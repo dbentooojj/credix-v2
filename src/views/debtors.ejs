@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFÃ¡cil - Devedores</title>
+    <title>CredFácil - Devedores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -157,7 +157,11 @@
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
             </div>
             <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
@@ -176,10 +180,6 @@
                         <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
                             <span>Segurança</span>
-                        </button>
-                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
-                            <span>Preferências</span>
                         </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
@@ -202,9 +202,9 @@
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
                     <li><a href="debtors.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span class="font-medium">Devedores</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃ©stimos</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
                 </ul>
             </nav>
         </aside>
@@ -213,7 +213,7 @@
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                     <h2 class="page-title text-3xl font-bold">Devedores</h2>
-                    <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situaÃ§Ã£o de cada cliente.</p>
+                    <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situação de cada cliente.</p>
                 </div>
                 <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
                     <i class="fas fa-user-plus mr-2"></i>Novo devedor
@@ -266,9 +266,9 @@
                                 <th>Documento</th>
                                 <th>Telefone</th>
                                 <th>Status</th>
-                                <th>EmprÃ©stimos</th>
+                                <th>Empréstimos</th>
                                 <th>Parcelas em atraso</th>
-                                <th>AÃ§Ãµes</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="debtorsTableBody">
@@ -279,13 +279,13 @@
 
                 <div class="mt-4 flex items-center justify-between">
                     <p class="text-sm text-gray-600">
-                        Mostrando <span id="showingStart">0</span> atÃ© <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
+                        Mostrando <span id="showingStart">0</span> até <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
                     </p>
                     <div class="flex items-center gap-2">
                         <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span id="pageIndicator" class="text-sm text-gray-600">PÃ¡gina 1</span>
+                        <span id="pageIndicator" class="text-sm text-gray-600">Página 1</span>
                         <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -321,12 +321,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm text-gray-600">EndereÃ§o</label>
-                            <textarea id="newDebtorAddress" class="filter-control" rows="2" placeholder="EndereÃ§o (opcional)"></textarea>
+                            <label class="mb-1 block text-sm text-gray-600">Endereço</label>
+                            <textarea id="newDebtorAddress" class="filter-control" rows="2" placeholder="Endereço (opcional)"></textarea>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm text-gray-600">ObservaÃ§Ãµes</label>
-                            <textarea id="newDebtorNotes" class="filter-control" rows="2" placeholder="ObservaÃ§Ãµes"></textarea>
+                            <label class="mb-1 block text-sm text-gray-600">Observações</label>
+                            <textarea id="newDebtorNotes" class="filter-control" rows="2" placeholder="Observações"></textarea>
                         </div>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
@@ -498,24 +498,9 @@
                 return;
             }
 
-            if (action === 'profile') {
-                showUserMenuNotice('Meu perfil: em breve.');
-                return;
-            }
-
-            if (action === 'security') {
-                showUserMenuNotice('Segurança: em breve.');
-                return;
-            }
-
-            if (action === 'preferences') {
-                showUserMenuNotice('Preferências: em breve.');
-                return;
-            }
-
-            if (action === 'help') {
-                showUserMenuNotice('Ajuda: em breve.');
-            }
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
         }
 
         if (userMenuBtn && userMenuDropdown) {
@@ -710,7 +695,7 @@
             document.getElementById('showingStart').textContent = String(start);
             document.getElementById('showingEnd').textContent = String(end);
             document.getElementById('totalResults').textContent = String(total);
-            document.getElementById('pageIndicator').textContent = `PÃ¡gina ${debtorsState.currentPage} de ${totalPages}`;
+            document.getElementById('pageIndicator').textContent = `Página ${debtorsState.currentPage} de ${totalPages}`;
 
             prevPageBtn.disabled = debtorsState.currentPage <= 1;
             nextPageBtn.disabled = debtorsState.currentPage >= totalPages;
@@ -960,6 +945,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

@@ -1,0 +1,11 @@
+<%
+  const size = (typeof locals?.size === 'string' ? locals.size : 'header');
+  const classes =
+    size === 'login'
+      ? 'text-3xl sm:text-4xl font-semibold tracking-wide'
+      : 'text-lg sm:text-2xl font-bold tracking-wide';
+%>
+<span class="<%= classes %>" aria-label="CredFácil">
+  <span class="text-white">Cred</span><span class="text-[#C9A227]">Fácil</span>
+</span>
+

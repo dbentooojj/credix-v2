@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFÃ¡cil - EmprÃ©stimos</title>
+    <title>CredFácil - Empréstimos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -192,7 +192,11 @@
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
             </div>
             <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
@@ -211,10 +215,6 @@
                         <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
                             <span>Segurança</span>
-                        </button>
-                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
-                            <span>Preferências</span>
                         </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
@@ -237,9 +237,9 @@
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
                     <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span class="font-medium">EmprÃ©stimos</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span class="font-medium">Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
                 </ul>
             </nav>
         </aside>
@@ -247,26 +247,26 @@
         <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <h2 class="page-title text-3xl font-bold">EmprÃ©stimos</h2>
+                    <h2 class="page-title text-3xl font-bold">Empréstimos</h2>
                     <p class="muted-on-dark mt-1 text-sm">Acompanhe contratos, valores e status da carteira ativa.</p>
                 </div>
                 <button id="newLoanBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-                    <i class="fas fa-file-invoice-dollar mr-2"></i>Novo emprÃ©stimo
+                    <i class="fas fa-file-invoice-dollar mr-2"></i>Novo empréstimo
                 </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Qtd. emprÃ©stimos</p><p id="totalLoans" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Qtd. empréstimos</p><p id="totalLoans" class="kpi-value mt-2">0</p></div>
                 <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Principal total</p><p id="totalPrincipal" class="kpi-value mt-2">R$ 0,00</p></div>
                 <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total contratado</p><p id="totalContracted" class="kpi-value mt-2">R$ 0,00</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">EmprÃ©stimos ativos</p><p id="activeLoans" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Empréstimos ativos</p><p id="activeLoans" class="kpi-value mt-2">0</p></div>
             </div>
 
             <div class="glass-card rounded-2xl p-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
                     <div class="md:col-span-2">
                         <label class="block text-sm text-gray-600 mb-1">Buscar</label>
-                        <input id="loanSearch" type="text" class="filter-control" placeholder="Cliente ou ID do emprÃ©stimo">
+                        <input id="loanSearch" type="text" class="filter-control" placeholder="Cliente ou ID do empréstimo">
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Status</label>
@@ -294,26 +294,26 @@
                                 <th>Total</th>
                                 <th>Parcelas</th>
                                 <th>Juros</th>
-                                <th>Data de inÃ­cio</th>
+                                <th>Data de início</th>
                                 <th>Status</th>
-                                <th>AÃ§Ãµes</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="loansTableBody">
-                            <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando emprÃ©stimos...</td></tr>
+                            <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando empréstimos...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="mt-4 flex items-center justify-between">
                     <p class="text-sm text-gray-600">
-                        Mostrando <span id="showingStart">0</span> atÃ© <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
+                        Mostrando <span id="showingStart">0</span> até <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
                     </p>
                     <div class="flex items-center gap-2">
                         <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span id="pageIndicator" class="text-sm text-gray-600">PÃ¡gina 1</span>
+                        <span id="pageIndicator" class="text-sm text-gray-600">Página 1</span>
                         <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -323,7 +323,7 @@
             <div id="loanModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
                 <div class="glass-card w-full max-w-5xl rounded-2xl p-6 max-h-[92vh] overflow-y-auto">
                     <div class="mb-5 flex items-center justify-between">
-                        <h3 id="loanModalTitle" class="text-xl font-bold text-gray-800">Novo emprÃ©stimo</h3>
+                        <h3 id="loanModalTitle" class="text-xl font-bold text-gray-800">Novo empréstimo</h3>
                         <button id="closeLoanModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
                     </div>
 
@@ -331,7 +331,7 @@
                         <input type="hidden" id="loanEditingId">
 
                         <div class="rounded-xl border border-gray-200 p-4">
-                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">InformaÃ§Ãµes bÃ¡sicas</h4>
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Informações básicas</h4>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Devedor</label>
@@ -345,7 +345,7 @@
                         </div>
 
                         <div class="rounded-xl border border-gray-200 p-4">
-                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">CondiÃ§Ãµes</h4>
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Condições</h4>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)</label>
@@ -367,7 +367,7 @@
                                     <select id="loanPaymentMethod" class="filter-control">
                                         <option value="Pix">Pix</option>
                                         <option value="Dinheiro">Dinheiro</option>
-                                        <option value="TransferÃªncia">TransferÃªncia</option>
+                                        <option value="Transferência">Transferência</option>
                                         <option value="Outro">Outro</option>
                                     </select>
                                 </div>
@@ -378,23 +378,23 @@
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Datas</h4>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Data de inÃ­cio</label>
+                                    <label class="mb-1 block text-sm text-gray-600">Data de início</label>
                                     <input id="loanStartDate" class="filter-control" type="date" required>
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm text-gray-600">1Âº vencimento</label>
+                                    <label class="mb-1 block text-sm text-gray-600">1º vencimento</label>
                                     <input id="loanFirstDueDate" class="filter-control" type="date" required>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label class="mb-1 block text-sm text-gray-600">ObservaÃ§Ãµes</label>
-                            <textarea id="loanObservations" class="filter-control" rows="3" placeholder="ObservaÃ§Ãµes sobre o emprÃ©stimo"></textarea>
+                            <label class="mb-1 block text-sm text-gray-600">Observações</label>
+                            <textarea id="loanObservations" class="filter-control" rows="3" placeholder="Observações sobre o empréstimo"></textarea>
                         </div>
 
                         <div id="loanCalculationCard" class="calc-card p-4 hidden">
-                            <h4 class="text-sm font-semibold uppercase tracking-wide text-blue-900">CÃ¡lculo automÃ¡tico</h4>
+                            <h4 class="text-sm font-semibold uppercase tracking-wide text-blue-900">Cálculo automático</h4>
                             <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <p class="text-sm text-blue-800">Total a receber</p>
@@ -408,14 +408,14 @@
                         </div>
 
                         <div id="installmentsPreviewCard" class="rounded-xl border border-gray-200 p-4 hidden">
-                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">PrÃ©via das parcelas</h4>
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Prévia das parcelas</h4>
                             <div id="installmentsPreviewList" class="space-y-2 max-h-64 overflow-y-auto"></div>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-2">
                             <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancelar</button>
                             <button id="calculateLoanBtn" type="button" class="rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">Calcular</button>
-                            <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar emprÃ©stimo</button>
+                            <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar empréstimo</button>
                         </div>
                     </form>
                 </div>
@@ -424,7 +424,7 @@
             <div id="loanDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
                 <div class="glass-card w-full max-w-4xl rounded-2xl p-6 max-h-[92vh] overflow-y-auto">
                     <div class="mb-5 flex items-center justify-between">
-                        <h3 id="loanDetailsTitle" class="text-xl font-bold text-gray-800">Detalhes do emprÃ©stimo</h3>
+                        <h3 id="loanDetailsTitle" class="text-xl font-bold text-gray-800">Detalhes do empréstimo</h3>
                         <button id="closeLoanDetailsBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
                     </div>
                     <div id="loanDetailsContent" class="space-y-4"></div>
@@ -580,24 +580,9 @@
                 return;
             }
 
-            if (action === 'profile') {
-                showUserMenuNotice('Meu perfil: em breve.');
-                return;
-            }
-
-            if (action === 'security') {
-                showUserMenuNotice('Segurança: em breve.');
-                return;
-            }
-
-            if (action === 'preferences') {
-                showUserMenuNotice('Preferências: em breve.');
-                return;
-            }
-
-            if (action === 'help') {
-                showUserMenuNotice('Ajuda: em breve.');
-            }
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
         }
 
         if (userMenuBtn && userMenuDropdown) {
@@ -724,7 +709,7 @@
 
         function getDebtorName(debtorId) {
             const debtor = loansState.debtors.find(item => sameId(item.id, debtorId));
-            return debtor?.name || debtor?.full_name || 'Cliente nÃ£o identificado';
+            return debtor?.name || debtor?.full_name || 'Cliente não identificado';
         }
 
         function addMonths(date, count) {
@@ -879,7 +864,7 @@
             document.getElementById('showingStart').textContent = String(start);
             document.getElementById('showingEnd').textContent = String(end);
             document.getElementById('totalResults').textContent = String(total);
-            document.getElementById('pageIndicator').textContent = `PÃ¡gina ${loansState.currentPage} de ${totalPages}`;
+            document.getElementById('pageIndicator').textContent = `Página ${loansState.currentPage} de ${totalPages}`;
 
             const prevPageBtn = document.getElementById('prevPageBtn');
             const nextPageBtn = document.getElementById('nextPageBtn');
@@ -895,7 +880,7 @@
             updatePaginationInfo(total);
 
             if (!total) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum emprÃ©stimo encontrado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum empréstimo encontrado.</td></tr>';
                 return;
             }
 
@@ -976,7 +961,7 @@
             }
 
             if (!source.length) {
-                select.innerHTML = '<option value="">Nenhum devedor disponÃ­vel</option>';
+                select.innerHTML = '<option value="">Nenhum devedor disponível</option>';
                 return;
             }
 
@@ -1007,8 +992,8 @@
             document.getElementById('installmentsPreviewList').innerHTML = '';
 
             if (mode === 'edit' && loan) {
-                document.getElementById('loanModalTitle').textContent = `Editar emprÃ©stimo #${loan.id}`;
-                document.getElementById('saveLoanBtn').textContent = 'Salvar alteraÃ§Ãµes';
+                document.getElementById('loanModalTitle').textContent = `Editar empréstimo #${loan.id}`;
+                document.getElementById('saveLoanBtn').textContent = 'Salvar alterações';
                 document.getElementById('loanEditingId').value = String(loan.id);
 
                 populateDebtorOptions(loan.debtor_id);
@@ -1026,8 +1011,8 @@
 
                 calculateLoanFromForm(false);
             } else {
-                document.getElementById('loanModalTitle').textContent = 'Novo emprÃ©stimo';
-                document.getElementById('saveLoanBtn').textContent = 'Salvar emprÃ©stimo';
+                document.getElementById('loanModalTitle').textContent = 'Novo empréstimo';
+                document.getElementById('saveLoanBtn').textContent = 'Salvar empréstimo';
                 document.getElementById('loanEditingId').value = '';
                 document.getElementById('loanInterestRate').value = 20;
                 document.getElementById('loanInterestType').value = 'composto';
@@ -1069,16 +1054,16 @@
 
         function validateLoanFormValues(values) {
             if (!values.debtorId) return 'Selecione um devedor.';
-            if (values.principal <= 0) return 'Informe um valor principal vÃ¡lido.';
-            if (values.interestRate < 0) return 'A taxa de juros nÃ£o pode ser negativa.';
+            if (values.principal <= 0) return 'Informe um valor principal válido.';
+            if (values.interestRate < 0) return 'A taxa de juros não pode ser negativa.';
             if (values.installments <= 0) return 'Informe a quantidade de parcelas.';
-            if (!values.startDate) return 'Informe a data de inÃ­cio.';
+            if (!values.startDate) return 'Informe a data de início.';
             if (!values.firstDueDate) return 'Informe o primeiro vencimento.';
 
             const start = new Date(values.startDate);
             const firstDue = new Date(values.firstDueDate);
-            if (Number.isNaN(start.getTime()) || Number.isNaN(firstDue.getTime())) return 'Datas invÃ¡lidas.';
-            if (firstDue < start) return 'O primeiro vencimento nÃ£o pode ser antes da data de inÃ­cio.';
+            if (Number.isNaN(start.getTime()) || Number.isNaN(firstDue.getTime())) return 'Datas inválidas.';
+            if (firstDue < start) return 'O primeiro vencimento não pode ser antes da data de início.';
 
             return '';
         }
@@ -1119,7 +1104,7 @@
 
             const calcResult = calculateLoanValues(values.principal, values.interestRate, values.installments, values.interestType);
             if (!calcResult) {
-                if (showErrors) showMessage('NÃ£o foi possÃ­vel calcular o emprÃ©stimo.', 'error');
+                if (showErrors) showMessage('Não foi possível calcular o empréstimo.', 'error');
                 return null;
             }
 
@@ -1171,7 +1156,7 @@
         }
 
         async function deleteLoan(loanId) {
-            if (!confirm('Tem certeza que deseja excluir este emprÃ©stimo e suas parcelas?')) return;
+            if (!confirm('Tem certeza que deseja excluir este empréstimo e suas parcelas?')) return;
 
             loansState.loans = loansState.loans.filter(loan => !sameId(loan.id, loanId));
             loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanId));
@@ -1182,10 +1167,10 @@
 
                 updateLoanMetrics();
                 applyLoansFilters(false);
-                showMessage('EmprÃ©stimo excluÃ­do com sucesso.', 'success');
+                showMessage('Empréstimo excluído com sucesso.', 'success');
             } catch (error) {
-                console.error('Erro ao excluir emprÃ©stimo:', error);
-                showMessage('Erro ao excluir emprÃ©stimo. Tente novamente.', 'error');
+                console.error('Erro ao excluir empréstimo:', error);
+                showMessage('Erro ao excluir empréstimo. Tente novamente.', 'error');
                 loadLoansData();
             }
         }
@@ -1199,7 +1184,7 @@
             const pending = installments.length - paid;
             const interestTypeLabel = normalizeInterestType(loan.interest_type) === 'simples' ? 'Simples' : 'Composto';
 
-            document.getElementById('loanDetailsTitle').textContent = `Detalhes do emprÃ©stimo #${loan.id}`;
+            document.getElementById('loanDetailsTitle').textContent = `Detalhes do empréstimo #${loan.id}`;
 
             const detailRows = `
                 <div class="details-grid">
@@ -1209,8 +1194,8 @@
                     <div class="details-item"><p class="text-xs text-gray-500">Total contratado</p><p class="font-semibold">${formatCurrency(loan.total_amount)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Juros</p><p class="font-semibold">${loan.interest_rate}% (${interestTypeLabel})</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Forma de pagamento</p><p class="font-semibold">${loan.payment_method || '-'}</p></div>
-                    <div class="details-item"><p class="text-xs text-gray-500">Data de inÃ­cio</p><p class="font-semibold">${formatDate(loan.start_date)}</p></div>
-                    <div class="details-item"><p class="text-xs text-gray-500">1Âº vencimento</p><p class="font-semibold">${formatDate(loan.first_due_date)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Data de início</p><p class="font-semibold">${formatDate(loan.start_date)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">1º vencimento</p><p class="font-semibold">${formatDate(loan.first_due_date)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas pagas</p><p class="font-semibold">${paid}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas em aberto</p><p class="font-semibold">${pending}</p></div>
                 </div>
@@ -1239,7 +1224,7 @@
                 : '<p class="text-sm text-gray-500">Nenhuma parcela vinculada.</p>';
 
             const notesHtml = loan.observations
-                ? `<div class="details-item"><p class="text-xs text-gray-500">ObservaÃ§Ãµes</p><p class="font-semibold">${loan.observations}</p></div>`
+                ? `<div class="details-item"><p class="text-xs text-gray-500">Observações</p><p class="font-semibold">${loan.observations}</p></div>`
                 : '';
 
             document.getElementById('loanDetailsContent').innerHTML = `
@@ -1269,7 +1254,7 @@
                 updateLoanMetrics();
                 applyLoansFilters(true);
             } catch (error) {
-                console.error('Erro ao carregar emprÃ©stimos:', error);
+                console.error('Erro ao carregar empréstimos:', error);
                 document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="9" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
             }
         }
@@ -1301,7 +1286,7 @@
 
         document.getElementById('newLoanBtn').addEventListener('click', function () {
             if (!loansState.debtors.length) {
-                showMessage('Cadastre um devedor antes de criar emprÃ©stimos.', 'error');
+                showMessage('Cadastre um devedor antes de criar empréstimos.', 'error');
                 return;
             }
             openLoanModal('create');
@@ -1331,7 +1316,7 @@
                     .some(item => String(item.status || '').toLowerCase() === 'pago');
 
                 if (hasPaidInstallments) {
-                    const confirmed = confirm('Este emprÃ©stimo possui parcelas pagas. Ao salvar, as parcelas serÃ£o recriadas. Deseja continuar?');
+                    const confirmed = confirm('Este empréstimo possui parcelas pagas. Ao salvar, as parcelas serão recriadas. Deseja continuar?');
                     if (!confirmed) return;
                 }
             }
@@ -1363,10 +1348,10 @@
                 updateLoanMetrics();
                 applyLoansFilters(!isEditing);
                 closeLoanModal();
-                showMessage(isEditing ? 'EmprÃ©stimo atualizado com sucesso.' : 'EmprÃ©stimo criado com sucesso.', 'success');
+                showMessage(isEditing ? 'Empréstimo atualizado com sucesso.' : 'Empréstimo criado com sucesso.', 'success');
             } catch (error) {
-                console.error('Erro ao salvar emprÃ©stimo:', error);
-                showMessage('Erro ao salvar emprÃ©stimo. Tente novamente.', 'error');
+                console.error('Erro ao salvar empréstimo:', error);
+                showMessage('Erro ao salvar empréstimo. Tente novamente.', 'error');
                 await loadLoansData();
             }
         });
@@ -1408,6 +1393,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

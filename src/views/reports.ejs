@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFÃ¡cil - RelatÃ³rios</title>
+    <title>CredFácil - Relatórios</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -159,7 +159,11 @@
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
             </div>
             <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
@@ -178,10 +182,6 @@
                         <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
                             <span>Segurança</span>
-                        </button>
-                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
-                            <span>Preferências</span>
                         </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
@@ -204,36 +204,36 @@
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
                     <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃ©stimos</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span class="font-medium">RelatÃ³rios</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span class="font-medium">Relatórios</span></a></li>
                 </ul>
             </nav>
         </aside>
 
         <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
             <div class="mb-6">
-                <h2 class="page-title text-3xl font-bold">RelatÃ³rios</h2>
-                <p class="muted-on-dark mt-1 text-sm">Indicadores consolidados para apoiar decisÃµes rÃ¡pidas.</p>
+                <h2 class="page-title text-3xl font-bold">Relatórios</h2>
+                <p class="muted-on-dark mt-1 text-sm">Indicadores consolidados para apoiar decisões rápidas.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
                 <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total emprestado</p><p id="reportTotalLoaned" class="kpi-value mt-2">R$ 0,00</p></div>
                 <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total recebido</p><p id="reportTotalReceived" class="kpi-value mt-2">R$ 0,00</p></div>
                 <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Em aberto</p><p id="reportOpenAmount" class="kpi-value mt-2">R$ 0,00</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Taxa de adimplÃªncia</p><p id="reportCompliance" class="kpi-value mt-2">0%</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Taxa de adimplência</p><p id="reportCompliance" class="kpi-value mt-2">0%</p></div>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">DistribuiÃ§Ã£o de Parcelas</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Distribuição de Parcelas</h3>
                     <div class="space-y-4" id="statusDistribution">
                         <p class="text-gray-500">Carregando...</p>
                     </div>
                 </div>
 
                 <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">PrÃ³ximos Vencimentos (7 dias)</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Próximos Vencimentos (7 dias)</h3>
                     <div class="space-y-3" id="nextDueList">
                         <p class="text-gray-500">Carregando...</p>
                     </div>
@@ -253,7 +253,7 @@
                             </tr>
                         </thead>
                         <tbody id="topDebtorsTable">
-                            <tr><td colspan="4" class="text-center py-8 text-gray-500">Carregando relatÃ³rio...</td></tr>
+                            <tr><td colspan="4" class="text-center py-8 text-gray-500">Carregando relatório...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -382,24 +382,9 @@
                 return;
             }
 
-            if (action === 'profile') {
-                showUserMenuNotice('Meu perfil: em breve.');
-                return;
-            }
-
-            if (action === 'security') {
-                showUserMenuNotice('Segurança: em breve.');
-                return;
-            }
-
-            if (action === 'preferences') {
-                showUserMenuNotice('Preferências: em breve.');
-                return;
-            }
-
-            if (action === 'help') {
-                showUserMenuNotice('Ajuda: em breve.');
-            }
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
         }
 
         if (userMenuBtn && userMenuDropdown) {
@@ -501,7 +486,7 @@
         function renderNextDueDates(upcoming, debtors) {
             const container = document.getElementById('nextDueList');
             if (!upcoming.length) {
-                container.innerHTML = '<p class="text-gray-500">Nenhum vencimento nos prÃ³ximos 7 dias.</p>';
+                container.innerHTML = '<p class="text-gray-500">Nenhum vencimento nos próximos 7 dias.</p>';
                 return;
             }
 
@@ -582,7 +567,7 @@
 
                 renderNextDueDates(upcoming, debtors);
             } catch (error) {
-                console.error('Erro ao carregar relatÃ³rios:', error);
+                console.error('Erro ao carregar relatórios:', error);
                 document.getElementById('statusDistribution').innerHTML = '<p class="text-red-600">Erro ao carregar dados.</p>';
                 document.getElementById('nextDueList').innerHTML = '<p class="text-red-600">Erro ao carregar dados.</p>';
                 document.getElementById('topDebtorsTable').innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
@@ -595,6 +580,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

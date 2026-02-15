@@ -107,7 +107,11 @@
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFácil</h1>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
             </div>
             <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
@@ -126,10 +130,6 @@
                         <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
                             <span>Segurança</span>
-                        </button>
-                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
-                            <span>Preferências</span>
                         </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
@@ -1060,24 +1060,9 @@
                 return;
             }
 
-            if (action === 'profile') {
-                showUserMenuNotice('Meu perfil: em breve.');
-                return;
-            }
-
-            if (action === 'security') {
-                showUserMenuNotice('Segurança: em breve.');
-                return;
-            }
-
-            if (action === 'preferences') {
-                showUserMenuNotice('Preferências: em breve.');
-                return;
-            }
-
-            if (action === 'help') {
-                showUserMenuNotice('Ajuda: em breve.');
-            }
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
         }
 
         if (userMenuBtn && userMenuDropdown) {
@@ -1169,6 +1154,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

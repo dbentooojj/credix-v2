@@ -1,6 +1,5 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { requireAuthPage } from "../middleware/auth";
-
 const router = Router();
 
 function extractCurrentUser(req: { user?: { sub: string; email: string; name: string; role: string } }) {
@@ -48,10 +47,15 @@ router.get("/admin/reports.html", requireAuthPage, (req, res) => {
   return res.render("reports", { currentUser: extractCurrentUser(req) });
 });
 
+router.get("/admin/account.html", requireAuthPage, (req, res) => {
+  return res.render("account", { currentUser: extractCurrentUser(req) });
+});
+
 router.get("/dashboard.html", (_req, res) => res.redirect("/admin/dashboard.html"));
 router.get("/debtors.html", (_req, res) => res.redirect("/admin/debtors.html"));
 router.get("/loans.html", (_req, res) => res.redirect("/admin/loans.html"));
 router.get("/installments.html", (_req, res) => res.redirect("/admin/installments.html"));
 router.get("/reports.html", (_req, res) => res.redirect("/admin/reports.html"));
+router.get("/account.html", (_req, res) => res.redirect("/admin/account.html"));
 
 export { router as pageRoutes };

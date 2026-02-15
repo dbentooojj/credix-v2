@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFÃ¡cil - Painel financeiro</title>
+    <title>CredFácil - Painel financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -405,7 +405,11 @@
                 <button id="sidebarToggle" class="icon-btn focus:outline-none">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
-                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
             </div>
             <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none">
@@ -432,10 +436,6 @@
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
                             <span>Segurança</span>
                         </button>
-                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
-                            <span>Preferências</span>
-                        </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
                             <span>Ajuda</span>
@@ -457,9 +457,9 @@
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span class="font-medium">Painel financeiro</span></a></li>
                     <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃ©stimos</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
                 </ul>
             </nav>
         </aside>
@@ -741,24 +741,9 @@
                 return;
             }
 
-            if (action === 'profile') {
-                showMessage('Meu perfil: em breve.', 'success');
-                return;
-            }
-
-            if (action === 'security') {
-                showMessage('Segurança: em breve.', 'success');
-                return;
-            }
-
-            if (action === 'preferences') {
-                showMessage('Preferências: em breve.', 'success');
-                return;
-            }
-
-            if (action === 'help') {
-                showMessage('Ajuda: em breve.', 'success');
-            }
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
         }
 
         function setLoading(loading) {
@@ -1446,5 +1431,7 @@
 
 </body>
 </html>
+
+
 
 
