@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum ClientStatus {
+  ATIVO
+  INATIVO
+}
+
+enum LoanStatus {
+  PENDENTE
+  EM_DIA
+  ATRASADO
+  QUITADO
+}
+
+enum InterestType {
+  SIMPLES
+  COMPOSTO
+}
+
+enum PaymentMethod {
+  PIX
+  DINHEIRO
+  TRANSFERENCIA
+}
+
+enum InstallmentStatus {
+  PENDENTE
+  PAGO
+  ATRASADO
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Client {
+  id           Int          @id @default(autoincrement())
+  name         String
+  cpf          String       @unique
+  phone        String
+  email        String?
+  status       ClientStatus @default(ATIVO)
+  address      String?
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  loans        Loan[]
+  installments Installment[]
+
+  @@index([cpf])
+}
+
+model Loan {
+  id                Int            @id @default(autoincrement())
+  clientId          Int
+  client            Client         @relation(fields: [clientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  principalAmount   Decimal        @db.Decimal(14, 2)
+  interestRate      Decimal        @db.Decimal(7, 4)
+  interestType      InterestType   @default(SIMPLES)
+  installmentsCount Int
+  installmentAmount Decimal?       @db.Decimal(14, 2)
+  totalAmount       Decimal        @db.Decimal(14, 2)
+  paymentMethod     PaymentMethod  @default(PIX)
+  startDate         DateTime       @db.Date
+  firstDueDate      DateTime       @db.Date
+  dueDate           DateTime       @db.Date
+  status            LoanStatus     @default(PENDENTE)
+  observations      String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  installments      Installment[]
+  payments          Payment[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Installment {
+  id               Int               @id @default(autoincrement())
+  loanId           Int
+  loan             Loan              @relation(fields: [loanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  clientId         Int
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  installmentNumber Int
+  dueDate          DateTime          @db.Date
+  paymentDate      DateTime?         @db.Date
+  amount           Decimal           @db.Decimal(14, 2)
+  principalAmount  Decimal?          @db.Decimal(14, 2)
+  interestAmount   Decimal?          @db.Decimal(14, 2)
+  status           InstallmentStatus @default(PENDENTE)
+  paymentMethod    PaymentMethod?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  payments         Payment[]
+
+  @@unique([loanId, installmentNumber])
+  @@index([loanId])
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  loanId        Int
+  loan          Loan          @relation(fields: [loanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  installmentId Int?          @unique
+  installment   Installment?  @relation(fields: [installmentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  amount        Decimal       @db.Decimal(14, 2)
+  paymentDate   DateTime      @db.Date
+  method        PaymentMethod
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([loanId])
+  @@index([installmentId])
+  @@index([paymentDate])
+}

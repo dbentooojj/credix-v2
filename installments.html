@@ -1,0 +1,979 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredFÃƒÂ¡cil - Parcelas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 16px; }
+        body { font-family: 'Inter', sans-serif; }
+        .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
+        .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
+        .icon-btn {
+            color: #cbd5e1;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+        }
+        .icon-btn:hover { color: #ffffff; background: rgba(59, 130, 246, 0.2); box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35) inset; }
+        .modern-sidebar {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
+            transform: translateX(0);
+            transition: transform 120ms ease-out;
+        }
+        .sidebar-item { transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out; border-radius: 12px; margin: 4px 0; }
+        .sidebar-item:hover { background: rgba(148, 163, 184, 0.12); box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset; }
+        .sidebar-item.active { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25); }
+        .sidebar-item:focus-visible, .icon-btn:focus-visible { outline: 2px solid rgba(96, 165, 250, 0.7); outline-offset: 2px; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16); }
+        .page-title { color: #ffffff; }
+        .muted-on-dark { color: #cbd5e1; }
+        .summary-card {
+            color: #fff;
+            border-radius: 16px;
+            padding: 18px;
+            min-height: 120px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.35);
+        }
+        .summary-card .value { font-size: 1.9rem; line-height: 1; font-weight: 700; margin-top: 8px; }
+        .summary-card .label { font-size: 0.82rem; letter-spacing: 0.02em; opacity: 0.88; }
+        .summary-paid { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+        .summary-pending { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+        .summary-overdue { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+        .summary-due-soon { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
+        .filter-control { background: #ffffff; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px 12px; color: #111827; width: 100%; }
+        .table-shell { overflow: auto; border-radius: 14px; border: 1px solid #e5e7eb; background: #ffffff; }
+        .table-shell table { width: 100%; border-collapse: collapse; min-width: 980px; }
+        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
+        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; vertical-align: top; }
+        .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1d4ed8; }
+        .table-action { border-radius: 10px; padding: 6px 10px; font-size: 12px; font-weight: 600; transition: background-color 120ms ease-out; color: #ffffff; }
+        .modal-backdrop { backdrop-filter: blur(4px); background: rgba(2, 6, 23, 0.72); }
+        .modal-panel { background: #ffffff; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 18px 40px rgba(2, 6, 23, 0.4); }
+        .empty-state { border: 1px dashed rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.7); border-radius: 14px; }
+        main { transition: none; }
+        body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
+        body.sidebar-collapsed main { margin-left: 0 !important; }
+        @media (max-width: 1024px) {
+            .modern-sidebar { transform: translateX(-100%); }
+            .modern-sidebar.mobile-open { transform: translateX(0) !important; }
+            main { margin-left: 0 !important; }
+        }
+        @media (max-width: 640px) { .summary-card .value { font-size: 1.55rem; } }
+        .dark .glass-card { background: rgba(15, 23, 42, 0.82); border: 1px solid rgba(148, 163, 184, 0.2); color: #e2e8f0; }
+        .dark .filter-control, .dark .table-shell, .dark .table-shell th, .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
+        .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
+        .dark .text-gray-800 { color: #f8fafc !important; }
+        .dark .text-gray-700 { color: #e2e8f0 !important; }
+        .dark .text-gray-600 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: rgba(148, 163, 184, 0.22) !important; }
+        .dark .bg-white { background: rgba(15, 23, 42, 0.65) !important; }
+        .dark .bg-gray-50 { background: rgba(15, 23, 42, 0.8) !important; }
+        .dark .empty-state { background: rgba(15, 23, 42, 0.45); border-color: rgba(148, 163, 184, 0.35); }
+        .dark .modal-panel { background: rgba(15, 23, 42, 0.98); border-color: rgba(148, 163, 184, 0.3); color: #e2e8f0; }
+        .dark textarea, .dark select, .dark input { color: #e2e8f0; }
+    </style>
+</head>
+<body class="primary-gradient min-h-screen">
+    <header class="premium-header fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center">
+                <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <h1 class="ml-6 text-2xl font-bold text-white">CredFÃƒÂ¡cil</h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
+                <button id="notificationBtn" class="icon-btn focus:outline-none relative"><i class="fas fa-bell text-xl"></i></button>
+                <div class="flex items-center space-x-3 text-slate-200">
+                    <div class="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center"><i class="fas fa-user"></i></div>
+                    <span id="userName" class="font-semibold">Administrador</span>
+                </div>
+                <button id="logoutBtn" class="icon-btn focus:outline-none"><i class="fas fa-sign-out-alt text-xl"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-20">
+        <aside id="sidebar" class="modern-sidebar fixed left-0 top-20 h-full w-64 z-40">
+            <nav class="mt-8 px-4">
+                <ul class="space-y-2">
+                    <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃƒÂ©stimos</span></a></li>
+                    <li><a href="installments.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span class="font-medium">Parcelas</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃƒÂ³rios</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 ml-64 p-8">
+            <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <p class="muted-on-dark text-sm">Gerenciamento Inteligente</p>
+                    <h2 class="page-title text-3xl font-bold">Controle de Parcelas</h2>
+                    <p class="muted-on-dark mt-2 text-sm">Acompanhe vencimentos, pagamentos e comunicaÃƒÂ§ÃƒÂµes em um sÃƒÂ³ lugar.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button id="notifyBatchBtn" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <i class="fas fa-bell mr-2"></i>NotificaÃƒÂ§ÃƒÂµes
+                    </button>
+                    <button id="refreshBtn" class="rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                        <i class="fas fa-rotate mr-2"></i>Atualizar
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                <div class="summary-card summary-paid">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="label">Pagas no MÃƒÂªs</p>
+                            <p id="paidThisMonthValue" class="value">R$ 0,00</p>
+                        </div>
+                        <i class="fas fa-check-circle text-3xl opacity-80"></i>
+                    </div>
+                </div>
+                <div class="summary-card summary-pending">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="label">Pendentes</p>
+                            <p id="pendingInstallments" class="value">0</p>
+                        </div>
+                        <i class="fas fa-clock text-3xl opacity-80"></i>
+                    </div>
+                </div>
+                <div class="summary-card summary-overdue">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="label">Em Atraso</p>
+                            <p id="overdueInstallments" class="value">0</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-3xl opacity-80"></i>
+                    </div>
+                </div>
+                <div class="summary-card summary-due-soon">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="label">Vence em atÃƒÂ© 3 dias</p>
+                            <p id="dueSoonInstallments" class="value">0</p>
+                        </div>
+                        <i class="fas fa-calendar-day text-3xl opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <div class="lg:col-span-5">
+                        <label for="installmentSearch" class="block text-sm text-gray-600 mb-1">Buscar</label>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input id="installmentSearch" type="text" class="filter-control pl-10" placeholder="Nome, telefone, emprÃƒÂ©stimo ou parcela">
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <label for="installmentStatusFilter" class="block text-sm text-gray-600 mb-1">Status</label>
+                        <select id="installmentStatusFilter" class="filter-control">
+                            <option value="Todos">Todos</option>
+                            <option value="Pago">Pago</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <label for="installmentPeriodFilter" class="block text-sm text-gray-600 mb-1">PerÃƒÂ­odo</label>
+                        <select id="installmentPeriodFilter" class="filter-control">
+                            <option value="all">Todas</option>
+                            <option value="this_month">Este mÃƒÂªs</option>
+                            <option value="next_month">PrÃƒÂ³ximo mÃƒÂªs</option>
+                            <option value="overdue">Atrasadas</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-1 flex items-end">
+                        <span class="text-xs text-gray-500">Atualizado: <span id="lastUpdatedAt">--:--</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-xl font-bold text-gray-800">Parcelas</h3>
+                    <span class="text-sm text-gray-500">Resultados: <strong id="filteredCount" class="text-gray-700">0</strong></span>
+                </div>
+
+                <div id="installmentsTableWrapper" class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>EmprÃƒÂ©stimo</th>
+                                <th>Parcela</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>AÃƒÂ§ÃƒÂµes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="installmentsTableBody">
+                            <tr><td colspan="7" class="text-center py-8 text-gray-500">Carregando parcelas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="installmentsEmptyState" class="empty-state hidden mt-4 text-center py-12 px-6">
+                    <i class="fas fa-calendar-check text-5xl text-slate-400 mb-4"></i>
+                    <h4 class="text-lg font-semibold text-gray-700">Nenhuma parcela encontrada</h4>
+                    <p class="text-sm text-gray-500 mt-1">Ajuste os filtros para visualizar resultados.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="paymentModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel w-full max-w-lg p-6">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-800">Registrar Pagamento</h3>
+                <button id="closePaymentModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="paymentForm" class="space-y-4">
+                <input type="hidden" id="paymentInstallmentId">
+                <div id="paymentInstallmentInfo" class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                    Selecione uma parcela para registrar o pagamento.
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="paymentAmount" class="mb-1 block text-sm text-gray-600">Valor pago (R$)</label>
+                        <input id="paymentAmount" type="number" min="0" step="0.01" class="filter-control" required>
+                    </div>
+                    <div>
+                        <label for="paymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
+                        <input id="paymentDate" type="date" class="filter-control" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="paymentMethod" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
+                    <select id="paymentMethod" class="filter-control" required>
+                        <option value="">Selecione...</option>
+                        <option value="Pix">Pix</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="TransferÃƒÂªncia">TransferÃƒÂªncia</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="paymentNotes" class="mb-1 block text-sm text-gray-600">ObservaÃƒÂ§ÃƒÂµes</label>
+                    <textarea id="paymentNotes" rows="2" class="filter-control" placeholder="ObservaÃƒÂ§ÃƒÂµes opcionais sobre o pagamento"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-3">
+                    <button id="cancelPaymentBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"><i class="fas fa-check mr-2"></i>Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notificationModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel w-full max-w-xl p-6">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-800">Enviar NotificaÃƒÂ§ÃƒÂµes</h3>
+                <button id="closeNotificationModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="messageTemplate" class="mb-1 block text-sm text-gray-600">Modelo</label>
+                    <select id="messageTemplate" class="filter-control">
+                        <option value="vencimento_proximo">Vencimento prÃƒÂ³ximo (3 dias)</option>
+                        <option value="vencimento_hoje">Vence hoje</option>
+                        <option value="atraso">Atraso</option>
+                        <option value="personalizada">Personalizada</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="customMessage" class="mb-1 block text-sm text-gray-600">Mensagem</label>
+                    <textarea id="customMessage" rows="4" class="filter-control"></textarea>
+                </div>
+                <div class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                    <i class="fas fa-circle-info mr-1"></i>
+                    As mensagens sÃƒÂ£o preparadas com base nos filtros atuais da pÃƒÂ¡gina.
+                </div>
+                <div class="pt-2 flex justify-end gap-3">
+                    <button id="cancelNotificationBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button id="sendNotificationBtn" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"><i class="fas fa-paper-plane mr-2"></i>Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="demo-data.js"></script>
+    <script>
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'index.html';
+        }
+
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('main');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
+        const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+
+        const paymentModal = document.getElementById('paymentModal');
+        const notificationModal = document.getElementById('notificationModal');
+
+        const installmentsState = {
+            installments: [],
+            debtors: [],
+            filtered: []
+        };
+
+        function getDemoTable(tableName) {
+            if (window.__credfacilDemo && typeof window.__credfacilDemo.getTable === 'function') {
+                return window.__credfacilDemo.getTable(tableName);
+            }
+            return [];
+        }
+
+        function saveTableData(tableName, rows) {
+            if (window.__credfacilDemo && typeof window.__credfacilDemo.setTable === 'function') {
+                window.__credfacilDemo.setTable(tableName, rows);
+            }
+        }
+
+        async function fetchTableData(tableName) {
+            try {
+                const response = await fetch(`tables/${tableName}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                if (Array.isArray(payload?.data) && payload.data.length > 0) {
+                    return payload.data;
+                }
+            } catch (error) {
+                console.warn(`Fallback para dados demo: ${tableName}`, error);
+            }
+            return getDemoTable(tableName);
+        }
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
+        }
+
+        function parseDateValue(value) {
+            if (!value) return null;
+            if (value instanceof Date) return new Date(value.getTime());
+
+            const raw = String(value).trim();
+            const dateOnlyMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (dateOnlyMatch) {
+                const year = Number(dateOnlyMatch[1]);
+                const month = Number(dateOnlyMatch[2]) - 1;
+                const day = Number(dateOnlyMatch[3]);
+                return new Date(year, month, day);
+            }
+
+            const parsed = new Date(raw);
+            if (Number.isNaN(parsed.getTime())) return null;
+            return parsed;
+        }
+
+        function startOfDay(value) {
+            const date = parseDateValue(value);
+            if (!date || Number.isNaN(date.getTime())) return null;
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function normalizeInstallmentStatus(installment) {
+            const rawStatus = String(installment.status || '').trim().toLowerCase();
+            if (rawStatus === 'pago') return 'Pago';
+            if (rawStatus === 'atrasado') return 'Atrasado';
+
+            const dueDate = startOfDay(installment.due_date);
+            const today = startOfDay(new Date());
+            if (dueDate && today && dueDate < today) return 'Atrasado';
+            return 'Pendente';
+        }
+
+        function dueInDays(installment) {
+            const dueDate = startOfDay(installment.due_date);
+            const today = startOfDay(new Date());
+            if (!dueDate || !today) return null;
+            return Math.round((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+        }
+
+        function formatDate(value) {
+            const date = parseDateValue(value);
+            if (!date) return '-';
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getDebtorById(debtorId) {
+            return installmentsState.debtors.find(debtor => sameId(debtor.id, debtorId));
+        }
+
+        function getDebtorName(debtorId) {
+            const debtor = getDebtorById(debtorId);
+            return debtor?.name || debtor?.full_name || 'Cliente nÃƒÂ£o identificado';
+        }
+
+        function getDebtorPhone(debtorId) {
+            const debtor = getDebtorById(debtorId);
+            return debtor?.phone || '';
+        }
+
+        function getStatusBadge(status, installment) {
+            const days = dueInDays(installment);
+            if (status === 'Pago') return { className: 'badge badge-success', text: 'Pago' };
+            if (status === 'Atrasado') return { className: 'badge badge-danger', text: 'Atrasado' };
+            if (days === 0) return { className: 'badge badge-info', text: 'Vence hoje' };
+            if (Number.isFinite(days) && days > 0 && days <= 3) return { className: 'badge badge-info', text: `Vence em ${days} dia(s)` };
+            return { className: 'badge badge-warn', text: 'Pendente' };
+        }
+
+        function updateInstallmentsSummary(list) {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            const paidThisMonth = list
+                .filter(installment => {
+                    if (normalizeInstallmentStatus(installment) !== 'Pago') return false;
+                    const paymentDate = parseDateValue(installment.payment_date);
+                    return paymentDate && paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+                })
+                .reduce((sum, installment) => sum + Number(installment.paid_amount || installment.amount || 0), 0);
+
+            const pending = list.filter(installment => normalizeInstallmentStatus(installment) === 'Pendente').length;
+            const overdue = list.filter(installment => normalizeInstallmentStatus(installment) === 'Atrasado').length;
+            const dueSoon = list.filter(installment => {
+                if (normalizeInstallmentStatus(installment) !== 'Pendente') return false;
+                const days = dueInDays(installment);
+                return Number.isFinite(days) && days >= 0 && days <= 3;
+            }).length;
+
+            document.getElementById('paidThisMonthValue').textContent = formatCurrency(paidThisMonth);
+            document.getElementById('pendingInstallments').textContent = String(pending);
+            document.getElementById('overdueInstallments').textContent = String(overdue);
+            document.getElementById('dueSoonInstallments').textContent = String(dueSoon);
+        }
+
+        function renderInstallmentsTable() {
+            const tbody = document.getElementById('installmentsTableBody');
+            const tableWrapper = document.getElementById('installmentsTableWrapper');
+            const emptyState = document.getElementById('installmentsEmptyState');
+            const list = installmentsState.filtered;
+
+            document.getElementById('filteredCount').textContent = String(list.length);
+            updateInstallmentsSummary(list);
+
+            if (!list.length) {
+                tableWrapper.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                tbody.innerHTML = '';
+                return;
+            }
+
+            tableWrapper.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            tbody.innerHTML = list.map(installment => {
+                const status = normalizeInstallmentStatus(installment);
+                const badge = getStatusBadge(status, installment);
+                const installmentNumber = installment.installment_number ?? installment.number ?? '-';
+                const phone = getDebtorPhone(installment.debtor_id);
+                const canRegisterPayment = status !== 'Pago';
+
+                return `
+                    <tr>
+                        <td>
+                            <p class="font-semibold">${getDebtorName(installment.debtor_id)}</p>
+                            <p class="text-xs text-gray-500">${phone || 'Sem telefone'}</p>
+                        </td>
+                        <td>#${installment.loan_id ?? '-'}</td>
+                        <td>${installmentNumber}</td>
+                        <td>
+                            <p>${formatDate(installment.due_date)}</p>
+                            <p class="text-xs text-gray-500">Pagamento: ${formatDate(installment.payment_date)}</p>
+                        </td>
+                        <td>${formatCurrency(installment.amount)}</td>
+                        <td><span class="${badge.className}">${badge.text}</span></td>
+                        <td>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" data-action="whatsapp" data-id="${installment.id}" class="table-action bg-emerald-600 hover:bg-emerald-500"><i class="fab fa-whatsapp mr-1"></i>WhatsApp</button>
+                                ${canRegisterPayment ? `<button type="button" data-action="pay-installment" data-id="${installment.id}" class="table-action bg-blue-600 hover:bg-blue-500"><i class="fas fa-money-check-dollar mr-1"></i>Pagar</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyInstallmentsFilters() {
+            const searchValue = document.getElementById('installmentSearch').value.trim().toLowerCase();
+            const statusValue = document.getElementById('installmentStatusFilter').value;
+            const periodValue = document.getElementById('installmentPeriodFilter').value;
+            const today = startOfDay(new Date());
+            const nextMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+            installmentsState.filtered = installmentsState.installments.filter(installment => {
+                const status = normalizeInstallmentStatus(installment);
+                const dueDate = startOfDay(installment.due_date);
+
+                if (statusValue !== 'Todos' && status !== statusValue) return false;
+
+                if (periodValue === 'this_month') {
+                    if (!dueDate || dueDate.getMonth() !== today.getMonth() || dueDate.getFullYear() !== today.getFullYear()) return false;
+                } else if (periodValue === 'next_month') {
+                    if (!dueDate || dueDate.getMonth() !== nextMonthDate.getMonth() || dueDate.getFullYear() !== nextMonthDate.getFullYear()) return false;
+                } else if (periodValue === 'overdue') {
+                    if (status !== 'Atrasado') return false;
+                }
+
+                if (!searchValue) return true;
+
+                const debtorName = getDebtorName(installment.debtor_id).toLowerCase();
+                const phone = getDebtorPhone(installment.debtor_id).toLowerCase();
+                const loanId = String(installment.loan_id ?? '').toLowerCase();
+                const number = String(installment.installment_number ?? installment.number ?? '').toLowerCase();
+
+                return debtorName.includes(searchValue) || phone.includes(searchValue) || loanId.includes(searchValue) || number.includes(searchValue);
+            });
+
+            installmentsState.filtered.sort((a, b) => {
+                const dueA = startOfDay(a.due_date);
+                const dueB = startOfDay(b.due_date);
+                if (!dueA && !dueB) return 0;
+                if (!dueA) return 1;
+                if (!dueB) return -1;
+                return dueA - dueB;
+            });
+
+            renderInstallmentsTable();
+        }
+        function updateLoanStatusFromInstallments(loanId) {
+            const loans = getDemoTable('loans');
+            const loanIndex = loans.findIndex(loan => sameId(loan.id, loanId));
+            if (loanIndex < 0) return;
+
+            const related = installmentsState.installments.filter(installment => sameId(installment.loan_id, loanId));
+            if (!related.length) return;
+
+            const allPaid = related.every(installment => normalizeInstallmentStatus(installment) === 'Pago');
+            const hasOverdue = related.some(installment => normalizeInstallmentStatus(installment) === 'Atrasado');
+            loans[loanIndex].status = allPaid ? 'Finalizado' : hasOverdue ? 'Atrasado' : 'Ativo';
+            saveTableData('loans', loans);
+        }
+
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openPaymentModal(installmentId) {
+            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
+            if (!installment) return;
+
+            if (normalizeInstallmentStatus(installment) === 'Pago') {
+                showMessage('Essa parcela jÃƒÂ¡ estÃƒÂ¡ paga.', 'error');
+                return;
+            }
+
+            document.getElementById('paymentInstallmentId').value = String(installment.id);
+            document.getElementById('paymentAmount').value = Number(installment.amount || 0).toFixed(2);
+            document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('paymentMethod').value = '';
+            document.getElementById('paymentNotes').value = '';
+
+            document.getElementById('paymentInstallmentInfo').innerHTML = `
+                <p><strong>Cliente:</strong> ${getDebtorName(installment.debtor_id)}</p>
+                <p><strong>EmprÃƒÂ©stimo:</strong> #${installment.loan_id ?? '-'}</p>
+                <p><strong>Parcela:</strong> #${installment.installment_number ?? '-'}</p>
+                <p><strong>Vencimento:</strong> ${formatDate(installment.due_date)}</p>
+            `;
+
+            openModal(paymentModal);
+        }
+
+        function registerInstallmentPayment(event) {
+            event.preventDefault();
+
+            const installmentId = document.getElementById('paymentInstallmentId').value;
+            const amount = Number(document.getElementById('paymentAmount').value);
+            const paymentDate = document.getElementById('paymentDate').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentNotes = document.getElementById('paymentNotes').value.trim();
+
+            if (!installmentId || !Number.isFinite(amount) || amount <= 0 || !paymentDate || !paymentMethod) {
+                showMessage('Preencha os campos obrigatÃƒÂ³rios do pagamento.', 'error');
+                return;
+            }
+
+            const index = installmentsState.installments.findIndex(item => sameId(item.id, installmentId));
+            if (index < 0) {
+                showMessage('Parcela nÃƒÂ£o encontrada.', 'error');
+                return;
+            }
+
+            const current = installmentsState.installments[index];
+            installmentsState.installments[index] = {
+                ...current,
+                status: 'Pago',
+                payment_date: paymentDate,
+                paid_amount: amount,
+                payment_method: paymentMethod,
+                payment_notes: paymentNotes
+            };
+
+            saveTableData('installments', installmentsState.installments);
+            updateLoanStatusFromInstallments(current.loan_id);
+            closeModal(paymentModal);
+            applyInstallmentsFilters();
+            showMessage('Pagamento registrado com sucesso!', 'success');
+        }
+
+        function buildWhatsAppMessage(installment) {
+            return `OlÃƒÂ¡ ${getDebtorName(installment.debtor_id)}! Sua parcela #${installment.installment_number ?? '-'} no valor de ${formatCurrency(installment.amount)} vence em ${formatDate(installment.due_date)}.`;
+        }
+
+        function normalizePhoneForWhatsApp(phoneRaw) {
+            const digits = String(phoneRaw || '').replace(/\D/g, '');
+            if (!digits) return '';
+            return digits.length <= 11 ? `55${digits}` : digits;
+        }
+
+        function buildBatchWhatsAppMessage(baseMessage, installments) {
+            const message = String(baseMessage || '').trim();
+            if (!installments.length) return message;
+
+            const refs = installments
+                .slice(0, 3)
+                .map(item => `#${item.installment_number ?? item.number ?? '-'} (${formatDate(item.due_date)})`);
+
+            const extraCount = installments.length - refs.length;
+            const details = extraCount > 0
+                ? `${refs.join(', ')} e mais ${extraCount}`
+                : refs.join(', ');
+
+            return `${message}\n\nParcelas: ${details}`;
+        }
+
+        function sendInstallmentWhatsApp(installmentId) {
+            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
+            if (!installment) return;
+
+            const phone = normalizePhoneForWhatsApp(getDebtorPhone(installment.debtor_id));
+            if (!phone) {
+                showMessage('Cliente sem telefone cadastrado.', 'error');
+                return;
+            }
+
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(buildWhatsAppMessage(installment))}`;
+            window.open(url, '_blank', 'noopener');
+        }
+
+        function getNotificationTargets(template) {
+            const list = installmentsState.filtered.filter(installment => normalizeInstallmentStatus(installment) !== 'Pago');
+            if (template === 'vencimento_hoje') {
+                return list.filter(installment => dueInDays(installment) === 0);
+            }
+            if (template === 'vencimento_proximo') {
+                return list.filter(installment => {
+                    const days = dueInDays(installment);
+                    return Number.isFinite(days) && days > 0 && days <= 3;
+                });
+            }
+            if (template === 'atraso') {
+                return list.filter(installment => normalizeInstallmentStatus(installment) === 'Atrasado');
+            }
+            return list;
+        }
+
+        function getTemplateText(template) {
+            if (template === 'vencimento_hoje') {
+                return 'OlÃƒÂ¡! Passando para lembrar que sua parcela vence hoje. Caso jÃƒÂ¡ tenha realizado o pagamento, desconsidere esta mensagem.';
+            }
+            if (template === 'atraso') {
+                return 'OlÃƒÂ¡! Identificamos uma parcela em atraso. Entre em contato para regularizaÃƒÂ§ÃƒÂ£o e evitar novos encargos.';
+            }
+            if (template === 'personalizada') {
+                return 'Digite aqui sua mensagem personalizada.';
+            }
+            return 'OlÃƒÂ¡! Sua parcela vence nos prÃƒÂ³ximos dias. Se precisar de suporte, estou ÃƒÂ  disposiÃƒÂ§ÃƒÂ£o.';
+        }
+
+        function handleTemplateChange() {
+            const template = document.getElementById('messageTemplate').value;
+            document.getElementById('customMessage').value = getTemplateText(template);
+        }
+        async function sendBatchNotifications() {
+            const template = document.getElementById('messageTemplate').value;
+            const message = document.getElementById('customMessage').value.trim();
+            const targets = getNotificationTargets(template);
+
+            if (!message) {
+                showMessage('Preencha a mensagem da notificacao.', 'error');
+                return;
+            }
+
+            if (!targets.length) {
+                showMessage('Nenhuma parcela se encaixa no filtro de notificacao.', 'error');
+                return;
+            }
+
+            const groupedByDebtor = new Map();
+            targets.forEach((installment) => {
+                const debtorKey = String(installment.debtor_id ?? '');
+                if (!debtorKey) return;
+
+                if (!groupedByDebtor.has(debtorKey)) {
+                    groupedByDebtor.set(debtorKey, []);
+                }
+
+                groupedByDebtor.get(debtorKey).push(installment);
+            });
+
+            let withoutPhone = 0;
+            const recipients = [];
+
+            groupedByDebtor.forEach((debtorInstallments, debtorKey) => {
+                const debtorId = debtorInstallments[0]?.debtor_id ?? debtorKey;
+                const phone = normalizePhoneForWhatsApp(getDebtorPhone(debtorId));
+                if (!phone) {
+                    withoutPhone += 1;
+                    return;
+                }
+
+                const sortedInstallments = [...debtorInstallments].sort((a, b) => {
+                    const dueA = startOfDay(a.due_date);
+                    const dueB = startOfDay(b.due_date);
+                    if (!dueA && !dueB) return 0;
+                    if (!dueA) return 1;
+                    if (!dueB) return -1;
+                    return dueA - dueB;
+                });
+
+                const debtorIdNumber = Number(debtorId);
+                const recipient = {
+                    phone,
+                    message: buildBatchWhatsAppMessage(message, sortedInstallments),
+                    installmentIds: sortedInstallments.map((item) => Number(item.id)).filter(Number.isFinite),
+                };
+
+                if (Number.isFinite(debtorIdNumber) && debtorIdNumber > 0) {
+                    recipient.debtorId = debtorIdNumber;
+                }
+
+                recipients.push(recipient);
+            });
+
+            if (!recipients.length) {
+                showMessage('Nenhum cliente com telefone valido para notificacao.', 'error');
+                return;
+            }
+
+            let payload = null;
+            try {
+                const response = await fetch('/api/notifications/whatsapp/batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ recipients }),
+                });
+
+                payload = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    const apiMessage = payload?.message || 'Falha ao enviar notificacoes via WhatsApp.';
+                    showMessage(apiMessage, 'error');
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao enviar notificacoes:', error);
+                showMessage('Erro de conexao ao enviar notificacoes.', 'error');
+                return;
+            }
+
+            closeModal(notificationModal);
+
+            const sent = Number(payload?.summary?.sent ?? 0);
+            const failed = Number(payload?.summary?.failed ?? 0);
+
+            const summary = [`${sent} enviada(s)`];
+            if (failed > 0) summary.push(`${failed} falha(s)`);
+            if (withoutPhone > 0) summary.push(`${withoutPhone} sem telefone`);
+
+            if (sent === 0) {
+                showMessage(`Nenhuma mensagem enviada. Resumo: ${summary.join(' | ')}.`, 'error');
+                return;
+            }
+
+            showMessage(`Notificacoes enviadas: ${summary.join(' | ')}.`, 'success');
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-6 right-6 px-6 py-4 rounded-xl text-white font-medium z-50 shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            messageDiv.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-3 text-lg"></i><span>${message}</span></div>`;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3500);
+        }
+
+        async function loadInstallmentsData() {
+            try {
+                const [installments, debtors] = await Promise.all([
+                    fetchTableData('installments'),
+                    fetchTableData('debtors')
+                ]);
+
+                installmentsState.installments = installments;
+                installmentsState.debtors = debtors;
+                installmentsState.filtered = [...installments];
+                applyInstallmentsFilters();
+
+                const now = new Date();
+                document.getElementById('lastUpdatedAt').textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            } catch (error) {
+                console.error('Erro ao carregar parcelas:', error);
+                document.getElementById('installmentsTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+            }
+        }
+        function setActiveSidebarItem(targetHref) {
+            sidebarLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === targetHref;
+                link.classList.toggle('active', isActive);
+                if (isActive) link.setAttribute('aria-current', 'page');
+                else link.removeAttribute('aria-current');
+            });
+        }
+
+        function syncActiveSidebarWithRoute() {
+            const currentPage = window.location.pathname.split('/').pop() || 'installments.html';
+            setActiveSidebarItem(currentPage);
+        }
+
+        function syncSidebarLayout() {
+            if (isMobileViewport()) {
+                main.style.marginLeft = '0';
+                return;
+            }
+            sidebar.classList.remove('mobile-open');
+            main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            if (isMobileViewport()) {
+                sidebar.classList.toggle('mobile-open');
+                return;
+            }
+            document.body.classList.toggle('sidebar-collapsed');
+            syncSidebarLayout();
+        });
+
+        window.addEventListener('resize', syncSidebarLayout);
+        syncSidebarLayout();
+        syncActiveSidebarWithRoute();
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            const themeIcon = document.getElementById('themeToggle').querySelector('i');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('installmentSearch').addEventListener('input', applyInstallmentsFilters);
+        document.getElementById('installmentStatusFilter').addEventListener('change', applyInstallmentsFilters);
+        document.getElementById('installmentPeriodFilter').addEventListener('change', applyInstallmentsFilters);
+        document.getElementById('refreshBtn').addEventListener('click', loadInstallmentsData);
+
+        document.getElementById('notifyBatchBtn').addEventListener('click', function() {
+            handleTemplateChange();
+            openModal(notificationModal);
+        });
+
+        document.getElementById('notificationBtn').addEventListener('click', function() {
+            handleTemplateChange();
+            openModal(notificationModal);
+        });
+
+        document.getElementById('messageTemplate').addEventListener('change', handleTemplateChange);
+        document.getElementById('sendNotificationBtn').addEventListener('click', sendBatchNotifications);
+        document.getElementById('closeNotificationModalBtn').addEventListener('click', () => closeModal(notificationModal));
+        document.getElementById('cancelNotificationBtn').addEventListener('click', () => closeModal(notificationModal));
+
+        document.getElementById('paymentForm').addEventListener('submit', registerInstallmentPayment);
+        document.getElementById('closePaymentModalBtn').addEventListener('click', () => closeModal(paymentModal));
+        document.getElementById('cancelPaymentBtn').addEventListener('click', () => closeModal(paymentModal));
+
+        document.getElementById('installmentsTableBody').addEventListener('click', function(event) {
+            const actionBtn = event.target.closest('button[data-action]');
+            if (!actionBtn) return;
+
+            const action = actionBtn.getAttribute('data-action');
+            const installmentId = actionBtn.getAttribute('data-id');
+
+            if (action === 'pay-installment') {
+                openPaymentModal(installmentId);
+                return;
+            }
+
+            if (action === 'whatsapp') {
+                sendInstallmentWhatsApp(installmentId);
+            }
+        });
+
+        [paymentModal, notificationModal].forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) closeModal(modal);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            handleTemplateChange();
+            loadInstallmentsData();
+        });
+    </script>
+</body>
+</html>
+

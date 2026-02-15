@@ -1,0 +1,163 @@
+﻿import {
+  InstallmentStatus,
+  LoanStatus,
+  PaymentMethod,
+} from "@prisma/client";
+import { Router } from "express";
+import { AppError } from "../middleware/error-handler";
+import { requireAuthApi } from "../middleware/auth";
+import { prisma } from "../lib/prisma";
+import { createPaymentSchema } from "../schemas/payments.schemas";
+
+const router = Router();
+
+function toDateOnly(input: string) {
+  const raw = input.trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new AppError("Data de pagamento invalida", 400);
+  }
+  return parsed;
+}
+
+async function refreshLoanStatus(loanId: number) {
+  const installments = await prisma.installment.findMany({
+    where: { loanId },
+    select: { status: true, dueDate: true },
+  });
+
+  if (installments.length === 0) {
+    await prisma.loan.update({ where: { id: loanId }, data: { status: LoanStatus.PENDENTE } });
+    return;
+  }
+
+  if (installments.every((i) => i.status === InstallmentStatus.PAGO)) {
+    await prisma.loan.update({ where: { id: loanId }, data: { status: LoanStatus.QUITADO } });
+    return;
+  }
+
+  const today = new Date();
+  const hasOverdue = installments.some((i) => i.status === InstallmentStatus.ATRASADO || (i.status !== InstallmentStatus.PAGO && i.dueDate < today));
+
+  await prisma.loan.update({
+    where: { id: loanId },
+    data: { status: hasOverdue ? LoanStatus.ATRASADO : LoanStatus.EM_DIA },
+  });
+}
+
+router.use(requireAuthApi);
+
+router.get("/", async (req, res) => {
+  const loanId = req.query.loanId ? Number(req.query.loanId) : undefined;
+
+  const payments = await prisma.payment.findMany({
+    where: loanId ? { loanId } : undefined,
+    include: {
+      loan: {
+        select: {
+          clientId: true,
+        },
+      },
+    },
+    orderBy: { paymentDate: "desc" },
+  });
+
+  return res.json({
+    data: payments.map((payment) => ({
+      id: payment.id,
+      loanId: payment.loanId,
+      installmentId: payment.installmentId,
+      debtorId: payment.loan.clientId,
+      amount: Number(payment.amount),
+      paymentDate: payment.paymentDate.toISOString().slice(0, 10),
+      method: payment.method,
+      notes: payment.notes,
+      createdAt: payment.createdAt,
+    })),
+  });
+});
+
+router.post("/", async (req, res) => {
+  const payload = createPaymentSchema.parse(req.body);
+  const paymentDate = toDateOnly(payload.paymentDate);
+
+  const result = await prisma.$transaction(async (tx) => {
+    const loan = await tx.loan.findUnique({ where: { id: payload.loanId } });
+    if (!loan) {
+      throw new AppError("Emprestimo nao encontrado", 404);
+    }
+
+    if (payload.installmentId) {
+      const installment = await tx.installment.findUnique({ where: { id: payload.installmentId } });
+      if (!installment || installment.loanId !== payload.loanId) {
+        throw new AppError("Parcela nao encontrada para este emprestimo", 404);
+      }
+    }
+
+    const payment = payload.installmentId
+      ? await tx.payment.upsert({
+          where: { installmentId: payload.installmentId },
+          create: {
+            loanId: payload.loanId,
+            installmentId: payload.installmentId,
+            amount: payload.amount,
+            paymentDate,
+            method: payload.method as PaymentMethod,
+            notes: payload.notes?.trim() || null,
+          },
+          update: {
+            loanId: payload.loanId,
+            amount: payload.amount,
+            paymentDate,
+            method: payload.method as PaymentMethod,
+            notes: payload.notes?.trim() || null,
+          },
+        })
+      : await tx.payment.create({
+          data: {
+            loanId: payload.loanId,
+            installmentId: payload.installmentId,
+            amount: payload.amount,
+            paymentDate,
+            method: payload.method as PaymentMethod,
+            notes: payload.notes?.trim() || null,
+          },
+        });
+
+    if (payload.installmentId) {
+      await tx.installment.update({
+        where: { id: payload.installmentId },
+        data: {
+          status: InstallmentStatus.PAGO,
+          paymentDate,
+          paymentMethod: payload.method as PaymentMethod,
+          notes: payload.notes?.trim() || null,
+        },
+      });
+    }
+
+    return payment;
+  });
+
+  await refreshLoanStatus(payload.loanId);
+
+  return res.status(201).json({
+    message: "Pagamento registrado",
+    data: {
+      id: result.id,
+      loanId: result.loanId,
+      installmentId: result.installmentId,
+      amount: Number(result.amount),
+      paymentDate: result.paymentDate.toISOString().slice(0, 10),
+      method: result.method,
+      notes: result.notes,
+    },
+  });
+});
+
+export { router as paymentsRoutes };

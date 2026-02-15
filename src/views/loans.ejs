@@ -1,0 +1,1414 @@
+﻿
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredFÃ¡cil - EmprÃ©stimos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 16px; }
+        body { font-family: 'Inter', sans-serif; }
+        .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
+        .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
+
+        .icon-btn {
+            color: #cbd5e1;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+        }
+        .icon-btn:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35) inset;
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
+            transform: translateX(0);
+            transition: transform 120ms ease-out;
+        }
+        .sidebar-item {
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+            border-radius: 12px;
+            margin: 4px 0;
+        }
+        .sidebar-item:hover {
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
+        }
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+        .page-title { color: #ffffff; }
+        .muted-on-dark { color: #cbd5e1; }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #0f172a;
+        }
+        .filter-control {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #111827;
+            width: 100%;
+        }
+
+        .table-shell {
+            overflow: auto;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+        .table-shell table { width: 100%; border-collapse: collapse; }
+        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
+        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+        .badge-neutral { background: #e2e8f0; color: #334155; }
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out;
+        }
+        .action-btn-view { color: #2563eb; }
+        .action-btn-view:hover { background: #dbeafe; border-color: #bfdbfe; }
+        .action-btn-edit { color: #059669; }
+        .action-btn-edit:hover { background: #d1fae5; border-color: #a7f3d0; }
+        .action-btn-delete { color: #dc2626; }
+        .action-btn-delete:hover { background: #fee2e2; border-color: #fecaca; }
+
+        .calc-card {
+            border-radius: 14px;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.08) 0%, rgba(59, 130, 246, 0.12) 100%);
+        }
+        .installment-preview {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        .installment-preview.overdue { background: #fee2e2; border-color: #fecaca; }
+        .installment-preview.pending { background: #fef3c7; border-color: #fde68a; }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .details-item {
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 10px 12px;
+            background: #f8fafc;
+        }
+
+        main { transition: none; }
+        body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
+        body.sidebar-collapsed main { margin-left: 0 !important; }
+
+        @media (max-width: 1024px) {
+            .modern-sidebar { transform: translateX(-100%); }
+            .modern-sidebar.mobile-open { transform: translateX(0) !important; }
+            main { margin-left: 0 !important; }
+        }
+        @media (max-width: 640px) {
+            .kpi-value { font-size: 1.6rem; }
+            .details-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .icon-btn i {
+                font-size: 1rem !important;
+            }
+
+            .header-user-name, .header-user-chevron { display: none; }
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+        }
+        .dark .kpi-value { color: #f8fafc; }
+        .dark .filter-control,
+        .dark .table-shell,
+        .dark .table-shell th,
+        .dark .table-shell td,
+        .dark .details-item,
+        .dark .installment-preview {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.22);
+        }
+        .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
+        .dark .calc-card {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.2) 0%, rgba(59, 130, 246, 0.22) 100%);
+            border-color: rgba(96, 165, 250, 0.35);
+        }
+    </style>
+</head>
+<body class="primary-gradient min-h-screen">
+    <header class="premium-header fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+            <div class="flex items-center">
+                <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
+                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
+                <button id="notificationBtn" class="icon-btn focus:outline-none relative"><i class="fas fa-bell text-xl"></i></button>
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
+                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center sm:h-11 sm:w-11"><i class="fas fa-user"></i></div>
+                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+                        <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                        <button type="button" data-user-menu-action="profile" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-id-card text-slate-500 dark:text-slate-300"></i>
+                            <span>Meu perfil</span>
+                        </button>
+                        <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
+                            <span>Segurança</span>
+                        </button>
+                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
+                            <span>Preferências</span>
+                        </button>
+                        <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
+                            <span>Ajuda</span>
+                        </button>
+                        <div class="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                        <button type="button" data-user-menu-action="logout" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
+                            <i class="fas fa-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16 sm:pt-20">
+        <aside id="sidebar" class="modern-sidebar fixed left-0 top-16 h-[calc(100%-4rem)] w-64 z-40 sm:top-20 sm:h-[calc(100%-5rem)]">
+            <nav class="mt-8 px-4">
+                <ul class="space-y-2">
+                    <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span class="font-medium">EmprÃ©stimos</span></a></li>
+                    <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">EmprÃ©stimos</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Acompanhe contratos, valores e status da carteira ativa.</p>
+                </div>
+                <button id="newLoanBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                    <i class="fas fa-file-invoice-dollar mr-2"></i>Novo emprÃ©stimo
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Qtd. emprÃ©stimos</p><p id="totalLoans" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Principal total</p><p id="totalPrincipal" class="kpi-value mt-2">R$ 0,00</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total contratado</p><p id="totalContracted" class="kpi-value mt-2">R$ 0,00</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">EmprÃ©stimos ativos</p><p id="activeLoans" class="kpi-value mt-2">0</p></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">Buscar</label>
+                        <input id="loanSearch" type="text" class="filter-control" placeholder="Cliente ou ID do emprÃ©stimo">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Status</label>
+                        <select id="loanStatusFilter" class="filter-control">
+                            <option value="Todos">Todos</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Finalizado">Finalizado</option>
+                            <option value="Atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button id="refreshBtn" type="button" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">
+                            <i class="fas fa-rotate-right mr-2"></i>Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Principal</th>
+                                <th>Total</th>
+                                <th>Parcelas</th>
+                                <th>Juros</th>
+                                <th>Data de inÃ­cio</th>
+                                <th>Status</th>
+                                <th>AÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loansTableBody">
+                            <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando emprÃ©stimos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+                    <p class="text-sm text-gray-600">
+                        Mostrando <span id="showingStart">0</span> atÃ© <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="pageIndicator" class="text-sm text-gray-600">PÃ¡gina 1</span>
+                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="loanModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="glass-card w-full max-w-5xl rounded-2xl p-6 max-h-[92vh] overflow-y-auto">
+                    <div class="mb-5 flex items-center justify-between">
+                        <h3 id="loanModalTitle" class="text-xl font-bold text-gray-800">Novo emprÃ©stimo</h3>
+                        <button id="closeLoanModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <form id="loanForm" class="space-y-5">
+                        <input type="hidden" id="loanEditingId">
+
+                        <div class="rounded-xl border border-gray-200 p-4">
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">InformaÃ§Ãµes bÃ¡sicas</h4>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Devedor</label>
+                                    <select id="loanDebtor" class="filter-control" required></select>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Valor principal (R$)</label>
+                                    <input id="loanPrincipal" class="filter-control" type="number" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-gray-200 p-4">
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">CondiÃ§Ãµes</h4>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)</label>
+                                    <input id="loanInterestRate" class="filter-control" type="number" min="0" step="0.01" value="20" required>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Tipo de juros</label>
+                                    <select id="loanInterestType" class="filter-control">
+                                        <option value="simples">Simples</option>
+                                        <option value="composto" selected>Composto</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Parcelas</label>
+                                    <input id="loanInstallments" class="filter-control" type="number" min="1" max="96" step="1" value="6" required>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
+                                    <select id="loanPaymentMethod" class="filter-control">
+                                        <option value="Pix">Pix</option>
+                                        <option value="Dinheiro">Dinheiro</option>
+                                        <option value="TransferÃªncia">TransferÃªncia</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-gray-200 p-4">
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Datas</h4>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Data de inÃ­cio</label>
+                                    <input id="loanStartDate" class="filter-control" type="date" required>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">1Âº vencimento</label>
+                                    <input id="loanFirstDueDate" class="filter-control" type="date" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm text-gray-600">ObservaÃ§Ãµes</label>
+                            <textarea id="loanObservations" class="filter-control" rows="3" placeholder="ObservaÃ§Ãµes sobre o emprÃ©stimo"></textarea>
+                        </div>
+
+                        <div id="loanCalculationCard" class="calc-card p-4 hidden">
+                            <h4 class="text-sm font-semibold uppercase tracking-wide text-blue-900">CÃ¡lculo automÃ¡tico</h4>
+                            <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <p class="text-sm text-blue-800">Total a receber</p>
+                                    <p id="loanCalculatedTotal" class="text-xl font-bold text-blue-950">R$ 0,00</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-blue-800">Valor da parcela</p>
+                                    <p id="loanCalculatedInstallment" class="text-xl font-bold text-blue-950">R$ 0,00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="installmentsPreviewCard" class="rounded-xl border border-gray-200 p-4 hidden">
+                            <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">PrÃ©via das parcelas</h4>
+                            <div id="installmentsPreviewList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancelar</button>
+                            <button id="calculateLoanBtn" type="button" class="rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">Calcular</button>
+                            <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar emprÃ©stimo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="loanDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="glass-card w-full max-w-4xl rounded-2xl p-6 max-h-[92vh] overflow-y-auto">
+                    <div class="mb-5 flex items-center justify-between">
+                        <h3 id="loanDetailsTitle" class="text-xl font-bold text-gray-800">Detalhes do emprÃ©stimo</h3>
+                        <button id="closeLoanDetailsBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="loanDetailsContent" class="space-y-4"></div>
+                    <div class="mt-5 flex justify-end">
+                        <button id="closeLoanDetailsFooterBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
+    <script>
+        const currentUser = window.__AUTH_USER__;
+        if (!currentUser) {
+            window.location.href = '/login';
+        } else {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('main');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+        const tableCache = {};
+        function getDemoTable(tableName) {
+            return Array.isArray(tableCache[tableName]) ? tableCache[tableName] : [];
+        }
+
+        async function fetchTableData(tableName) {
+            try {
+                const response = await fetch(`/api/tables/${tableName}`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                if (Array.isArray(payload?.data)) {
+                    tableCache[tableName] = payload.data;
+                    return payload.data;
+                }
+            } catch (error) {
+                console.warn(`Fallback para dados demo: ${tableName}`, error);
+            }
+            return getDemoTable(tableName);
+        }
+
+        async function saveTableData(tableName, rows) {
+            const safeRows = Array.isArray(rows) ? rows : [];
+            tableCache[tableName] = safeRows;
+
+            const response = await fetch(`/api/tables/${tableName}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rows: safeRows })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Falha ao salvar ${tableName}: HTTP ${response.status}`);
+            }
+
+            const payload = await response.json().catch(() => null);
+            if (Array.isArray(payload?.data)) {
+                tableCache[tableName] = payload.data;
+            }
+
+            return tableCache[tableName];
+        }
+
+        function setActiveSidebarItem(targetHref) {
+            sidebarLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === targetHref;
+                link.classList.toggle('active', isActive);
+                if (isActive) link.setAttribute('aria-current', 'page');
+                else link.removeAttribute('aria-current');
+            });
+        }
+
+        function syncActiveSidebarWithRoute() {
+            const currentPage = window.location.pathname.split('/').pop() || 'loans.html';
+            setActiveSidebarItem(currentPage);
+        }
+
+        function syncSidebarLayout() {
+            if (isMobileViewport()) {
+                main.style.marginLeft = '0';
+                return;
+            }
+            sidebar.classList.remove('mobile-open');
+            main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            if (isMobileViewport()) {
+                sidebar.classList.toggle('mobile-open');
+                return;
+            }
+            document.body.classList.toggle('sidebar-collapsed');
+            syncSidebarLayout();
+        });
+
+        window.addEventListener('resize', syncSidebarLayout);
+        syncSidebarLayout();
+        syncActiveSidebarWithRoute();
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').querySelector('i').classList.remove('fa-sun');
+            document.getElementById('themeToggle').querySelector('i').classList.add('fa-moon');
+        }
+
+        function closeUserMenu() {
+            if (!userMenuDropdown) return;
+            userMenuDropdown.classList.add('hidden');
+        }
+
+        function showUserMenuNotice(message) {
+            if (typeof showMessage === 'function') {
+                showMessage(message, 'success');
+                return;
+            }
+            window.alert(message);
+        }
+
+        async function performLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = '/login';
+        }
+
+        async function handleUserMenuAction(action) {
+            if (action === 'logout') {
+                await performLogout();
+                return;
+            }
+
+            if (action === 'profile') {
+                showUserMenuNotice('Meu perfil: em breve.');
+                return;
+            }
+
+            if (action === 'security') {
+                showUserMenuNotice('Segurança: em breve.');
+                return;
+            }
+
+            if (action === 'preferences') {
+                showUserMenuNotice('Preferências: em breve.');
+                return;
+            }
+
+            if (action === 'help') {
+                showUserMenuNotice('Ajuda: em breve.');
+            }
+        }
+
+        if (userMenuBtn && userMenuDropdown) {
+            userMenuBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+
+            userMenuDropdown.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const actionBtn = target.closest('[data-user-menu-action]');
+                if (!actionBtn) return;
+                const action = actionBtn.getAttribute('data-user-menu-action');
+                closeUserMenu();
+                void handleUserMenuAction(action);
+            });
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Node)) return;
+                if (userMenuDropdown.classList.contains('hidden')) return;
+                if (userMenuDropdown.contains(target) || userMenuBtn.contains(target)) return;
+                closeUserMenu();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeUserMenu();
+            });
+        }
+
+        const loansState = {
+            loans: [],
+            debtors: [],
+            installments: [],
+            filtered: [],
+            currentPage: 1,
+            pageSize: 8,
+            editingLoanId: null
+        };
+
+        const loanModal = document.getElementById('loanModal');
+        const loanDetailsModal = document.getElementById('loanDetailsModal');
+        const loanForm = document.getElementById('loanForm');
+        const loanCalculationCard = document.getElementById('loanCalculationCard');
+        const installmentsPreviewCard = document.getElementById('installmentsPreviewCard');
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
+        }
+
+        function toNumber(value) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function round2(value) {
+            return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(toNumber(value));
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function toIsoDate(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toISOString().slice(0, 10);
+        }
+
+        function normalizeLoanStatus(status) {
+            if (!status) return 'Ativo';
+            const s = String(status).trim().toLowerCase();
+            if (s.includes('final')) return 'Finalizado';
+            if (s.includes('atras')) return 'Atrasado';
+            if (s.includes('ativo') || s.includes('aberto') || s.includes('pendente')) return 'Ativo';
+            return status;
+        }
+
+        function normalizeInterestType(value) {
+            const s = String(value || '').trim().toLowerCase();
+            if (s === 'simples') return 'simples';
+            return 'composto';
+        }
+
+        function normalizeLoanRow(row) {
+            const installmentsCount = toNumber(row.installments_count ?? row.installments ?? row.total_installments ?? 0);
+            const principalAmount = round2(row.principal_amount ?? row.principal ?? row.amount ?? 0);
+            const totalAmount = round2(row.total_amount ?? row.total ?? row.contract_amount ?? 0);
+            const interestRate = round2(row.interest_rate ?? row.interest ?? row.monthly_interest ?? 0);
+            const installmentAmount = installmentsCount > 0 ? round2(row.installment_amount ?? (totalAmount / installmentsCount)) : 0;
+
+            return {
+                ...row,
+                id: row.id,
+                debtor_id: row.debtor_id,
+                principal_amount: principalAmount,
+                total_amount: totalAmount,
+                installments_count: installmentsCount,
+                interest_rate: interestRate,
+                installment_amount: installmentAmount,
+                interest_type: normalizeInterestType(row.interest_type),
+                payment_method: row.payment_method || 'Pix',
+                observations: row.observations || row.notes || '',
+                status: normalizeLoanStatus(row.status),
+                start_date: row.start_date || row.created_at || '',
+                first_due_date: row.first_due_date || row.due_date || ''
+            };
+        }
+
+        function badgeForStatus(status) {
+            if (status === 'Ativo') return 'badge badge-success';
+            if (status === 'Finalizado') return 'badge badge-neutral';
+            if (status === 'Atrasado') return 'badge badge-danger';
+            return 'badge badge-warn';
+        }
+
+        function getDebtorName(debtorId) {
+            const debtor = loansState.debtors.find(item => sameId(item.id, debtorId));
+            return debtor?.name || debtor?.full_name || 'Cliente nÃ£o identificado';
+        }
+
+        function addMonths(date, count) {
+            const copy = new Date(date.getTime());
+            copy.setMonth(copy.getMonth() + count);
+            return copy;
+        }
+
+        function getTodayIsoDate() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function splitAmount(total, parts) {
+            const safeParts = Math.max(1, toNumber(parts));
+            const cents = Math.round(round2(total) * 100);
+            const base = Math.floor(cents / safeParts);
+            const remainder = cents - base * safeParts;
+
+            return Array.from({ length: safeParts }, (_, index) => {
+                const current = base + (index === safeParts - 1 ? remainder : 0);
+                return round2(current / 100);
+            });
+        }
+
+        function calculateLoanValues(principal, ratePercent, installmentsCount, interestType) {
+            const p = round2(principal);
+            const r = toNumber(ratePercent) / 100;
+            const n = Math.max(1, Math.trunc(toNumber(installmentsCount)));
+
+            if (p <= 0 || n <= 0 || r < 0) return null;
+
+            if (interestType === 'simples') {
+                const totalInterest = round2(p * r * n);
+                const totalAmount = round2(p + totalInterest);
+                const installmentAmount = round2(totalAmount / n);
+                return { totalAmount, installmentAmount, totalInterest };
+            }
+
+            if (r === 0) {
+                const totalAmount = p;
+                const installmentAmount = round2(p / n);
+                return { totalAmount, installmentAmount, totalInterest: 0 };
+            }
+
+            const factor = Math.pow(1 + r, n);
+            const installmentAmount = round2((p * r * factor) / (factor - 1));
+            const totalAmount = round2(installmentAmount * n);
+            const totalInterest = round2(totalAmount - p);
+            return { totalAmount, installmentAmount, totalInterest };
+        }
+
+        function buildInstallmentPlan(values, calcResult) {
+            const n = values.installments;
+            const monthlyRate = values.interestRate / 100;
+            const firstDue = new Date(values.firstDueDate);
+            const today = new Date(getTodayIsoDate());
+            const plan = [];
+            if (values.interestType === 'simples') {
+                const principalParts = splitAmount(values.principal, n);
+                const interestParts = splitAmount(calcResult.totalInterest, n);
+
+                for (let index = 0; index < n; index += 1) {
+                    const due = addMonths(firstDue, index);
+                    const amount = round2(principalParts[index] + interestParts[index]);
+                    plan.push({
+                        installment_number: index + 1,
+                        amount,
+                        principal_amount: principalParts[index],
+                        interest_amount: interestParts[index],
+                        due_date: toIsoDate(due),
+                        status: due < today ? 'Atrasado' : 'Pendente',
+                        payment_date: null
+                    });
+                }
+                return plan;
+            }
+
+            const amounts = splitAmount(calcResult.totalAmount, n);
+            let remainingPrincipal = round2(values.principal);
+
+            for (let index = 0; index < n; index += 1) {
+                const due = addMonths(firstDue, index);
+                const amount = amounts[index];
+
+                let interestAmount = values.interestRate === 0 ? 0 : round2(remainingPrincipal * monthlyRate);
+                let principalAmount = round2(amount - interestAmount);
+
+                if (index === n - 1) {
+                    principalAmount = round2(remainingPrincipal);
+                    interestAmount = round2(amount - principalAmount);
+                }
+
+                remainingPrincipal = round2(remainingPrincipal - principalAmount);
+                if (remainingPrincipal < 0) remainingPrincipal = 0;
+
+                plan.push({
+                    installment_number: index + 1,
+                    amount,
+                    principal_amount: principalAmount,
+                    interest_amount: interestAmount,
+                    due_date: toIsoDate(due),
+                    status: due < today ? 'Atrasado' : 'Pendente',
+                    payment_date: null
+                });
+            }
+
+            return plan;
+        }
+
+        function deriveLoanStatus(plan) {
+            if (!plan.length) return 'Ativo';
+            const hasOverdue = plan.some(item => item.status === 'Atrasado');
+            return hasOverdue ? 'Atrasado' : 'Ativo';
+        }
+
+        function getLoanInstallments(loanId) {
+            return loansState.installments
+                .filter(item => sameId(item.loan_id, loanId))
+                .sort((a, b) => toNumber(a.installment_number) - toNumber(b.installment_number));
+        }
+
+        function getLoanInstallmentsSummary(loan) {
+            const installments = getLoanInstallments(loan.id);
+            const total = loan.installments_count || installments.length;
+            if (!total) return '-';
+
+            const paid = installments.filter(item => String(item.status || '').toLowerCase() === 'pago').length;
+            return `${paid}/${total}`;
+        }
+
+        function updateLoanMetrics() {
+            const total = loansState.loans.length;
+            const principal = loansState.loans.reduce((acc, loan) => acc + toNumber(loan.principal_amount), 0);
+            const contracted = loansState.loans.reduce((acc, loan) => acc + toNumber(loan.total_amount), 0);
+            const active = loansState.loans.filter(loan => normalizeLoanStatus(loan.status) === 'Ativo').length;
+
+            document.getElementById('totalLoans').textContent = String(total);
+            document.getElementById('totalPrincipal').textContent = formatCurrency(principal);
+            document.getElementById('totalContracted').textContent = formatCurrency(contracted);
+            document.getElementById('activeLoans').textContent = String(active);
+        }
+
+        function updatePaginationInfo(total) {
+            const totalPages = Math.max(1, Math.ceil(total / loansState.pageSize));
+            if (loansState.currentPage > totalPages) {
+                loansState.currentPage = totalPages;
+            }
+
+            const start = total === 0 ? 0 : (loansState.currentPage - 1) * loansState.pageSize + 1;
+            const end = total === 0 ? 0 : Math.min(start + loansState.pageSize - 1, total);
+
+            document.getElementById('showingStart').textContent = String(start);
+            document.getElementById('showingEnd').textContent = String(end);
+            document.getElementById('totalResults').textContent = String(total);
+            document.getElementById('pageIndicator').textContent = `PÃ¡gina ${loansState.currentPage} de ${totalPages}`;
+
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            prevPageBtn.disabled = loansState.currentPage <= 1;
+            nextPageBtn.disabled = loansState.currentPage >= totalPages;
+            prevPageBtn.classList.toggle('opacity-50', prevPageBtn.disabled);
+            nextPageBtn.classList.toggle('opacity-50', nextPageBtn.disabled);
+        }
+
+        function renderLoansTable() {
+            const tbody = document.getElementById('loansTableBody');
+            const total = loansState.filtered.length;
+            updatePaginationInfo(total);
+
+            if (!total) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum emprÃ©stimo encontrado.</td></tr>';
+                return;
+            }
+
+            const startIndex = (loansState.currentPage - 1) * loansState.pageSize;
+            const pageRows = loansState.filtered.slice(startIndex, startIndex + loansState.pageSize);
+
+            tbody.innerHTML = pageRows.map(loan => {
+                const status = normalizeLoanStatus(loan.status);
+                const interestType = normalizeInterestType(loan.interest_type) === 'simples' ? 'Simples' : 'Composto';
+                const installmentsInfo = getLoanInstallmentsSummary(loan);
+
+                return `
+                    <tr>
+                        <td>#${loan.id ?? '-'}</td>
+                        <td>${getDebtorName(loan.debtor_id)}</td>
+                        <td>${formatCurrency(loan.principal_amount)}</td>
+                        <td>${formatCurrency(loan.total_amount)}</td>
+                        <td>${installmentsInfo}</td>
+                        <td>${loan.interest_rate}% (${interestType})</td>
+                        <td>${formatDate(loan.start_date)}</td>
+                        <td><span class="${badgeForStatus(status)}">${status}</span></td>
+                        <td>
+                            <div class="flex items-center gap-1">
+                                <button type="button" class="action-btn action-btn-view" data-action="view-loan" data-id="${loan.id}" title="Detalhes"><i class="fas fa-eye"></i></button>
+                                <button type="button" class="action-btn action-btn-edit" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
+                                <button type="button" class="action-btn action-btn-delete" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyLoansFilters(resetPage) {
+            if (resetPage) loansState.currentPage = 1;
+
+            const searchValue = document.getElementById('loanSearch').value.trim().toLowerCase();
+            const statusValue = document.getElementById('loanStatusFilter').value;
+
+            loansState.filtered = loansState.loans
+                .filter(loan => {
+                    const normalizedStatus = normalizeLoanStatus(loan.status);
+                    if (statusValue !== 'Todos' && normalizedStatus !== statusValue) return false;
+
+                    if (!searchValue) return true;
+                    const debtorName = getDebtorName(loan.debtor_id).toLowerCase();
+                    const idValue = String(loan.id ?? '').toLowerCase();
+                    return debtorName.includes(searchValue) || idValue.includes(searchValue);
+                })
+                .sort((a, b) => {
+                    const first = new Date(a.start_date || 0).getTime();
+                    const second = new Date(b.start_date || 0).getTime();
+                    if (second !== first) return second - first;
+                    return toNumber(b.id) - toNumber(a.id);
+                });
+
+            renderLoansTable();
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-5 right-5 px-5 py-3 rounded-xl text-white text-sm font-semibold z-50 shadow-lg ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        function populateDebtorOptions(selectedDebtorId) {
+            const select = document.getElementById('loanDebtor');
+            const activeDebtors = loansState.debtors.filter(item => String(item.status || '').toLowerCase() === 'ativo');
+            const source = activeDebtors.length ? [...activeDebtors] : [...loansState.debtors];
+
+            if (selectedDebtorId && !source.some(item => sameId(item.id, selectedDebtorId))) {
+                const selectedDebtor = loansState.debtors.find(item => sameId(item.id, selectedDebtorId));
+                if (selectedDebtor) {
+                    source.unshift(selectedDebtor);
+                }
+            }
+
+            if (!source.length) {
+                select.innerHTML = '<option value="">Nenhum devedor disponÃ­vel</option>';
+                return;
+            }
+
+            select.innerHTML = source
+                .map(item => `<option value="${item.id}">${item.name || item.full_name || `Devedor #${item.id}`}</option>`)
+                .join('');
+
+            if (selectedDebtorId) {
+                const hasSelected = source.some(item => sameId(item.id, selectedDebtorId));
+                if (hasSelected) select.value = String(selectedDebtorId);
+            }
+        }
+
+        function setDefaultLoanDates() {
+            const today = new Date(getTodayIsoDate());
+            const firstDue = addMonths(today, 1);
+            document.getElementById('loanStartDate').value = toIsoDate(today);
+            document.getElementById('loanFirstDueDate').value = toIsoDate(firstDue);
+        }
+
+        function openLoanModal(mode, loan) {
+            loansState.editingLoanId = mode === 'edit' ? loan.id : null;
+
+            loanForm.reset();
+            setDefaultLoanDates();
+            loanCalculationCard.classList.add('hidden');
+            installmentsPreviewCard.classList.add('hidden');
+            document.getElementById('installmentsPreviewList').innerHTML = '';
+
+            if (mode === 'edit' && loan) {
+                document.getElementById('loanModalTitle').textContent = `Editar emprÃ©stimo #${loan.id}`;
+                document.getElementById('saveLoanBtn').textContent = 'Salvar alteraÃ§Ãµes';
+                document.getElementById('loanEditingId').value = String(loan.id);
+
+                populateDebtorOptions(loan.debtor_id);
+                document.getElementById('loanDebtor').value = String(loan.debtor_id);
+                document.getElementById('loanPrincipal').value = loan.principal_amount;
+                document.getElementById('loanInterestRate').value = loan.interest_rate;
+                document.getElementById('loanInterestType').value = normalizeInterestType(loan.interest_type);
+                document.getElementById('loanInstallments').value = loan.installments_count;
+                document.getElementById('loanPaymentMethod').value = loan.payment_method || 'Pix';
+                document.getElementById('loanStartDate').value = toIsoDate(loan.start_date) || getTodayIsoDate();
+
+                const fallbackFirstDue = addMonths(new Date(document.getElementById('loanStartDate').value), 1);
+                document.getElementById('loanFirstDueDate').value = toIsoDate(loan.first_due_date) || toIsoDate(fallbackFirstDue);
+                document.getElementById('loanObservations').value = loan.observations || '';
+
+                calculateLoanFromForm(false);
+            } else {
+                document.getElementById('loanModalTitle').textContent = 'Novo emprÃ©stimo';
+                document.getElementById('saveLoanBtn').textContent = 'Salvar emprÃ©stimo';
+                document.getElementById('loanEditingId').value = '';
+                document.getElementById('loanInterestRate').value = 20;
+                document.getElementById('loanInterestType').value = 'composto';
+                document.getElementById('loanInstallments').value = 6;
+                document.getElementById('loanPaymentMethod').value = 'Pix';
+                populateDebtorOptions();
+            }
+
+            loanModal.classList.remove('hidden');
+            loanModal.classList.add('flex');
+            document.getElementById('loanDebtor').focus();
+        }
+        function closeLoanModal() {
+            loansState.editingLoanId = null;
+            loanModal.classList.add('hidden');
+            loanModal.classList.remove('flex');
+            loanForm.reset();
+        }
+
+        function closeLoanDetailsModal() {
+            loanDetailsModal.classList.add('hidden');
+            loanDetailsModal.classList.remove('flex');
+            document.getElementById('loanDetailsContent').innerHTML = '';
+        }
+
+        function getLoanFormValues() {
+            return {
+                debtorId: document.getElementById('loanDebtor').value,
+                principal: round2(document.getElementById('loanPrincipal').value),
+                interestRate: round2(document.getElementById('loanInterestRate').value),
+                interestType: normalizeInterestType(document.getElementById('loanInterestType').value),
+                installments: Math.max(1, Math.trunc(toNumber(document.getElementById('loanInstallments').value))),
+                paymentMethod: document.getElementById('loanPaymentMethod').value || 'Pix',
+                startDate: document.getElementById('loanStartDate').value,
+                firstDueDate: document.getElementById('loanFirstDueDate').value,
+                observations: document.getElementById('loanObservations').value.trim()
+            };
+        }
+
+        function validateLoanFormValues(values) {
+            if (!values.debtorId) return 'Selecione um devedor.';
+            if (values.principal <= 0) return 'Informe um valor principal vÃ¡lido.';
+            if (values.interestRate < 0) return 'A taxa de juros nÃ£o pode ser negativa.';
+            if (values.installments <= 0) return 'Informe a quantidade de parcelas.';
+            if (!values.startDate) return 'Informe a data de inÃ­cio.';
+            if (!values.firstDueDate) return 'Informe o primeiro vencimento.';
+
+            const start = new Date(values.startDate);
+            const firstDue = new Date(values.firstDueDate);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(firstDue.getTime())) return 'Datas invÃ¡lidas.';
+            if (firstDue < start) return 'O primeiro vencimento nÃ£o pode ser antes da data de inÃ­cio.';
+
+            return '';
+        }
+
+        function renderInstallmentPreview(plan) {
+            const previewList = document.getElementById('installmentsPreviewList');
+            previewList.innerHTML = '';
+
+            plan.forEach(item => {
+                const statusClass = item.status === 'Atrasado' ? 'overdue' : 'pending';
+                const div = document.createElement('div');
+                div.className = `installment-preview ${statusClass} p-3`;
+                div.innerHTML = `
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="font-semibold text-sm">Parcela #${item.installment_number}</p>
+                            <p class="text-xs text-gray-600">Vencimento: ${formatDate(item.due_date)}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-sm">${formatCurrency(item.amount)}</p>
+                            <p class="text-xs text-gray-600">Juros: ${formatCurrency(item.interest_amount)}</p>
+                        </div>
+                    </div>
+                `;
+                previewList.appendChild(div);
+            });
+
+            installmentsPreviewCard.classList.remove('hidden');
+        }
+
+        function calculateLoanFromForm(showErrors) {
+            const values = getLoanFormValues();
+            const validationError = validateLoanFormValues(values);
+            if (validationError) {
+                if (showErrors) showMessage(validationError, 'error');
+                return null;
+            }
+
+            const calcResult = calculateLoanValues(values.principal, values.interestRate, values.installments, values.interestType);
+            if (!calcResult) {
+                if (showErrors) showMessage('NÃ£o foi possÃ­vel calcular o emprÃ©stimo.', 'error');
+                return null;
+            }
+
+            const plan = buildInstallmentPlan(values, calcResult);
+            document.getElementById('loanCalculatedTotal').textContent = formatCurrency(calcResult.totalAmount);
+            document.getElementById('loanCalculatedInstallment').textContent = formatCurrency(calcResult.installmentAmount);
+            loanCalculationCard.classList.remove('hidden');
+            renderInstallmentPreview(plan);
+
+            return { values, calcResult, plan };
+        }
+
+        function getNextLocalId(rows, startAt) {
+            const start = Math.max(1, Math.trunc(toNumber(startAt)));
+            const maxId = rows.reduce((max, row) => {
+                const parsed = toNumber(row?.id);
+                return parsed > max ? parsed : max;
+            }, start - 1);
+            return maxId + 1;
+        }
+
+        async function saveLoanAndInstallments(loanPayload, plan, isEditing) {
+            if (isEditing) {
+                loansState.loans = loansState.loans.map(loan => sameId(loan.id, loanPayload.id) ? loanPayload : loan);
+            } else {
+                loansState.loans = [loanPayload, ...loansState.loans];
+            }
+
+            loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanPayload.id));
+
+            const nextInstallmentId = getNextLocalId(loansState.installments, 1000);
+            const generatedInstallments = plan.map((item, index) => ({
+                id: nextInstallmentId + index,
+                loan_id: loanPayload.id,
+                debtor_id: loanPayload.debtor_id,
+                installment_number: item.installment_number,
+                due_date: item.due_date,
+                payment_date: null,
+                amount: item.amount,
+                principal_amount: item.principal_amount,
+                interest_amount: item.interest_amount,
+                status: item.status
+            }));
+
+            loansState.installments = [...generatedInstallments, ...loansState.installments];
+
+            await saveTableData('loans', loansState.loans);
+            await saveTableData('installments', loansState.installments);
+        }
+
+        async function deleteLoan(loanId) {
+            if (!confirm('Tem certeza que deseja excluir este emprÃ©stimo e suas parcelas?')) return;
+
+            loansState.loans = loansState.loans.filter(loan => !sameId(loan.id, loanId));
+            loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanId));
+
+            try {
+                await saveTableData('loans', loansState.loans);
+                await saveTableData('installments', loansState.installments);
+
+                updateLoanMetrics();
+                applyLoansFilters(false);
+                showMessage('EmprÃ©stimo excluÃ­do com sucesso.', 'success');
+            } catch (error) {
+                console.error('Erro ao excluir emprÃ©stimo:', error);
+                showMessage('Erro ao excluir emprÃ©stimo. Tente novamente.', 'error');
+                loadLoansData();
+            }
+        }
+
+        function openLoanDetails(loanId) {
+            const loan = loansState.loans.find(item => sameId(item.id, loanId));
+            if (!loan) return;
+
+            const installments = getLoanInstallments(loan.id);
+            const paid = installments.filter(item => String(item.status || '').toLowerCase() === 'pago').length;
+            const pending = installments.length - paid;
+            const interestTypeLabel = normalizeInterestType(loan.interest_type) === 'simples' ? 'Simples' : 'Composto';
+
+            document.getElementById('loanDetailsTitle').textContent = `Detalhes do emprÃ©stimo #${loan.id}`;
+
+            const detailRows = `
+                <div class="details-grid">
+                    <div class="details-item"><p class="text-xs text-gray-500">Cliente</p><p class="font-semibold">${getDebtorName(loan.debtor_id)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Status</p><p class="font-semibold">${normalizeLoanStatus(loan.status)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Principal</p><p class="font-semibold">${formatCurrency(loan.principal_amount)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Total contratado</p><p class="font-semibold">${formatCurrency(loan.total_amount)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Juros</p><p class="font-semibold">${loan.interest_rate}% (${interestTypeLabel})</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Forma de pagamento</p><p class="font-semibold">${loan.payment_method || '-'}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Data de inÃ­cio</p><p class="font-semibold">${formatDate(loan.start_date)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">1Âº vencimento</p><p class="font-semibold">${formatDate(loan.first_due_date)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Parcelas pagas</p><p class="font-semibold">${paid}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Parcelas em aberto</p><p class="font-semibold">${pending}</p></div>
+                </div>
+            `;
+
+            const installmentsHtml = installments.length
+                ? installments.map(item => {
+                    const status = String(item.status || '').trim() || 'Pendente';
+                    const badgeClass = status.toLowerCase() === 'pago' ? 'badge badge-success' : status.toLowerCase() === 'atrasado' ? 'badge badge-danger' : 'badge badge-warn';
+
+                    return `
+                        <div class="installment-preview p-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="font-semibold text-sm">Parcela #${item.installment_number}</p>
+                                    <p class="text-xs text-gray-600">Vencimento: ${formatDate(item.due_date)}</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <p class="font-semibold text-sm">${formatCurrency(item.amount)}</p>
+                                    <span class="${badgeClass}">${status}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')
+                : '<p class="text-sm text-gray-500">Nenhuma parcela vinculada.</p>';
+
+            const notesHtml = loan.observations
+                ? `<div class="details-item"><p class="text-xs text-gray-500">ObservaÃ§Ãµes</p><p class="font-semibold">${loan.observations}</p></div>`
+                : '';
+
+            document.getElementById('loanDetailsContent').innerHTML = `
+                ${detailRows}
+                ${notesHtml}
+                <div>
+                    <h4 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-700">Parcelas</h4>
+                    <div class="space-y-2 max-h-64 overflow-y-auto">${installmentsHtml}</div>
+                </div>
+            `;
+
+            loanDetailsModal.classList.remove('hidden');
+            loanDetailsModal.classList.add('flex');
+        }
+        async function loadLoansData() {
+            try {
+                const [loans, debtors, installments] = await Promise.all([
+                    fetchTableData('loans'),
+                    fetchTableData('debtors'),
+                    fetchTableData('installments')
+                ]);
+
+                loansState.loans = loans.map(normalizeLoanRow);
+                loansState.debtors = debtors;
+                loansState.installments = installments;
+
+                updateLoanMetrics();
+                applyLoansFilters(true);
+            } catch (error) {
+                console.error('Erro ao carregar emprÃ©stimos:', error);
+                document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="9" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+            }
+        }
+
+        document.getElementById('loanSearch').addEventListener('input', function () {
+            applyLoansFilters(true);
+        });
+
+        document.getElementById('loanStatusFilter').addEventListener('change', function () {
+            applyLoansFilters(true);
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', function () {
+            loadLoansData();
+        });
+
+        document.getElementById('prevPageBtn').addEventListener('click', function () {
+            if (loansState.currentPage <= 1) return;
+            loansState.currentPage -= 1;
+            renderLoansTable();
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+            const totalPages = Math.max(1, Math.ceil(loansState.filtered.length / loansState.pageSize));
+            if (loansState.currentPage >= totalPages) return;
+            loansState.currentPage += 1;
+            renderLoansTable();
+        });
+
+        document.getElementById('newLoanBtn').addEventListener('click', function () {
+            if (!loansState.debtors.length) {
+                showMessage('Cadastre um devedor antes de criar emprÃ©stimos.', 'error');
+                return;
+            }
+            openLoanModal('create');
+        });
+
+        document.getElementById('closeLoanModalBtn').addEventListener('click', closeLoanModal);
+        document.getElementById('cancelLoanModalBtn').addEventListener('click', closeLoanModal);
+        loanModal.addEventListener('click', function (event) {
+            if (event.target === loanModal) closeLoanModal();
+        });
+
+        document.getElementById('calculateLoanBtn').addEventListener('click', function () {
+            calculateLoanFromForm(true);
+        });
+
+        loanForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const result = calculateLoanFromForm(true);
+            if (!result) return;
+
+            const { values, calcResult, plan } = result;
+            const isEditing = Boolean(loansState.editingLoanId);
+
+            if (isEditing) {
+                const hasPaidInstallments = getLoanInstallments(loansState.editingLoanId)
+                    .some(item => String(item.status || '').toLowerCase() === 'pago');
+
+                if (hasPaidInstallments) {
+                    const confirmed = confirm('Este emprÃ©stimo possui parcelas pagas. Ao salvar, as parcelas serÃ£o recriadas. Deseja continuar?');
+                    if (!confirmed) return;
+                }
+            }
+
+            const loanId = isEditing
+                ? loansState.editingLoanId
+                : getNextLocalId(loansState.loans, 100);
+            const status = deriveLoanStatus(plan);
+
+            const payload = normalizeLoanRow({
+                id: loanId,
+                debtor_id: values.debtorId,
+                principal_amount: values.principal,
+                total_amount: calcResult.totalAmount,
+                installments_count: values.installments,
+                interest_rate: values.interestRate,
+                interest_type: values.interestType,
+                installment_amount: calcResult.installmentAmount,
+                payment_method: values.paymentMethod,
+                observations: values.observations,
+                start_date: values.startDate,
+                first_due_date: values.firstDueDate,
+                due_date: values.firstDueDate,
+                status
+            });
+
+            try {
+                await saveLoanAndInstallments(payload, plan, isEditing);
+                updateLoanMetrics();
+                applyLoansFilters(!isEditing);
+                closeLoanModal();
+                showMessage(isEditing ? 'EmprÃ©stimo atualizado com sucesso.' : 'EmprÃ©stimo criado com sucesso.', 'success');
+            } catch (error) {
+                console.error('Erro ao salvar emprÃ©stimo:', error);
+                showMessage('Erro ao salvar emprÃ©stimo. Tente novamente.', 'error');
+                await loadLoansData();
+            }
+        });
+
+        document.getElementById('loansTableBody').addEventListener('click', function (event) {
+            const actionBtn = event.target.closest('button[data-action]');
+            if (!actionBtn) return;
+
+            const action = actionBtn.getAttribute('data-action');
+            const loanId = actionBtn.getAttribute('data-id');
+            const loan = loansState.loans.find(item => sameId(item.id, loanId));
+
+            if (!loan) return;
+
+            if (action === 'view-loan') {
+                openLoanDetails(loan.id);
+                return;
+            }
+
+            if (action === 'edit-loan') {
+                openLoanModal('edit', loan);
+                return;
+            }
+
+            if (action === 'delete-loan') {
+                deleteLoan(loan.id);
+            }
+        });
+
+        document.getElementById('closeLoanDetailsBtn').addEventListener('click', closeLoanDetailsModal);
+        document.getElementById('closeLoanDetailsFooterBtn').addEventListener('click', closeLoanDetailsModal);
+        loanDetailsModal.addEventListener('click', function (event) {
+            if (event.target === loanDetailsModal) closeLoanDetailsModal();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLoansData();
+        });
+    </script>
+</body>
+</html>
+
+
+
+

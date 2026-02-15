@@ -1,0 +1,966 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredFÃ¡cil - Devedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 16px; }
+        body { font-family: 'Inter', sans-serif; }
+
+        .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
+        .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
+
+        .icon-btn {
+            color: #cbd5e1;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+        }
+
+        .icon-btn:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35) inset;
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
+            transform: translateX(0);
+            transition: transform 120ms ease-out;
+        }
+
+        .sidebar-item {
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+            border-radius: 12px;
+            margin: 4px 0;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
+        }
+
+        .sidebar-item:focus-visible,
+        .icon-btn:focus-visible {
+            outline: 2px solid rgba(96, 165, 250, 0.7);
+            outline-offset: 2px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+
+        .page-title { color: #ffffff; }
+        .muted-on-dark { color: #cbd5e1; }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #0f172a;
+        }
+
+        .filter-control {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #111827;
+            width: 100%;
+        }
+
+        .table-shell {
+            overflow: auto;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+
+        .table-shell table { width: 100%; border-collapse: collapse; }
+        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
+        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; }
+        .debtor-focus-row { background: #eff6ff; box-shadow: inset 3px 0 0 #2563eb; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+        .badge-neutral { background: #e2e8f0; color: #334155; }
+
+        main { transition: none; }
+        body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
+        body.sidebar-collapsed main { margin-left: 0 !important; }
+
+        @media (max-width: 1024px) {
+            .modern-sidebar { transform: translateX(-100%); }
+            .modern-sidebar.mobile-open { transform: translateX(0) !important; }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-value { font-size: 1.6rem; }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .icon-btn i {
+                font-size: 1rem !important;
+            }
+
+            .header-user-name, .header-user-chevron { display: none; }
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+        }
+
+        .dark .kpi-value { color: #f8fafc; }
+        .dark .filter-control,
+        .dark .table-shell,
+        .dark .table-shell th,
+        .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
+        .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
+        .dark .debtor-focus-row { background: rgba(30, 64, 175, 0.25); }
+    </style>
+</head>
+<body class="primary-gradient min-h-screen">
+    <header class="premium-header fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+            <div class="flex items-center">
+                <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <h1 class="ml-3 text-lg font-bold text-white sm:ml-6 sm:text-2xl">CredFÃ¡cil</h1>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
+                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
+                <button id="notificationBtn" class="icon-btn focus:outline-none relative"><i class="fas fa-bell text-xl"></i></button>
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
+                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center sm:h-11 sm:w-11"><i class="fas fa-user"></i></div>
+                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+                        <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                        <button type="button" data-user-menu-action="profile" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-id-card text-slate-500 dark:text-slate-300"></i>
+                            <span>Meu perfil</span>
+                        </button>
+                        <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
+                            <span>Segurança</span>
+                        </button>
+                        <button type="button" data-user-menu-action="preferences" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-sliders text-slate-500 dark:text-slate-300"></i>
+                            <span>Preferências</span>
+                        </button>
+                        <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
+                            <span>Ajuda</span>
+                        </button>
+                        <div class="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                        <button type="button" data-user-menu-action="logout" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
+                            <i class="fas fa-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16 sm:pt-20">
+        <aside id="sidebar" class="modern-sidebar fixed left-0 top-16 h-[calc(100%-4rem)] w-64 z-40 sm:top-20 sm:h-[calc(100%-5rem)]">
+            <nav class="mt-8 px-4">
+                <ul class="space-y-2">
+                    <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span class="font-medium">Devedores</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃ©stimos</span></a></li>
+                    <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">Devedores</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situaÃ§Ã£o de cada cliente.</p>
+                </div>
+                <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                    <i class="fas fa-user-plus mr-2"></i>Novo devedor
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total de devedores</p><p id="totalDebtors" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Ativos</p><p id="activeDebtors" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Inativos</p><p id="inactiveDebtors" class="kpi-value mt-2">0</p></div>
+                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Com atraso</p><p id="overdueDebtors" class="kpi-value mt-2">0</p></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">Buscar</label>
+                        <input id="debtorSearch" type="text" class="filter-control" placeholder="Nome, telefone ou documento">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Status</label>
+                        <select id="statusFilter" class="filter-control">
+                            <option value="Todos">Todos</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                            <option value="Atrasado">Atrasado</option>
+                            <option value="Quitado">Quitado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Ordenar por</label>
+                        <select id="sortBy" class="filter-control">
+                            <option value="name">Nome</option>
+                            <option value="created_at">Data de cadastro</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-4 flex justify-end">
+                        <button id="refreshBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">
+                            <i class="fas fa-rotate-right mr-2"></i>Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Documento</th>
+                                <th>Telefone</th>
+                                <th>Status</th>
+                                <th>EmprÃ©stimos</th>
+                                <th>Parcelas em atraso</th>
+                                <th>AÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="debtorsTableBody">
+                            <tr><td colspan="7" class="text-center py-8 text-gray-500">Carregando devedores...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+                    <p class="text-sm text-gray-600">
+                        Mostrando <span id="showingStart">0</span> atÃ© <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="pageIndicator" class="text-sm text-gray-600">PÃ¡gina 1</span>
+                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="debtorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="glass-card w-full max-w-2xl rounded-2xl p-6">
+                    <div class="mb-5 flex items-center justify-between">
+                        <h3 id="debtorModalTitle" class="text-xl font-bold text-gray-800">Novo devedor</h3>
+                        <button id="closeDebtorModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form id="newDebtorForm" class="space-y-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Nome</label>
+                                <input id="newDebtorName" class="filter-control" type="text" required placeholder="Nome completo">
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">CPF/CNPJ</label>
+                                <input id="newDebtorDocument" class="filter-control" type="text" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Telefone</label>
+                                <input id="newDebtorPhone" class="filter-control" type="text" placeholder="(11) 90000-0000">
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">E-mail</label>
+                                <input id="newDebtorEmail" class="filter-control" type="email" placeholder="email@exemplo.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-gray-600">EndereÃ§o</label>
+                            <textarea id="newDebtorAddress" class="filter-control" rows="2" placeholder="EndereÃ§o (opcional)"></textarea>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-gray-600">ObservaÃ§Ãµes</label>
+                            <textarea id="newDebtorNotes" class="filter-control" rows="2" placeholder="ObservaÃ§Ãµes"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Status</label>
+                                <select id="newDebtorStatus" class="filter-control">
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Inativo">Inativo</option>
+                                    <option value="Atrasado">Atrasado</option>
+                                    <option value="Quitado">Quitado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Data de cadastro</label>
+                                <input id="newDebtorCreatedAt" class="filter-control" type="date">
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button id="cancelDebtorModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancelar</button>
+                            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar devedor</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
+    <script>
+        const currentUser = window.__AUTH_USER__;
+        if (!currentUser) {
+            window.location.href = '/login';
+        } else {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('main');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+        const tableCache = {};
+        function getDemoTable(tableName) {
+            return Array.isArray(tableCache[tableName]) ? tableCache[tableName] : [];
+        }
+
+        async function fetchTableData(tableName) {
+            try {
+                const response = await fetch(`/api/tables/${tableName}`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                if (Array.isArray(payload?.data)) {
+                    tableCache[tableName] = payload.data;
+                    return payload.data;
+                }
+            } catch (error) {
+                console.warn(`Fallback para dados demo: ${tableName}`, error);
+            }
+            return getDemoTable(tableName);
+        }
+
+        function saveTableData(tableName, rows) {
+            const safeRows = Array.isArray(rows) ? rows : [];
+            tableCache[tableName] = safeRows;
+
+            fetch(`/api/tables/${tableName}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rows: safeRows })
+            }).catch(error => {
+                console.error(`Erro ao salvar tabela ${tableName}:`, error);
+            });
+        }
+
+        function getNextTableId(tableName, fallbackStart) {
+            const table = getDemoTable(tableName);
+            const maxId = table.reduce((max, row) => {
+                const parsed = Number(row?.id);
+                if (!Number.isFinite(parsed)) return max;
+                return parsed > max ? parsed : max;
+            }, Number(fallbackStart || 1) - 1);
+            return maxId + 1;
+        }
+
+        function setActiveSidebarItem(targetHref) {
+            sidebarLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === targetHref;
+                link.classList.toggle('active', isActive);
+                if (isActive) link.setAttribute('aria-current', 'page');
+                else link.removeAttribute('aria-current');
+            });
+        }
+
+        function syncActiveSidebarWithRoute() {
+            const currentPage = window.location.pathname.split('/').pop() || 'debtors.html';
+            setActiveSidebarItem(currentPage);
+        }
+
+        function syncSidebarLayout() {
+            if (isMobileViewport()) {
+                main.style.marginLeft = '0';
+                return;
+            }
+            sidebar.classList.remove('mobile-open');
+            main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            if (isMobileViewport()) {
+                sidebar.classList.toggle('mobile-open');
+                return;
+            }
+            document.body.classList.toggle('sidebar-collapsed');
+            syncSidebarLayout();
+        });
+
+        window.addEventListener('resize', syncSidebarLayout);
+        syncSidebarLayout();
+        syncActiveSidebarWithRoute();
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').querySelector('i').classList.remove('fa-sun');
+            document.getElementById('themeToggle').querySelector('i').classList.add('fa-moon');
+        }
+
+        function closeUserMenu() {
+            if (!userMenuDropdown) return;
+            userMenuDropdown.classList.add('hidden');
+        }
+
+        function showUserMenuNotice(message) {
+            if (typeof showMessage === 'function') {
+                showMessage(message, 'success');
+                return;
+            }
+            window.alert(message);
+        }
+
+        async function performLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = '/login';
+        }
+
+        async function handleUserMenuAction(action) {
+            if (action === 'logout') {
+                await performLogout();
+                return;
+            }
+
+            if (action === 'profile') {
+                showUserMenuNotice('Meu perfil: em breve.');
+                return;
+            }
+
+            if (action === 'security') {
+                showUserMenuNotice('Segurança: em breve.');
+                return;
+            }
+
+            if (action === 'preferences') {
+                showUserMenuNotice('Preferências: em breve.');
+                return;
+            }
+
+            if (action === 'help') {
+                showUserMenuNotice('Ajuda: em breve.');
+            }
+        }
+
+        if (userMenuBtn && userMenuDropdown) {
+            userMenuBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+
+            userMenuDropdown.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const actionBtn = target.closest('[data-user-menu-action]');
+                if (!actionBtn) return;
+                const action = actionBtn.getAttribute('data-user-menu-action');
+                closeUserMenu();
+                void handleUserMenuAction(action);
+            });
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Node)) return;
+                if (userMenuDropdown.classList.contains('hidden')) return;
+                if (userMenuDropdown.contains(target) || userMenuBtn.contains(target)) return;
+                closeUserMenu();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeUserMenu();
+            });
+        }
+
+        const debtorsState = {
+            debtors: [],
+            loans: [],
+            installments: [],
+            filtered: [],
+            currentPage: 1,
+            pageSize: 8,
+            editingDebtorId: null
+        };
+        const focusDebtorId = String(new URLSearchParams(window.location.search).get('debtorId') || '').trim();
+        let hasAppliedDebtorFocus = false;
+
+        const debtorModal = document.getElementById('debtorModal');
+        const debtorModalTitle = document.getElementById('debtorModalTitle');
+        const newDebtorBtn = document.getElementById('newDebtorBtn');
+        const closeDebtorModalBtn = document.getElementById('closeDebtorModalBtn');
+        const cancelDebtorModalBtn = document.getElementById('cancelDebtorModalBtn');
+        const newDebtorForm = document.getElementById('newDebtorForm');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const sortBy = document.getElementById('sortBy');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
+        }
+
+        function highlightFocusedDebtorRow(debtorId) {
+            const rows = document.querySelectorAll('#debtorsTableBody tr[data-debtor-id]');
+            const targetRow = Array.from(rows).find(row => sameId(row.getAttribute('data-debtor-id'), debtorId));
+            if (!targetRow) return;
+
+            targetRow.classList.add('debtor-focus-row');
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => targetRow.classList.remove('debtor-focus-row'), 3500);
+        }
+
+        function toDigits(value) {
+            return String(value || '').replace(/\D/g, '');
+        }
+
+        function formatDocument(value) {
+            const digits = toDigits(value);
+            if (digits.length === 11) {
+                return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            if (digits.length === 14) {
+                return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            }
+            return value || '-';
+        }
+
+        function formatPhone(value) {
+            const digits = toDigits(value);
+            if (digits.length === 11) {
+                return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+            if (digits.length === 10) {
+                return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            }
+            return value || '-';
+        }
+
+        function normalizeStatus(status) {
+            const s = String(status || '').trim().toLowerCase();
+            if (s === 'ativo') return 'Ativo';
+            if (s === 'inativo') return 'Inativo';
+            if (s === 'quitado') return 'Quitado';
+            if (s === 'atrasado') return 'Atrasado';
+            return status || 'Inativo';
+        }
+
+        function normalizeDebtorRow(row) {
+            return {
+                ...row,
+                id: row.id,
+                name: row.name || '',
+                cpf: row.cpf || row.document || '',
+                document: row.document || row.cpf || '',
+                phone: row.phone || '',
+                email: row.email || '',
+                address: row.address || '',
+                notes: row.notes || '',
+                status: normalizeStatus(row.status),
+                created_at: row.created_at || row.createdAt || new Date().toISOString().slice(0, 10)
+            };
+        }
+
+        function getDebtorOverdueCount(debtorId) {
+            const today = new Date();
+            return debtorsState.installments.filter(installment => {
+                if (!sameId(installment.debtor_id, debtorId)) return false;
+                const status = String(installment.status || '').toLowerCase();
+                if (status === 'atrasado') return true;
+                if (status === 'pago') return false;
+                const dueDate = installment.due_date ? new Date(installment.due_date) : null;
+                return dueDate && dueDate < today;
+            }).length;
+        }
+
+        function getDebtorLoansCount(debtorId) {
+            return debtorsState.loans.filter(loan => sameId(loan.debtor_id, debtorId)).length;
+        }
+
+        function updateDebtorMetrics() {
+            const total = debtorsState.debtors.length;
+            const active = debtorsState.debtors.filter(d => normalizeStatus(d.status) === 'Ativo').length;
+            const inactive = debtorsState.debtors.filter(d => ['Inativo', 'Quitado'].includes(normalizeStatus(d.status))).length;
+            const withOverdue = debtorsState.debtors.filter(d => normalizeStatus(d.status) === 'Atrasado' || getDebtorOverdueCount(d.id) > 0).length;
+
+            document.getElementById('totalDebtors').textContent = String(total);
+            document.getElementById('activeDebtors').textContent = String(active);
+            document.getElementById('inactiveDebtors').textContent = String(inactive);
+            document.getElementById('overdueDebtors').textContent = String(withOverdue);
+        }
+
+        function badgeForStatus(status) {
+            if (status === 'Ativo') return 'badge badge-success';
+            if (status === 'Atrasado') return 'badge badge-danger';
+            if (status === 'Quitado') return 'badge badge-success';
+            if (status === 'Inativo') return 'badge badge-neutral';
+            return 'badge badge-warn';
+        }
+
+        function compareDebtors(a, b, sortField) {
+            if (sortField === 'created_at') {
+                return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+            }
+            if (sortField === 'status') {
+                return normalizeStatus(a.status).localeCompare(normalizeStatus(b.status), 'pt-BR');
+            }
+            return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+        }
+
+        function getFilteredDebtors() {
+            const searchValue = document.getElementById('debtorSearch').value.trim().toLowerCase();
+            const statusValue = document.getElementById('statusFilter').value;
+            const sortField = sortBy.value;
+
+            const filtered = debtorsState.debtors.filter(debtor => {
+                const normalizedStatus = normalizeStatus(debtor.status);
+                if (statusValue !== 'Todos' && normalizedStatus !== statusValue) return false;
+
+                if (!searchValue) return true;
+                const haystack = `${debtor.name || ''} ${debtor.phone || ''} ${debtor.document || debtor.cpf || ''} ${debtor.email || ''}`.toLowerCase();
+                return haystack.includes(searchValue);
+            });
+
+            return filtered.sort((a, b) => compareDebtors(a, b, sortField));
+        }
+
+        function updatePaginationInfo(total) {
+            const totalPages = Math.max(1, Math.ceil(total / debtorsState.pageSize));
+            if (debtorsState.currentPage > totalPages) {
+                debtorsState.currentPage = totalPages;
+            }
+
+            const start = total === 0 ? 0 : (debtorsState.currentPage - 1) * debtorsState.pageSize + 1;
+            const end = total === 0 ? 0 : Math.min(start + debtorsState.pageSize - 1, total);
+
+            document.getElementById('showingStart').textContent = String(start);
+            document.getElementById('showingEnd').textContent = String(end);
+            document.getElementById('totalResults').textContent = String(total);
+            document.getElementById('pageIndicator').textContent = `PÃ¡gina ${debtorsState.currentPage} de ${totalPages}`;
+
+            prevPageBtn.disabled = debtorsState.currentPage <= 1;
+            nextPageBtn.disabled = debtorsState.currentPage >= totalPages;
+            prevPageBtn.classList.toggle('opacity-50', prevPageBtn.disabled);
+            nextPageBtn.classList.toggle('opacity-50', nextPageBtn.disabled);
+        }
+
+        function renderDebtorsTable() {
+            const tbody = document.getElementById('debtorsTableBody');
+            const total = debtorsState.filtered.length;
+            updatePaginationInfo(total);
+
+            if (!total) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">Nenhum devedor encontrado.</td></tr>';
+                return;
+            }
+
+            const startIndex = (debtorsState.currentPage - 1) * debtorsState.pageSize;
+            const pageRows = debtorsState.filtered.slice(startIndex, startIndex + debtorsState.pageSize);
+
+            tbody.innerHTML = pageRows.map(debtor => {
+                const status = normalizeStatus(debtor.status);
+                const loansCount = getDebtorLoansCount(debtor.id);
+                const overdueCount = getDebtorOverdueCount(debtor.id);
+                const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
+                const documentValue = formatDocument(rawDocument);
+                const rawPhone = debtor.phone || '';
+                const phoneValue = formatPhone(rawPhone);
+                const phoneDigits = toDigits(rawPhone);
+                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '-';
+
+                return `
+                    <tr data-debtor-id="${debtor.id}">
+                        <td>
+                            <div class="font-semibold">${debtor.name || '-'}</div>
+                            <div class="text-xs text-gray-500">${debtor.email || 'Sem e-mail'}</div>
+                        </td>
+                        <td>${documentValue}</td>
+                        <td>${phoneHtml}</td>
+                        <td><span class="${badgeForStatus(status)}">${status}</span></td>
+                        <td>${loansCount}</td>
+                        <td>${overdueCount > 0 ? `<span class="badge badge-danger">${overdueCount}</span>` : '<span class="badge badge-success">0</span>'}</td>
+                        <td>
+                            <button type="button" class="mr-2 text-blue-600" data-action="edit-debtor" data-id="${debtor.id}" title="Editar">
+                                <i class="fas fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" class="text-red-600" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyDebtorsFilters(resetPage) {
+            if (resetPage) {
+                debtorsState.currentPage = 1;
+            }
+            debtorsState.filtered = getFilteredDebtors();
+            renderDebtorsTable();
+        }
+
+        function applyDebtorFocusFromQuery() {
+            if (!focusDebtorId || hasAppliedDebtorFocus) return;
+
+            const debtorExists = debtorsState.debtors.some(debtor => sameId(debtor.id, focusDebtorId));
+            if (!debtorExists) return;
+
+            hasAppliedDebtorFocus = true;
+
+            document.getElementById('debtorSearch').value = '';
+            document.getElementById('statusFilter').value = 'Todos';
+            sortBy.value = 'name';
+
+            debtorsState.filtered = getFilteredDebtors();
+            const debtorIndex = debtorsState.filtered.findIndex(debtor => sameId(debtor.id, focusDebtorId));
+
+            if (debtorIndex < 0) {
+                renderDebtorsTable();
+                return;
+            }
+
+            debtorsState.currentPage = Math.floor(debtorIndex / debtorsState.pageSize) + 1;
+            renderDebtorsTable();
+            highlightFocusedDebtorRow(focusDebtorId);
+        }
+
+        function openDebtorModal(mode, debtor) {
+            debtorsState.editingDebtorId = mode === 'edit' ? debtor.id : null;
+            debtorModalTitle.textContent = mode === 'edit' ? 'Editar devedor' : 'Novo devedor';
+
+            document.getElementById('newDebtorName').value = debtor?.name || '';
+            document.getElementById('newDebtorPhone').value = debtor?.phone || '';
+            document.getElementById('newDebtorDocument').value = debtor?.document || debtor?.cpf || '';
+            document.getElementById('newDebtorEmail').value = debtor?.email || '';
+            document.getElementById('newDebtorAddress').value = debtor?.address || '';
+            document.getElementById('newDebtorNotes').value = debtor?.notes || '';
+            document.getElementById('newDebtorStatus').value = normalizeStatus(debtor?.status || 'Ativo');
+            document.getElementById('newDebtorCreatedAt').value = debtor?.created_at || new Date().toISOString().slice(0, 10);
+
+            debtorModal.classList.remove('hidden');
+            debtorModal.classList.add('flex');
+            document.getElementById('newDebtorName').focus();
+        }
+
+        function closeDebtorModal() {
+            debtorsState.editingDebtorId = null;
+            debtorModal.classList.add('hidden');
+            debtorModal.classList.remove('flex');
+            newDebtorForm.reset();
+        }
+
+        function deleteDebtor(debtorId) {
+            if (!confirm('Tem certeza que deseja excluir este devedor?')) return;
+
+            debtorsState.debtors = debtorsState.debtors.filter(debtor => !sameId(debtor.id, debtorId));
+            debtorsState.loans = debtorsState.loans.filter(loan => !sameId(loan.debtor_id, debtorId));
+            debtorsState.installments = debtorsState.installments.filter(installment => !sameId(installment.debtor_id, debtorId));
+
+            saveTableData('debtors', debtorsState.debtors);
+            saveTableData('loans', debtorsState.loans);
+            saveTableData('installments', debtorsState.installments);
+
+            updateDebtorMetrics();
+            applyDebtorsFilters(false);
+        }
+
+        async function loadDebtorsData() {
+            try {
+                const [debtors, loans, installments] = await Promise.all([
+                    fetchTableData('debtors'),
+                    fetchTableData('loans'),
+                    fetchTableData('installments')
+                ]);
+
+                debtorsState.debtors = debtors.map(normalizeDebtorRow);
+                debtorsState.loans = loans;
+                debtorsState.installments = installments;
+
+                updateDebtorMetrics();
+                applyDebtorsFilters(true);
+                applyDebtorFocusFromQuery();
+            } catch (error) {
+                console.error('Erro ao carregar devedores:', error);
+                document.getElementById('debtorsTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+            }
+        }
+
+        document.getElementById('debtorSearch').addEventListener('input', function () {
+            applyDebtorsFilters(true);
+        });
+        document.getElementById('statusFilter').addEventListener('change', function () {
+            applyDebtorsFilters(true);
+        });
+        sortBy.addEventListener('change', function () {
+            applyDebtorsFilters(true);
+        });
+        refreshBtn.addEventListener('click', function () {
+            loadDebtorsData();
+        });
+
+        prevPageBtn.addEventListener('click', function () {
+            if (debtorsState.currentPage <= 1) return;
+            debtorsState.currentPage -= 1;
+            renderDebtorsTable();
+        });
+        nextPageBtn.addEventListener('click', function () {
+            const totalPages = Math.max(1, Math.ceil(debtorsState.filtered.length / debtorsState.pageSize));
+            if (debtorsState.currentPage >= totalPages) return;
+            debtorsState.currentPage += 1;
+            renderDebtorsTable();
+        });
+
+        newDebtorBtn.addEventListener('click', function () {
+            openDebtorModal('create');
+        });
+        closeDebtorModalBtn.addEventListener('click', closeDebtorModal);
+        cancelDebtorModalBtn.addEventListener('click', closeDebtorModal);
+        debtorModal.addEventListener('click', function (event) {
+            if (event.target === debtorModal) {
+                closeDebtorModal();
+            }
+        });
+
+        document.getElementById('debtorsTableBody').addEventListener('click', function (event) {
+            const editBtn = event.target.closest('button[data-action="edit-debtor"]');
+            if (editBtn) {
+                const debtor = debtorsState.debtors.find(item => sameId(item.id, editBtn.getAttribute('data-id')));
+                if (debtor) openDebtorModal('edit', debtor);
+                return;
+            }
+
+            const deleteBtn = event.target.closest('button[data-action="delete-debtor"]');
+            if (deleteBtn) {
+                deleteDebtor(deleteBtn.getAttribute('data-id'));
+            }
+        });
+
+        newDebtorForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('newDebtorName').value.trim();
+            if (!name) return;
+
+            const phone = document.getElementById('newDebtorPhone').value.trim();
+            const documentValue = document.getElementById('newDebtorDocument').value.trim();
+            const email = document.getElementById('newDebtorEmail').value.trim();
+            const address = document.getElementById('newDebtorAddress').value.trim();
+            const notes = document.getElementById('newDebtorNotes').value.trim();
+            const status = document.getElementById('newDebtorStatus').value;
+            const createdAt = document.getElementById('newDebtorCreatedAt').value || new Date().toISOString().slice(0, 10);
+
+            const payload = {
+                name,
+                phone,
+                cpf: documentValue,
+                document: documentValue,
+                email,
+                address,
+                notes,
+                status,
+                created_at: createdAt
+            };
+
+            if (debtorsState.editingDebtorId) {
+                debtorsState.debtors = debtorsState.debtors.map(debtor =>
+                    sameId(debtor.id, debtorsState.editingDebtorId) ? normalizeDebtorRow({ ...debtor, ...payload }) : debtor
+                );
+            } else {
+                const newDebtor = normalizeDebtorRow({
+                    id: getNextTableId('debtors', 1),
+                    ...payload
+                });
+                debtorsState.debtors = [newDebtor, ...debtorsState.debtors];
+            }
+
+            saveTableData('debtors', debtorsState.debtors);
+            updateDebtorMetrics();
+            applyDebtorsFilters(true);
+            closeDebtorModal();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDebtorsData();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
