@@ -85,7 +85,7 @@
                 font-size: 1rem !important;
             }
 
-            .header-user-name, .header-user-chevron { display: none; }
+            .header-user-chevron { display: none; }
         }
         .dark .glass-card { background: rgba(15, 23, 42, 0.82); border: 1px solid rgba(148, 163, 184, 0.2); color: #e2e8f0; }
         .dark .filter-control, .dark .table-shell, .dark .table-shell th, .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
@@ -113,13 +113,10 @@
                     </a>
                 </h1>
             </div>
-            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
-                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
-                <button id="notificationBtn" class="icon-btn focus:outline-none relative"><i class="fas fa-bell text-xl"></i></button>
-                <div class="relative">
-                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
-                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center sm:h-11 sm:w-11"><i class="fas fa-user"></i></div>
-                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -151,7 +148,7 @@
             <nav class="mt-8 px-4">
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
-                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
                     <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span class="font-medium">Parcelas</span></a></li>
                     <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
@@ -166,9 +163,6 @@
                     <p class="muted-on-dark mt-1 text-sm">Controle vencimentos, pagamentos e cobranças em um só lugar.</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button id="notifyBatchBtn" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <i class="fas fa-bell mr-2"></i>Notificações
-                    </button>
                     <button id="refreshBtn" class="rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400">
                         <i class="fas fa-rotate mr-2"></i>Atualizar
                     </button>
@@ -365,7 +359,8 @@
         } else {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+            const displayName = currentUser.name || currentUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -1014,26 +1009,6 @@
         syncSidebarLayout();
         syncActiveSidebarWithRoute();
 
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark');
-            const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark')) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark');
-            const themeIcon = document.getElementById('themeToggle').querySelector('i');
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-        }
-
         function closeUserMenu() {
             if (!userMenuDropdown) return;
             userMenuDropdown.classList.add('hidden');
@@ -1098,16 +1073,6 @@
         document.getElementById('installmentStatusFilter').addEventListener('change', applyInstallmentsFilters);
         document.getElementById('installmentPeriodFilter').addEventListener('change', applyInstallmentsFilters);
         document.getElementById('refreshBtn').addEventListener('click', loadInstallmentsData);
-
-        document.getElementById('notifyBatchBtn').addEventListener('click', function() {
-            handleTemplateChange();
-            openModal(notificationModal);
-        });
-
-        document.getElementById('notificationBtn').addEventListener('click', function() {
-            handleTemplateChange();
-            openModal(notificationModal);
-        });
 
         document.getElementById('messageTemplate').addEventListener('change', handleTemplateChange);
         document.getElementById('sendNotificationBtn').addEventListener('click', sendBatchNotifications);

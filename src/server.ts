@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "express-async-errors";
 import cookieParser from "cookie-parser";
 import express from "express";
 import morgan from "morgan";

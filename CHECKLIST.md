@@ -16,6 +16,8 @@ Atualizado em: **2026-02-15**
 - Removido seletor "Linhas fixas" do cabecalho do grafico
 - Filtro de periodo ajustado para "3 meses", "6 meses" e "12 meses"
 - Removido outline visual no seletor de periodo
+- Removido outline visual de foco (inputs/botoes/links) nas telas Painel financeiro e Clientes
+- Seed de dados demo no banco para testar Painel financeiro e Clientes (`npm run db:seed:demo`)
 - Titulo do grafico alterado para "Visao mensal da carteira"
 - Layout ajustado para celular nas telas principais (header/sidebar/espacamentos)
 - Toasts de aviso adaptados para mobile (sem cortar mensagem)

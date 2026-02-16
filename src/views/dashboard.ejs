@@ -61,10 +61,18 @@
             box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
         }
 
-        .sidebar-item:focus-visible,
-        .icon-btn:focus-visible {
-            outline: 2px solid rgba(96, 165, 250, 0.7);
-            outline-offset: 2px;
+        /* Remover outlines de foco (pedido do usuário) apenas nesta tela. */
+        a:focus,
+        a:focus-visible,
+        button:focus,
+        button:focus-visible,
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible {
+            outline: none !important;
         }
 
         .glass-card {
@@ -293,18 +301,6 @@
             animation: none;
         }
 
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-        }
-
         .page-title {
             color: #ffffff;
         }
@@ -343,15 +339,7 @@
                 font-size: 1rem !important;
             }
 
-            .header-user-name,
-            .header-user-chevron {
-                display: none;
-            }
-
-            .user-avatar {
-                width: 2.2rem;
-                height: 2.2rem;
-            }
+            .header-user-chevron { display: none; }
         }
 
         .dark .glass-card,
@@ -411,20 +399,10 @@
                     </a>
                 </h1>
             </div>
-            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
-                <button id="themeToggle" class="icon-btn focus:outline-none">
-                    <i class="fas fa-sun text-xl"></i>
-                </button>
-                <div class="relative">
-                    <button id="notificationBtn" class="icon-btn focus:outline-none relative">
-                        <i class="fas fa-bell text-xl"></i>
-                        <span id="notificationBadge" class="notification-badge absolute -top-1 -right-1 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                    </button>
-                </div>
-                <div class="relative">
-                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
-                        <div class="user-avatar"><i class="fas fa-user text-lg"></i></div>
-                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -456,7 +434,7 @@
             <nav class="mt-8 px-4">
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span class="font-medium">Painel financeiro</span></a></li>
-                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
                     <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
                     <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
@@ -481,12 +459,12 @@
                     <div class="kpi-value" id="kpiTotalToReceive">R$ 0,00</div>
                 </article>
                 <article class="kpi-card glass-card kpi-danger">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Total em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige acao."></i></div>
+                    <div class="flex items-start justify-between"><span class="kpi-label">Total em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige ação."></i></div>
                     <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
-                    <p class="kpi-note" id="kpiOverdueRate">Inadimplencia: --</p>
+                    <p class="kpi-note" id="kpiOverdueRate">Inadimplência: --</p>
                 </article>
                 <article class="kpi-card glass-card">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Recebido no mes</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mes."></i></div>
+                    <div class="flex items-start justify-between"><span class="kpi-label">Recebido no mês</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mês."></i></div>
                     <div class="kpi-value" id="kpiReceivedThisMonth">R$ 0,00</div>
                 </article>
                 <article class="kpi-card glass-card">
@@ -531,14 +509,14 @@
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
                     <div class="glass-card rounded-2xl p-5">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Proximos vencimentos (em dia)</h3>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Próximos vencimentos (em dia)</h3>
                         <div id="upcomingList" class="space-y-3 fixed-scroll-panel">
                             <div class="text-center py-10 text-gray-500"><i class="fas fa-calendar-check text-4xl mb-3 opacity-50"></i><p>Nenhuma parcela pendente.</p></div>
                         </div>
                         <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
                             <button id="upcomingPrevPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Anterior</button>
-                            <span id="upcomingPageInfo">Pagina 1 de 1</span>
-                            <button id="upcomingNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Proxima</button>
+                            <span id="upcomingPageInfo">Página 1 de 1</span>
+                            <button id="upcomingNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Próxima</button>
                         </div>
                     </div>
                 </div>
@@ -548,8 +526,8 @@
                         <div id="overdueList" class="space-y-3 fixed-scroll-panel"><p class="text-sm text-gray-500">Sem pagamentos atrasados.</p></div>
                         <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
                             <button id="overduePrevPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Anterior</button>
-                            <span id="overduePageInfo">Pagina 1 de 1</span>
-                            <button id="overdueNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Proxima</button>
+                            <span id="overduePageInfo">Página 1 de 1</span>
+                            <button id="overdueNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Próxima</button>
                         </div>
                     </div>
                 </div>
@@ -558,13 +536,32 @@
             <section class="mb-6">
                 <div class="glass-card rounded-2xl p-5">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-                        <h3 class="text-xl font-bold text-gray-800">Visao mensal da carteira</h3>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Vis&atilde;o mensal da carteira</h3>
+                            <p class="mt-1 text-xs text-gray-500">Recebido no mês vs mês anterior.</p>
+                        </div>
                         <div class="flex items-center gap-2">
+                            <div class="inline-flex rounded-xl border border-gray-300 bg-white p-1">
+                                <button id="chartTypeLineBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold bg-blue-600 text-white shadow-sm">Linha</button>
+                                <button id="chartTypeStackedBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Barras empilhadas</button>
+                            </div>
                             <select id="periodSelect" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none">
                                 <option value="3m">3 meses</option>
                                 <option value="6m" selected>6 meses</option>
                                 <option value="12m">12 meses</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Recebido no mês</p>
+                                <p id="chartReceivedMonthValue" class="text-xl font-bold text-slate-900">R$ 0,00</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">vs mês anterior</p>
+                                <p id="chartReceivedMoMValue" class="text-xl font-bold text-slate-700">--</p>
+                            </div>
                         </div>
                     </div>
                     <div class="chart-shell">
@@ -578,12 +575,12 @@
         </main>
     </div>
 
-    <div id="collectionModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+            <div id="collectionModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
         <div class="modal-panel w-full max-w-xl p-6">
             <div class="flex items-start justify-between mb-4">
                 <div>
-                    <h3 class="text-xl font-semibold text-gray-800">Enviar cobranca</h3>
-                    <p class="text-sm text-gray-500">Mensagem editavel com placeholders.</p>
+                    <h3 class="text-xl font-semibold text-gray-800">Enviar cobrança</h3>
+                    <p class="text-sm text-gray-500">Mensagem editável com placeholders.</p>
                 </div>
                 <button id="closeCollectionModalBtn" class="text-gray-400 hover:text-gray-600" type="button"><i class="fas fa-times text-xl"></i></button>
             </div>
@@ -619,7 +616,7 @@
                 <select id="paymentMethodSelect" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
                     <option value="PIX">PIX</option>
                     <option value="DINHEIRO">Dinheiro</option>
-                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="TRANSFERENCIA">Transferência</option>
                 </select>
             </div>
             <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -637,7 +634,8 @@
         } else {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', JSON.stringify(authUser));
-            document.getElementById('userName').textContent = authUser.name || authUser.full_name || 'Administrador';
+            const displayName = authUser.name || authUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -655,12 +653,18 @@
         const collectionPreview = document.getElementById('collectionPreview');
         const periodSelect = document.getElementById('periodSelect');
         const metricSelect = document.getElementById('metricSelect');
+        const chartTypeLineBtn = document.getElementById('chartTypeLineBtn');
+        const chartTypeStackedBtn = document.getElementById('chartTypeStackedBtn');
+        const chartReceivedMonthValue = document.getElementById('chartReceivedMonthValue');
+        const chartReceivedMoMValue = document.getElementById('chartReceivedMoMValue');
         const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
 
         const dashboardState = {
             period: '6m',
             metric: 'recebido',
             chart: null,
+            chartView: 'line',
+            lastChartPayload: null,
             upcomingById: new Map(),
             overdueById: new Map(),
             upcomingItems: [],
@@ -764,17 +768,17 @@
                 .replaceAll('{nome}', data.nome || '-')
                 .replaceAll('{valor}', data.valor || '-')
                 .replaceAll('{vencimento}', data.vencimento || '-')
-                .replaceAll('{pix_chave}', data.pix_chave || 'nao informado');
+                .replaceAll('{pix_chave}', data.pix_chave || 'não informado');
         }
 
-        const COLLECTION_TEMPLATE = 'Ola {nome}, identificamos parcela de {valor} com vencimento em {vencimento}. Se ja pagou, desconsidere. PIX: {pix_chave}.';
+        const COLLECTION_TEMPLATE = 'Olá, {nome}. Parcela em aberto: {valor} (venc. {vencimento}).\nChave PIX: {pix_chave}.';
 
         function buildCollectionData(item) {
             return {
                 nome: item?.debtorName,
                 valor: formatCurrency(item?.amount),
                 vencimento: formatDate(item?.dueDate),
-                pix_chave: item?.pixKey || 'nao informado',
+                pix_chave: item?.pixKey || 'não informado',
             };
         }
 
@@ -795,7 +799,7 @@
         function openWhatsAppCharge(item) {
             const phone = normalizeWhatsAppPhone(item?.phone);
             if (!phone) {
-                showMessage('Cliente sem telefone valido para WhatsApp.', 'error');
+                showMessage('Cliente sem telefone válido para WhatsApp.', 'error');
                 return;
             }
 
@@ -915,7 +919,7 @@
             prevBtn.classList.toggle('opacity-50', !canGoPrev);
             nextBtn.classList.toggle('opacity-50', !canGoNext);
             info.textContent = hasItems
-                ? `Pagina ${currentPage} de ${totalPages}`
+                ? `Página ${currentPage} de ${totalPages}`
                 : 'Sem registros';
         }
 
@@ -929,10 +933,67 @@
 
             const hasToReceive = Number(kpis?.totalToReceive || 0) > 0;
             document.getElementById('kpiOverdueRate').textContent = hasToReceive
-                ? `Inadimplencia: ${formatPercent(kpis?.delinquencyRate)}`
-                : 'Inadimplencia: --';
+                ? `Inadimplência: ${formatPercent(kpis?.delinquencyRate)}`
+                : 'Inadimplência: --';
 
             document.getElementById('kpiRoiRate').textContent = `ROI: ${formatPercent(kpis?.roiRate)}`;
+        }
+
+        function updateChartTypeButtons() {
+            if (chartTypeLineBtn) {
+                chartTypeLineBtn.classList.toggle('bg-blue-600', dashboardState.chartView === 'line');
+                chartTypeLineBtn.classList.toggle('text-white', dashboardState.chartView === 'line');
+                chartTypeLineBtn.classList.toggle('shadow-sm', dashboardState.chartView === 'line');
+                chartTypeLineBtn.classList.toggle('text-gray-700', dashboardState.chartView !== 'line');
+                chartTypeLineBtn.classList.toggle('hover:bg-gray-50', dashboardState.chartView !== 'line');
+            }
+            if (chartTypeStackedBtn) {
+                chartTypeStackedBtn.classList.toggle('bg-blue-600', dashboardState.chartView === 'stacked');
+                chartTypeStackedBtn.classList.toggle('text-white', dashboardState.chartView === 'stacked');
+                chartTypeStackedBtn.classList.toggle('shadow-sm', dashboardState.chartView === 'stacked');
+                chartTypeStackedBtn.classList.toggle('text-gray-700', dashboardState.chartView !== 'stacked');
+                chartTypeStackedBtn.classList.toggle('hover:bg-gray-50', dashboardState.chartView !== 'stacked');
+            }
+        }
+
+        function renderMonthlyReceivedComparison(points) {
+            if (!Array.isArray(points) || points.length === 0) return;
+
+            const currentPoint = points[points.length - 1];
+            const prevPoint = points.length >= 2 ? points[points.length - 2] : null;
+            const currentValue = Number(currentPoint?.received ?? currentPoint?.value ?? 0) || 0;
+            const prevValue = Number(prevPoint?.received ?? prevPoint?.value ?? 0) || 0;
+
+            if (chartReceivedMonthValue) {
+                chartReceivedMonthValue.textContent = formatCurrency(currentValue);
+            }
+
+            if (!chartReceivedMoMValue) return;
+
+            chartReceivedMoMValue.classList.remove('text-emerald-600', 'text-red-600', 'text-slate-700');
+            chartReceivedMoMValue.classList.add('text-slate-700');
+
+            if (prevPoint === null) {
+                chartReceivedMoMValue.textContent = '--';
+                return;
+            }
+
+            if (prevValue <= 0) {
+                chartReceivedMoMValue.textContent = currentValue > 0 ? 'Novo' : '--';
+                return;
+            }
+
+            const pct = ((currentValue - prevValue) / prevValue) * 100;
+            const pctText = `${pct >= 0 ? '+' : ''}${pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+            chartReceivedMoMValue.textContent = pctText;
+
+            if (pct > 0.05) {
+                chartReceivedMoMValue.classList.remove('text-slate-700');
+                chartReceivedMoMValue.classList.add('text-emerald-600');
+            } else if (pct < -0.05) {
+                chartReceivedMoMValue.classList.remove('text-slate-700');
+                chartReceivedMoMValue.classList.add('text-red-600');
+            }
         }
 
         function renderDailySummary(summary) {
@@ -952,6 +1013,7 @@
         }
 
         function renderChart(chartPayload) {
+            dashboardState.lastChartPayload = chartPayload || null;
             const points = Array.isArray(chartPayload?.points) ? chartPayload.points : [];
             const labels = points.map((point) => point.label);
             const receivedValues = points.map((point) => Number(point.received ?? point.value ?? 0));
@@ -964,42 +1026,79 @@
 
             if (dashboardState.chart) dashboardState.chart.destroy();
 
+            renderMonthlyReceivedComparison(points);
+
+            const view = dashboardState.chartView === 'stacked' ? 'stacked' : 'line';
+            const isStacked = view === 'stacked';
+
+            const datasets = isStacked
+                ? [
+                    {
+                        label: 'Recebido',
+                        data: receivedValues,
+                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    },
+                    {
+                        label: 'Em aberto',
+                        data: openValues,
+                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    },
+                    {
+                        label: 'Atraso',
+                        data: overdueValues,
+                        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    },
+                ]
+                : [
+                    {
+                        label: 'Atraso',
+                        data: overdueValues,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.25,
+                    },
+                    {
+                        label: 'Recebido',
+                        data: receivedValues,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.25,
+                    },
+                    {
+                        label: 'Em aberto',
+                        data: openValues,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.25,
+                    },
+                ];
+
             dashboardState.chart = new Chart(document.getElementById('monthlyChart').getContext('2d'), {
-                type: 'line',
+                type: isStacked ? 'bar' : 'line',
                 data: {
                     labels,
-                    datasets: [
-                        {
-                            label: 'Atraso',
-                            data: overdueValues,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                            borderWidth: 2,
-                            fill: false,
-                            pointRadius: 3,
-                            tension: 0.25,
-                        },
-                        {
-                            label: 'Recebido',
-                            data: receivedValues,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                            borderWidth: 2,
-                            fill: false,
-                            pointRadius: 3,
-                            tension: 0.25,
-                        },
-                        {
-                            label: 'Em aberto',
-                            data: openValues,
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                            borderWidth: 2,
-                            fill: false,
-                            pointRadius: 3,
-                            tension: 0.25,
-                        },
-                    ],
+                    datasets,
                 },
                 options: {
                     responsive: true,
@@ -1014,8 +1113,10 @@
                         },
                     },
                     scales: {
+                        x: { stacked: isStacked },
                         y: {
                             beginAtZero: true,
+                            stacked: isStacked,
                             ticks: { callback: (value) => formatCurrency(Number(value)) },
                         },
                     },
@@ -1223,7 +1324,7 @@
                 showMessage('Mensagem copiada.', 'success');
             } catch (error) {
                 console.error(error);
-                showMessage('Nao foi possivel copiar a mensagem.', 'error');
+                showMessage('Não foi possível copiar a mensagem.', 'error');
             }
         }
 
@@ -1255,7 +1356,7 @@
                 return true;
             } catch (error) {
                 console.error(error);
-                showMessage('Erro de conexao ao marcar como pago.', 'error');
+                showMessage('Erro de conexão ao marcar como pago.', 'error');
                 return false;
             }
         }
@@ -1292,6 +1393,22 @@
             dashboardState.period = event.target.value;
             await loadDashboard();
         });
+
+        if (chartTypeLineBtn && chartTypeStackedBtn) {
+            chartTypeLineBtn.addEventListener('click', () => {
+                dashboardState.chartView = 'line';
+                localStorage.setItem('dashboardChartView', 'line');
+                updateChartTypeButtons();
+                renderChart(dashboardState.lastChartPayload);
+            });
+
+            chartTypeStackedBtn.addEventListener('click', () => {
+                dashboardState.chartView = 'stacked';
+                localStorage.setItem('dashboardChartView', 'stacked');
+                updateChartTypeButtons();
+                renderChart(dashboardState.lastChartPayload);
+            });
+        }
 
         if (metricSelect) {
             metricSelect.addEventListener('change', async (event) => {
@@ -1373,26 +1490,6 @@
             if (event.target === paymentConfirmModal) closePaymentConfirmModal();
         });
 
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark');
-            const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark')) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark');
-            const themeIcon = document.getElementById('themeToggle').querySelector('i');
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-        }
-
         if (userMenuBtn && userMenuDropdown) {
             userMenuBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
@@ -1425,6 +1522,11 @@
         document.addEventListener('DOMContentLoaded', async () => {
             periodSelect.value = dashboardState.period;
             if (metricSelect) metricSelect.value = dashboardState.metric;
+            const savedView = localStorage.getItem('dashboardChartView');
+            if (savedView === 'stacked' || savedView === 'line') {
+                dashboardState.chartView = savedView;
+            }
+            updateChartTypeButtons();
             await loadDashboard();
         });
     </script>

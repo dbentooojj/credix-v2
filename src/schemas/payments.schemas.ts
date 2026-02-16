@@ -1,6 +1,6 @@
 ﻿import { z } from "zod";
 
-export const paymentMethodSchema = z.enum(["PIX", "DINHEIRO", "TRANSFERENCIA"]);
+export const paymentMethodSchema = z.enum(["PIX", "DINHEIRO", "TRANSFERENCIA", "CARTAO"]);
 
 const normalizeMethodInput = (value: unknown) =>
   String(value ?? "")

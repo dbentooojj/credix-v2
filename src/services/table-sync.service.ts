@@ -7,6 +7,7 @@
   type Prisma,
 } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { AppError } from "../middleware/error-handler";
 
 export type TableName = "debtors" | "loans" | "installments";
 
@@ -14,6 +15,29 @@ type RawRow = Record<string, unknown>;
 
 function normalizeText(value: unknown): string {
   return String(value ?? "").trim();
+}
+
+function normalizeDigits(value: unknown): string {
+  return String(value ?? "").replace(/\D/g, "");
+}
+
+function normalizeBrazilPhoneDigits(value: unknown): string {
+  const digits = normalizeDigits(value);
+  if (!digits) return "";
+
+  let normalized = digits;
+
+  // Accepts +55/55 prefix pasted from WhatsApp.
+  if (normalized.startsWith("55") && normalized.length > 11) {
+    normalized = normalized.slice(2);
+  }
+
+  // Defensive: keep only the last 11 digits if something longer sneaks in.
+  if (normalized.length > 11) {
+    normalized = normalized.slice(-11);
+  }
+
+  return normalized;
 }
 
 function normalizeAsciiUpper(value: unknown): string {
@@ -117,6 +141,7 @@ function normalizePaymentMethod(value: unknown): PaymentMethod {
   if (normalized === "DINHEIRO") return PaymentMethod.DINHEIRO;
   if (normalized === "TRANSFERENCIA") return PaymentMethod.TRANSFERENCIA;
   if (normalized === "PIX") return PaymentMethod.PIX;
+  if (normalized === "CARTAO") return PaymentMethod.CARTAO;
 
   return PaymentMethod.PIX;
 }
@@ -124,6 +149,7 @@ function normalizePaymentMethod(value: unknown): PaymentMethod {
 function mapPaymentMethodToUi(value: PaymentMethod): string {
   if (value === PaymentMethod.DINHEIRO) return "Dinheiro";
   if (value === PaymentMethod.TRANSFERENCIA) return "Transferência";
+  if (value === PaymentMethod.CARTAO) return "Cartão";
   return "Pix";
 }
 
@@ -225,25 +251,91 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       const maxId = (await tx.client.aggregate({ _max: { id: true } }))._max.id ?? 0;
       let nextId = maxId + 1;
 
-      const normalized = rows.map((row) => {
+      const drafted = rows.map((row) => {
         const id = toInt(row.id) ?? nextId++;
-        const cpfRaw = normalizeText(row.document ?? row.cpf);
-        const cpf = cpfRaw || `CPF-${id}`;
+        return { id, row };
+      });
+
+      const ids = drafted.map((item) => item.id);
+
+      const existing = await tx.client.findMany({
+        where: { id: { in: ids } },
+        select: { id: true, name: true, cpf: true, phone: true, email: true, status: true, address: true, notes: true },
+      });
+      const existingById = new Map(existing.map((item) => [item.id, item]));
+
+      const normalized = drafted.map(({ id, row }) => {
+        const current = existingById.get(id);
+
+        const nameRaw = normalizeText(row.name);
+        const name = nameRaw || current?.name;
+        if (!name) {
+          throw new AppError("Nome do cliente e obrigatorio.");
+        }
+
+        const cpfInput = normalizeText(row.cpf ?? row.document);
+        const cpfDigits = normalizeDigits(cpfInput);
+
+        let cpf: string;
+        if (cpfDigits.length === 11) {
+          cpf = cpfDigits;
+        } else if (current && normalizeText(current.cpf) === cpfInput) {
+          cpf = current.cpf;
+        } else {
+          throw new AppError("CPF invalido. Informe um CPF com 11 digitos.");
+        }
+
+        const phoneInput = normalizeText(row.phone);
+        const phoneDigits = normalizeBrazilPhoneDigits(phoneInput);
+
+        let phone: string;
+        if (phoneDigits.length === 10 || phoneDigits.length === 11) {
+          phone = phoneDigits;
+        } else if (current && normalizeText(current.phone) === phoneInput) {
+          phone = current.phone;
+        } else {
+          throw new AppError("Telefone invalido. Informe DDD + numero (10 ou 11 digitos).");
+        }
+
+        const email = (() => {
+          const raw = normalizeText(row.email);
+          if (raw) return raw;
+          if (row.email === undefined) return current?.email ?? null;
+          return null;
+        })();
+
+        const status = (() => {
+          const raw = normalizeText(row.status);
+          if (raw) return normalizeClientStatus(raw);
+          return current?.status ?? ClientStatus.ATIVO;
+        })();
+
+        const address = (() => {
+          const raw = normalizeText(row.address);
+          if (raw) return raw;
+          if (row.address === undefined) return current?.address ?? null;
+          return null;
+        })();
+
+        const notes = (() => {
+          const raw = normalizeText(row.notes);
+          if (raw) return raw;
+          if (row.notes === undefined) return current?.notes ?? null;
+          return null;
+        })();
 
         return {
           id,
-          name: normalizeText(row.name) || `Cliente ${id}`,
+          name,
           cpf,
-          phone: normalizeText(row.phone),
-          email: normalizeText(row.email) || null,
-          status: normalizeClientStatus(row.status),
-          address: normalizeText(row.address) || null,
-          notes: normalizeText(row.notes) || null,
-          createdAt: toDateOnly(row.created_at ?? row.createdAt ?? new Date()),
+          phone,
+          email,
+          status,
+          address,
+          notes,
         };
       });
 
-      const ids = normalized.map((row) => row.id);
       if (ids.length > 0) {
         await tx.client.deleteMany({ where: { id: { notIn: ids } } });
       } else {
@@ -262,7 +354,8 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
             status: row.status,
             address: row.address,
             notes: row.notes,
-            createdAt: row.createdAt,
+            // Backend-controlled "date only" createdAt (not editable by the UI).
+            createdAt: toDateOnly(new Date().toISOString().slice(0, 10)),
           },
           update: {
             name: row.name,

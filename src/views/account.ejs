@@ -67,6 +67,10 @@
             color: #111827;
             width: 100%;
         }
+        .filter-control:focus {
+            outline: none;
+            box-shadow: none;
+        }
 
         .tab-btn {
             border: 1px solid #cbd5e1;
@@ -131,9 +135,7 @@
                 font-size: 1rem !important;
             }
 
-            .header-user-name, .header-user-chevron {
-                display: none;
-            }
+            .header-user-chevron { display: none; }
         }
     </style>
 </head>
@@ -148,12 +150,10 @@
                     </a>
                 </h1>
             </div>
-            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
-                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
-                <div class="relative">
-                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
-                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center sm:h-11 sm:w-11"><i class="fas fa-user"></i></div>
-                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -185,7 +185,7 @@
             <nav class="mt-8 px-4">
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
-                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
                     <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
                     <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
@@ -229,20 +229,55 @@
                 <div id="tab-security" class="tab-panel hidden">
                     <h3 class="mb-1 text-xl font-bold text-gray-800">Segurança</h3>
                     <p class="mb-4 text-sm text-gray-600">Troque sua senha de acesso.</p>
-                    <form id="securityForm" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <form id="securityForm" class="grid grid-cols-1 gap-4">
                         <div>
                             <label for="currentPassword" class="mb-1 block text-sm text-gray-600">Senha atual</label>
-                            <input id="currentPassword" class="filter-control" type="password" required>
+                            <input id="currentPassword" class="filter-control" type="password" autocomplete="current-password" required>
                         </div>
                         <div>
                             <label for="newPassword" class="mb-1 block text-sm text-gray-600">Nova senha</label>
-                            <input id="newPassword" class="filter-control" type="password" minlength="6" required>
+                            <input id="newPassword" class="filter-control" type="password" minlength="8" autocomplete="new-password" required>
+                            <div id="passwordStrengthPanel" class="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                                <div class="flex items-center justify-between gap-3">
+                                    <span class="font-semibold text-slate-700">Força da senha</span>
+                                    <span id="passwordStrengthLabel" class="font-bold text-slate-700">-</span>
+                                </div>
+                                <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                                    <div id="passwordStrengthBar" class="h-full w-0 bg-red-500 transition-[width,background-color] duration-200"></div>
+                                </div>
+                                <div class="mt-3 grid grid-cols-1 gap-1">
+                                    <div id="pwRuleLen" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>8+ caracteres</span>
+                                    </div>
+                                    <div id="pwRuleUpper" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>1 letra maiúscula</span>
+                                    </div>
+                                    <div id="pwRuleLower" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>1 letra minúscula</span>
+                                    </div>
+                                    <div id="pwRuleDigit" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>1 número</span>
+                                    </div>
+                                    <div id="pwRuleSymbol" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>1 símbolo</span>
+                                    </div>
+                                    <div id="pwRuleNoSpace" class="flex items-center gap-2">
+                                        <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
+                                        <span>Sem espaços</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label for="confirmPassword" class="mb-1 block text-sm text-gray-600">Confirmar nova senha</label>
-                            <input id="confirmPassword" class="filter-control" type="password" minlength="6" required>
+                            <input id="confirmPassword" class="filter-control" type="password" minlength="8" autocomplete="new-password" required>
                         </div>
-                        <div class="md:col-span-2 flex justify-end">
+                        <div class="flex justify-end">
                             <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
                                 <i class="fas fa-key mr-2"></i>Alterar senha
                             </button>
@@ -252,21 +287,33 @@
 
                 <div id="tab-help" class="tab-panel hidden">
                     <h3 class="mb-1 text-xl font-bold text-gray-800">Ajuda</h3>
-                    <p class="mb-4 text-sm text-gray-600">Contato rápido.</p>
+                    <p class="mb-4 text-sm text-gray-600">Contato rápido. Escolha um canal:</p>
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <div class="rounded-xl border border-slate-200 p-4 text-sm text-gray-700 dark:border-slate-700 dark:text-gray-300">
-                            <p class="font-semibold"><i class="fas fa-headset mr-2"></i>Contato</p>
-                            <div class="mt-2 space-y-1 text-xs text-gray-500">
-                                <p>
-                                    <i class="fas fa-envelope mr-2"></i>
-                                    <a class="underline" href="mailto:bento431@gmail.com">bento431@gmail.com</a>
-                                </p>
-                                <p>
-                                    <i class="fab fa-whatsapp mr-2"></i>
-                                    <a class="underline" href="https://wa.me/5547999600742" target="_blank" rel="noopener noreferrer">+55 47 99960-0742</a>
-                                </p>
+                        <a class="group rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left transition hover:border-blue-200 hover:bg-white hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300" href="mailto:bento431@gmail.com">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-slate-900">E-mail</p>
+                                    <p class="mt-1 text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-2 group-hover:decoration-blue-300 truncate">bento431@gmail.com</p>
+                                    <p class="mt-2 text-xs text-slate-500">Clique para enviar mensagem</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
+
+                        <a class="group rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left transition hover:border-emerald-200 hover:bg-white hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" href="https://wa.me/5547999600742?text=Ol%C3%A1%21%20Estou%20com%20uma%20d%C3%BAvida%20no%20CredF%C3%A1cil%2C" target="_blank" rel="noopener noreferrer">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-slate-900">WhatsApp</p>
+                                    <p class="mt-1 text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-2 group-hover:decoration-emerald-300 truncate">+55 47 99960-0742</p>
+                                    <p class="mt-2 text-xs text-slate-500">Clique para abrir conversa</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </section>
@@ -281,7 +328,8 @@
         } else {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+            const displayName = currentUser.name || currentUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -294,6 +342,61 @@
 
         const profileForm = document.getElementById('profileForm');
         const securityForm = document.getElementById('securityForm');
+        const newPasswordInput = document.getElementById('newPassword');
+        const passwordStrengthLabel = document.getElementById('passwordStrengthLabel');
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+
+        const PASSWORD_RULES = [
+            { id: 'pwRuleLen', label: '8+ caracteres', test: (value) => value.length >= 8 },
+            { id: 'pwRuleUpper', label: '1 letra maiúscula', test: (value) => /[A-Z]/.test(value) },
+            { id: 'pwRuleLower', label: '1 letra minúscula', test: (value) => /[a-z]/.test(value) },
+            { id: 'pwRuleDigit', label: '1 número', test: (value) => /\d/.test(value) },
+            { id: 'pwRuleSymbol', label: '1 símbolo', test: (value) => /[^A-Za-z0-9]/.test(value) },
+            { id: 'pwRuleNoSpace', label: 'sem espaços', test: (value) => !/\s/.test(value) },
+        ];
+
+        function setPasswordRuleState(ruleId, ok) {
+            const row = document.getElementById(ruleId);
+            if (!row) return;
+            const icon = row.querySelector('i');
+            if (!icon) return;
+
+            if (ok) {
+                icon.classList.remove('fa-circle', 'text-slate-400');
+                icon.classList.add('fa-check-circle', 'text-emerald-600');
+            } else {
+                icon.classList.remove('fa-check-circle', 'text-emerald-600');
+                icon.classList.add('fa-circle', 'text-slate-400');
+            }
+        }
+
+        function getPasswordStrengthMeta(password) {
+            const total = PASSWORD_RULES.length;
+            const passed = PASSWORD_RULES.filter((rule) => rule.test(password)).length;
+            const percent = Math.round((passed / total) * 100);
+
+            if (!password) return { label: '-', color: '#94a3b8', percent: 0 };
+            if (passed <= 2) return { label: 'Fraca', color: '#ef4444', percent };
+            if (passed <= 4) return { label: 'Média', color: '#f59e0b', percent };
+            if (passed < total) return { label: 'Boa', color: '#22c55e', percent };
+            return { label: 'Forte', color: '#16a34a', percent: 100 };
+        }
+
+        function renderPasswordStrength(password) {
+            PASSWORD_RULES.forEach((rule) => setPasswordRuleState(rule.id, rule.test(password)));
+
+            const meta = getPasswordStrengthMeta(password);
+            if (passwordStrengthLabel) passwordStrengthLabel.textContent = meta.label;
+            if (passwordStrengthBar) {
+                passwordStrengthBar.style.width = `${meta.percent}%`;
+                passwordStrengthBar.style.backgroundColor = meta.color;
+            }
+        }
+
+        function validateStrongPassword(password) {
+            const missing = PASSWORD_RULES.filter((rule) => !rule.test(password)).map((rule) => rule.label);
+            return { ok: missing.length === 0, missing };
+        }
 
         function showMessage(message, type) {
             const messageDiv = document.createElement('div');
@@ -324,20 +427,6 @@
             }
             sidebar.classList.remove('mobile-open');
             main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
-        }
-
-        function applyTheme(theme) {
-            const icon = document.getElementById('themeToggle').querySelector('i');
-            if (theme === 'dark') {
-                document.body.classList.add('dark');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                return;
-            }
-
-            document.body.classList.remove('dark');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
         }
 
         async function performLogout() {
@@ -404,7 +493,8 @@
                 const user = payload?.user;
                 if (user) {
                     localStorage.setItem('currentUser', JSON.stringify(user));
-                    document.getElementById('userName').textContent = user.name || 'Administrador';
+                    const displayName = user.name || 'Administrador';
+                    document.getElementById('userName').textContent = `Olá, ${displayName}`;
                 }
                 showMessage('Perfil atualizado com sucesso.', 'success');
             } catch {
@@ -418,12 +508,19 @@
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (newPassword.length < 6) {
-                showMessage('A nova senha precisa ter pelo menos 6 caracteres.', 'error');
-                return;
-            }
             if (newPassword !== confirmPassword) {
                 showMessage('A confirmação da nova senha não confere.', 'error');
+                return;
+            }
+
+            if (newPassword === currentPassword) {
+                showMessage('A nova senha deve ser diferente da atual.', 'error');
+                return;
+            }
+
+            const validation = validateStrongPassword(newPassword);
+            if (!validation.ok) {
+                showMessage(`Senha fraca. Use: ${validation.missing.join(', ')}.`, 'error');
                 return;
             }
 
@@ -436,11 +533,16 @@
                 });
                 const payload = await response.json().catch(() => null);
                 if (!response.ok) {
-                    showMessage(payload?.message || 'Falha ao alterar senha.', 'error');
+                    const fieldErrors = payload?.issues?.fieldErrors;
+                    const serverPasswordErrors = Array.isArray(fieldErrors?.newPassword) ? fieldErrors.newPassword : [];
+                    const serverCurrentErrors = Array.isArray(fieldErrors?.currentPassword) ? fieldErrors.currentPassword : [];
+                    const serverMessage = serverPasswordErrors[0] || serverCurrentErrors[0] || payload?.message;
+                    showMessage(serverMessage || 'Falha ao alterar senha.', 'error');
                     return;
                 }
 
                 securityForm.reset();
+                renderPasswordStrength('');
                 showMessage('Senha alterada com sucesso.', 'success');
             } catch {
                 showMessage('Erro de conexão ao alterar senha.', 'error');
@@ -459,15 +561,6 @@
         window.addEventListener('resize', syncSidebarLayout);
         syncSidebarLayout();
         syncActiveSidebarWithRoute();
-
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            const nextTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
-            localStorage.setItem('theme', nextTheme);
-            applyTheme(nextTheme);
-        });
 
         userMenuBtn.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -504,6 +597,14 @@
 
         profileForm.addEventListener('submit', saveProfile);
         securityForm.addEventListener('submit', savePassword);
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) return;
+                renderPasswordStrength(target.value);
+            });
+            renderPasswordStrength(newPasswordInput.value || '');
+        }
 
         document.getElementById('profileName').value = currentUser.name || '';
         document.getElementById('profileEmail').value = currentUser.email || '';

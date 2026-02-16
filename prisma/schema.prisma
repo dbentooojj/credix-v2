@@ -32,6 +32,7 @@ enum PaymentMethod {
   PIX
   DINHEIRO
   TRANSFERENCIA
+  CARTAO
 }
 
 enum InstallmentStatus {

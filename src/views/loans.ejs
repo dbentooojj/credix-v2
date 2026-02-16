@@ -161,7 +161,7 @@
                 font-size: 1rem !important;
             }
 
-            .header-user-name, .header-user-chevron { display: none; }
+            .header-user-chevron { display: none; }
         }
 
         .dark .glass-card {
@@ -198,13 +198,10 @@
                     </a>
                 </h1>
             </div>
-            <div class="flex items-center gap-1 sm:gap-4 lg:gap-6">
-                <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
-                <button id="notificationBtn" class="icon-btn focus:outline-none relative"><i class="fas fa-bell text-xl"></i></button>
-                <div class="relative">
-                    <button id="userMenuBtn" class="flex items-center space-x-2 sm:space-x-3 text-slate-200 hover:text-white focus:outline-none">
-                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center sm:h-11 sm:w-11"><i class="fas fa-user"></i></div>
-                        <span id="userName" class="header-user-name font-semibold">Administrador</span>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -236,7 +233,7 @@
             <nav class="mt-8 px-4">
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
-                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Devedores</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
                     <li><a href="loans.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span class="font-medium">Empréstimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
                     <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
@@ -334,7 +331,7 @@
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Informações básicas</h4>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Devedor</label>
+                                    <label class="mb-1 block text-sm text-gray-600">Cliente</label>
                                     <select id="loanDebtor" class="filter-control" required></select>
                                 </div>
                                 <div>
@@ -444,7 +441,8 @@
         } else {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            document.getElementById('userName').textContent = currentUser.name || currentUser.full_name || 'Administrador';
+            const displayName = currentUser.name || currentUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -533,26 +531,6 @@
         window.addEventListener('resize', syncSidebarLayout);
         syncSidebarLayout();
         syncActiveSidebarWithRoute();
-
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark');
-            const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark')) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark');
-            document.getElementById('themeToggle').querySelector('i').classList.remove('fa-sun');
-            document.getElementById('themeToggle').querySelector('i').classList.add('fa-moon');
-        }
 
         function closeUserMenu() {
             if (!userMenuDropdown) return;
@@ -961,12 +939,12 @@
             }
 
             if (!source.length) {
-                select.innerHTML = '<option value="">Nenhum devedor disponível</option>';
+                select.innerHTML = '<option value="">Nenhum cliente disponível</option>';
                 return;
             }
 
             select.innerHTML = source
-                .map(item => `<option value="${item.id}">${item.name || item.full_name || `Devedor #${item.id}`}</option>`)
+                .map(item => `<option value="${item.id}">${item.name || item.full_name || `Cliente #${item.id}`}</option>`)
                 .join('');
 
             if (selectedDebtorId) {
@@ -1053,7 +1031,7 @@
         }
 
         function validateLoanFormValues(values) {
-            if (!values.debtorId) return 'Selecione um devedor.';
+            if (!values.debtorId) return 'Selecione um cliente.';
             if (values.principal <= 0) return 'Informe um valor principal válido.';
             if (values.interestRate < 0) return 'A taxa de juros não pode ser negativa.';
             if (values.installments <= 0) return 'Informe a quantidade de parcelas.';
@@ -1286,7 +1264,7 @@
 
         document.getElementById('newLoanBtn').addEventListener('click', function () {
             if (!loansState.debtors.length) {
-                showMessage('Cadastre um devedor antes de criar empréstimos.', 'error');
+                showMessage('Cadastre um cliente antes de criar empréstimos.', 'error');
                 return;
             }
             openLoanModal('create');
