@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFácil - Clientes</title>
+    <title>Credix - Clientes</title>
+    <style>
+        html, body { background-color: #020617; }
+    </style>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') root.classList.add('dark');
+                if (savedTheme === 'light') root.classList.remove('dark');
+            } catch (error) {}
+        })();
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -69,7 +85,7 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: #f8fafc;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
         }
@@ -85,7 +101,7 @@
         }
 
         .filter-control {
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid #d1d5db;
             border-radius: 10px;
             padding: 10px 12px;
@@ -93,22 +109,95 @@
             width: 100%;
         }
 
-        .table-shell {
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 14px;
-            border: 1px solid #e5e7eb;
-            background: #ffffff;
+        .clients-data-panel {
+            background: #f8fafc;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
-        .table-shell table { width: 100%; border-collapse: collapse; }
-        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
-        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; }
+        .clients-data-panel .filter-control {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            font-size: 0.875rem;
+            padding: 8px 11px;
+            min-height: 38px;
+        }
+
+        .clients-data-panel .filter-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .clients-data-panel .filter-control:focus {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+        }
+
+        .clients-data-panel .filter-control option {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .table-shell {
+            overflow-x: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.4);
+            scrollbar-gutter: stable both-edges;
+        }
+
+        .table-shell table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-shell th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            text-align: left;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 10px 12px;
+            box-shadow: inset 0 -1px 0 rgba(203, 213, 225, 0.65);
+        }
+        .table-shell td {
+            padding: 9px 12px;
+            border-top: 1px solid #e5e7eb;
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
         .debtor-focus-row { background: #eff6ff; box-shadow: inset 3px 0 0 #2563eb; }
+        .debtor-table-row { transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
+        .debtor-table-row:hover { background: #f8fafc; }
+        .debtor-overdue-row {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+        .debtor-overdue-row:hover { background: #f8fafc; }
+
+        .debtor-overdue-mobile {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+
+        .debtor-row-enter {
+            animation: debtorRowEnter 220ms ease-out both;
+        }
+
+        @keyframes debtorRowEnter {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .table-shell th.sortable-th { cursor: pointer; user-select: none; }
-        .table-shell th.sortable-th:hover { background: #f1f5f9; }
+        .table-shell th.sortable-th:hover { background: #eef2ff; }
         .table-shell th.sortable-th > button.sort-btn {
             display: flex;
             align-items: center;
@@ -128,16 +217,81 @@
         .badge {
             display: inline-flex;
             align-items: center;
-            padding: 2px 10px;
+            justify-content: center;
+            min-height: 24px;
+            padding: 0 10px;
             border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 13px;
+            line-height: 1;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
-        .badge-success { background: #dcfce7; color: #166534; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        .badge-warn { background: #fef3c7; color: #92400e; }
-        .badge-neutral { background: #e2e8f0; color: #334155; }
+        .badge-success { background: #d1fae5; color: #065f46; border: 1px solid #86efac; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .badge-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        .app-toast {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 420px;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.42);
+            background: linear-gradient(135deg, rgba(5, 85, 70, 0.9) 0%, rgba(3, 55, 48, 0.95) 100%);
+            color: #d1fae5;
+            padding: 12px 14px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.25;
+            box-shadow: 0 16px 38px -22px rgba(16, 185, 129, 0.75), inset 0 1px 0 rgba(167, 243, 208, 0.16);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 200ms ease, transform 200ms ease;
+            pointer-events: none;
+        }
+
+        .app-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .app-toast-error {
+            border-color: rgba(239, 68, 68, 0.42);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.95) 100%);
+            color: #fee2e2;
+            box-shadow: 0 16px 38px -22px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(254, 202, 202, 0.15);
+        }
+
+        .app-toast-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.22);
+            color: #a7f3d0;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .app-toast-error .app-toast-icon {
+            background: rgba(239, 68, 68, 0.22);
+            color: #fecaca;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+        }
+
+        .app-toast-text {
+            word-break: break-word;
+        }
 
         main { transition: none; }
         body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
@@ -166,14 +320,19 @@
 
             .table-shell th,
             .table-shell td {
-                padding: 10px 10px;
+                padding: 8px 10px;
             }
         }
 
         /* Evita "tabela esmagada" em viewports estreitos (ex: modo desktop no celular).
            Em telas >= sm, a tabela pode ficar mais larga e rolar horizontalmente. */
         @media (min-width: 640px) {
-            .table-shell table { min-width: 980px; }
+            .table-shell table { min-width: 100%; }
+            .app-toast {
+                left: auto;
+                top: 1.5rem;
+                right: 1.5rem;
+            }
         }
 
         .dark .glass-card {
@@ -182,14 +341,47 @@
             color: #e2e8f0;
         }
 
-        .dark .kpi-value { color: #f8fafc; }
+        .dark .kpi-value { color: #0f172a; }
         .dark .filter-control,
         .dark .table-shell,
         .dark .table-shell th,
-        .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
-        .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
-        .dark .table-shell th.sortable-th:hover { background: rgba(30, 41, 59, 0.85); }
+        .dark .table-shell td { background: #f8fafc; color: #1f2937; border-color: #e2e8f0; }
+        .dark .table-shell th { background: #f8fafc; color: #0f172a; }
+        .dark .table-shell th.sortable-th:hover { background: #eef2ff; }
         .dark .debtor-focus-row { background: rgba(30, 64, 175, 0.25); }
+        .dark .debtor-table-row:hover { background: #f8fafc; }
+        .dark .debtor-overdue-row {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+        .dark .debtor-overdue-row:hover { background: #f8fafc; }
+
+        .table-shell .text-slate-100,
+        .table-shell .text-slate-50,
+        #debtorsMobileList .text-slate-100,
+        #debtorsMobileList .text-slate-50 {
+            color: #0f172a !important;
+        }
+
+        .table-shell .text-slate-500,
+        .table-shell .text-slate-400,
+        .table-shell .text-slate-400\/90,
+        .table-shell .text-slate-300,
+        #debtorsMobileList .text-slate-500,
+        #debtorsMobileList .text-slate-400,
+        #debtorsMobileList .text-slate-400\/90,
+        #debtorsMobileList .text-slate-300 {
+            color: #64748b !important;
+        }
+
+        #debtorsMobileList [data-debtor-id] {
+            background: #f8fafc !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        #debtorsMobileList [data-debtor-id][class*="border-amber-500"] {
+            background: #fffbeb !important;
+            border-color: #fcd34d !important;
+        }
     </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -198,7 +390,7 @@
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
                 <h1 class="ml-3 sm:ml-6">
-                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                    <a href="dashboard.html" class="flex items-center" aria-label="Credix">
                         <%- include('partials/brand-wordmark', { size: 'header' }) %>
                     </a>
                 </h1>
@@ -258,21 +450,65 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total de clientes</p><p id="totalDebtors" class="kpi-value mt-2">0</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Ativos</p><p id="activeDebtors" class="kpi-value mt-2">0</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Inativos</p><p id="inactiveDebtors" class="kpi-value mt-2">0</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Com atraso</p><p id="overdueDebtors" class="kpi-value mt-2">0</p></div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
+                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-users"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
+                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-circle-check"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
+                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-user-clock"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
+                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div class="glass-card rounded-2xl p-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-gray-600 mb-1">Buscar</label>
-                        <input id="debtorSearch" type="text" class="filter-control" placeholder="Nome, telefone ou documento">
+            <div class="clients-data-panel rounded-2xl p-4 sm:p-5 lg:p-6">
+                <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+                    <div class="md:col-span-5">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Buscar</label>
+                        <input id="debtorSearch" type="text" class="filter-control text-sm" placeholder="Nome, telefone ou documento">
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Status</label>
-                        <select id="statusFilter" class="filter-control">
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Status</label>
+                        <select id="statusFilter" class="filter-control text-sm">
                             <option value="Todos">Todos</option>
                             <option value="Ativo">Ativo</option>
                             <option value="Inativo">Inativo</option>
@@ -280,9 +516,9 @@
                             <option value="Quitado">Quitado</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Ordenar por</label>
-                        <select id="sortBy" class="filter-control">
+                    <div class="md:col-span-4">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Ordenar por</label>
+                        <select id="sortBy" class="filter-control text-sm">
                             <option value="name">Nome</option>
                             <option value="document">Documento</option>
                             <option value="phone">Telefone</option>
@@ -295,41 +531,32 @@
                             <option value="status">Status</option>
                         </select>
                     </div>
-                    <div class="md:col-span-4 flex justify-end">
-                        <button id="refreshBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">
-                            <i class="fas fa-rotate-right mr-2"></i>Atualizar
+                    <div class="md:col-span-12 flex flex-wrap items-center justify-end gap-2 pt-1">
+                        <button id="clearFiltersBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                            <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
+                        </button>
+                        <button id="refreshBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50">
+                            <i class="fas fa-rotate-right mr-2"></i><span id="refreshBtnText">Atualizar</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Mobile: lista em cards (padrao tipo Painel financeiro) -->
                 <div id="debtorsMobileList" class="sm:hidden space-y-3">
-                    <div class="rounded-2xl border border-slate-200 bg-white/90 p-4 text-center text-sm text-gray-500">
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
                         Carregando clientes...
                     </div>
                 </div>
 
                 <!-- Desktop/Tablet: tabela completa -->
                 <div class="hidden sm:block">
-                    <div class="table-shell">
+                    <div class="table-shell max-h-[520px] overflow-auto">
                         <table>
                             <thead>
                                 <tr>
                                     <th class="sortable-th" data-sort="name" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Nome">
-                                            <span>Nome</span>
-                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-                                        </button>
-                                    </th>
-                                    <th class="hidden sm:table-cell sortable-th" data-sort="document" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Documento">
-                                            <span>Documento</span>
-                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-                                        </button>
-                                    </th>
-                                    <th class="hidden sm:table-cell sortable-th" data-sort="phone" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Telefone">
-                                            <span>Telefone</span>
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Cliente">
+                                            <span>Cliente</span>
                                             <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
                                         </button>
                                     </th>
@@ -339,56 +566,41 @@
                                             <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
                                         </button>
                                     </th>
-                                    <th class="hidden sm:table-cell sortable-th" data-sort="loans_count" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Empréstimos">
-                                            <span>Empréstimos</span>
-                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-                                        </button>
+                                    <th class="whitespace-nowrap">
+                                        <span>Situação</span>
                                     </th>
-                                    <th class="sortable-th" data-sort="overdue_count" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Parcelas em atraso">
-                                            <span>Parcelas em atraso</span>
-                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-                                        </button>
-                                    </th>
-                                    <th class="hidden sm:table-cell sortable-th" data-sort="max_overdue_days" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Dias em atraso (máx.)">
-                                            <span>Dias em atraso (máx.)</span>
-                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-                                        </button>
-                                    </th>
-                                    <th class="hidden sm:table-cell sortable-th" data-sort="next_due_date" data-sort-active="false">
-                                        <button type="button" class="sort-btn" aria-label="Ordenar por Próximo vencimento">
-                                            <span>Próximo vencimento</span>
+                                    <th class="whitespace-nowrap text-right sortable-th" data-sort="overdue_count" data-sort-active="false">
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Atrasos">
+                                            <span>Atrasos</span>
                                             <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
                                         </button>
                                     </th>
                                     <th class="whitespace-nowrap text-right sortable-th" data-sort="open_total" data-sort-active="false">
                                         <button type="button" class="sort-btn" aria-label="Ordenar por Total em aberto">
-                                            <span>Total em aberto (R$)</span>
+                                            <span>Total em aberto</span>
                                             <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
                                         </button>
                                     </th>
-                                    <th>Ações</th>
+                                    <th class="whitespace-nowrap w-[1%] text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="debtorsTableBody">
-                                <tr class="hidden sm:table-row"><td colspan="10" class="text-center py-8 text-gray-500">Carregando clientes...</td></tr>
+                                <tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Carregando clientes...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <div class="mt-4 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-gray-500">
                         Mostrando <span id="showingStart">0</span> até <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
                     </p>
                     <div class="flex items-center gap-2">
-                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span id="pageIndicator" class="text-sm text-gray-600">Página 1</span>
-                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                        <span id="pageIndicator" class="text-sm text-gray-500">Página 1</span>
+                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -396,10 +608,10 @@
             </div>
 
             <div id="debtorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="glass-card w-full max-w-2xl rounded-2xl p-6">
+                <div class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
                     <div class="mb-5 flex items-center justify-between">
                         <h3 id="debtorModalTitle" class="text-xl font-bold text-gray-800">Novo cliente</h3>
-                        <button id="closeDebtorModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                        <button id="closeDebtorModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
                     </div>
                     <form id="newDebtorForm" class="space-y-4" novalidate>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -436,21 +648,36 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-3 pt-2">
-                            <button id="cancelDebtorModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancelar</button>
+                            <button id="cancelDebtorModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
                             <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar cliente</button>
                         </div>
                     </form>
                 </div>
             </div>
 
+            <div id="deleteDebtorConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
+                    <h3 class="text-xl font-semibold text-gray-800">Confirmar exclusão</h3>
+                    <p class="mt-2 text-sm text-gray-600">Tem certeza que deseja excluir este cliente?</p>
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                        <button id="cancelDeleteDebtorBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button id="confirmDeleteDebtorBtn" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div id="registerPaymentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="glass-card w-full max-w-lg rounded-2xl p-6">
+                <div class="w-full max-w-lg rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
                     <div class="mb-5 flex items-start justify-between">
                         <div>
                             <h3 class="text-xl font-bold text-gray-800">Registrar pagamento</h3>
                             <p class="text-sm text-gray-500">Cliente: <span id="registerPaymentDebtorName" class="font-semibold text-gray-800">-</span></p>
                         </div>
-                        <button id="closeRegisterPaymentModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                        <button id="closeRegisterPaymentModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
                     </div>
                     <form id="registerPaymentForm" class="space-y-4">
                         <div>
@@ -479,6 +706,15 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <div id="deleteDebtorToast" class="pointer-events-none fixed left-4 right-4 top-4 z-50 hidden translate-y-2 opacity-0 transition-all duration-300 ease-out sm:left-auto sm:right-6 sm:max-w-sm">
+                <div class="flex items-center gap-3 rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-emerald-100 shadow-2xl backdrop-blur">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-200">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <p class="text-sm font-medium">Cliente excluído com sucesso.</p>
                 </div>
             </div>
         </main>
@@ -600,25 +836,50 @@
         function showMessage(message, type) {
             const safeType = type === 'success' ? 'success' : 'error';
 
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `fixed left-4 right-4 top-4 rounded-xl px-4 py-3 text-white font-medium z-50 shadow-lg sm:left-auto sm:right-6 sm:top-6 sm:max-w-md sm:px-6 sm:py-4 ${safeType === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            if (showMessage.hideTimeoutId) {
+                clearTimeout(showMessage.hideTimeoutId);
+                showMessage.hideTimeoutId = null;
+            }
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex items-center';
+            if (showMessage.removeTimeoutId) {
+                clearTimeout(showMessage.removeTimeoutId);
+                showMessage.removeTimeoutId = null;
+            }
+
+            const existing = document.getElementById('appToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
+
+            const iconWrap = document.createElement('span');
+            iconWrap.className = 'app-toast-icon';
 
             const icon = document.createElement('i');
-            icon.className = `fas fa-${safeType === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-3 text-lg`;
+            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
+            iconWrap.appendChild(icon);
 
             const text = document.createElement('span');
-            text.className = 'break-words';
+            text.className = 'app-toast-text';
             text.textContent = String(message || '');
 
-            wrapper.appendChild(icon);
-            wrapper.appendChild(text);
-            messageDiv.appendChild(wrapper);
+            toast.appendChild(iconWrap);
+            toast.appendChild(text);
+            document.body.appendChild(toast);
 
-            document.body.appendChild(messageDiv);
-            setTimeout(() => messageDiv.remove(), 3500);
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            showMessage.hideTimeoutId = window.setTimeout(() => {
+                toast.classList.remove('show');
+                showMessage.removeTimeoutId = window.setTimeout(() => {
+                    toast.remove();
+                    showMessage.removeTimeoutId = null;
+                }, 220);
+                showMessage.hideTimeoutId = null;
+            }, 3000);
         }
 
         async function performLogout() {
@@ -678,7 +939,8 @@
             sortField: 'name',
             sortDir: 'asc',
             editingDebtorId: null,
-            registeringPaymentTarget: null
+            registeringPaymentTarget: null,
+            expandedDebtorIds: new Set()
         };
         const focusDebtorId = String(new URLSearchParams(window.location.search).get('debtorId') || '').trim();
         let hasAppliedDebtorFocus = false;
@@ -699,7 +961,9 @@
         const newDebtorPhoneError = document.getElementById('newDebtorPhoneError');
         const newDebtorCpfError = document.getElementById('newDebtorCpfError');
         const newDebtorEmailError = document.getElementById('newDebtorEmailError');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
         const refreshBtn = document.getElementById('refreshBtn');
+        const refreshBtnText = document.getElementById('refreshBtnText');
         const sortBy = document.getElementById('sortBy');
         const prevPageBtn = document.getElementById('prevPageBtn');
         const nextPageBtn = document.getElementById('nextPageBtn');
@@ -712,8 +976,46 @@
         const closeRegisterPaymentModalBtn = document.getElementById('closeRegisterPaymentModalBtn');
         const cancelRegisterPaymentModalBtn = document.getElementById('cancelRegisterPaymentModalBtn');
         const saveRegisterPaymentBtn = document.getElementById('saveRegisterPaymentBtn');
+        const deleteDebtorConfirmModal = document.getElementById('deleteDebtorConfirmModal');
+        const cancelDeleteDebtorBtn = document.getElementById('cancelDeleteDebtorBtn');
+        const confirmDeleteDebtorBtn = document.getElementById('confirmDeleteDebtorBtn');
+        const deleteDebtorToast = document.getElementById('deleteDebtorToast');
         const debtorsMobileList = document.getElementById('debtorsMobileList');
         const debtorsTableHead = document.querySelector('.table-shell thead');
+        let pendingDeleteDebtorId = null;
+        let deleteToastTimeoutId = null;
+        let deleteToastHideTimeoutId = null;
+        let isDebtorsLoading = false;
+        const debtorsModalScrollState = {
+            previousBodyOverflow: '',
+            openModalIds: new Set(),
+        };
+
+        function lockBodyScrollForDebtorsModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || debtorsModalScrollState.openModalIds.has(modalId)) return;
+
+            if (debtorsModalScrollState.openModalIds.size === 0) {
+                debtorsModalScrollState.previousBodyOverflow = document.body.style.overflow || '';
+                document.body.style.overflow = 'hidden';
+            }
+
+            debtorsModalScrollState.openModalIds.add(modalId);
+        }
+
+        function unlockBodyScrollForDebtorsModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || !debtorsModalScrollState.openModalIds.has(modalId)) return;
+
+            debtorsModalScrollState.openModalIds.delete(modalId);
+
+            if (debtorsModalScrollState.openModalIds.size === 0) {
+                document.body.style.overflow = debtorsModalScrollState.previousBodyOverflow;
+                debtorsModalScrollState.previousBodyOverflow = '';
+            }
+        }
 
         function sameId(a, b) {
             return String(a ?? '') === String(b ?? '');
@@ -907,6 +1209,11 @@
             return status || 'Inativo';
         }
 
+        function isOverdueStatus(status) {
+            const normalized = String(status || '').trim().toLowerCase();
+            return ['atrasado', 'overdue', 'em atraso', 'vencido', 'late'].includes(normalized);
+        }
+
         function normalizeEditableClientStatus(value) {
             const s = normalizeStatus(value);
             if (s === 'Inativo' || s === 'Quitado') return 'Inativo';
@@ -947,6 +1254,26 @@
             const overdueCount = getDebtorOverdueCount(debtor?.id);
             if (overdueCount > 0) return 'Atrasado';
             return base;
+        }
+
+        function getDebtorRegistrationStatus(debtor) {
+            const base = normalizeEditableClientStatus(debtor?.status);
+            return base === 'Inativo' ? 'Inativo' : 'Ativo';
+        }
+
+        function getDebtorFinancialSituation(debtor) {
+            const loansCount = getDebtorLoansCount(debtor?.id);
+            if (loansCount <= 0) return 'Sem empréstimo';
+
+            const overdueCount = getDebtorOverdueCount(debtor?.id);
+            if (overdueCount > 0) return 'Atrasado';
+            return 'Em dia';
+        }
+
+        function badgeForFinancialSituation(situation) {
+            if (situation === 'Atrasado') return 'badge badge-danger';
+            if (situation === 'Em dia') return 'badge badge-success';
+            return 'badge badge-neutral';
         }
 
         function getDebtorMaxOverdueDays(debtorId) {
@@ -1083,6 +1410,105 @@
             return 'badge badge-warn';
         }
 
+        function getDebtorRiskIndicator(maxOverdueDays) {
+            const days = Number(maxOverdueDays || 0);
+            if (days >= 30) {
+                return {
+                    label: 'Alto',
+                    badgeClass: 'border-red-300 bg-red-50 text-red-700',
+                    dotClass: 'bg-red-500',
+                };
+            }
+
+            if (days >= 8) {
+                return {
+                    label: 'Médio',
+                    badgeClass: 'border-amber-300 bg-amber-50 text-amber-700',
+                    dotClass: 'bg-amber-500',
+                };
+            }
+
+            return {
+                label: 'Baixo',
+                badgeClass: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+                dotClass: 'bg-emerald-500',
+            };
+        }
+
+        function setRefreshLoadingState(isLoading) {
+            if (!refreshBtn) return;
+            const icon = refreshBtn.querySelector('i');
+            refreshBtn.disabled = Boolean(isLoading);
+            refreshBtn.classList.toggle('opacity-80', Boolean(isLoading));
+            refreshBtn.classList.toggle('cursor-not-allowed', Boolean(isLoading));
+            refreshBtn.classList.toggle('ring-2', Boolean(isLoading));
+            refreshBtn.classList.toggle('ring-blue-200', Boolean(isLoading));
+
+            if (icon) {
+                icon.classList.toggle('fa-spin', Boolean(isLoading));
+            }
+            if (refreshBtnText) {
+                refreshBtnText.textContent = isLoading ? 'Atualizando...' : 'Atualizar';
+            }
+        }
+
+        function flashRefreshSuccess() {
+            if (!refreshBtn) return;
+            refreshBtn.classList.add('border-emerald-400', 'text-emerald-700', 'ring-2', 'ring-emerald-200');
+            setTimeout(() => {
+                refreshBtn.classList.remove('border-emerald-400', 'text-emerald-700', 'ring-2', 'ring-emerald-200');
+            }, 900);
+        }
+
+        function renderDebtorsLoadingSkeleton() {
+            const skeletonCount = Math.max(4, Math.min(8, Number(debtorsState.pageSize || 6)));
+            const tbody = document.getElementById('debtorsTableBody');
+
+            if (tbody) {
+                tbody.innerHTML = Array.from({ length: skeletonCount }).map(() => `
+                    <tr class="hidden sm:table-row">
+                        <td colspan="6" class="py-4">
+                            <div class="animate-pulse flex items-center justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="h-3 w-40 rounded bg-gray-300"></div>
+                                    <div class="mt-2 h-2 w-24 rounded bg-gray-200"></div>
+                                </div>
+                                <div class="h-6 w-24 rounded-full bg-gray-300"></div>
+                                <div class="h-6 w-20 rounded-full bg-gray-300"></div>
+                                <div class="h-6 w-24 rounded bg-gray-300"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (debtorsMobileList) {
+                debtorsMobileList.innerHTML = Array.from({ length: 4 }).map(() => `
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 shadow-sm animate-pulse">
+                        <div class="h-3 w-2/3 rounded bg-gray-300"></div>
+                        <div class="mt-2 h-2 w-1/3 rounded bg-gray-200"></div>
+                        <div class="mt-4 grid grid-cols-2 gap-3">
+                            <div class="h-10 rounded bg-gray-200"></div>
+                            <div class="h-10 rounded bg-gray-200"></div>
+                        </div>
+                        <div class="mt-4 h-10 rounded bg-gray-200"></div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearDebtorsFilters() {
+            const searchInput = document.getElementById('debtorSearch');
+            const statusInput = document.getElementById('statusFilter');
+            if (searchInput) searchInput.value = '';
+            if (statusInput) statusInput.value = 'Todos';
+            if (sortBy) sortBy.value = 'name';
+            debtorsState.sortField = 'name';
+            debtorsState.sortDir = getDefaultSortDir('name');
+            updateDebtorsSortHeaderUi();
+            applyDebtorsFilters(true);
+        }
+
         function getDefaultSortDir(sortField) {
             if (sortField === 'open_total') return 'desc';
             if (sortField === 'max_overdue_days') return 'desc';
@@ -1122,8 +1548,8 @@
             }
 
             if (sortField === 'status') {
-                const aStatus = getDebtorUiStatus(a);
-                const bStatus = getDebtorUiStatus(b);
+                const aStatus = getDebtorRegistrationStatus(a);
+                const bStatus = getDebtorRegistrationStatus(b);
                 const cmp = String(aStatus).localeCompare(String(bStatus), 'pt-BR');
                 if (cmp !== 0) return cmp * dir;
                 return nameCmp;
@@ -1245,68 +1671,113 @@
             nextPageBtn.classList.toggle('opacity-50', nextPageBtn.disabled);
         }
 
+        function isDebtorDetailExpanded(debtorId) {
+            return debtorsState.expandedDebtorIds.has(String(debtorId));
+        }
+
+        function setDebtorDetailExpanded(debtorId, expanded) {
+            const key = String(debtorId || '');
+            if (!key) return;
+
+            if (expanded) {
+                debtorsState.expandedDebtorIds.add(key);
+            } else {
+                debtorsState.expandedDebtorIds.delete(key);
+            }
+
+            const detailNodes = document.querySelectorAll(`[data-debtor-detail-for="${key}"]`);
+            const mainNodes = document.querySelectorAll(`[data-expandable-row="true"][data-debtor-id="${key}"]`);
+            const toggleButtons = document.querySelectorAll(`button[data-action="toggle-debtor-details"][data-id="${key}"]`);
+
+            detailNodes.forEach((node) => {
+                node.classList.toggle('hidden', !expanded);
+            });
+
+            mainNodes.forEach((node) => {
+                node.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            });
+
+            toggleButtons.forEach((button) => {
+                button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                button.setAttribute('title', expanded ? 'Fechar detalhes' : 'Ver detalhes');
+                button.setAttribute('aria-label', expanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente');
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !expanded);
+                    icon.classList.toggle('fa-eye-slash', expanded);
+                }
+            });
+        }
+
+        function toggleDebtorDetail(debtorId) {
+            const expanded = isDebtorDetailExpanded(debtorId);
+            setDebtorDetailExpanded(debtorId, !expanded);
+        }
+
         function renderDebtorsMobileList(pageRows) {
             if (!debtorsMobileList) return;
 
-            debtorsMobileList.innerHTML = pageRows.map(debtor => {
-                const status = getDebtorUiStatus(debtor);
+            debtorsMobileList.innerHTML = pageRows.map((debtor, index) => {
+                const statusLabel = getDebtorRegistrationStatus(debtor);
+                const financialSituation = getDebtorFinancialSituation(debtor);
+                const financialSituationBadge = badgeForFinancialSituation(financialSituation);
                 const loansCount = getDebtorLoansCount(debtor.id);
                 const overdueCount = getDebtorOverdueCount(debtor.id);
                 const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
                 const nextDue = getDebtorNextDueInstallment(debtor.id);
                 const openTotal = getDebtorOpenTotal(debtor.id);
+                const hasOverdue = overdueCount > 0;
+                const isExpanded = isDebtorDetailExpanded(debtor.id);
+                const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
+                const documentValue = formatDocument(rawDocument);
                 const rawPhone = debtor.phone || '';
                 const phoneValue = formatPhone(rawPhone);
                 const phoneDigits = toDigits(rawPhone);
-                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="font-semibold text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-500">-</span>';
+                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="font-semibold text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-400">-</span>';
+                const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
 
                 return `
-                    <div class="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm" data-debtor-id="${debtor.id}">
+                    <div class="debtor-row-enter rounded-2xl border ${hasOverdue ? 'border-gray-200 bg-slate-50 debtor-overdue-mobile' : 'border-gray-200 bg-slate-50'} p-4 shadow-sm" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <div class="truncate text-base font-semibold text-slate-900">${debtor.name || '-'}</div>
-                                <div class="mt-0.5 truncate text-xs text-slate-500">${debtor.email || 'Sem e-mail'}</div>
-                            </div>
-                            <div class="shrink-0">
-                                <span class="${badgeForStatus(status)}">${status}</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 grid grid-cols-2 gap-3">
-                            <div>
-                                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Telefone</div>
-                                <div class="mt-1 text-sm">${phoneHtml}</div>
+                                <div class="truncate text-base font-semibold text-gray-900">${debtor.name || '-'}</div>
+                                <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
                             </div>
                             <div class="text-right">
-                                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Em aberto</div>
-                                <div class="mt-1 text-sm font-semibold text-slate-900">${formatCurrency(openTotal)}</div>
+                                <div class="text-[11px] uppercase tracking-wide text-gray-500">Total em aberto</div>
+                                <div class="mt-1 text-base font-extrabold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</div>
                             </div>
                         </div>
 
                         <div class="mt-3 flex flex-wrap items-center gap-2">
-                            <span class="badge ${overdueCount > 0 ? 'badge-danger' : 'badge-success'}">${overdueCount} em atraso</span>
-                            <span class="badge ${Number(maxOverdueDays || 0) > 0 ? 'badge-danger' : 'badge-neutral'}">${Number(maxOverdueDays || 0) > 0 ? `${maxOverdueDays} dias (máx.)` : '0 dias (máx.)'}</span>
-                            <span class="badge badge-neutral">${loansCount} empréstimos</span>
-                        </div>
-
-                        <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Próximo vencimento</div>
-                            <div class="mt-1 flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-900">${nextDue ? formatDate(nextDue.dueDate) : '-'}</div>
-                                <div class="text-sm text-slate-700">${nextDue ? formatCurrency(nextDue.amount) : '-'}</div>
-                            </div>
+                            <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
+                            <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
+                            <span class="inline-flex min-w-[1.5rem] justify-center rounded-full border px-2 py-1 text-xs font-semibold ${overdueCount > 0 ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
                         </div>
 
                         <div class="mt-3 flex items-center justify-end gap-2">
-                            <button type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}">
-                                <i class="fas fa-cash-register mr-2"></i>Pagar
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                                <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
-                            <button type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}">
-                                <i class="fas fa-pen-to-square mr-2"></i>Editar
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
+                                <i class="fas fa-cash-register"></i>
                             </button>
-                            <button type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}">
-                                <i class="fas fa-trash mr-2"></i>Excluir
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                                <i class="fas fa-pen-to-square"></i>
                             </button>
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-3 ${isExpanded ? '' : 'hidden'} rounded-xl border border-gray-200 bg-slate-50 p-3" data-debtor-detail-for="${debtor.id}">
+                            <div class="grid grid-cols-1 gap-2 text-xs text-gray-700">
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Documento:</span> <span class="font-semibold text-gray-800">${documentValue}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">E-mail:</span> <span class="font-semibold text-gray-800">${debtor.email || '&mdash;'}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.):</span> <span class="font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${detailNextDue}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos:</span> <span class="font-semibold text-gray-800">${loansCount}</span></div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1320,11 +1791,11 @@
 
             if (!total) {
                 if (tbody) {
-                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="10" class="text-center py-8 text-gray-500">Nenhum cliente encontrado.</td></tr>';
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Nenhum cliente encontrado.</td></tr>';
                 }
                 if (debtorsMobileList) {
                     debtorsMobileList.innerHTML = `
-                        <div class="rounded-2xl border border-slate-200 bg-white/90 p-4 text-center text-sm text-gray-500">
+                        <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
                             Nenhum cliente encontrado.
                         </div>
                     `;
@@ -1336,49 +1807,82 @@
             const pageRows = debtorsState.filtered.slice(startIndex, startIndex + debtorsState.pageSize);
 
             if (tbody) {
-                tbody.innerHTML = pageRows.map(debtor => {
-                const status = getDebtorUiStatus(debtor);
+                tbody.innerHTML = pageRows.map((debtor, index) => {
+                const statusLabel = getDebtorRegistrationStatus(debtor);
+                const financialSituation = getDebtorFinancialSituation(debtor);
+                const financialSituationBadge = badgeForFinancialSituation(financialSituation);
                 const loansCount = getDebtorLoansCount(debtor.id);
                 const overdueCount = getDebtorOverdueCount(debtor.id);
                 const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
                 const nextDue = getDebtorNextDueInstallment(debtor.id);
                 const openTotal = getDebtorOpenTotal(debtor.id);
+                const hasOverdue = overdueCount > 0;
+                const isExpanded = isDebtorDetailExpanded(debtor.id);
                 const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
                 const documentValue = formatDocument(rawDocument);
                 const rawPhone = debtor.phone || '';
                 const phoneValue = formatPhone(rawPhone);
                 const phoneDigits = toDigits(rawPhone);
-                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '-';
+                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-500">-</span>';
+                const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
 
                 return `
-                    <tr data-debtor-id="${debtor.id}">
+                    <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
                         <td>
-                            <div class="font-semibold">${debtor.name || '-'}</div>
-                            <div class="mt-1 text-xs text-gray-500 sm:hidden">${phoneDigits ? phoneHtml : '-'}</div>
-                            <div class="text-xs text-gray-500 hidden sm:block">${debtor.email || 'Sem e-mail'}</div>
+                            <div class="text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
+                            <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
                         </td>
-                        <td class="hidden sm:table-cell">${documentValue}</td>
-                        <td class="hidden sm:table-cell">${phoneHtml}</td>
-                        <td><span class="${badgeForStatus(status)}">${status}</span></td>
-                        <td class="hidden sm:table-cell">${loansCount}</td>
-                        <td>${overdueCount > 0 ? `<span class="badge badge-danger">${overdueCount}</span>` : '<span class="badge badge-success">0</span>'}</td>
-                        <td class="hidden sm:table-cell">${Number(maxOverdueDays || 0) > 0 ? `<span class="badge badge-danger">${maxOverdueDays}</span>` : '<span class="badge badge-neutral">&mdash;</span>'}</td>
-                        <td class="hidden sm:table-cell">
-                            ${nextDue
-                                ? `<div class="font-semibold whitespace-nowrap">${formatDate(nextDue.dueDate)}</div><div class="text-xs text-gray-500 whitespace-nowrap">${formatCurrency(nextDue.amount)}</div>`
-                                : '<span class="badge badge-neutral">&mdash;</span>'}
+                        <td>
+                            <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
                         </td>
-                        <td class="whitespace-nowrap text-right font-semibold">${formatCurrency(openTotal)}</td>
-                        <td class="whitespace-nowrap">
-                            <button type="button" class="mr-2 text-emerald-600 hover:text-emerald-500" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento">
-                                <i class="fas fa-cash-register"></i>
-                            </button>
-                            <button type="button" class="mr-2 text-blue-600" data-action="edit-debtor" data-id="${debtor.id}" title="Editar">
-                                <i class="fas fa-pen-to-square"></i>
-                            </button>
-                            <button type="button" class="text-red-600" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <td>
+                            <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
+                        </td>
+                        <td class="whitespace-nowrap text-right">
+                            <span class="inline-flex min-w-[1.5rem] justify-end text-base ${overdueCount > 0 ? 'font-semibold text-amber-700' : 'font-medium text-gray-600'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
+                        </td>
+                        <td class="whitespace-nowrap text-right text-base font-semibold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</td>
+                        <td class="whitespace-nowrap w-[1%]">
+                            <div class="flex items-center justify-end gap-2">
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                                    <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
+                                    <i class="fas fa-cash-register"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                                    <i class="fas fa-pen-to-square"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="${isExpanded ? '' : 'hidden'}" data-debtor-detail-for="${debtor.id}">
+                        <td colspan="6" class="border-t border-gray-200 bg-slate-50 px-4 py-3">
+                            <div class="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2 xl:grid-cols-5">
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Documento</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${documentValue}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">E-mail</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${debtor.email || '&mdash;'}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.)</div>
+                                    <div class="mt-1 font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${detailNextDue}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${loansCount}</div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1449,6 +1953,7 @@
 
             debtorModal.classList.remove('hidden');
             debtorModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(debtorModal);
             if (newDebtorNameInput) newDebtorNameInput.focus();
         }
 
@@ -1456,12 +1961,37 @@
             debtorsState.editingDebtorId = null;
             debtorModal.classList.add('hidden');
             debtorModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(debtorModal);
             newDebtorForm.reset();
             clearDebtorFormErrors();
         }
 
-        function deleteDebtor(debtorId) {
-            if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+        function openDeleteDebtorConfirmModal(debtorId) {
+            if (!deleteDebtorConfirmModal) {
+                performDebtorDeletion(debtorId);
+                return;
+            }
+            pendingDeleteDebtorId = debtorId;
+            deleteDebtorConfirmModal.classList.remove('hidden');
+            deleteDebtorConfirmModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(deleteDebtorConfirmModal);
+            if (confirmDeleteDebtorBtn) confirmDeleteDebtorBtn.focus();
+        }
+
+        function closeDeleteDebtorConfirmModal() {
+            pendingDeleteDebtorId = null;
+            if (!deleteDebtorConfirmModal) return;
+            deleteDebtorConfirmModal.classList.add('hidden');
+            deleteDebtorConfirmModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(deleteDebtorConfirmModal);
+        }
+
+        function showDeleteDebtorSuccessToast() {
+            showMessage('Cliente excluído com sucesso.', 'success');
+        }
+
+        function performDebtorDeletion(debtorId) {
+            if (debtorId === null || debtorId === undefined || debtorId === '') return;
 
             debtorsState.debtors = debtorsState.debtors.filter(debtor => !sameId(debtor.id, debtorId));
             debtorsState.loans = debtorsState.loans.filter(loan => !sameId(loan.debtor_id, debtorId));
@@ -1473,9 +2003,34 @@
 
             updateDebtorMetrics();
             applyDebtorsFilters(false);
+            showDeleteDebtorSuccessToast();
         }
 
-        async function loadDebtorsData() {
+        function confirmDeleteDebtor() {
+            if (pendingDeleteDebtorId === null || pendingDeleteDebtorId === undefined || pendingDeleteDebtorId === '') {
+                closeDeleteDebtorConfirmModal();
+                return;
+            }
+
+            const debtorId = pendingDeleteDebtorId;
+            closeDeleteDebtorConfirmModal();
+            performDebtorDeletion(debtorId);
+        }
+
+        function deleteDebtor(debtorId) {
+            openDeleteDebtorConfirmModal(debtorId);
+        }
+
+        async function loadDebtorsData(options = {}) {
+            const showSkeleton = options.showSkeleton !== false;
+            const showRefreshState = options.showRefreshState === true;
+            const feedbackOnSuccess = options.feedbackOnSuccess === true;
+            if (isDebtorsLoading) return;
+
+            isDebtorsLoading = true;
+            if (showRefreshState) setRefreshLoadingState(true);
+            if (showSkeleton) renderDebtorsLoadingSkeleton();
+
             try {
                 const [debtors, loans, installments] = await Promise.all([
                     fetchTableData('debtors'),
@@ -1490,11 +2045,12 @@
                 updateDebtorMetrics();
                 applyDebtorsFilters(true);
                 applyDebtorFocusFromQuery();
+                if (feedbackOnSuccess) flashRefreshSuccess();
             } catch (error) {
                 console.error('Erro ao carregar clientes:', error);
                 const tbody = document.getElementById('debtorsTableBody');
                 if (tbody) {
-                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="10" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-red-600">Erro ao carregar dados.</td></tr>';
                 }
                 if (debtorsMobileList) {
                     debtorsMobileList.innerHTML = `
@@ -1503,6 +2059,9 @@
                         </div>
                     `;
                 }
+            } finally {
+                isDebtorsLoading = false;
+                if (showRefreshState) setRefreshLoadingState(false);
             }
         }
 
@@ -1528,6 +2087,7 @@
 
             registerPaymentModal.classList.remove('hidden');
             registerPaymentModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(registerPaymentModal);
             if (registerPaymentAmount) registerPaymentAmount.focus();
         }
 
@@ -1536,6 +2096,7 @@
             if (!registerPaymentModal) return;
             registerPaymentModal.classList.add('hidden');
             registerPaymentModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(registerPaymentModal);
             if (registerPaymentForm) registerPaymentForm.reset();
         }
 
@@ -1605,6 +2166,13 @@
         document.getElementById('statusFilter').addEventListener('change', function () {
             applyDebtorsFilters(true);
         });
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', function () {
+                clearDebtorsFilters();
+                clearFiltersBtn.classList.add('ring-2', 'ring-blue-200');
+                setTimeout(() => clearFiltersBtn.classList.remove('ring-2', 'ring-blue-200'), 450);
+            });
+        }
         sortBy.addEventListener('change', function () {
             debtorsState.sortField = sortBy.value;
             debtorsState.sortDir = getDefaultSortDir(debtorsState.sortField);
@@ -1645,7 +2213,7 @@
         debtorsState.sortDir = getDefaultSortDir(debtorsState.sortField);
         updateDebtorsSortHeaderUi();
         refreshBtn.addEventListener('click', function () {
-            loadDebtorsData();
+            loadDebtorsData({ showSkeleton: true, showRefreshState: true, feedbackOnSuccess: true });
         });
 
         prevPageBtn.addEventListener('click', function () {
@@ -1681,8 +2249,22 @@
             });
         }
 
+        if (cancelDeleteDebtorBtn) cancelDeleteDebtorBtn.addEventListener('click', closeDeleteDebtorConfirmModal);
+        if (confirmDeleteDebtorBtn) confirmDeleteDebtorBtn.addEventListener('click', confirmDeleteDebtor);
+        if (deleteDebtorConfirmModal) {
+            deleteDebtorConfirmModal.addEventListener('click', function (event) {
+                if (event.target === deleteDebtorConfirmModal) {
+                    closeDeleteDebtorConfirmModal();
+                }
+            });
+        }
+
         document.addEventListener('keydown', function (event) {
             if (event.key !== 'Escape') return;
+            if (deleteDebtorConfirmModal && !deleteDebtorConfirmModal.classList.contains('hidden')) {
+                closeDeleteDebtorConfirmModal();
+                return;
+            }
             if (debtorModal && !debtorModal.classList.contains('hidden')) {
                 closeDebtorModal();
                 return;
@@ -1693,6 +2275,12 @@
         function handleDebtorsListClick(event) {
             const target = event.target;
             if (!(target instanceof Element)) return;
+
+            const detailsBtn = target.closest('button[data-action="toggle-debtor-details"]');
+            if (detailsBtn) {
+                toggleDebtorDetail(detailsBtn.getAttribute('data-id'));
+                return;
+            }
 
             const registerBtn = target.closest('button[data-action="register-payment"]');
             if (registerBtn) {
@@ -1711,6 +2299,7 @@
             const deleteBtn = target.closest('button[data-action="delete-debtor"]');
             if (deleteBtn) {
                 deleteDebtor(deleteBtn.getAttribute('data-id'));
+                return;
             }
         }
 
@@ -1761,7 +2350,7 @@
 
                     closeRegisterPaymentModal();
                     showMessage('Pagamento registrado com sucesso.', 'success');
-                    await loadDebtorsData();
+                    await loadDebtorsData({ showSkeleton: false });
                 } catch (error) {
                     console.error(error);
                     showMessage(error?.message || 'Erro ao registrar pagamento.', 'error');
@@ -1844,7 +2433,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadDebtorsData();
+            loadDebtorsData({ showSkeleton: true });
         });
     </script>
 </body>

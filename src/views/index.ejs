@@ -3,8 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CredFácil - Login</title>
+<title>Credix - Login</title>
 
+<style>
+html, body { background-color: #020617; }
+</style>
+<script>
+(() => {
+    const root = document.documentElement;
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') root.classList.add('dark');
+        if (savedTheme === 'light') root.classList.remove('dark');
+    } catch (error) {}
+})();
+
+window.tailwind = window.tailwind || {};
+window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -129,7 +145,7 @@ body { font-family: 'Inter', sans-serif; }
     <!-- Footer -->
     <div class="text-center mt-4">
         <p class="text-xs text-blue-200 opacity-70">
-            © 2026 CredFácil
+            © 2026 Credix
         </p>
     </div>
 

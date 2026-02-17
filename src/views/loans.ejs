@@ -4,7 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFácil - Empréstimos</title>
+    <title>Credix - Empréstimos</title>
+    <style>
+        html, body { background-color: #020617; }
+    </style>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') root.classList.add('dark');
+                if (savedTheme === 'light') root.classList.remove('dark');
+            } catch (error) {}
+        })();
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -51,9 +67,9 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
         }
         .page-title { color: #ffffff; }
         .muted-on-dark { color: #cbd5e1; }
@@ -65,23 +81,51 @@
             color: #0f172a;
         }
         .filter-control {
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid #d1d5db;
             border-radius: 10px;
             padding: 10px 12px;
             color: #111827;
             width: 100%;
         }
+        #loanModal .filter-control:focus,
+        #loanModal button:focus,
+        #loanSearch:focus,
+        #loanStatusFilter:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .filter-control.field-invalid {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
+        }
+        .field-error {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #dc2626;
+            display: none;
+        }
+        .field-error:not(:empty) { display: block; }
 
         .table-shell {
             overflow: auto;
             border-radius: 14px;
-            border: 1px solid #e5e7eb;
-            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
         }
         .table-shell table { width: 100%; border-collapse: collapse; }
-        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
-        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; }
+        .table-shell th {
+            text-align: left;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .table-shell td { padding: 16px 14px; border-top: 1px solid #f1f5f9; color: #1f2937; }
 
         .badge {
             display: inline-flex;
@@ -107,16 +151,20 @@
             transition: background-color 120ms ease-out, border-color 120ms ease-out;
         }
         .action-btn-view { color: #2563eb; }
-        .action-btn-view:hover { background: #dbeafe; border-color: #bfdbfe; }
         .action-btn-edit { color: #059669; }
-        .action-btn-edit:hover { background: #d1fae5; border-color: #a7f3d0; }
         .action-btn-delete { color: #dc2626; }
-        .action-btn-delete:hover { background: #fee2e2; border-color: #fecaca; }
+        .action-btn-view:hover,
+        .action-btn-edit:hover,
+        .action-btn-delete:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
 
         .calc-card {
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid rgba(59, 130, 246, 0.25);
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.08) 0%, rgba(59, 130, 246, 0.12) 100%);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
         }
         .installment-preview {
             border-radius: 12px;
@@ -125,6 +173,8 @@
         }
         .installment-preview.overdue { background: #fee2e2; border-color: #fecaca; }
         .installment-preview.pending { background: #fef3c7; border-color: #fde68a; }
+        .installment-preview.overdue:hover { background: #fecaca; }
+        .installment-preview.pending:hover { background: #fde68a; }
 
         .details-grid {
             display: grid;
@@ -168,6 +218,7 @@
             background: rgba(15, 23, 42, 0.82);
             border: 1px solid rgba(148, 163, 184, 0.2);
             color: #e2e8f0;
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35);
         }
         .dark .kpi-value { color: #f8fafc; }
         .dark .filter-control,
@@ -180,10 +231,12 @@
             color: #e2e8f0;
             border-color: rgba(148, 163, 184, 0.22);
         }
+        .dark .field-error { color: #fca5a5; }
         .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
         .dark .calc-card {
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.2) 0%, rgba(59, 130, 246, 0.22) 100%);
             border-color: rgba(96, 165, 250, 0.35);
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35);
         }
     </style>
 </head>
@@ -193,7 +246,7 @@
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
                 <h1 class="ml-3 sm:ml-6">
-                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                    <a href="dashboard.html" class="flex items-center" aria-label="Credix">
                         <%- include('partials/brand-wordmark', { size: 'header' }) %>
                     </a>
                 </h1>
@@ -247,37 +300,47 @@
                     <h2 class="page-title text-3xl font-bold">Empréstimos</h2>
                     <p class="muted-on-dark mt-1 text-sm">Acompanhe contratos, valores e status da carteira ativa.</p>
                 </div>
-                <button id="newLoanBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                <button id="newLoanBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-blue-500">
                     <i class="fas fa-file-invoice-dollar mr-2"></i>Novo empréstimo
                 </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Qtd. empréstimos</p><p id="totalLoans" class="kpi-value mt-2">0</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Principal total</p><p id="totalPrincipal" class="kpi-value mt-2">R$ 0,00</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Total contratado</p><p id="totalContracted" class="kpi-value mt-2">R$ 0,00</p></div>
-                <div class="glass-card rounded-2xl p-5"><p class="text-sm text-gray-500">Empréstimos ativos</p><p id="activeLoans" class="kpi-value mt-2">0</p></div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hashtag"></i></span>
+                    <p class="text-xs tracking-wide text-slate-600">Qtd. empréstimos</p>
+                    <p id="totalLoans" class="mt-2 text-xl font-semibold text-slate-900">0</p>
+                </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hand-holding-usd"></i></span>
+                    <p class="text-xs tracking-wide text-slate-600">Principal total</p>
+                    <p id="totalPrincipal" class="mt-2 text-xl font-semibold text-slate-900">R$ 0,00</p>
+                </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-chart-line"></i></span>
+                    <p class="text-xs tracking-wide text-slate-600">Total contratado</p>
+                    <p id="totalContracted" class="mt-2 text-xl font-semibold text-slate-900">R$ 0,00</p>
+                </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-circle-check"></i></span>
+                    <p class="text-xs tracking-wide text-slate-600">Empréstimos ativos</p>
+                    <p id="activeLoans" class="mt-2 text-xl font-semibold text-slate-900">0</p>
+                </div>
             </div>
 
-            <div class="glass-card rounded-2xl p-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                     <div class="md:col-span-2">
                         <label class="block text-sm text-gray-600 mb-1">Buscar</label>
-                        <input id="loanSearch" type="text" class="filter-control" placeholder="Cliente ou ID do empréstimo">
+                        <input id="loanSearch" type="text" class="filter-control focus:ring-2 focus:ring-blue-500/40" placeholder="Cliente ou ID do empréstimo">
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Status</label>
-                        <select id="loanStatusFilter" class="filter-control">
+                        <select id="loanStatusFilter" class="filter-control focus:ring-2 focus:ring-blue-500/40">
                             <option value="Todos">Todos</option>
                             <option value="Ativo">Ativo</option>
-                            <option value="Finalizado">Finalizado</option>
-                            <option value="Atrasado">Atrasado</option>
+                            <option value="Inativo">Inativo</option>
                         </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button id="refreshBtn" type="button" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">
-                            <i class="fas fa-rotate-right mr-2"></i>Atualizar
-                        </button>
                     </div>
                 </div>
 
@@ -307,68 +370,71 @@
                         Mostrando <span id="showingStart">0</span> até <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
                     </p>
                     <div class="flex items-center gap-2">
-                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                        <button id="prevPageBtn" type="button" class="rounded-lg border border-slate-200 px-3 py-1 text-sm text-slate-700 transition-colors duration-150 hover:bg-slate-50">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                         <span id="pageIndicator" class="text-sm text-gray-600">Página 1</span>
-                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700">
+                        <button id="nextPageBtn" type="button" class="rounded-lg border border-slate-200 px-3 py-1 text-sm text-slate-700 transition-colors duration-150 hover:bg-slate-50">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
             <div id="loanModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="glass-card w-full max-w-5xl rounded-2xl p-6 max-h-[92vh] overflow-y-auto">
+                <div class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-sm max-h-[92vh] overflow-y-auto">
                     <div class="mb-5 flex items-center justify-between">
                         <h3 id="loanModalTitle" class="text-xl font-bold text-gray-800">Novo empréstimo</h3>
-                        <button id="closeLoanModalBtn" class="icon-btn focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                        <button id="closeLoanModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
                     </div>
 
-                    <form id="loanForm" class="space-y-5">
+                    <form id="loanForm" class="space-y-4">
                         <input type="hidden" id="loanEditingId">
 
                         <div class="rounded-xl border border-gray-200 p-4">
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Informações básicas</h4>
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div class="md:col-span-2">
                                     <label class="mb-1 block text-sm text-gray-600">Cliente</label>
-                                    <select id="loanDebtor" class="filter-control" required></select>
+                                    <select id="loanDebtor" class="filter-control focus:ring-2 focus:ring-blue-500/40" required></select>
+                                    <p id="loanDebtorError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Valor principal (R$)</label>
-                                    <input id="loanPrincipal" class="filter-control" type="number" min="0.01" step="0.01" required>
+                                    <input id="loanPrincipal" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0.01" step="0.01" required>
+                                    <p id="loanPrincipalError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="rounded-xl border border-gray-200 p-4">
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Condições</h4>
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)</label>
-                                    <input id="loanInterestRate" class="filter-control" type="number" min="0" step="0.01" value="20" required>
-                                </div>
+                            <div class="grid grid-cols-1 gap-4 md:[grid-template-columns:minmax(0,1.45fr)_minmax(0,1fr)_minmax(0,1fr)]">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Tipo de juros</label>
-                                    <select id="loanInterestType" class="filter-control">
-                                        <option value="simples">Simples</option>
-                                        <option value="composto" selected>Composto</option>
+                                    <select id="loanInterestType" class="filter-control focus:ring-2 focus:ring-blue-500/40">
+                                        <option value="simples">Simples %</option>
+                                        <option value="composto" selected>Composto %</option>
+                                        <option value="fixo">Fixo (valor total)</option>
                                     </select>
+                                    <p id="loanInterestTypeError" class="field-error" aria-live="polite"></p>
+                                </div>
+                                <div id="loanInterestRateWrap">
+                                    <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)</label>
+                                    <input id="loanInterestRate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="20" required placeholder="Ex: 8">
+                                    <p id="loanInterestRateError" class="field-error" aria-live="polite"></p>
+                                </div>
+                                <div id="loanFixedAdditionWrap" class="hidden">
+                                    <label class="mb-1 block text-sm text-gray-600">Acréscimo fixo total (R$)</label>
+                                    <input id="loanFixedAddition" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="0">
+                                    <p id="loanFixedAdditionError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Parcelas</label>
-                                    <input id="loanInstallments" class="filter-control" type="number" min="1" max="96" step="1" value="6" required>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
-                                    <select id="loanPaymentMethod" class="filter-control">
-                                        <option value="Pix">Pix</option>
-                                        <option value="Dinheiro">Dinheiro</option>
-                                        <option value="Transferência">Transferência</option>
-                                        <option value="Outro">Outro</option>
-                                    </select>
+                                    <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="6" required>
+                                    <p id="loanInstallmentsError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
+                            <input id="loanPaymentMethod" type="hidden" value="Pix">
                         </div>
 
                         <div class="rounded-xl border border-gray-200 p-4">
@@ -376,43 +442,82 @@
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Data de início</label>
-                                    <input id="loanStartDate" class="filter-control" type="date" required>
+                                    <input id="loanStartDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="date" required>
+                                    <p id="loanStartDateError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">1º vencimento</label>
-                                    <input id="loanFirstDueDate" class="filter-control" type="date" required>
+                                    <input id="loanFirstDueDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="date" required>
+                                    <p id="loanFirstDueDateError" class="field-error" aria-live="polite"></p>
+                                </div>
+                            </div>
+                            <input id="loanFrequency" type="hidden" value="mensal">
+                        </div>
+
+                        <div id="loanCalculationCard" class="calc-card p-4 hidden">
+                            <h4 class="text-sm font-semibold uppercase tracking-wide text-blue-900">Simulação</h4>
+                            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div class="rounded-lg border border-blue-200/70 bg-white/55 px-3 py-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-blue-800">Total do contrato</p>
+                                    <p id="loanCalculatedTotal" class="mt-1 text-lg font-semibold tracking-tight leading-tight text-blue-950">R$ 0,00</p>
+                                </div>
+                                <div class="rounded-lg border border-blue-200/70 bg-white/55 px-3 py-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-blue-800">Valor da parcela</p>
+                                    <p id="loanCalculatedInstallment" class="mt-1 text-lg font-semibold tracking-tight leading-tight text-blue-950">R$ 0,00</p>
+                                </div>
+                                <div class="rounded-lg border border-blue-200/70 bg-white/55 px-3 py-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-blue-800">Tipo de juros</p>
+                                    <p id="loanCalculatedInterestType" class="mt-1 text-lg font-semibold tracking-tight leading-tight text-blue-950">Composto</p>
+                                </div>
+                                <div class="rounded-lg border border-blue-200/70 bg-white/55 px-3 py-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-blue-800">Condição</p>
+                                    <p id="loanCalculatedRateInfo" class="mt-1 text-lg font-semibold tracking-tight leading-tight text-blue-950">Taxa: 0%</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="mb-1 block text-sm text-gray-600">Observações</label>
-                            <textarea id="loanObservations" class="filter-control" rows="3" placeholder="Observações sobre o empréstimo"></textarea>
-                        </div>
-
-                        <div id="loanCalculationCard" class="calc-card p-4 hidden">
-                            <h4 class="text-sm font-semibold uppercase tracking-wide text-blue-900">Cálculo automático</h4>
-                            <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                    <p class="text-sm text-blue-800">Total a receber</p>
-                                    <p id="loanCalculatedTotal" class="text-xl font-bold text-blue-950">R$ 0,00</p>
+                        <div id="loanScheduleCard" class="hidden rounded-xl border border-gray-200 p-4">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Agenda das parcelas</h4>
+                                <div class="flex items-center gap-2">
+                                    <button id="generateScheduleBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700">Gerar agenda</button>
+                                    <button id="regenerateScheduleBtn" type="button" class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700">Regerar agenda</button>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-blue-800">Valor da parcela</p>
-                                    <p id="loanCalculatedInstallment" class="text-xl font-bold text-blue-950">R$ 0,00</p>
-                                </div>
+                            </div>
+                            <p id="loanScheduleHint" class="mb-2 text-xs text-gray-500">Preencha parcelas e datas para visualizar a agenda.</p>
+                            <p id="loanScheduleError" class="field-error mb-2" aria-live="polite"></p>
+                            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Parcela</th>
+                                            <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Data</th>
+                                            <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="loanScheduleBody">
+                                        <tr>
+                                            <td colspan="3" class="px-3 py-4 text-center text-xs text-gray-500">Agenda ainda não gerada.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <div id="installmentsPreviewCard" class="rounded-xl border border-gray-200 p-4 hidden">
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Prévia das parcelas</h4>
-                            <div id="installmentsPreviewList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                            <div id="installmentsPreviewList" class="space-y-2 max-h-52 overflow-y-auto"></div>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm text-gray-600">Observações</label>
+                            <textarea id="loanObservations" class="filter-control focus:ring-2 focus:ring-blue-500/40" rows="3" placeholder="Observações sobre o empréstimo"></textarea>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-2">
-                            <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancelar</button>
-                            <button id="calculateLoanBtn" type="button" class="rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">Calcular</button>
-                            <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar empréstimo</button>
+                                <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                                <button id="calculateLoanBtn" type="button" class="rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100">Simular parcelas</button>
+                                <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar empréstimo</button>
                         </div>
                     </form>
                 </div>
@@ -427,6 +532,21 @@
                     <div id="loanDetailsContent" class="space-y-4"></div>
                     <div class="mt-5 flex justify-end">
                         <button id="closeLoanDetailsFooterBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Fechar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="deleteLoanConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
+                    <h3 class="text-xl font-semibold text-gray-800">Confirmar exclusão</h3>
+                    <p class="mt-2 text-sm text-gray-600">Tem certeza que deseja excluir este empréstimo e suas parcelas?</p>
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                        <button id="cancelDeleteLoanBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button id="confirmDeleteLoanBtn" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
+                            Excluir
+                        </button>
                     </div>
                 </div>
             </div>
@@ -604,9 +724,48 @@
 
         const loanModal = document.getElementById('loanModal');
         const loanDetailsModal = document.getElementById('loanDetailsModal');
+        const deleteLoanConfirmModal = document.getElementById('deleteLoanConfirmModal');
         const loanForm = document.getElementById('loanForm');
         const loanCalculationCard = document.getElementById('loanCalculationCard');
         const installmentsPreviewCard = document.getElementById('installmentsPreviewCard');
+        const installmentsPreviewList = document.getElementById('installmentsPreviewList');
+        const loanScheduleBody = document.getElementById('loanScheduleBody');
+        const loanOpenedModalIds = new Set();
+        let previousBodyOverflow = '';
+        let pendingDeleteLoanId = null;
+
+        const LOAN_META_START = '[[LOAN_META]]';
+        const LOAN_META_END = '[[/LOAN_META]]';
+
+        const loanFormState = {
+            schedule: [],
+            simulation: null,
+            firstDueTouched: false
+        };
+
+        const loanFieldElements = {
+            debtorId: document.getElementById('loanDebtor'),
+            principal: document.getElementById('loanPrincipal'),
+            interestType: document.getElementById('loanInterestType'),
+            interestRate: document.getElementById('loanInterestRate'),
+            fixedAddition: document.getElementById('loanFixedAddition'),
+            installments: document.getElementById('loanInstallments'),
+            startDate: document.getElementById('loanStartDate'),
+            frequency: document.getElementById('loanFrequency'),
+            firstDueDate: document.getElementById('loanFirstDueDate')
+        };
+
+        const loanFieldErrorIds = {
+            debtorId: 'loanDebtorError',
+            principal: 'loanPrincipalError',
+            interestType: 'loanInterestTypeError',
+            interestRate: 'loanInterestRateError',
+            fixedAddition: 'loanFixedAdditionError',
+            installments: 'loanInstallmentsError',
+            startDate: 'loanStartDateError',
+            frequency: 'loanFrequencyError',
+            firstDueDate: 'loanFirstDueDateError'
+        };
 
         function sameId(a, b) {
             return String(a ?? '') === String(b ?? '');
@@ -641,16 +800,58 @@
         function normalizeLoanStatus(status) {
             if (!status) return 'Ativo';
             const s = String(status).trim().toLowerCase();
-            if (s.includes('final')) return 'Finalizado';
-            if (s.includes('atras')) return 'Atrasado';
-            if (s.includes('ativo') || s.includes('aberto') || s.includes('pendente')) return 'Ativo';
-            return status;
+            if (s.includes('inativ') || s.includes('final') || s.includes('quit')) return 'Inativo';
+            if (s.includes('ativo') || s.includes('aberto') || s.includes('pendente') || s.includes('atras')) return 'Ativo';
+            return 'Ativo';
         }
 
         function normalizeInterestType(value) {
             const s = String(value || '').trim().toLowerCase();
             if (s === 'simples') return 'simples';
+            if (s === 'fixo') return 'fixo';
             return 'composto';
+        }
+
+        function formatInterestTypeLabel(type) {
+            if (type === 'simples') return 'Simples';
+            if (type === 'fixo') return 'Fixo';
+            return 'Composto';
+        }
+
+        function stripLoanMeta(rawText) {
+            const text = String(rawText || '');
+            const start = text.indexOf(LOAN_META_START);
+            const end = text.indexOf(LOAN_META_END);
+            if (start === -1 || end === -1 || end <= start) return text.trim();
+            return `${text.slice(0, start)}${text.slice(end + LOAN_META_END.length)}`.trim();
+        }
+
+        function parseLoanMeta(rawText) {
+            const text = String(rawText || '');
+            const start = text.indexOf(LOAN_META_START);
+            const end = text.indexOf(LOAN_META_END);
+            if (start === -1 || end === -1 || end <= start) {
+                return { userText: text.trim(), meta: null };
+            }
+
+            const metaRaw = text.slice(start + LOAN_META_START.length, end).trim();
+            let meta = null;
+            try {
+                meta = JSON.parse(metaRaw);
+            } catch (_error) {
+                meta = null;
+            }
+
+            const userText = `${text.slice(0, start)}${text.slice(end + LOAN_META_END.length)}`.trim();
+            return { userText, meta };
+        }
+
+        function encodeLoanObservations(userText, meta) {
+            const cleanText = stripLoanMeta(userText || '');
+            if (!meta || typeof meta !== 'object') return cleanText;
+            const encodedMeta = `${LOAN_META_START}${JSON.stringify(meta)}${LOAN_META_END}`;
+            if (!cleanText) return encodedMeta;
+            return `${cleanText}\n${encodedMeta}`;
         }
 
         function normalizeLoanRow(row) {
@@ -659,6 +860,8 @@
             const totalAmount = round2(row.total_amount ?? row.total ?? row.contract_amount ?? 0);
             const interestRate = round2(row.interest_rate ?? row.interest ?? row.monthly_interest ?? 0);
             const installmentAmount = installmentsCount > 0 ? round2(row.installment_amount ?? (totalAmount / installmentsCount)) : 0;
+            const parsed = parseLoanMeta(row.observations || row.notes || '');
+            const interestMode = normalizeInterestType(parsed.meta?.interestMode || row.interest_type);
 
             return {
                 ...row,
@@ -669,9 +872,10 @@
                 installments_count: installmentsCount,
                 interest_rate: interestRate,
                 installment_amount: installmentAmount,
-                interest_type: normalizeInterestType(row.interest_type),
+                interest_type: interestMode,
                 payment_method: row.payment_method || 'Pix',
-                observations: row.observations || row.notes || '',
+                observations: parsed.userText,
+                loan_meta: parsed.meta || null,
                 status: normalizeLoanStatus(row.status),
                 start_date: row.start_date || row.created_at || '',
                 first_due_date: row.first_due_date || row.due_date || ''
@@ -679,10 +883,9 @@
         }
 
         function badgeForStatus(status) {
-            if (status === 'Ativo') return 'badge badge-success';
-            if (status === 'Finalizado') return 'badge badge-neutral';
-            if (status === 'Atrasado') return 'badge badge-danger';
-            return 'badge badge-warn';
+            if (status === 'Ativo') return 'badge bg-emerald-100 text-emerald-700';
+            if (status === 'Inativo') return 'badge bg-slate-200 text-slate-700';
+            return 'badge bg-emerald-100 text-emerald-700';
         }
 
         function getDebtorName(debtorId) {
@@ -739,18 +942,30 @@
             return { totalAmount, installmentAmount, totalInterest };
         }
 
-        function buildInstallmentPlan(values, calcResult) {
+        function buildInstallmentPlan(values, calcResult, scheduleRows) {
             const n = values.installments;
             const monthlyRate = values.interestRate / 100;
-            const firstDue = new Date(values.firstDueDate);
             const today = new Date(getTodayIsoDate());
             const plan = [];
+            const dueDates = (Array.isArray(scheduleRows) ? scheduleRows : []).map((item, index) => {
+                const parsed = new Date(item?.due_date);
+                if (!Number.isNaN(parsed.getTime())) return parsed;
+                const fallback = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                return fallback || new Date(values.firstDueDate);
+            });
+
+            while (dueDates.length < n) {
+                const index = dueDates.length;
+                const fallback = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                dueDates.push(fallback || new Date(values.firstDueDate));
+            }
+
             if (values.interestType === 'simples') {
                 const principalParts = splitAmount(values.principal, n);
                 const interestParts = splitAmount(calcResult.totalInterest, n);
 
                 for (let index = 0; index < n; index += 1) {
-                    const due = addMonths(firstDue, index);
+                    const due = dueDates[index];
                     const amount = round2(principalParts[index] + interestParts[index]);
                     plan.push({
                         installment_number: index + 1,
@@ -769,7 +984,7 @@
             let remainingPrincipal = round2(values.principal);
 
             for (let index = 0; index < n; index += 1) {
-                const due = addMonths(firstDue, index);
+                const due = dueDates[index];
                 const amount = amounts[index];
 
                 let interestAmount = values.interestRate === 0 ? 0 : round2(remainingPrincipal * monthlyRate);
@@ -799,8 +1014,8 @@
 
         function deriveLoanStatus(plan) {
             if (!plan.length) return 'Ativo';
-            const hasOverdue = plan.some(item => item.status === 'Atrasado');
-            return hasOverdue ? 'Atrasado' : 'Ativo';
+            const allPaid = plan.every(item => isPaidInstallmentStatus(item.status));
+            return allPaid ? 'Inativo' : 'Ativo';
         }
 
         function getLoanInstallments(loanId) {
@@ -816,6 +1031,37 @@
 
             const paid = installments.filter(item => String(item.status || '').toLowerCase() === 'pago').length;
             return `${paid}/${total}`;
+        }
+
+        function isPaidInstallmentStatus(status) {
+            const normalized = String(status || '').trim().toLowerCase();
+            return normalized === 'pago' || normalized === 'paid' || normalized === 'quitado' || normalized === 'finalizado';
+        }
+
+        function getLoanFinancialSituation(installments) {
+            const rows = Array.isArray(installments) ? installments : [];
+            if (!rows.length) {
+                return { label: 'Em dia', badgeClass: 'badge bg-emerald-100 text-emerald-700' };
+            }
+
+            const allPaid = rows.every(item => isPaidInstallmentStatus(item.status));
+            if (allPaid) {
+                return { label: 'Em dia', badgeClass: 'badge bg-emerald-100 text-emerald-700' };
+            }
+
+            const today = new Date(getTodayIsoDate());
+            const hasOverdueOpen = rows.some(item => {
+                if (isPaidInstallmentStatus(item.status)) return false;
+                const dueDate = new Date(item.due_date);
+                if (Number.isNaN(dueDate.getTime())) return false;
+                return dueDate < today;
+            });
+
+            if (hasOverdueOpen) {
+                return { label: 'Atrasado', badgeClass: 'badge bg-red-100 text-red-700' };
+            }
+
+            return { label: 'Em dia', badgeClass: 'badge bg-emerald-100 text-emerald-700' };
         }
 
         function updateLoanMetrics() {
@@ -865,26 +1111,34 @@
             const startIndex = (loansState.currentPage - 1) * loansState.pageSize;
             const pageRows = loansState.filtered.slice(startIndex, startIndex + loansState.pageSize);
 
-            tbody.innerHTML = pageRows.map(loan => {
+            tbody.innerHTML = pageRows.map((loan) => {
                 const status = normalizeLoanStatus(loan.status);
-                const interestType = normalizeInterestType(loan.interest_type) === 'simples' ? 'Simples' : 'Composto';
+                const interestType = normalizeInterestType(loan.interest_type);
                 const installmentsInfo = getLoanInstallmentsSummary(loan);
+                const interestPrimary = interestType === 'fixo'
+                    ? formatCurrency(loan.interest_rate)
+                    : `${loan.interest_rate}%`;
 
                 return `
-                    <tr>
+                    <tr data-loan-id="${loan.id}" class="cursor-pointer transition-colors duration-150 hover:bg-slate-50" title="Ver detalhes do empréstimo">
                         <td>#${loan.id ?? '-'}</td>
                         <td>${getDebtorName(loan.debtor_id)}</td>
                         <td>${formatCurrency(loan.principal_amount)}</td>
                         <td>${formatCurrency(loan.total_amount)}</td>
                         <td>${installmentsInfo}</td>
-                        <td>${loan.interest_rate}% (${interestType})</td>
+                        <td>
+                            <div class="leading-tight">
+                                <div class="font-semibold text-slate-800">${interestPrimary}</div>
+                                <div class="mt-0.5 text-xs text-slate-500">${formatInterestTypeLabel(interestType)}</div>
+                            </div>
+                        </td>
                         <td>${formatDate(loan.start_date)}</td>
                         <td><span class="${badgeForStatus(status)}">${status}</span></td>
                         <td>
                             <div class="flex items-center gap-1">
-                                <button type="button" class="action-btn action-btn-view" data-action="view-loan" data-id="${loan.id}" title="Detalhes"><i class="fas fa-eye"></i></button>
-                                <button type="button" class="action-btn action-btn-edit" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
-                                <button type="button" class="action-btn action-btn-delete" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="action-btn action-btn-view rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="view-loan" data-id="${loan.id}" title="Detalhes"><i class="fas fa-eye"></i></button>
+                                <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
+                                <button type="button" class="action-btn action-btn-delete rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -953,23 +1207,260 @@
             }
         }
 
+        function addDays(date, days) {
+            const copy = new Date(date.getTime());
+            copy.setDate(copy.getDate() + days);
+            return copy;
+        }
+
+        function normalizeFrequency(value) {
+            return String(value || '').trim().toLowerCase() === 'quinzenal' ? 'quinzenal' : 'mensal';
+        }
+
+        function getFrequencyLabel(frequency) {
+            return normalizeFrequency(frequency) === 'quinzenal' ? 'Quinzenal (15 dias)' : 'Mensal';
+        }
+
+        function suggestFirstDueDate(startDateIso, frequency) {
+            const start = new Date(startDateIso);
+            if (Number.isNaN(start.getTime())) return '';
+            if (frequency === 'quinzenal') return toIsoDate(addDays(start, 15));
+            return toIsoDate(addDays(start, 30));
+        }
+
+        function getDueDateByFrequency(firstDueDateIso, index, frequency) {
+            const firstDue = new Date(firstDueDateIso);
+            if (Number.isNaN(firstDue.getTime())) return null;
+            if (frequency === 'quinzenal') return addDays(firstDue, index * 15);
+            return addMonths(firstDue, index);
+        }
+
+        function inferFrequencyFromInstallments(loanId) {
+            const installments = getLoanInstallments(loanId);
+            if (installments.length < 2) return 'mensal';
+
+            const diffs = [];
+            for (let i = 1; i < installments.length; i += 1) {
+                const previous = new Date(installments[i - 1].due_date);
+                const current = new Date(installments[i].due_date);
+                if (Number.isNaN(previous.getTime()) || Number.isNaN(current.getTime())) continue;
+                const diffDays = Math.round((current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24));
+                diffs.push(diffDays);
+            }
+
+            if (!diffs.length) return 'mensal';
+            if (diffs.every(diff => diff >= 14 && diff <= 16)) return 'quinzenal';
+            if (diffs.every(diff => diff >= 27 && diff <= 32)) return 'mensal';
+            return 'mensal';
+        }
+
+        function clearFieldErrors() {
+            Object.entries(loanFieldElements).forEach(([field, input]) => {
+                if (!input) return;
+                input.classList.remove('field-invalid');
+                const errorEl = document.getElementById(loanFieldErrorIds[field]);
+                if (errorEl) errorEl.textContent = '';
+            });
+            const scheduleErrorEl = document.getElementById('loanScheduleError');
+            if (scheduleErrorEl) scheduleErrorEl.textContent = '';
+        }
+
+        function applyFieldErrors(errors) {
+            clearFieldErrors();
+            Object.entries(errors).forEach(([field, message]) => {
+                if (!message) return;
+                if (field === 'schedule') {
+                    const scheduleErrorEl = document.getElementById('loanScheduleError');
+                    if (scheduleErrorEl) scheduleErrorEl.textContent = message;
+                    return;
+                }
+
+                const input = loanFieldElements[field];
+                const errorEl = document.getElementById(loanFieldErrorIds[field]);
+                if (input) input.classList.add('field-invalid');
+                if (errorEl) errorEl.textContent = message;
+            });
+        }
+
+        function updateInterestTypeVisibility() {
+            const interestType = normalizeInterestType(document.getElementById('loanInterestType').value);
+            const rateWrap = document.getElementById('loanInterestRateWrap');
+            const fixedWrap = document.getElementById('loanFixedAdditionWrap');
+            const rateInput = document.getElementById('loanInterestRate');
+            const fixedInput = document.getElementById('loanFixedAddition');
+
+            if (interestType === 'fixo') {
+                rateWrap.classList.add('hidden');
+                fixedWrap.classList.remove('hidden');
+                rateInput.required = false;
+                fixedInput.required = true;
+            } else {
+                rateWrap.classList.remove('hidden');
+                fixedWrap.classList.add('hidden');
+                rateInput.required = true;
+                fixedInput.required = false;
+            }
+        }
+
+        function resetSimulationState() {
+            loanFormState.simulation = null;
+            loanCalculationCard.classList.add('hidden');
+            installmentsPreviewCard.classList.add('hidden');
+            document.getElementById('installmentsPreviewList').innerHTML = '';
+            document.getElementById('loanCalculatedTotal').textContent = 'R$ 0,00';
+            document.getElementById('loanCalculatedInstallment').textContent = 'R$ 0,00';
+            document.getElementById('loanCalculatedInterestType').textContent = 'Composto';
+            document.getElementById('loanCalculatedRateInfo').textContent = 'Taxa: 0%';
+        }
+
+        function buildScheduleRows(values, existingSchedule, forceGenerate) {
+            const total = Math.max(1, Math.trunc(toNumber(values.installments)));
+            const current = Array.isArray(existingSchedule) ? existingSchedule : [];
+            const rows = [];
+
+            for (let index = 0; index < total; index += 1) {
+                let dueDate = current[index]?.due_date || '';
+                if (forceGenerate || !dueDate) {
+                    const calculated = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                    dueDate = calculated ? toIsoDate(calculated) : '';
+                }
+
+                rows.push({
+                    installment_number: index + 1,
+                    due_date: dueDate
+                });
+            }
+
+            return rows;
+        }
+
+        function renderScheduleTable(plan) {
+            const values = getLoanFormValues();
+            const schedule = loanFormState.schedule;
+
+            if (!values.installments || values.installments <= 0 || !values.startDate || !values.firstDueDate) {
+                loanScheduleBody.innerHTML = '<tr><td colspan="3" class="px-3 py-4 text-center text-xs text-gray-500">Preencha parcelas e datas para visualizar a agenda.</td></tr>';
+                return;
+            }
+
+            loanScheduleBody.innerHTML = schedule.map((row, index) => {
+                const installmentPlan = Array.isArray(plan) ? plan[index] : null;
+                const amountLabel = installmentPlan ? formatCurrency(installmentPlan.amount) : '-';
+
+                return `
+                    <tr class="border-t border-slate-200">
+                        <td class="px-3 py-2 font-semibold text-slate-700">#${row.installment_number}</td>
+                        <td class="px-3 py-2">
+                            <input
+                                type="date"
+                                class="filter-control !px-2 !py-1.5 text-xs focus:ring-2 focus:ring-blue-500/40"
+                                data-schedule-index="${index}"
+                                value="${row.due_date || ''}">
+                        </td>
+                        <td class="px-3 py-2 text-right font-semibold text-slate-700">${amountLabel}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const hint = document.getElementById('loanScheduleHint');
+            if (hint) {
+                hint.textContent = `Frequência ${getFrequencyLabel(values.frequency).toLowerCase()}: você pode editar as datas e regerar quando precisar.`;
+            }
+        }
+
+        function refreshSchedule(forceGenerate) {
+            const values = getLoanFormValues();
+            if (!values.installments || values.installments <= 0 || !values.startDate || !values.firstDueDate) {
+                loanFormState.schedule = [];
+                renderScheduleTable([]);
+                return false;
+            }
+
+            loanFormState.schedule = buildScheduleRows(values, loanFormState.schedule, forceGenerate);
+            renderScheduleTable(loanFormState.simulation?.plan || []);
+            return true;
+        }
+
+        function captureScheduleFromTable() {
+            const inputs = loanScheduleBody.querySelectorAll('input[data-schedule-index]');
+            if (!inputs.length) return;
+
+            inputs.forEach(input => {
+                const index = Math.trunc(toNumber(input.getAttribute('data-schedule-index')));
+                if (!Number.isFinite(index)) return;
+                if (!loanFormState.schedule[index]) return;
+                loanFormState.schedule[index].due_date = input.value;
+            });
+        }
+
+        function updateSimulationSummary(values, calcResult) {
+            document.getElementById('loanCalculatedTotal').textContent = formatCurrency(calcResult.totalAmount);
+            document.getElementById('loanCalculatedInstallment').textContent = formatCurrency(calcResult.installmentAmount);
+            document.getElementById('loanCalculatedInterestType').textContent = formatInterestTypeLabel(values.interestType);
+            document.getElementById('loanCalculatedRateInfo').textContent = values.interestType === 'fixo'
+                ? `Acréscimo fixo: ${formatCurrency(values.fixedAddition)}`
+                : `Taxa mensal: ${values.interestRate}%`;
+            loanCalculationCard.classList.remove('hidden');
+        }
+
         function setDefaultLoanDates() {
-            const today = new Date(getTodayIsoDate());
-            const firstDue = addMonths(today, 1);
-            document.getElementById('loanStartDate').value = toIsoDate(today);
-            document.getElementById('loanFirstDueDate').value = toIsoDate(firstDue);
+            const todayIso = getTodayIsoDate();
+            document.getElementById('loanStartDate').value = todayIso;
+            document.getElementById('loanFrequency').value = 'mensal';
+            document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(todayIso, 'mensal');
+            loanFormState.firstDueTouched = false;
+        }
+
+        function lockBodyScrollForLoanModal(modalElement = loanModal) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || loanOpenedModalIds.has(modalId)) return;
+
+            if (loanOpenedModalIds.size === 0) {
+                previousBodyOverflow = document.body.style.overflow || '';
+                document.body.style.overflow = 'hidden';
+            }
+
+            loanOpenedModalIds.add(modalId);
+        }
+
+        function unlockBodyScrollForLoanModal(modalElement = loanModal) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || !loanOpenedModalIds.has(modalId)) return;
+
+            loanOpenedModalIds.delete(modalId);
+
+            if (loanOpenedModalIds.size === 0) {
+                document.body.style.overflow = previousBodyOverflow;
+                previousBodyOverflow = '';
+            }
         }
 
         function openLoanModal(mode, loan) {
             loansState.editingLoanId = mode === 'edit' ? loan.id : null;
 
             loanForm.reset();
+            clearFieldErrors();
+            resetSimulationState();
             setDefaultLoanDates();
-            loanCalculationCard.classList.add('hidden');
-            installmentsPreviewCard.classList.add('hidden');
-            document.getElementById('installmentsPreviewList').innerHTML = '';
+            document.getElementById('loanFixedAddition').value = 0;
+            document.getElementById('loanInterestRate').value = 20;
+            document.getElementById('loanInterestType').value = 'composto';
+            document.getElementById('loanInstallments').value = 6;
+            document.getElementById('loanPaymentMethod').value = 'Pix';
+            document.getElementById('loanFrequency').value = 'mensal';
+            document.getElementById('loanEditingId').value = '';
+            loanFormState.schedule = [];
 
             if (mode === 'edit' && loan) {
+                const installments = getLoanInstallments(loan.id);
+                const inferredFrequency = loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id);
+                const safeFrequency = normalizeFrequency(inferredFrequency);
+                const interestType = normalizeInterestType(loan.loan_meta?.interestMode || loan.interest_type);
+                const startDateValue = toIsoDate(loan.start_date) || getTodayIsoDate();
+                const firstDueValue = toIsoDate(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue, safeFrequency);
+
                 document.getElementById('loanModalTitle').textContent = `Editar empréstimo #${loan.id}`;
                 document.getElementById('saveLoanBtn').textContent = 'Salvar alterações';
                 document.getElementById('loanEditingId').value = String(loan.id);
@@ -977,88 +1468,164 @@
                 populateDebtorOptions(loan.debtor_id);
                 document.getElementById('loanDebtor').value = String(loan.debtor_id);
                 document.getElementById('loanPrincipal').value = loan.principal_amount;
-                document.getElementById('loanInterestRate').value = loan.interest_rate;
-                document.getElementById('loanInterestType').value = normalizeInterestType(loan.interest_type);
                 document.getElementById('loanInstallments').value = loan.installments_count;
-                document.getElementById('loanPaymentMethod').value = loan.payment_method || 'Pix';
-                document.getElementById('loanStartDate').value = toIsoDate(loan.start_date) || getTodayIsoDate();
-
-                const fallbackFirstDue = addMonths(new Date(document.getElementById('loanStartDate').value), 1);
-                document.getElementById('loanFirstDueDate').value = toIsoDate(loan.first_due_date) || toIsoDate(fallbackFirstDue);
+                const paymentMethodSelect = document.getElementById('loanPaymentMethod');
+                paymentMethodSelect.value = loan.payment_method || 'Pix';
+                if (!paymentMethodSelect.value) paymentMethodSelect.value = 'Pix';
+                document.getElementById('loanStartDate').value = startDateValue;
+                document.getElementById('loanFrequency').value = safeFrequency;
+                document.getElementById('loanFirstDueDate').value = firstDueValue;
                 document.getElementById('loanObservations').value = loan.observations || '';
 
-                calculateLoanFromForm(false);
+                document.getElementById('loanInterestType').value = interestType;
+                if (interestType === 'fixo') {
+                    document.getElementById('loanFixedAddition').value = round2(loan.loan_meta?.fixedAddition ?? loan.interest_rate);
+                    document.getElementById('loanInterestRate').value = 0;
+                } else {
+                    document.getElementById('loanInterestRate').value = loan.interest_rate;
+                    document.getElementById('loanFixedAddition').value = 0;
+                }
+
+                loanFormState.firstDueTouched = true;
+                loanFormState.schedule = buildScheduleRows({
+                    ...getLoanFormValues(),
+                    installments: Math.max(1, Math.trunc(toNumber(loan.installments_count)))
+                }, installments.map((item, idx) => ({
+                    installment_number: idx + 1,
+                    due_date: toIsoDate(item.due_date)
+                })), false);
             } else {
                 document.getElementById('loanModalTitle').textContent = 'Novo empréstimo';
                 document.getElementById('saveLoanBtn').textContent = 'Salvar empréstimo';
-                document.getElementById('loanEditingId').value = '';
-                document.getElementById('loanInterestRate').value = 20;
-                document.getElementById('loanInterestType').value = 'composto';
-                document.getElementById('loanInstallments').value = 6;
-                document.getElementById('loanPaymentMethod').value = 'Pix';
+                loanFormState.firstDueTouched = false;
                 populateDebtorOptions();
+            }
+
+            updateInterestTypeVisibility();
+            const scheduleReady = refreshSchedule(mode !== 'edit');
+            if (mode === 'edit' && scheduleReady) {
+                calculateLoanFromForm(false);
             }
 
             loanModal.classList.remove('hidden');
             loanModal.classList.add('flex');
+            lockBodyScrollForLoanModal();
             document.getElementById('loanDebtor').focus();
         }
         function closeLoanModal() {
             loansState.editingLoanId = null;
             loanModal.classList.add('hidden');
             loanModal.classList.remove('flex');
+            unlockBodyScrollForLoanModal();
             loanForm.reset();
+            clearFieldErrors();
+            loanFormState.schedule = [];
+            loanFormState.simulation = null;
+            loanFormState.firstDueTouched = false;
         }
 
         function closeLoanDetailsModal() {
             loanDetailsModal.classList.add('hidden');
             loanDetailsModal.classList.remove('flex');
+            unlockBodyScrollForLoanModal(loanDetailsModal);
             document.getElementById('loanDetailsContent').innerHTML = '';
         }
 
         function getLoanFormValues() {
+            const interestType = normalizeInterestType(document.getElementById('loanInterestType').value);
+            const installmentsRaw = Math.trunc(toNumber(document.getElementById('loanInstallments').value));
+
             return {
                 debtorId: document.getElementById('loanDebtor').value,
                 principal: round2(document.getElementById('loanPrincipal').value),
                 interestRate: round2(document.getElementById('loanInterestRate').value),
-                interestType: normalizeInterestType(document.getElementById('loanInterestType').value),
-                installments: Math.max(1, Math.trunc(toNumber(document.getElementById('loanInstallments').value))),
+                fixedAddition: round2(document.getElementById('loanFixedAddition').value),
+                interestType,
+                installments: installmentsRaw > 0 ? installmentsRaw : 0,
                 paymentMethod: document.getElementById('loanPaymentMethod').value || 'Pix',
                 startDate: document.getElementById('loanStartDate').value,
+                frequency: normalizeFrequency(document.getElementById('loanFrequency').value || 'mensal'),
                 firstDueDate: document.getElementById('loanFirstDueDate').value,
                 observations: document.getElementById('loanObservations').value.trim()
             };
         }
 
         function validateLoanFormValues(values) {
-            if (!values.debtorId) return 'Selecione um cliente.';
-            if (values.principal <= 0) return 'Informe um valor principal válido.';
-            if (values.interestRate < 0) return 'A taxa de juros não pode ser negativa.';
-            if (values.installments <= 0) return 'Informe a quantidade de parcelas.';
-            if (!values.startDate) return 'Informe a data de início.';
-            if (!values.firstDueDate) return 'Informe o primeiro vencimento.';
+            const errors = {};
 
-            const start = new Date(values.startDate);
-            const firstDue = new Date(values.firstDueDate);
-            if (Number.isNaN(start.getTime()) || Number.isNaN(firstDue.getTime())) return 'Datas inválidas.';
-            if (firstDue < start) return 'O primeiro vencimento não pode ser antes da data de início.';
+            if (!values.debtorId) errors.debtorId = 'Selecione um cliente.';
+            if (values.principal <= 0) errors.principal = 'Informe um valor principal maior que zero.';
+            if (values.installments <= 0) errors.installments = 'Informe ao menos uma parcela.';
 
-            return '';
+            if (values.interestType === 'fixo') {
+                if (values.fixedAddition < 0) errors.fixedAddition = 'O acréscimo fixo não pode ser negativo.';
+            } else if (values.interestRate < 0) {
+                errors.interestRate = 'A taxa mensal não pode ser negativa.';
+            }
+
+            if (!values.startDate) errors.startDate = 'Informe a data de início.';
+            if (!values.firstDueDate) errors.firstDueDate = 'Informe o primeiro vencimento.';
+
+            const startDate = new Date(values.startDate);
+            const firstDueDate = new Date(values.firstDueDate);
+            if (!errors.startDate && Number.isNaN(startDate.getTime())) errors.startDate = 'Data de início inválida.';
+            if (!errors.firstDueDate && Number.isNaN(firstDueDate.getTime())) errors.firstDueDate = 'Primeiro vencimento inválido.';
+            if (!errors.startDate && !errors.firstDueDate && firstDueDate < startDate) {
+                errors.firstDueDate = 'O 1º vencimento deve ser igual ou posterior à data de início.';
+            }
+
+            const hasSchedule = loanFormState.schedule.length === values.installments;
+            if (!hasSchedule) {
+                errors.schedule = 'Gere a agenda das parcelas antes de simular/salvar.';
+            } else {
+                for (let index = 0; index < loanFormState.schedule.length; index += 1) {
+                    const dueDate = loanFormState.schedule[index]?.due_date;
+                    if (!dueDate) {
+                        errors.schedule = 'Revise as datas da agenda antes de continuar.';
+                        break;
+                    }
+
+                    const due = new Date(dueDate);
+                    if (Number.isNaN(due.getTime()) || due < startDate) {
+                        errors.schedule = 'Todas as datas de parcela devem ser válidas e iguais ou após a data de início.';
+                        break;
+                    }
+                }
+            }
+
+            return errors;
         }
 
         function renderInstallmentPreview(plan) {
-            const previewList = document.getElementById('installmentsPreviewList');
-            previewList.innerHTML = '';
+            installmentsPreviewList.innerHTML = '';
 
             plan.forEach(item => {
                 const statusClass = item.status === 'Atrasado' ? 'overdue' : 'pending';
+                const index = Math.max(0, toNumber(item.installment_number) - 1);
+                const dueIso = toIsoDate(item.due_date);
                 const div = document.createElement('div');
-                div.className = `installment-preview ${statusClass} p-3`;
+                div.className = `installment-preview ${statusClass} p-3 transition-colors duration-150 hover:bg-slate-50`;
                 div.innerHTML = `
                     <div class="flex items-center justify-between gap-4">
                         <div>
                             <p class="font-semibold text-sm">Parcela #${item.installment_number}</p>
-                            <p class="text-xs text-gray-600">Vencimento: ${formatDate(item.due_date)}</p>
+                            <div class="mt-0.5 flex flex-wrap items-center gap-2">
+                                <p class="text-xs text-gray-600">Vencimento: <span class="font-medium text-gray-700">${formatDate(item.due_date)}</span></p>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-7 w-7 items-center justify-center rounded-md p-1 text-slate-600 transition-colors duration-150 hover:bg-slate-100"
+                                    data-action="edit-preview-due"
+                                    data-index="${index}"
+                                    aria-label="Editar data de vencimento da parcela #${item.installment_number}">
+                                    <i class="fas fa-pen text-[11px]"></i>
+                                </button>
+                                <input
+                                    type="date"
+                                    class="sr-only"
+                                    data-action="preview-due-input"
+                                    data-index="${index}"
+                                    value="${dueIso}">
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-sm">${formatCurrency(item.amount)}</p>
@@ -1066,30 +1633,108 @@
                         </div>
                     </div>
                 `;
-                previewList.appendChild(div);
+                installmentsPreviewList.appendChild(div);
             });
 
             installmentsPreviewCard.classList.remove('hidden');
         }
 
+        function updateInstallmentDueDate(index, dueDateIso, showFeedback) {
+            const parsedIndex = Math.trunc(toNumber(index));
+            const due = new Date(dueDateIso);
+            const startDate = new Date(document.getElementById('loanStartDate').value);
+
+            if (!dueDateIso || Number.isNaN(due.getTime())) {
+                if (showFeedback) showMessage('Data de vencimento inválida.', 'error');
+                return false;
+            }
+
+            if (!Number.isNaN(startDate.getTime()) && due < startDate) {
+                if (showFeedback) showMessage('Vencimento deve ser igual ou após a data de início.', 'error');
+                return false;
+            }
+
+            if (!loanFormState.schedule[parsedIndex]) {
+                loanFormState.schedule[parsedIndex] = {
+                    installment_number: parsedIndex + 1,
+                    due_date: dueDateIso
+                };
+            } else {
+                loanFormState.schedule[parsedIndex].due_date = dueDateIso;
+            }
+
+            if (loanFormState.simulation?.plan?.[parsedIndex]) {
+                loanFormState.simulation.plan[parsedIndex].due_date = dueDateIso;
+                loanFormState.simulation.plan[parsedIndex].status = due < new Date(getTodayIsoDate()) ? 'Atrasado' : 'Pendente';
+                renderScheduleTable(loanFormState.simulation.plan);
+                renderInstallmentPreview(loanFormState.simulation.plan);
+            } else {
+                renderScheduleTable([]);
+            }
+
+            clearFieldErrors();
+            if (showFeedback) showMessage(`Vencimento da parcela #${parsedIndex + 1} atualizado.`, 'success');
+            return true;
+        }
+
         function calculateLoanFromForm(showErrors) {
+            captureScheduleFromTable();
             const values = getLoanFormValues();
-            const validationError = validateLoanFormValues(values);
-            if (validationError) {
-                if (showErrors) showMessage(validationError, 'error');
+            const errors = validateLoanFormValues(values);
+            applyFieldErrors(errors);
+            if (Object.keys(errors).length > 0) {
+                if (showErrors) showMessage('Revise os campos destacados antes de continuar.', 'error');
                 return null;
             }
 
-            const calcResult = calculateLoanValues(values.principal, values.interestRate, values.installments, values.interestType);
-            if (!calcResult) {
-                if (showErrors) showMessage('Não foi possível calcular o empréstimo.', 'error');
-                return null;
+            let calcResult;
+            let plan;
+
+            if (values.interestType === 'fixo') {
+                const totalAmount = round2(values.principal + values.fixedAddition);
+                const parcelas = Math.max(1, Math.trunc(toNumber(values.installments)));
+                const totalCents = Math.round(totalAmount * 100);
+                const baseCents = Math.floor(totalCents / parcelas);
+                const diferencaCents = totalCents - (baseCents * parcelas);
+                const principalParts = splitAmount(values.principal, parcelas);
+                const fixedParts = splitAmount(values.fixedAddition, parcelas);
+                const today = new Date(getTodayIsoDate());
+
+                const parcelasCents = Array.from({ length: parcelas }, (_, index) => baseCents + (index === parcelas - 1 ? diferencaCents : 0));
+                plan = parcelasCents.map((amountCents, index) => {
+                    const dueDate = loanFormState.schedule[index]?.due_date;
+                    const due = new Date(dueDate);
+                    const safeDue = Number.isNaN(due.getTime())
+                        ? (getDueDateByFrequency(values.firstDueDate, index, values.frequency) || new Date(values.firstDueDate))
+                        : due;
+
+                    return {
+                        installment_number: index + 1,
+                        amount: round2(amountCents / 100),
+                        principal_amount: principalParts[index],
+                        interest_amount: fixedParts[index],
+                        due_date: toIsoDate(safeDue),
+                        status: safeDue < today ? 'Atrasado' : 'Pendente',
+                        payment_date: null
+                    };
+                });
+                calcResult = {
+                    totalAmount,
+                    installmentAmount: round2(totalAmount / parcelas),
+                    totalInterest: round2(values.fixedAddition)
+                };
+            } else {
+                calcResult = calculateLoanValues(values.principal, values.interestRate, values.installments, values.interestType);
+                if (!calcResult) {
+                    if (showErrors) showMessage('Não foi possível calcular o empréstimo.', 'error');
+                    return null;
+                }
+                plan = buildInstallmentPlan(values, calcResult, loanFormState.schedule);
             }
 
-            const plan = buildInstallmentPlan(values, calcResult);
-            document.getElementById('loanCalculatedTotal').textContent = formatCurrency(calcResult.totalAmount);
-            document.getElementById('loanCalculatedInstallment').textContent = formatCurrency(calcResult.installmentAmount);
-            loanCalculationCard.classList.remove('hidden');
+            loanFormState.simulation = { values, calcResult, plan };
+            updateSimulationSummary(values, calcResult);
+            renderScheduleTable(plan);
             renderInstallmentPreview(plan);
 
             return { values, calcResult, plan };
@@ -1134,8 +1779,6 @@
         }
 
         async function deleteLoan(loanId) {
-            if (!confirm('Tem certeza que deseja excluir este empréstimo e suas parcelas?')) return;
-
             loansState.loans = loansState.loans.filter(loan => !sameId(loan.id, loanId));
             loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanId));
 
@@ -1153,14 +1796,34 @@
             }
         }
 
+        function openDeleteLoanConfirmModal(loanId) {
+            pendingDeleteLoanId = loanId;
+            deleteLoanConfirmModal.classList.remove('hidden');
+            deleteLoanConfirmModal.classList.add('flex');
+            lockBodyScrollForLoanModal(deleteLoanConfirmModal);
+        }
+
+        function closeDeleteLoanConfirmModal() {
+            pendingDeleteLoanId = null;
+            deleteLoanConfirmModal.classList.add('hidden');
+            deleteLoanConfirmModal.classList.remove('flex');
+            unlockBodyScrollForLoanModal(deleteLoanConfirmModal);
+        }
+
         function openLoanDetails(loanId) {
             const loan = loansState.loans.find(item => sameId(item.id, loanId));
             if (!loan) return;
 
             const installments = getLoanInstallments(loan.id);
+            const financialSituation = getLoanFinancialSituation(installments);
             const paid = installments.filter(item => String(item.status || '').toLowerCase() === 'pago').length;
             const pending = installments.length - paid;
-            const interestTypeLabel = normalizeInterestType(loan.interest_type) === 'simples' ? 'Simples' : 'Composto';
+            const interestType = normalizeInterestType(loan.interest_type);
+            const interestTypeLabel = formatInterestTypeLabel(interestType);
+            const interestValue = interestType === 'fixo'
+                ? `${formatCurrency(loan.interest_rate)} (${interestTypeLabel})`
+                : `${loan.interest_rate}% (${interestTypeLabel})`;
+            const frequencyLabel = getFrequencyLabel(loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id));
 
             document.getElementById('loanDetailsTitle').textContent = `Detalhes do empréstimo #${loan.id}`;
 
@@ -1168,12 +1831,14 @@
                 <div class="details-grid">
                     <div class="details-item"><p class="text-xs text-gray-500">Cliente</p><p class="font-semibold">${getDebtorName(loan.debtor_id)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Status</p><p class="font-semibold">${normalizeLoanStatus(loan.status)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Situação</p><p class="font-semibold"><span class="${financialSituation.badgeClass}">${financialSituation.label}</span></p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Principal</p><p class="font-semibold">${formatCurrency(loan.principal_amount)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Total contratado</p><p class="font-semibold">${formatCurrency(loan.total_amount)}</p></div>
-                    <div class="details-item"><p class="text-xs text-gray-500">Juros</p><p class="font-semibold">${loan.interest_rate}% (${interestTypeLabel})</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Juros</p><p class="font-semibold">${interestValue}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Forma de pagamento</p><p class="font-semibold">${loan.payment_method || '-'}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Data de início</p><p class="font-semibold">${formatDate(loan.start_date)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">1º vencimento</p><p class="font-semibold">${formatDate(loan.first_due_date)}</p></div>
+                    <div class="details-item"><p class="text-xs text-gray-500">Frequência</p><p class="font-semibold">${frequencyLabel}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas pagas</p><p class="font-semibold">${paid}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas em aberto</p><p class="font-semibold">${pending}</p></div>
                 </div>
@@ -1182,10 +1847,16 @@
             const installmentsHtml = installments.length
                 ? installments.map(item => {
                     const status = String(item.status || '').trim() || 'Pendente';
-                    const badgeClass = status.toLowerCase() === 'pago' ? 'badge badge-success' : status.toLowerCase() === 'atrasado' ? 'badge badge-danger' : 'badge badge-warn';
+                    const normalizedStatus = status.toLowerCase();
+                    const badgeClass = normalizedStatus === 'pago' ? 'badge badge-success' : normalizedStatus === 'atrasado' ? 'badge badge-danger' : 'badge badge-warn';
+                    const installmentClass = normalizedStatus === 'atrasado'
+                        ? 'installment-preview overdue p-3'
+                        : normalizedStatus === 'pago'
+                            ? 'installment-preview p-3'
+                            : 'installment-preview pending p-3';
 
                     return `
-                        <div class="installment-preview p-3">
+                        <div class="${installmentClass}">
                             <div class="flex items-center justify-between gap-4">
                                 <div>
                                     <p class="font-semibold text-sm">Parcela #${item.installment_number}</p>
@@ -1216,6 +1887,7 @@
 
             loanDetailsModal.classList.remove('hidden');
             loanDetailsModal.classList.add('flex');
+            lockBodyScrollForLoanModal(loanDetailsModal);
         }
         async function loadLoansData() {
             try {
@@ -1245,10 +1917,6 @@
             applyLoansFilters(true);
         });
 
-        document.getElementById('refreshBtn').addEventListener('click', function () {
-            loadLoansData();
-        });
-
         document.getElementById('prevPageBtn').addEventListener('click', function () {
             if (loansState.currentPage <= 1) return;
             loansState.currentPage -= 1;
@@ -1276,12 +1944,127 @@
             if (event.target === loanModal) closeLoanModal();
         });
 
+        document.getElementById('loanInterestType').addEventListener('change', function () {
+            updateInterestTypeVisibility();
+            clearFieldErrors();
+            resetSimulationState();
+        });
+
+        document.getElementById('loanStartDate').addEventListener('change', function () {
+            const frequency = document.getElementById('loanFrequency').value || 'mensal';
+            if (!loanFormState.firstDueTouched || !document.getElementById('loanFirstDueDate').value) {
+                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(this.value, frequency);
+            }
+            refreshSchedule(true);
+            clearFieldErrors();
+            resetSimulationState();
+        });
+
+        document.getElementById('loanFrequency').addEventListener('change', function () {
+            const startDate = document.getElementById('loanStartDate').value || getTodayIsoDate();
+            if (!loanFormState.firstDueTouched || !document.getElementById('loanFirstDueDate').value) {
+                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(startDate, this.value);
+            }
+            refreshSchedule(true);
+            clearFieldErrors();
+            resetSimulationState();
+        });
+
+        document.getElementById('loanFirstDueDate').addEventListener('change', function () {
+            loanFormState.firstDueTouched = true;
+            refreshSchedule(true);
+            clearFieldErrors();
+            resetSimulationState();
+        });
+
+        document.getElementById('loanInstallments').addEventListener('input', function () {
+            refreshSchedule(true);
+            clearFieldErrors();
+            resetSimulationState();
+        });
+
+        ['loanPrincipal', 'loanInterestRate', 'loanFixedAddition'].forEach((fieldId) => {
+            const element = document.getElementById(fieldId);
+            if (!element) return;
+            element.addEventListener('input', function () {
+                clearFieldErrors();
+                resetSimulationState();
+                renderScheduleTable([]);
+            });
+        });
+
+        document.getElementById('generateScheduleBtn').addEventListener('click', function () {
+            const generated = refreshSchedule(true);
+            if (!generated) {
+                showMessage('Preencha parcelas e datas antes de gerar a agenda.', 'error');
+                return;
+            }
+            clearFieldErrors();
+            showMessage('Agenda gerada com sucesso.', 'success');
+        });
+
+        document.getElementById('regenerateScheduleBtn').addEventListener('click', function () {
+            const generated = refreshSchedule(true);
+            if (!generated) {
+                showMessage('Preencha parcelas e datas antes de regerar a agenda.', 'error');
+                return;
+            }
+            clearFieldErrors();
+            resetSimulationState();
+            showMessage('Agenda regerada com sucesso.', 'success');
+        });
+
+        loanScheduleBody.addEventListener('input', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            if (!target.matches('input[data-schedule-index]')) return;
+            captureScheduleFromTable();
+            clearFieldErrors();
+        });
+
+        installmentsPreviewList.addEventListener('click', function (event) {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const editBtn = target.closest('button[data-action="edit-preview-due"]');
+            if (!editBtn) return;
+
+            const index = Math.trunc(toNumber(editBtn.getAttribute('data-index')));
+            const dateInput = installmentsPreviewList.querySelector(`input[data-action="preview-due-input"][data-index="${index}"]`);
+            if (!(dateInput instanceof HTMLInputElement)) return;
+
+            dateInput.focus();
+            if (typeof dateInput.showPicker === 'function') {
+                dateInput.showPicker();
+            } else {
+                dateInput.click();
+            }
+        });
+
+        installmentsPreviewList.addEventListener('change', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            if (target.getAttribute('data-action') !== 'preview-due-input') return;
+            const index = Math.trunc(toNumber(target.getAttribute('data-index')));
+            updateInstallmentDueDate(index, target.value, true);
+        });
+
         document.getElementById('calculateLoanBtn').addEventListener('click', function () {
+            const generated = refreshSchedule(false);
+            if (!generated) {
+                showMessage('Preencha parcelas e datas antes de simular.', 'error');
+                return;
+            }
             calculateLoanFromForm(true);
         });
 
         loanForm.addEventListener('submit', async function (event) {
             event.preventDefault();
+
+            const generated = refreshSchedule(false);
+            if (!generated) {
+                showMessage('Preencha parcelas e datas antes de salvar.', 'error');
+                return;
+            }
 
             const result = calculateLoanFromForm(true);
             if (!result) return;
@@ -1303,6 +2086,14 @@
                 ? loansState.editingLoanId
                 : getNextLocalId(loansState.loans, 100);
             const status = deriveLoanStatus(plan);
+            const firstScheduleDueDate = plan[0]?.due_date || values.firstDueDate;
+            const lastScheduleDueDate = plan[plan.length - 1]?.due_date || values.firstDueDate;
+            const loanMeta = {
+                interestMode: values.interestType,
+                frequency: values.frequency,
+                fixedAddition: values.interestType === 'fixo' ? round2(values.fixedAddition) : 0
+            };
+            // TODO: persistir frequency/interestMode em colunas próprias quando o backend expor esses campos.
 
             const payload = normalizeLoanRow({
                 id: loanId,
@@ -1310,14 +2101,14 @@
                 principal_amount: values.principal,
                 total_amount: calcResult.totalAmount,
                 installments_count: values.installments,
-                interest_rate: values.interestRate,
-                interest_type: values.interestType,
+                interest_rate: values.interestType === 'fixo' ? round2(values.fixedAddition) : values.interestRate,
+                interest_type: values.interestType === 'fixo' ? 'composto' : values.interestType,
                 installment_amount: calcResult.installmentAmount,
                 payment_method: values.paymentMethod,
-                observations: values.observations,
+                observations: encodeLoanObservations(values.observations, loanMeta),
                 start_date: values.startDate,
-                first_due_date: values.firstDueDate,
-                due_date: values.firstDueDate,
+                first_due_date: firstScheduleDueDate,
+                due_date: lastScheduleDueDate,
                 status
             });
 
@@ -1336,7 +2127,16 @@
 
         document.getElementById('loansTableBody').addEventListener('click', function (event) {
             const actionBtn = event.target.closest('button[data-action]');
-            if (!actionBtn) return;
+            const row = event.target.closest('tr[data-loan-id]');
+            if (!row) return;
+            const rowLoanId = row.getAttribute('data-loan-id');
+            const rowLoan = loansState.loans.find(item => sameId(item.id, rowLoanId));
+            if (!rowLoan) return;
+
+            if (!actionBtn) {
+                openLoanDetails(rowLoan.id);
+                return;
+            }
 
             const action = actionBtn.getAttribute('data-action');
             const loanId = actionBtn.getAttribute('data-id');
@@ -1355,7 +2155,7 @@
             }
 
             if (action === 'delete-loan') {
-                deleteLoan(loan.id);
+                openDeleteLoanConfirmModal(loan.id);
             }
         });
 
@@ -1363,6 +2163,21 @@
         document.getElementById('closeLoanDetailsFooterBtn').addEventListener('click', closeLoanDetailsModal);
         loanDetailsModal.addEventListener('click', function (event) {
             if (event.target === loanDetailsModal) closeLoanDetailsModal();
+        });
+
+        document.getElementById('cancelDeleteLoanBtn').addEventListener('click', closeDeleteLoanConfirmModal);
+        document.getElementById('confirmDeleteLoanBtn').addEventListener('click', async function () {
+            const targetLoanId = pendingDeleteLoanId;
+            if (targetLoanId === null || targetLoanId === undefined) {
+                closeDeleteLoanConfirmModal();
+                return;
+            }
+
+            closeDeleteLoanConfirmModal();
+            await deleteLoan(targetLoanId);
+        });
+        deleteLoanConfirmModal.addEventListener('click', function (event) {
+            if (event.target === deleteLoanConfirmModal) closeDeleteLoanConfirmModal();
         });
 
         document.addEventListener('DOMContentLoaded', function() {

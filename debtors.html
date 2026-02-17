@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFácil - Devedores</title>
+    <title>Credix - Devedores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
         <div class="flex items-center justify-between px-6 py-4">
             <div class="flex items-center">
                 <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-                <h1 class="ml-6 text-2xl font-bold text-white">CredFácil</h1>
+                <h1 class="ml-6 text-2xl font-bold text-white">Credix</h1>
             </div>
             <div class="flex items-center space-x-6">
                 <button id="themeToggle" class="icon-btn focus:outline-none"><i class="fas fa-sun text-xl"></i></button>
@@ -650,7 +650,11 @@
 
                         <div class="mt-3 flex flex-wrap items-center gap-2">
                             <span class="badge badge-neutral">${loansCount} empréstimos</span>
-                            <span class="badge ${overdueCount > 0 ? 'badge-danger' : 'badge-success'}">${overdueCount} em atraso</span>
+                            <span
+                                class="badge ${overdueCount > 0 ? 'badge-danger' : 'badge-success'}"
+                                title="Parcelas em atraso"
+                                aria-label="Parcelas em atraso: ${overdueCount}"
+                            >${overdueCount}</span>
                         </div>
 
                         <div class="mt-3 flex items-center justify-end gap-2">
@@ -707,7 +711,9 @@
                         <td class="hidden sm:table-cell">${phoneHtml}</td>
                         <td><span class="${badgeForStatus(status)}">${status}</span></td>
                         <td class="hidden sm:table-cell">${loansCount}</td>
-                        <td>${overdueCount > 0 ? `<span class="badge badge-danger">${overdueCount}</span>` : '<span class="badge badge-success">0</span>'}</td>
+                        <td>${overdueCount > 0
+                            ? `<span class="badge badge-danger" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>`
+                            : '<span class="badge badge-success" title="Parcelas em atraso" aria-label="Parcelas em atraso: 0">0</span>'}</td>
                         <td>
                             <button type="button" class="mr-2 text-blue-600" data-action="edit-debtor" data-id="${debtor.id}" title="Editar">
                                 <i class="fas fa-pen-to-square"></i>

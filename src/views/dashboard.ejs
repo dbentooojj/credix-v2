@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredFácil - Painel financeiro</title>
+    <title>Credix - Painel financeiro</title>
+    <style>
+        html, body { background-color: #020617; }
+    </style>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') root.classList.add('dark');
+                if (savedTheme === 'light') root.classList.remove('dark');
+            } catch (error) {}
+        })();
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -76,12 +92,13 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: #f8fafc;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
         }
 
         .kpi-card {
+            background: #f8fafc;
             border-radius: 16px;
             padding: 18px;
             min-height: 124px;
@@ -92,24 +109,24 @@
 
         .kpi-label {
             color: #64748b;
-            font-size: 0.76rem;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
 
         .kpi-value {
             color: #0f172a;
-            font-size: 1.72rem;
-            line-height: 1;
+            font-size: 1.375rem;
+            line-height: 1.05;
             font-weight: 700;
         }
 
         .kpi-note {
             margin-top: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #475569;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
         }
 
         .kpi-info {
@@ -125,6 +142,7 @@
         }
 
         .summary-link {
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 12px;
@@ -186,6 +204,7 @@
         }
 
         .upcoming-item {
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 12px;
@@ -244,14 +263,14 @@
         }
 
         .modal-panel {
-            background: #ffffff;
+            background: #f8fafc;
             border-radius: 14px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 18px 40px rgba(2, 6, 23, 0.4);
         }
 
         .chart-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: #f8fafc;
             border-radius: 18px;
             padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -309,6 +328,67 @@
             color: #cbd5e1;
         }
 
+        .app-toast {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 420px;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.42);
+            background: linear-gradient(135deg, rgba(5, 85, 70, 0.9) 0%, rgba(3, 55, 48, 0.95) 100%);
+            color: #d1fae5;
+            padding: 12px 14px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.25;
+            box-shadow: 0 16px 38px -22px rgba(16, 185, 129, 0.75), inset 0 1px 0 rgba(167, 243, 208, 0.16);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 200ms ease, transform 200ms ease;
+            pointer-events: none;
+        }
+
+        .app-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .app-toast-error {
+            border-color: rgba(239, 68, 68, 0.42);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.95) 100%);
+            color: #fee2e2;
+            box-shadow: 0 16px 38px -22px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(254, 202, 202, 0.15);
+        }
+
+        .app-toast-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.22);
+            color: #a7f3d0;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .app-toast-error .app-toast-icon {
+            background: rgba(239, 68, 68, 0.22);
+            color: #fecaca;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+        }
+
+        .app-toast-text {
+            word-break: break-word;
+        }
+
         main { transition: none; }
 
         body.sidebar-collapsed .modern-sidebar {
@@ -327,7 +407,7 @@
 
         @media (max-width: 640px) {
             .metric-value { font-size: 2rem; }
-            .kpi-value { font-size: 1.46rem; }
+            .kpi-value { font-size: 1.3rem; }
 
             .icon-btn {
                 width: 36px;
@@ -340,6 +420,14 @@
             }
 
             .header-user-chevron { display: none; }
+        }
+
+        @media (min-width: 640px) {
+            .app-toast {
+                left: auto;
+                top: 1.5rem;
+                right: 1.5rem;
+            }
         }
 
         .dark .glass-card,
@@ -394,7 +482,7 @@
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <h1 class="ml-3 sm:ml-6">
-                    <a href="dashboard.html" class="flex items-center" aria-label="CredFácil">
+                    <a href="dashboard.html" class="flex items-center" aria-label="Credix">
                         <%- include('partials/brand-wordmark', { size: 'header' }) %>
                     </a>
                 </h1>
@@ -445,8 +533,8 @@
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <h2 class="page-title text-3xl font-bold">Painel financeiro</h2>
-                    <p class="muted-on-dark mt-1 text-sm">Resumo da carteira, risco e lucro em tempo real.</p>
+                    <h2 class="page-title text-2xl font-bold">Painel financeiro</h2>
+                    <p class="muted-on-dark mt-1 text-sm font-normal">Resumo da carteira, risco e lucro em tempo real.</p>
                 </div>
                 <div class="text-sm text-slate-300">
                     Atualizado: <span id="lastRefresh">--:--</span>
@@ -541,7 +629,7 @@
                             <p class="mt-1 text-xs text-gray-500">Recebido no mês vs mês anterior.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="inline-flex rounded-xl border border-gray-300 bg-white p-1">
+                            <div class="inline-flex rounded-xl border border-gray-300 bg-slate-50 p-1">
                                 <button id="chartTypeLineBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold bg-blue-600 text-white shadow-sm">Linha</button>
                                 <button id="chartTypeStackedBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Barras empilhadas</button>
                             </div>
@@ -589,7 +677,7 @@
                     Placeholders: <code>{nome}</code>, <code>{valor}</code>, <code>{vencimento}</code>, <code>{pix_chave}</code>
                 </div>
                 <textarea id="collectionMessage" rows="6" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"></textarea>
-                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
+                <div class="rounded-xl border border-gray-200 bg-slate-50 p-3 text-xs text-gray-600">
                     <p class="font-semibold mb-1">Preview</p>
                     <p id="collectionPreview">-</p>
                 </div>
@@ -610,7 +698,7 @@
                 </div>
                 <button id="closePaymentConfirmModalBtn" class="text-gray-400 hover:text-gray-600" type="button"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="paymentConfirmInfo" class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"></div>
+            <div id="paymentConfirmInfo" class="rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm text-gray-700"></div>
             <div class="mt-4">
                 <label for="paymentMethodSelect" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
                 <select id="paymentMethodSelect" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
@@ -658,6 +746,10 @@
         const chartReceivedMonthValue = document.getElementById('chartReceivedMonthValue');
         const chartReceivedMoMValue = document.getElementById('chartReceivedMoMValue');
         const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+        const modalScrollState = {
+            previousBodyOverflow: '',
+            openModalIds: new Set(),
+        };
 
         const dashboardState = {
             period: '6m',
@@ -685,6 +777,32 @@
             'kpiProfitTotal',
             'kpiTotalReceived',
         ];
+
+        function lockBodyScrollForModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || modalScrollState.openModalIds.has(modalId)) return;
+
+            if (modalScrollState.openModalIds.size === 0) {
+                modalScrollState.previousBodyOverflow = document.body.style.overflow || '';
+                document.body.style.overflow = 'hidden';
+            }
+
+            modalScrollState.openModalIds.add(modalId);
+        }
+
+        function unlockBodyScrollForModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || !modalScrollState.openModalIds.has(modalId)) return;
+
+            modalScrollState.openModalIds.delete(modalId);
+
+            if (modalScrollState.openModalIds.size === 0) {
+                document.body.style.overflow = modalScrollState.previousBodyOverflow;
+                modalScrollState.previousBodyOverflow = '';
+            }
+        }
 
         function formatCurrency(value) {
             const safe = Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -720,11 +838,52 @@
         }
 
         function showMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `fixed left-4 right-4 top-4 rounded-xl px-4 py-3 text-white font-medium z-50 shadow-lg sm:left-auto sm:right-6 sm:top-6 sm:max-w-md sm:px-6 sm:py-4 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-            messageDiv.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-3 text-lg"></i><span>${message}</span></div>`;
-            document.body.appendChild(messageDiv);
-            setTimeout(() => messageDiv.remove(), 3500);
+            const safeType = type === 'success' ? 'success' : 'error';
+
+            if (showMessage.hideTimeoutId) {
+                clearTimeout(showMessage.hideTimeoutId);
+                showMessage.hideTimeoutId = null;
+            }
+
+            if (showMessage.removeTimeoutId) {
+                clearTimeout(showMessage.removeTimeoutId);
+                showMessage.removeTimeoutId = null;
+            }
+
+            const existing = document.getElementById('appToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
+
+            const iconWrap = document.createElement('span');
+            iconWrap.className = 'app-toast-icon';
+
+            const icon = document.createElement('i');
+            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
+            iconWrap.appendChild(icon);
+
+            const text = document.createElement('span');
+            text.className = 'app-toast-text';
+            text.textContent = String(message || '');
+
+            toast.appendChild(iconWrap);
+            toast.appendChild(text);
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            showMessage.hideTimeoutId = window.setTimeout(() => {
+                toast.classList.remove('show');
+                showMessage.removeTimeoutId = window.setTimeout(() => {
+                    toast.remove();
+                    showMessage.removeTimeoutId = null;
+                }, 220);
+                showMessage.hideTimeoutId = null;
+            }, 3000);
         }
 
         function closeUserMenu() {
@@ -1249,11 +1408,13 @@
             collectionPreview.textContent = buildCollectionMessage(item, COLLECTION_TEMPLATE);
             collectionModal.classList.remove('hidden');
             collectionModal.classList.add('flex');
+            lockBodyScrollForModal(collectionModal);
         }
 
         function closeCollectionModal() {
             collectionModal.classList.add('hidden');
             collectionModal.classList.remove('flex');
+            unlockBodyScrollForModal(collectionModal);
             dashboardState.selectedCollection = null;
         }
 
@@ -1298,12 +1459,14 @@
             setPaymentConfirmLoading(false);
             paymentConfirmModal.classList.remove('hidden');
             paymentConfirmModal.classList.add('flex');
+            lockBodyScrollForModal(paymentConfirmModal);
         }
 
         function closePaymentConfirmModal(force = false) {
             if (dashboardState.paymentSubmitting && !force) return;
             paymentConfirmModal.classList.add('hidden');
             paymentConfirmModal.classList.remove('flex');
+            unlockBodyScrollForModal(paymentConfirmModal);
             dashboardState.selectedPayment = null;
             setPaymentConfirmLoading(false);
         }

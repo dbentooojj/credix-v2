@@ -228,7 +228,7 @@ async function fetchDueTomorrowInstallments(targetDateIso: string): Promise<DueT
 
 function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
   const dateLabel = formatDateIso(targetDateIso);
-  return `[CredFacil] Vencimentos de amanha (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
+  return `[Credix] Vencimentos de amanha (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
 }
 
 function buildTextBody(items: DueTomorrowInstallment[], targetDateIso: string, totalAmount: number): string {
@@ -246,7 +246,7 @@ function buildTextBody(items: DueTomorrowInstallment[], targetDateIso: string, t
     "",
     ...lines,
     "",
-    "Mensagem automatica do CredFacil.",
+    "Mensagem automatica do Credix.",
   ].join("\n");
 }
 
@@ -286,7 +286,7 @@ function buildHtmlBody(items: DueTomorrowInstallment[], targetDateIso: string, t
           ${rows}
         </tbody>
       </table>
-      <p style="margin-top:12px;color:#6b7280;font-size:12px;">Mensagem automatica do CredFacil.</p>
+      <p style="margin-top:12px;color:#6b7280;font-size:12px;">Mensagem automatica do Credix.</p>
     </div>
   `;
 }

@@ -2,6 +2,7 @@
   InstallmentStatus,
   LoanStatus,
   PaymentMethod,
+  Prisma,
 } from "@prisma/client";
 import { Router } from "express";
 import { AppError } from "../middleware/error-handler";
@@ -50,6 +51,24 @@ async function refreshLoanStatus(loanId: number) {
   });
 }
 
+function isPaymentIdUniqueViolation(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (error.code !== "P2002") return false;
+
+  const target = Array.isArray(error.meta?.target) ? error.meta.target : [];
+  return target.includes("id");
+}
+
+async function syncPaymentIdSequence(db: { $executeRawUnsafe: (query: string, ...values: unknown[]) => Promise<unknown> }) {
+  await db.$executeRawUnsafe(`
+    SELECT setval(
+      pg_get_serial_sequence('"Payment"', 'id'),
+      COALESCE((SELECT MAX(id) FROM "Payment"), 0) + 1,
+      false
+    )
+  `);
+}
+
 router.use(requireAuthApi);
 
 router.get("/", async (req, res) => {
@@ -86,7 +105,7 @@ router.post("/", async (req, res) => {
   const payload = createPaymentSchema.parse(req.body);
   const paymentDate = toDateOnly(payload.paymentDate);
 
-  const result = await prisma.$transaction(async (tx) => {
+  const persistPaymentInTransaction = () => prisma.$transaction(async (tx) => {
     const loan = await tx.loan.findUnique({ where: { id: payload.loanId } });
     if (!loan) {
       throw new AppError("Emprestimo nao encontrado", 404);
@@ -143,6 +162,15 @@ router.post("/", async (req, res) => {
 
     return payment;
   });
+
+  let result: Awaited<ReturnType<typeof persistPaymentInTransaction>>;
+  try {
+    result = await persistPaymentInTransaction();
+  } catch (error) {
+    if (!isPaymentIdUniqueViolation(error)) throw error;
+    await syncPaymentIdSequence(prisma);
+    result = await persistPaymentInTransaction();
+  }
 
   await refreshLoanStatus(payload.loanId);
 

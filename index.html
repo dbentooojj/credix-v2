@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CredFácil - Login</title>
+<title>Credix - Login</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -57,9 +57,9 @@ body { font-family: 'Inter', sans-serif; }
 
 <div class="w-full max-w-md">
 
-    <!-- Título -->
+    <!-- TÃ­tulo -->
     <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-white mb-1">CredFácil</h1>
+        <h1 class="text-3xl font-bold text-white mb-1">Credix</h1>
         <p class="text-blue-200">Gerenciamento Inteligente</p>
     </div>
 
@@ -92,7 +92,7 @@ body { font-family: 'Inter', sans-serif; }
                 <div class="relative">
                     <input type="password" id="password" required autocomplete="current-password"
                     class="modern-input w-full px-4 py-3 pr-11 rounded-lg focus:outline-none"
-                    placeholder="••••••••">
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
                     <button type="button" id="togglePassword"
                     class="absolute right-3 top-3 text-gray-500"
                     aria-label="Mostrar senha" aria-pressed="false">
@@ -101,7 +101,7 @@ body { font-family: 'Inter', sans-serif; }
                 </div>
             </div>
 
-            <!-- Opções -->
+            <!-- OpÃ§Ãµes -->
             <div class="flex items-center justify-between text-sm">
                 <label class="flex items-center">
                     <input type="checkbox" id="rememberMe" class="mr-2">
@@ -114,7 +114,7 @@ body { font-family: 'Inter', sans-serif; }
 
             <div id="loginMessage" class="hidden text-sm rounded-lg px-3 py-2"></div>
 
-            <!-- Botão -->
+            <!-- BotÃ£o -->
             <button type="submit"
             class="modern-button w-full text-white py-3.5 rounded-lg font-medium text-base">
                 <i class="fas fa-sign-in-alt mr-2"></i>Entrar
@@ -127,7 +127,7 @@ body { font-family: 'Inter', sans-serif; }
     <!-- Footer -->
     <div class="text-center mt-4">
         <p class="text-xs text-blue-200 opacity-70">
-            © 2026 CredFácil
+            Â© 2026 Credix
         </p>
     </div>
 
@@ -187,7 +187,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     }
 
     message.className = 'text-sm rounded-lg px-3 py-2 bg-red-100 text-red-700';
-    message.textContent = 'E-mail ou senha inválidos.';
+    message.textContent = 'E-mail ou senha invÃ¡lidos.';
     message.classList.remove('hidden');
 });
 </script>
