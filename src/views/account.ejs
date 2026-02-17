@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -26,6 +26,7 @@
     <style>
         html { font-size: 16px; }
         body { font-family: 'Inter', sans-serif; }
+
 
         .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
         .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
@@ -169,7 +170,7 @@
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
                     <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">OlÃ¡, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -179,7 +180,7 @@
                         </button>
                         <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
-                            <span>Segurança</span>
+                            <span>SeguranÃ§a</span>
                         </button>
                         <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                             <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
@@ -202,9 +203,9 @@
                 <ul class="space-y-2">
                     <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
                     <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>EmprÃ©stimos</span></a></li>
                     <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>RelatÃ³rios</span></a></li>
                 </ul>
             </nav>
         </aside>
@@ -212,13 +213,13 @@
         <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
             <div class="mb-6">
                 <h2 class="page-title text-3xl font-bold">Conta</h2>
-                <p class="muted-on-dark mt-1 text-sm">Gerencie perfil, segurança e suporte.</p>
+                <p class="muted-on-dark mt-1 text-sm">Gerencie perfil, seguranÃ§a e suporte.</p>
             </div>
 
             <section class="glass-card rounded-2xl p-5">
                 <div class="mb-5 flex flex-wrap gap-2">
                     <button type="button" data-account-tab="profile" class="tab-btn active">Meu perfil</button>
-                    <button type="button" data-account-tab="security" class="tab-btn">Segurança</button>
+                    <button type="button" data-account-tab="security" class="tab-btn">SeguranÃ§a</button>
                     <button type="button" data-account-tab="help" class="tab-btn">Ajuda</button>
                 </div>
 
@@ -243,7 +244,7 @@
                 </div>
 
                 <div id="tab-security" class="tab-panel hidden">
-                    <h3 class="mb-1 text-xl font-bold text-gray-800">Segurança</h3>
+                    <h3 class="mb-1 text-xl font-bold text-gray-800">SeguranÃ§a</h3>
                     <p class="mb-4 text-sm text-gray-600">Troque sua senha de acesso.</p>
                     <form id="securityForm" class="grid grid-cols-1 gap-4">
                         <div>
@@ -255,7 +256,7 @@
                             <input id="newPassword" class="filter-control" type="password" minlength="8" autocomplete="new-password" required>
                             <div id="passwordStrengthPanel" class="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
                                 <div class="flex items-center justify-between gap-3">
-                                    <span class="font-semibold text-slate-700">Força da senha</span>
+                                    <span class="font-semibold text-slate-700">ForÃ§a da senha</span>
                                     <span id="passwordStrengthLabel" class="font-bold text-slate-700">-</span>
                                 </div>
                                 <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
@@ -268,23 +269,23 @@
                                     </div>
                                     <div id="pwRuleUpper" class="flex items-center gap-2">
                                         <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
-                                        <span>1 letra maiúscula</span>
+                                        <span>1 letra maiÃºscula</span>
                                     </div>
                                     <div id="pwRuleLower" class="flex items-center gap-2">
                                         <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
-                                        <span>1 letra minúscula</span>
+                                        <span>1 letra minÃºscula</span>
                                     </div>
                                     <div id="pwRuleDigit" class="flex items-center gap-2">
                                         <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
-                                        <span>1 número</span>
+                                        <span>1 nÃºmero</span>
                                     </div>
                                     <div id="pwRuleSymbol" class="flex items-center gap-2">
                                         <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
-                                        <span>1 símbolo</span>
+                                        <span>1 sÃ­mbolo</span>
                                     </div>
                                     <div id="pwRuleNoSpace" class="flex items-center gap-2">
                                         <i class="fas fa-circle text-[0.45rem] text-slate-400"></i>
-                                        <span>Sem espaços</span>
+                                        <span>Sem espaÃ§os</span>
                                     </div>
                                 </div>
                             </div>
@@ -303,7 +304,7 @@
 
                 <div id="tab-help" class="tab-panel hidden">
                     <h3 class="mb-1 text-xl font-bold text-gray-800">Ajuda</h3>
-                    <p class="mb-4 text-sm text-gray-600">Contato rápido. Escolha um canal:</p>
+                    <p class="mb-4 text-sm text-gray-600">Contato rÃ¡pido. Escolha um canal:</p>
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                         <a class="group rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left transition hover:border-blue-200 hover:bg-white hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300" href="mailto:bento431@gmail.com">
                             <div class="flex items-start gap-3">
@@ -345,7 +346,7 @@
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             const displayName = currentUser.name || currentUser.full_name || 'Administrador';
-            document.getElementById('userName').textContent = `Olá, ${displayName}`;
+            document.getElementById('userName').textContent = `OlÃ¡, ${displayName}`;
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -364,11 +365,11 @@
 
         const PASSWORD_RULES = [
             { id: 'pwRuleLen', label: '8+ caracteres', test: (value) => value.length >= 8 },
-            { id: 'pwRuleUpper', label: '1 letra maiúscula', test: (value) => /[A-Z]/.test(value) },
-            { id: 'pwRuleLower', label: '1 letra minúscula', test: (value) => /[a-z]/.test(value) },
-            { id: 'pwRuleDigit', label: '1 número', test: (value) => /\d/.test(value) },
-            { id: 'pwRuleSymbol', label: '1 símbolo', test: (value) => /[^A-Za-z0-9]/.test(value) },
-            { id: 'pwRuleNoSpace', label: 'sem espaços', test: (value) => !/\s/.test(value) },
+            { id: 'pwRuleUpper', label: '1 letra maiÃºscula', test: (value) => /[A-Z]/.test(value) },
+            { id: 'pwRuleLower', label: '1 letra minÃºscula', test: (value) => /[a-z]/.test(value) },
+            { id: 'pwRuleDigit', label: '1 nÃºmero', test: (value) => /\d/.test(value) },
+            { id: 'pwRuleSymbol', label: '1 sÃ­mbolo', test: (value) => /[^A-Za-z0-9]/.test(value) },
+            { id: 'pwRuleNoSpace', label: 'sem espaÃ§os', test: (value) => !/\s/.test(value) },
         ];
 
         function setPasswordRuleState(ruleId, ok) {
@@ -393,7 +394,7 @@
 
             if (!password) return { label: '-', color: '#94a3b8', percent: 0 };
             if (passed <= 2) return { label: 'Fraca', color: '#ef4444', percent };
-            if (passed <= 4) return { label: 'Média', color: '#f59e0b', percent };
+            if (passed <= 4) return { label: 'MÃ©dia', color: '#f59e0b', percent };
             if (passed < total) return { label: 'Boa', color: '#22c55e', percent };
             return { label: 'Forte', color: '#16a34a', percent: 100 };
         }
@@ -510,11 +511,11 @@
                 if (user) {
                     localStorage.setItem('currentUser', JSON.stringify(user));
                     const displayName = user.name || 'Administrador';
-                    document.getElementById('userName').textContent = `Olá, ${displayName}`;
+                    document.getElementById('userName').textContent = `OlÃ¡, ${displayName}`;
                 }
                 showMessage('Perfil atualizado com sucesso.', 'success');
             } catch {
-                showMessage('Erro de conexão ao salvar perfil.', 'error');
+                showMessage('Erro de conexÃ£o ao salvar perfil.', 'error');
             }
         }
 
@@ -525,7 +526,7 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (newPassword !== confirmPassword) {
-                showMessage('A confirmação da nova senha não confere.', 'error');
+                showMessage('A confirmaÃ§Ã£o da nova senha nÃ£o confere.', 'error');
                 return;
             }
 
@@ -561,7 +562,7 @@
                 renderPasswordStrength('');
                 showMessage('Senha alterada com sucesso.', 'success');
             } catch {
-                showMessage('Erro de conexão ao alterar senha.', 'error');
+                showMessage('Erro de conexÃ£o ao alterar senha.', 'error');
             }
         }
 
@@ -630,3 +631,5 @@
     </script>
 </body>
 </html>
+
+

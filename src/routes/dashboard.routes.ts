@@ -149,6 +149,11 @@ function getRelativeDueLabel(dueDateIso: string, todayIso: string): string {
 router.use(requireAuthApi);
 
 router.get("/", async (req, res) => {
+  const userId = Number(req.user?.sub);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
   const parsedQuery = dashboardQuerySchema.parse(req.query);
   const period = parsedQuery.period ?? "6m";
   const metric = parsedQuery.metric ?? "recebido";
@@ -162,6 +167,7 @@ router.get("/", async (req, res) => {
 
   const [loans, installments, payments] = await Promise.all([
     prisma.loan.findMany({
+      where: { ownerUserId: userId },
       select: {
         id: true,
         principalAmount: true,
@@ -169,6 +175,7 @@ router.get("/", async (req, res) => {
       },
     }),
     prisma.installment.findMany({
+      where: { ownerUserId: userId },
       select: {
         id: true,
         loanId: true,
@@ -197,6 +204,7 @@ router.get("/", async (req, res) => {
       },
     }) as Promise<InstallmentWithRefs[]>,
     prisma.payment.findMany({
+      where: { ownerUserId: userId },
       select: {
         id: true,
         loanId: true,

@@ -100,7 +100,7 @@ async function seedAdminUser() {
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  await prisma.user.upsert({
+  return prisma.user.upsert({
     where: { email },
     update: {
       name,
@@ -115,11 +115,10 @@ async function seedAdminUser() {
     },
   });
 
-  return email;
 }
 
 async function main() {
-  const adminEmail = await seedAdminUser();
+  const adminUser = await seedAdminUser();
   const timeZone = process.env.SEED_TZ || "America/Sao_Paulo";
   const todayIso = getIsoTodayInTimeZone(timeZone);
   const today = isoToUtcDateOnly(todayIso);
@@ -138,7 +137,12 @@ async function main() {
 
   await prisma.$transaction(async (tx) => {
     // Remove o dataset demo anterior (somente os CPFs gerados aqui).
-    await tx.client.deleteMany({ where: { cpf: { in: demoCpfs } } });
+    await tx.client.deleteMany({
+      where: {
+        ownerUserId: adminUser.id,
+        cpf: { in: demoCpfs },
+      },
+    });
 
     const clients = [];
     for (let index = 0; index < demoCount; index += 1) {
@@ -148,6 +152,7 @@ async function main() {
 
       const created = await tx.client.create({
         data: {
+          ownerUserId: adminUser.id,
           name,
           cpf,
           phone: generatePhone(id),
@@ -371,6 +376,7 @@ async function main() {
         const loan = await tx.loan.create({
           data: {
             id: nextLoanId++,
+            ownerUserId: adminUser.id,
             clientId: client.id,
             principalAmount: plan.principalAmount,
             interestRate: plan.interestRate,
@@ -400,6 +406,7 @@ async function main() {
           const installment = await tx.installment.create({
             data: {
               id: nextInstallmentId++,
+              ownerUserId: adminUser.id,
               loanId: loan.id,
               clientId: client.id,
               installmentNumber: index + 1,
@@ -416,6 +423,7 @@ async function main() {
             await tx.payment.create({
               data: {
                 id: nextPaymentId++,
+                ownerUserId: adminUser.id,
                 loanId: loan.id,
                 installmentId: installment.id,
                 amount: plan.installmentAmount,
@@ -431,14 +439,46 @@ async function main() {
   });
 
   const [clientsCount, loansCount, installmentsCount, paymentsCount] = await Promise.all([
-    prisma.client.count({ where: { cpf: { in: demoCpfs } } }),
-    prisma.loan.count({ where: { client: { cpf: { in: demoCpfs } } } }),
-    prisma.installment.count({ where: { client: { cpf: { in: demoCpfs } } } }),
-    prisma.payment.count({ where: { loan: { client: { cpf: { in: demoCpfs } } } } }),
+    prisma.client.count({
+      where: {
+        ownerUserId: adminUser.id,
+        cpf: { in: demoCpfs },
+      },
+    }),
+    prisma.loan.count({
+      where: {
+        ownerUserId: adminUser.id,
+        client: {
+          ownerUserId: adminUser.id,
+          cpf: { in: demoCpfs },
+        },
+      },
+    }),
+    prisma.installment.count({
+      where: {
+        ownerUserId: adminUser.id,
+        client: {
+          ownerUserId: adminUser.id,
+          cpf: { in: demoCpfs },
+        },
+      },
+    }),
+    prisma.payment.count({
+      where: {
+        ownerUserId: adminUser.id,
+        loan: {
+          ownerUserId: adminUser.id,
+          client: {
+            ownerUserId: adminUser.id,
+            cpf: { in: demoCpfs },
+          },
+        },
+      },
+    }),
   ]);
 
   console.log("Seed demo concluido.");
-  console.log(`Admin: ${adminEmail}`);
+  console.log(`Admin: ${adminUser.email}`);
   console.log(`Clientes demo: ${clientsCount}`);
   console.log(`Emprestimos demo: ${loansCount}`);
   console.log(`Parcelas demo: ${installmentsCount}`);

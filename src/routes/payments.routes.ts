@@ -26,27 +26,33 @@ function toDateOnly(input: string) {
   return parsed;
 }
 
-async function refreshLoanStatus(loanId: number) {
+async function refreshLoanStatus(loanId: number, ownerUserId: number) {
   const installments = await prisma.installment.findMany({
-    where: { loanId },
+    where: { loanId, ownerUserId },
     select: { status: true, dueDate: true },
   });
 
   if (installments.length === 0) {
-    await prisma.loan.update({ where: { id: loanId }, data: { status: LoanStatus.PENDENTE } });
+    await prisma.loan.updateMany({
+      where: { id: loanId, ownerUserId },
+      data: { status: LoanStatus.PENDENTE },
+    });
     return;
   }
 
   if (installments.every((i) => i.status === InstallmentStatus.PAGO)) {
-    await prisma.loan.update({ where: { id: loanId }, data: { status: LoanStatus.QUITADO } });
+    await prisma.loan.updateMany({
+      where: { id: loanId, ownerUserId },
+      data: { status: LoanStatus.QUITADO },
+    });
     return;
   }
 
   const today = new Date();
   const hasOverdue = installments.some((i) => i.status === InstallmentStatus.ATRASADO || (i.status !== InstallmentStatus.PAGO && i.dueDate < today));
 
-  await prisma.loan.update({
-    where: { id: loanId },
+  await prisma.loan.updateMany({
+    where: { id: loanId, ownerUserId },
     data: { status: hasOverdue ? LoanStatus.ATRASADO : LoanStatus.EM_DIA },
   });
 }
@@ -72,10 +78,18 @@ async function syncPaymentIdSequence(db: { $executeRawUnsafe: (query: string, ..
 router.use(requireAuthApi);
 
 router.get("/", async (req, res) => {
+  const userId = Number(req.user?.sub);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
   const loanId = req.query.loanId ? Number(req.query.loanId) : undefined;
 
   const payments = await prisma.payment.findMany({
-    where: loanId ? { loanId } : undefined,
+    where: {
+      ownerUserId: userId,
+      ...(loanId ? { loanId } : {}),
+    },
     include: {
       loan: {
         select: {
@@ -102,17 +116,33 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const userId = Number(req.user?.sub);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
   const payload = createPaymentSchema.parse(req.body);
   const paymentDate = toDateOnly(payload.paymentDate);
 
   const persistPaymentInTransaction = () => prisma.$transaction(async (tx) => {
-    const loan = await tx.loan.findUnique({ where: { id: payload.loanId } });
+    const loan = await tx.loan.findFirst({
+      where: {
+        id: payload.loanId,
+        ownerUserId: userId,
+      },
+    });
     if (!loan) {
       throw new AppError("Emprestimo nao encontrado", 404);
     }
 
     if (payload.installmentId) {
-      const installment = await tx.installment.findUnique({ where: { id: payload.installmentId } });
+      const installment = await tx.installment.findFirst({
+        where: {
+          id: payload.installmentId,
+          loanId: payload.loanId,
+          ownerUserId: userId,
+        },
+      });
       if (!installment || installment.loanId !== payload.loanId) {
         throw new AppError("Parcela nao encontrada para este emprestimo", 404);
       }
@@ -122,6 +152,7 @@ router.post("/", async (req, res) => {
       ? await tx.payment.upsert({
           where: { installmentId: payload.installmentId },
           create: {
+            ownerUserId: userId,
             loanId: payload.loanId,
             installmentId: payload.installmentId,
             amount: payload.amount,
@@ -130,6 +161,7 @@ router.post("/", async (req, res) => {
             notes: payload.notes?.trim() || null,
           },
           update: {
+            ownerUserId: userId,
             loanId: payload.loanId,
             amount: payload.amount,
             paymentDate,
@@ -139,6 +171,7 @@ router.post("/", async (req, res) => {
         })
       : await tx.payment.create({
           data: {
+            ownerUserId: userId,
             loanId: payload.loanId,
             installmentId: payload.installmentId,
             amount: payload.amount,
@@ -149,8 +182,11 @@ router.post("/", async (req, res) => {
         });
 
     if (payload.installmentId) {
-      await tx.installment.update({
-        where: { id: payload.installmentId },
+      await tx.installment.updateMany({
+        where: {
+          id: payload.installmentId,
+          ownerUserId: userId,
+        },
         data: {
           status: InstallmentStatus.PAGO,
           paymentDate,
@@ -172,7 +208,7 @@ router.post("/", async (req, res) => {
     result = await persistPaymentInTransaction();
   }
 
-  await refreshLoanStatus(payload.loanId);
+  await refreshLoanStatus(payload.loanId, userId);
 
   return res.status(201).json({
     message: "Pagamento registrado",

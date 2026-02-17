@@ -189,9 +189,54 @@ async function refreshLoanStatuses(tx: Prisma.TransactionClient, loanIds: number
   }
 }
 
-export async function getTableData(tableName: TableName) {
+async function ensureRowsOwnedByUser(
+  tx: Prisma.TransactionClient,
+  tableName: TableName,
+  ids: number[],
+  ownerUserId: number,
+) {
+  if (ids.length === 0) return;
+
   if (tableName === "debtors") {
-    const rows = await prisma.client.findMany({ orderBy: { id: "asc" } });
+    const rows = await tx.client.findMany({
+      where: { id: { in: ids }, ownerUserId: { not: ownerUserId } },
+      select: { id: true },
+      take: 1,
+    });
+    if (rows.length > 0) {
+      throw new AppError("Identificador de cliente pertence a outro usuario.", 403);
+    }
+    return;
+  }
+
+  if (tableName === "loans") {
+    const rows = await tx.loan.findMany({
+      where: { id: { in: ids }, ownerUserId: { not: ownerUserId } },
+      select: { id: true },
+      take: 1,
+    });
+    if (rows.length > 0) {
+      throw new AppError("Identificador de emprestimo pertence a outro usuario.", 403);
+    }
+    return;
+  }
+
+  const rows = await tx.installment.findMany({
+    where: { id: { in: ids }, ownerUserId: { not: ownerUserId } },
+    select: { id: true },
+    take: 1,
+  });
+  if (rows.length > 0) {
+    throw new AppError("Identificador de parcela pertence a outro usuario.", 403);
+  }
+}
+
+export async function getTableData(tableName: TableName, ownerUserId: number) {
+  if (tableName === "debtors") {
+    const rows = await prisma.client.findMany({
+      where: { ownerUserId },
+      orderBy: { id: "asc" },
+    });
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
@@ -207,7 +252,10 @@ export async function getTableData(tableName: TableName) {
   }
 
   if (tableName === "loans") {
-    const rows = await prisma.loan.findMany({ orderBy: { id: "asc" } });
+    const rows = await prisma.loan.findMany({
+      where: { ownerUserId },
+      orderBy: { id: "asc" },
+    });
     return rows.map((row) => ({
       id: row.id,
       debtor_id: row.clientId,
@@ -226,7 +274,10 @@ export async function getTableData(tableName: TableName) {
     }));
   }
 
-  const rows = await prisma.installment.findMany({ orderBy: { id: "asc" } });
+  const rows = await prisma.installment.findMany({
+    where: { ownerUserId },
+    orderBy: { id: "asc" },
+  });
   return rows.map((row) => ({
     id: row.id,
     loan_id: row.loanId,
@@ -243,7 +294,7 @@ export async function getTableData(tableName: TableName) {
   }));
 }
 
-export async function replaceTableData(tableName: TableName, rawRows: unknown[]) {
+export async function replaceTableData(tableName: TableName, rawRows: unknown[], ownerUserId: number) {
   if (tableName === "debtors") {
     const rows = asRows(rawRows);
 
@@ -257,9 +308,13 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       });
 
       const ids = drafted.map((item) => item.id);
+      await ensureRowsOwnedByUser(tx, "debtors", ids, ownerUserId);
 
       const existing = await tx.client.findMany({
-        where: { id: { in: ids } },
+        where: {
+          id: { in: ids },
+          ownerUserId,
+        },
         select: { id: true, name: true, cpf: true, phone: true, email: true, status: true, address: true, notes: true },
       });
       const existingById = new Map(existing.map((item) => [item.id, item]));
@@ -337,9 +392,14 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       });
 
       if (ids.length > 0) {
-        await tx.client.deleteMany({ where: { id: { notIn: ids } } });
+        await tx.client.deleteMany({
+          where: {
+            ownerUserId,
+            id: { notIn: ids },
+          },
+        });
       } else {
-        await tx.client.deleteMany();
+        await tx.client.deleteMany({ where: { ownerUserId } });
       }
 
       for (const row of normalized) {
@@ -347,6 +407,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
           where: { id: row.id },
           create: {
             id: row.id,
+            ownerUserId,
             name: row.name,
             cpf: row.cpf,
             phone: row.phone,
@@ -358,6 +419,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
             createdAt: toDateOnly(new Date().toISOString().slice(0, 10)),
           },
           update: {
+            ownerUserId,
             name: row.name,
             cpf: row.cpf,
             phone: row.phone,
@@ -370,14 +432,19 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       }
     });
 
-    return getTableData("debtors");
+    return getTableData("debtors", ownerUserId);
   }
 
   if (tableName === "loans") {
     const rows = asRows(rawRows);
 
     await prisma.$transaction(async (tx) => {
-      const clientIds = new Set((await tx.client.findMany({ select: { id: true } })).map((item) => item.id));
+      const clientIds = new Set(
+        (await tx.client.findMany({
+          where: { ownerUserId },
+          select: { id: true },
+        })).map((item) => item.id),
+      );
 
       const maxId = (await tx.loan.aggregate({ _max: { id: true } }))._max.id ?? 0;
       let nextId = maxId + 1;
@@ -416,10 +483,16 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
         .filter((row): row is NonNullable<typeof row> => Boolean(row));
 
       const ids = normalized.map((row) => row.id);
+      await ensureRowsOwnedByUser(tx, "loans", ids, ownerUserId);
       if (ids.length > 0) {
-        await tx.loan.deleteMany({ where: { id: { notIn: ids } } });
+        await tx.loan.deleteMany({
+          where: {
+            ownerUserId,
+            id: { notIn: ids },
+          },
+        });
       } else {
-        await tx.loan.deleteMany();
+        await tx.loan.deleteMany({ where: { ownerUserId } });
       }
 
       for (const row of normalized) {
@@ -427,6 +500,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
           where: { id: row.id },
           create: {
             id: row.id,
+            ownerUserId,
             clientId: row.clientId,
             principalAmount: row.principalAmount,
             totalAmount: row.totalAmount,
@@ -442,6 +516,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
             status: row.status,
           },
           update: {
+            ownerUserId,
             clientId: row.clientId,
             principalAmount: row.principalAmount,
             totalAmount: row.totalAmount,
@@ -460,13 +535,16 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       }
     });
 
-    return getTableData("loans");
+    return getTableData("loans", ownerUserId);
   }
 
   const rows = asRows(rawRows);
 
   await prisma.$transaction(async (tx) => {
-    const loans = await tx.loan.findMany({ select: { id: true, clientId: true, paymentMethod: true } });
+    const loans = await tx.loan.findMany({
+      where: { ownerUserId },
+      select: { id: true, clientId: true, paymentMethod: true },
+    });
     const loanMap = new Map(loans.map((loan) => [loan.id, loan]));
 
     const maxId = (await tx.installment.aggregate({ _max: { id: true } }))._max.id ?? 0;
@@ -514,11 +592,22 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
       .filter((row): row is NonNullable<typeof row> => Boolean(row));
 
     const ids = normalized.map((row) => row.id);
+    await ensureRowsOwnedByUser(tx, "installments", ids, ownerUserId);
     if (ids.length > 0) {
-      await tx.installment.deleteMany({ where: { id: { notIn: ids } } });
+      await tx.installment.deleteMany({
+        where: {
+          ownerUserId,
+          id: { notIn: ids },
+        },
+      });
     } else {
-      await tx.installment.deleteMany();
-      await tx.payment.deleteMany({ where: { installmentId: { not: null } } });
+      await tx.installment.deleteMany({ where: { ownerUserId } });
+      await tx.payment.deleteMany({
+        where: {
+          ownerUserId,
+          installmentId: { not: null },
+        },
+      });
     }
 
     for (const row of normalized) {
@@ -526,6 +615,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
         where: { id: row.id },
         create: {
           id: row.id,
+          ownerUserId,
           loanId: row.loanId,
           clientId: row.clientId,
           installmentNumber: row.installmentNumber,
@@ -539,6 +629,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
           notes: row.notes,
         },
         update: {
+          ownerUserId,
           loanId: row.loanId,
           clientId: row.clientId,
           installmentNumber: row.installmentNumber,
@@ -557,6 +648,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
         await tx.payment.upsert({
           where: { installmentId: row.id },
           create: {
+            ownerUserId,
             installmentId: row.id,
             loanId: row.loanId,
             amount: row.amount,
@@ -565,6 +657,7 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
             notes: row.notes,
           },
           update: {
+            ownerUserId,
             loanId: row.loanId,
             amount: row.amount,
             paymentDate: row.paymentDate,
@@ -573,7 +666,12 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
           },
         });
       } else {
-        await tx.payment.deleteMany({ where: { installmentId: row.id } });
+        await tx.payment.deleteMany({
+          where: {
+            ownerUserId,
+            installmentId: row.id,
+          },
+        });
       }
     }
 
@@ -583,5 +681,5 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[])
     );
   });
 
-  return getTableData("installments");
+  return getTableData("installments", ownerUserId);
 }

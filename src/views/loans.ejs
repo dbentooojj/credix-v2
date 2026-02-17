@@ -27,6 +27,7 @@
     <style>
         html { font-size: 16px; }
         body { font-family: 'Inter', sans-serif; }
+
         .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
         .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
 
@@ -74,11 +75,18 @@
         .page-title { color: #ffffff; }
         .muted-on-dark { color: #cbd5e1; }
 
+        .kpi-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
         .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
             color: #0f172a;
+            font-size: 1.375rem;
+            line-height: 1.05;
+            font-weight: 700;
         }
         .filter-control {
             background: #f8fafc;
@@ -198,7 +206,7 @@
             main { margin-left: 0 !important; }
         }
         @media (max-width: 640px) {
-            .kpi-value { font-size: 1.6rem; }
+            .kpi-value { font-size: 1.3rem; }
             .details-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 
             .icon-btn {
@@ -308,23 +316,23 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hashtag"></i></span>
-                    <p class="text-xs tracking-wide text-slate-600">Qtd. empréstimos</p>
-                    <p id="totalLoans" class="mt-2 text-xl font-semibold text-slate-900">0</p>
+                    <p class="kpi-label">Qtd. empréstimos</p>
+                    <p id="totalLoans" class="kpi-value mt-3">0</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hand-holding-usd"></i></span>
-                    <p class="text-xs tracking-wide text-slate-600">Principal total</p>
-                    <p id="totalPrincipal" class="mt-2 text-xl font-semibold text-slate-900">R$ 0,00</p>
+                    <p class="kpi-label">Principal total</p>
+                    <p id="totalPrincipal" class="kpi-value mt-3">R$ 0,00</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-chart-line"></i></span>
-                    <p class="text-xs tracking-wide text-slate-600">Total contratado</p>
-                    <p id="totalContracted" class="mt-2 text-xl font-semibold text-slate-900">R$ 0,00</p>
+                    <p class="kpi-label">Total contratado</p>
+                    <p id="totalContracted" class="kpi-value mt-3">R$ 0,00</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-circle-check"></i></span>
-                    <p class="text-xs tracking-wide text-slate-600">Empréstimos ativos</p>
-                    <p id="activeLoans" class="mt-2 text-xl font-semibold text-slate-900">0</p>
+                    <p class="kpi-label">Empréstimos ativos</p>
+                    <p id="activeLoans" class="kpi-value mt-3">0</p>
                 </div>
             </div>
 
@@ -408,7 +416,7 @@
 
                         <div class="rounded-xl border border-gray-200 p-4">
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Condições</h4>
-                            <div class="grid grid-cols-1 gap-4 md:[grid-template-columns:minmax(0,1.45fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                            <div class="grid grid-cols-1 gap-4 md:[grid-template-columns:minmax(0,1.25fr)_minmax(0,1.1fr)_minmax(0,1fr)]">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Tipo de juros</label>
                                     <select id="loanInterestType" class="filter-control focus:ring-2 focus:ring-blue-500/40">
@@ -424,7 +432,7 @@
                                     <p id="loanInterestRateError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div id="loanFixedAdditionWrap" class="hidden">
-                                    <label class="mb-1 block text-sm text-gray-600">Acréscimo fixo total (R$)</label>
+                                    <label class="mb-1 block text-sm text-gray-600">Acréscimo fixo (R$)</label>
                                     <input id="loanFixedAddition" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="0">
                                     <p id="loanFixedAdditionError" class="field-error" aria-live="polite"></p>
                                 </div>
@@ -2186,6 +2194,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

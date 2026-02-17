@@ -47,11 +47,17 @@ router.get("/admin/reports.html", requireAuthPage, (req, res) => {
   return res.render("reports", { currentUser: extractCurrentUser(req) });
 });
 
+router.get("/admin/dashboard-advanced.html", requireAuthPage, (req, res) => {
+  return res.render("dashboard-advanced", { currentUser: extractCurrentUser(req) });
+});
+
 router.get("/admin/account.html", requireAuthPage, (req, res) => {
   return res.render("account", { currentUser: extractCurrentUser(req) });
 });
 
+router.get("/dashboard", requireAuthPage, (_req, res) => res.redirect("/admin/dashboard-advanced.html"));
 router.get("/dashboard.html", (_req, res) => res.redirect("/admin/dashboard.html"));
+router.get("/dashboard-advanced.html", (_req, res) => res.redirect("/admin/dashboard-advanced.html"));
 router.get("/debtors.html", (_req, res) => res.redirect("/admin/debtors.html"));
 router.get("/loans.html", (_req, res) => res.redirect("/admin/loans.html"));
 router.get("/installments.html", (_req, res) => res.redirect("/admin/installments.html"));
