@@ -11,3 +11,6 @@ pnpm-debug.log*
 coverage
 certbot/conf/*
 !certbot/conf/.gitkeep
+.next
+tools/*.log
+tools/*.pid

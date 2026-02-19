@@ -3,8 +3,9 @@
 Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS Ubuntu.
 
 ## Stack
-- Backend: Node.js + Express + TypeScript
-- Frontend: EJS reaproveitando os HTMLs originais
+- Frontend (base nova): Next.js (App Router) + TypeScript + Tailwind (`frontend/`)
+- Backend (base atual): Node.js + Express + TypeScript (`backend/`) + Prisma
+- Frontend legado em producao: EJS reaproveitando os HTMLs originais, servidos pelo backend
 - Banco: PostgreSQL
 - Migrations: Prisma
 - Auth: email/senha com bcrypt + JWT em cookie httpOnly
@@ -20,14 +21,15 @@ Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS U
 - Resumo diario por e-mail com parcelas que vencem no dia seguinte
 
 ## Estrutura principal
-- `src/server.ts`: inicializacao do Express
-- `src/routes/*.ts`: paginas, auth, tabelas e pagamentos
-- `src/services/table-sync.service.ts`: adaptacao de dados entre frontend e banco
-- `src/views/*.ejs`: telas reaproveitadas do prototipo
-- `prisma/schema.prisma`: modelos e indices
-- `prisma/migrations/*`: migration inicial
-- `prisma/seed.ts`: cria admin
-- `docker-compose.yml`: app + postgres + nginx
+- `backend/src/server.ts`: inicializacao do backend Express
+- `backend/src/routes/*.ts`: paginas, auth, tabelas e pagamentos
+- `backend/src/services/table-sync.service.ts`: adaptacao de dados entre frontend e banco
+- `backend/src/views/*.ejs`: telas atuais reaproveitadas do prototipo
+- `backend/prisma/schema.prisma`: modelos e indices
+- `backend/prisma/migrations/*`: migrations
+- `backend/prisma/seed.ts`: cria admin
+- `frontend/app/*`: base do novo frontend Next.js (rota inicial em `/app`)
+- `docker-compose.yml`: backend + frontend + postgres + nginx
 
 ## Modelos do banco
 - `User` (admin)
@@ -44,8 +46,9 @@ Com integridade referencial por FK e cascatas.
 cp .env.example .env
 ```
 2. Ajuste `DATABASE_URL` para seu PostgreSQL local.
-3. Instale dependencias:
+3. Instale dependencias do backend:
 ```bash
+cd backend
 npm install
 ```
 4. Gere cliente Prisma e aplique migrations:
@@ -63,6 +66,14 @@ npm run dev
 ```
 
 Acesse: `http://localhost:3000/login`
+
+Opcional (frontend Next base em paralelo):
+```bash
+cd ../frontend
+npm install
+npm run dev -- -p 3001
+```
+Acesse: `http://localhost:3001/app` (ou configure outra porta local).
 
 ## Configurar WhatsApp Cloud API
 Defina no `.env`:
@@ -160,20 +171,20 @@ docker compose up -d --build
 
 Ver logs:
 ```bash
-docker compose logs -f app
+docker compose logs -f backend
 ```
 
 ### 4) Migrations e admin
-A migration roda no startup do container `app` (`prisma migrate deploy`).
+A migration roda no startup do container `backend` (`prisma migrate deploy`).
 
 Se quiser rodar manualmente:
 ```bash
-docker compose exec app npm run prisma:migrate:deploy
+docker compose exec backend npm run prisma:migrate:deploy
 ```
 
 Criar/atualizar admin:
 ```bash
-docker compose exec app npm run db:seed
+docker compose exec backend npm run db:seed
 ```
 
 Acesso inicial:

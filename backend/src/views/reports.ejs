@@ -1,0 +1,1310 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credix - Relatórios</title>
+    <style>
+        html, body { background-color: #020617; }
+    </style>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') root.classList.add('dark');
+                if (savedTheme === 'light') root.classList.remove('dark');
+            } catch (error) {}
+        })();
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 16px; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+
+        .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
+        .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
+
+        .icon-btn {
+            color: #cbd5e1;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+        }
+
+        .icon-btn:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35) inset;
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
+            transform: translateX(0);
+            transition: transform 120ms ease-out;
+        }
+
+        .sidebar-item {
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+            border-radius: 12px;
+            margin: 4px 0;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
+        }
+
+        .sidebar-item:focus-visible,
+        .icon-btn:focus-visible {
+            outline: 2px solid rgba(96, 165, 250, 0.7);
+            outline-offset: 2px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+
+        .page-title { color: #ffffff; }
+        .muted-on-dark { color: #cbd5e1; }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #0f172a;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .kpi-note {
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .filter-control {
+            background: #f8fafc;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #111827;
+            width: 100%;
+        }
+
+        .action-btn {
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+        }
+
+        .action-btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .action-btn-primary:hover { background: #1d4ed8; }
+
+        .action-btn-soft {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+        }
+
+        .action-btn-soft:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .report-feedback {
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .report-feedback.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .report-feedback.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .report-chart-shell {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #ffffff;
+            padding: 16px;
+            min-height: 260px;
+        }
+
+        .report-chart-grid {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            min-height: 210px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .report-chart-column {
+            min-width: 56px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-chart-bars {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .chart-bar {
+            width: 12px;
+            border-radius: 8px 8px 0 0;
+            min-height: 3px;
+            transition: opacity 120ms ease-out;
+        }
+
+        .chart-bar:hover { opacity: 0.85; }
+        .chart-bar-loaned { background: #3b82f6; }
+        .chart-bar-received { background: #22c55e; }
+        .chart-bar-overdue { background: #ef4444; }
+
+        .report-chart-label {
+            font-size: 0.72rem;
+            color: #64748b;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #1e40af, #3b82f6);
+        }
+
+        .table-shell {
+            overflow: auto;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+
+        .table-shell table { width: 100%; border-collapse: collapse; }
+        .table-shell th { text-align: left; background: #f8fafc; color: #334155; font-size: 12px; padding: 12px 14px; }
+        .table-shell td { padding: 12px 14px; border-top: 1px solid #eef2f7; color: #1f2937; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+
+        main { transition: none; }
+        body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
+        body.sidebar-collapsed main { margin-left: 0 !important; }
+
+        @media (max-width: 1024px) {
+            .modern-sidebar { transform: translateX(-100%); }
+            .modern-sidebar.mobile-open { transform: translateX(0) !important; }
+            main { margin-left: 0 !important; }
+            main { width: 100% !important; flex: 1 1 100% !important; }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-value { font-size: 1.6rem; }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .icon-btn i {
+                font-size: 1rem !important;
+            }
+
+            .header-user-chevron { display: none; }
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+        }
+
+        .dark .kpi-value { color: #f8fafc; }
+        .dark .kpi-label,
+        .dark .kpi-note { color: #cbd5e1; }
+        .dark .filter-control {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.35);
+        }
+        .dark .action-btn-soft {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #e2e8f0;
+        }
+        .dark .action-btn-soft:hover {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(148, 163, 184, 0.55);
+        }
+        .dark .report-feedback.info {
+            background: rgba(30, 64, 175, 0.2);
+            border-color: rgba(96, 165, 250, 0.45);
+            color: #bfdbfe;
+        }
+        .dark .report-feedback.error {
+            background: rgba(127, 29, 29, 0.25);
+            border-color: rgba(252, 165, 165, 0.45);
+            color: #fecaca;
+        }
+        .dark .report-chart-shell {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+        .dark .report-chart-label { color: #94a3b8; }
+        .dark .table-shell,
+        .dark .table-shell th,
+        .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
+        .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
+        .dark .progress-track { background: rgba(148, 163, 184, 0.25); }
+        /* Premium DS v1 - light skin */
+        :root {
+            --premium-bg: #0B1220;
+            --premium-sidebar: #0B1730;
+            --premium-card: #F8FAFC;
+            --premium-positive: #16A34A;
+            --premium-negative: #DC2626;
+            --premium-accent: #1E40AF;
+            --premium-radius: 16px;
+            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+        }
+
+        html, body {
+            background-color: var(--premium-bg);
+        }
+
+        .primary-gradient {
+            background:
+                radial-gradient(900px 320px at -10% -10%, rgba(30, 64, 175, 0.18), transparent 60%),
+                var(--premium-bg);
+        }
+
+        .premium-header {
+            background: rgba(11, 18, 32, 0.86);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+            backdrop-filter: blur(8px);
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1B3D8F 0%, #234EA8 100%);
+        }
+
+        .glass-card,
+        .kpi-card,
+        .summary-link,
+        .modal-panel,
+        .modal-content {
+            background: var(--premium-card);
+            border-radius: var(--premium-radius);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: var(--premium-shadow-soft);
+        }
+
+        .rounded-2xl {
+            border-radius: var(--premium-radius);
+        }
+
+        .badge,
+        .status-pill {
+            border-radius: 999px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .badge-success,
+        .status-green {
+            background: rgba(22, 163, 74, 0.14);
+            color: var(--premium-positive);
+            border-color: rgba(22, 163, 74, 0.34);
+        }
+
+        .badge-danger,
+        .status-red {
+            background: rgba(220, 38, 38, 0.12);
+            color: var(--premium-negative);
+            border-color: rgba(220, 38, 38, 0.36);
+        }
+
+        .badge-warn,
+        .status-yellow {
+            background: rgba(245, 158, 11, 0.16);
+            color: #b45309;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .notification-badge,
+        .btn-primary,
+        .action-primary {
+            background: var(--premium-accent);
+        }
+</style>
+</head>
+<body class="primary-gradient min-h-screen">
+    <header class="premium-header fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+            <div class="flex items-center">
+                <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="Credix">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
+            </div>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                        <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                        <button type="button" data-user-menu-action="profile" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-id-card text-slate-500 dark:text-slate-300"></i>
+                            <span>Meu perfil</span>
+                        </button>
+                        <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
+                            <span>Segurança</span>
+                        </button>
+                        <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
+                            <span>Ajuda</span>
+                        </button>
+                        <div class="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                        <button type="button" data-user-menu-action="logout" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
+                            <i class="fas fa-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16 sm:pt-20">
+        <aside id="sidebar" class="modern-sidebar fixed left-0 top-16 h-[calc(100%-4rem)] w-64 z-40 sm:top-20 sm:h-[calc(100%-5rem)]">
+            <nav class="mt-8 px-4">
+                <ul class="space-y-2">
+                    <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
+                    <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span class="font-medium">Relatórios</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">Relatórios</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Visão consolidada com filtros para decisões financeiras rápidas.</p>
+                </div>
+                <p class="text-xs text-slate-300">Atualizado: <span id="reportUpdatedAt" class="font-semibold text-slate-100">--:--</span></p>
+            </div>
+
+            <div class="glass-card mb-6 rounded-2xl p-6">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+                    <div class="xl:col-span-3">
+                        <label for="reportPeriodFilter" class="mb-1 block text-sm text-gray-600">Período</label>
+                        <select id="reportPeriodFilter" class="filter-control">
+                            <option value="all">Todo período</option>
+                            <option value="month_current" selected>Mês atual</option>
+                            <option value="last30">Últimos 30 dias</option>
+                            <option value="quarter_current">Trimestre atual</option>
+                            <option value="year_current">Ano atual</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="xl:col-span-3">
+                        <label for="reportClientFilter" class="mb-1 block text-sm text-gray-600">Cliente</label>
+                        <select id="reportClientFilter" class="filter-control">
+                            <option value="all">Todos os clientes</option>
+                        </select>
+                    </div>
+                    <div id="reportCustomRangeWrap" class="hidden xl:col-span-4">
+                        <label class="mb-1 block text-sm text-gray-600">Faixa personalizada</label>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <input id="reportCustomStartDate" type="date" class="filter-control" aria-label="Data inicial do relatório">
+                            <input id="reportCustomEndDate" type="date" class="filter-control" aria-label="Data final do relatório">
+                        </div>
+                    </div>
+                    <div class="xl:col-span-2 flex flex-wrap items-end justify-start gap-2 md:justify-end">
+                        <button id="reportApplyFiltersBtn" type="button" class="action-btn action-btn-primary w-full sm:w-auto">
+                            <i class="fas fa-filter mr-1"></i>Aplicar
+                        </button>
+                        <button id="reportClearFiltersBtn" type="button" class="action-btn action-btn-soft w-full sm:w-auto">Limpar</button>
+                        <button id="exportCsvBtn" type="button" class="action-btn action-btn-soft w-full sm:w-auto">
+                            <i class="fas fa-file-csv mr-1"></i>Exportar CSV
+                        </button>
+                        <button id="exportPdfBtn" type="button" class="action-btn action-btn-soft w-full sm:w-auto">
+                            <i class="fas fa-file-pdf mr-1"></i>Exportar PDF
+                        </button>
+                    </div>
+                </div>
+                <p id="reportFeedback" class="report-feedback info mt-4 hidden"></p>
+            </div>
+
+            <div class="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+                <div class="glass-card rounded-2xl p-5">
+                    <p class="kpi-label">Total emprestado</p>
+                    <p id="reportTotalLoaned" class="kpi-value mt-2">R$ 0,00</p>
+                    <p class="kpi-note">Principal da carteira filtrada.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5">
+                    <p class="kpi-label">Total recebido</p>
+                    <p id="reportTotalReceived" class="kpi-value mt-2">R$ 0,00</p>
+                    <p class="kpi-note">Parcelas pagas no filtro atual.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5">
+                    <p class="kpi-label">Em atraso</p>
+                    <p id="reportOverdueAmount" class="kpi-value mt-2">R$ 0,00</p>
+                    <p id="reportOverdueCount" class="kpi-note">0 parcela(s) em atraso.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5">
+                    <p class="kpi-label">Lucro estimado</p>
+                    <p id="reportEstimatedProfit" class="kpi-value mt-2">R$ 0,00</p>
+                    <p class="kpi-note">Diferença entre total previsto e principal.</p>
+                </div>
+            </div>
+
+            <div class="glass-card mb-6 rounded-2xl p-6">
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 class="text-xl font-bold text-gray-800">Evolução mensal</h3>
+                    <p id="reportChartSubtitle" class="text-sm text-gray-500">Comparativo por mês do filtro selecionado.</p>
+                </div>
+                <div id="reportChart" class="report-chart-shell">
+                    <p class="text-gray-500">Carregando gráfico...</p>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+                    <span class="inline-flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-sm bg-blue-500"></span>Emprestado</span>
+                    <span class="inline-flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-sm bg-green-500"></span>Recebido</span>
+                    <span class="inline-flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-sm bg-red-500"></span>Atrasado</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-2 mb-6">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="mb-4 text-xl font-bold text-gray-800">Distribuição de parcelas</h3>
+                    <div class="space-y-4" id="statusDistribution">
+                        <p class="text-gray-500">Carregando...</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="mb-4 text-xl font-bold text-gray-800">Próximos vencimentos (7 dias)</h3>
+                    <div class="space-y-3" id="nextDueList">
+                        <p class="text-gray-500">Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="mb-4 text-xl font-bold text-gray-800">Top 5 clientes com maior saldo em atraso</h3>
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Telefone</th>
+                                <th>Parcelas em atraso</th>
+                                <th>Saldo em atraso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topDebtorsTable">
+                            <tr><td colspan="4" class="py-8 text-center text-gray-500">Carregando relatório...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
+    <script>
+        const currentUser = window.__AUTH_USER__;
+        if (!currentUser) {
+            window.location.href = '/login';
+        } else {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            const displayName = currentUser.name || currentUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('main');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+        const tableCache = {};
+        function getDemoTable(tableName) {
+            return Array.isArray(tableCache[tableName]) ? tableCache[tableName] : [];
+        }
+
+        async function fetchTableData(tableName) {
+            try {
+                const response = await fetch(`/api/tables/${tableName}`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                if (Array.isArray(payload?.data)) {
+                    tableCache[tableName] = payload.data;
+                    return payload.data;
+                }
+            } catch (error) {
+                console.warn(`Fallback para dados demo: ${tableName}`, error);
+            }
+            return getDemoTable(tableName);
+        }
+
+        function setActiveSidebarItem(targetHref) {
+            sidebarLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === targetHref;
+                link.classList.toggle('active', isActive);
+                if (isActive) link.setAttribute('aria-current', 'page');
+                else link.removeAttribute('aria-current');
+            });
+        }
+
+        function syncActiveSidebarWithRoute() {
+            const currentPage = window.location.pathname.split('/').pop() || 'reports.html';
+            setActiveSidebarItem(currentPage);
+        }
+
+        function syncSidebarLayout() {
+            if (isMobileViewport()) {
+                main.style.marginLeft = '0';
+                main.style.width = '100%';
+                main.style.flex = '1 1 100%';
+                return;
+            }
+
+            sidebar.classList.remove('mobile-open');
+            if (document.body.classList.contains('sidebar-collapsed')) {
+                main.style.marginLeft = '0';
+                main.style.width = '100%';
+                main.style.flex = '1 1 100%';
+                return;
+            }
+
+            main.style.marginLeft = '16rem';
+            main.style.width = 'calc(100% - 16rem)';
+            main.style.flex = '0 1 calc(100% - 16rem)';
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            if (isMobileViewport()) {
+                sidebar.classList.toggle('mobile-open');
+                return;
+            }
+            document.body.classList.toggle('sidebar-collapsed');
+            syncSidebarLayout();
+        });
+
+        window.addEventListener('resize', syncSidebarLayout);
+        syncSidebarLayout();
+        syncActiveSidebarWithRoute();
+
+        function closeUserMenu() {
+            if (!userMenuDropdown) return;
+            userMenuDropdown.classList.add('hidden');
+        }
+
+        function showUserMenuNotice(message) {
+            if (typeof showMessage === 'function') {
+                showMessage(message, 'success');
+                return;
+            }
+            window.alert(message);
+        }
+
+        async function performLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = '/login';
+        }
+
+        async function handleUserMenuAction(action) {
+            if (action === 'logout') {
+                await performLogout();
+                return;
+            }
+
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
+        }
+
+        if (userMenuBtn && userMenuDropdown) {
+            userMenuBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+
+            userMenuDropdown.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const actionBtn = target.closest('[data-user-menu-action]');
+                if (!actionBtn) return;
+                const action = actionBtn.getAttribute('data-user-menu-action');
+                closeUserMenu();
+                void handleUserMenuAction(action);
+            });
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Node)) return;
+                if (userMenuDropdown.classList.contains('hidden')) return;
+                if (userMenuDropdown.contains(target) || userMenuBtn.contains(target)) return;
+                closeUserMenu();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeUserMenu();
+            });
+        }
+
+        const reportsState = {
+            loans: [],
+            installments: [],
+            debtors: [],
+            filteredInstallments: [],
+        };
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
+        }
+
+        function toNumber(value, fallback = 0) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : fallback;
+        }
+
+        function round2(value) {
+            return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
+        }
+
+        function normalizeAscii(value) {
+            return String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function parseDateValue(value) {
+            if (!value) return null;
+            if (value instanceof Date) return new Date(value.getTime());
+
+            const raw = String(value).trim();
+            const dateOnlyMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (dateOnlyMatch) {
+                return new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]));
+            }
+
+            const parsed = new Date(raw);
+            if (Number.isNaN(parsed.getTime())) return null;
+            return parsed;
+        }
+
+        function startOfDay(value) {
+            const date = parseDateValue(value);
+            if (!date) return null;
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function toIsoDate(value) {
+            const date = parseDateValue(value);
+            if (!date) return '';
+            return date.toISOString().slice(0, 10);
+        }
+
+        function toMonthKey(value) {
+            const date = startOfDay(value);
+            if (!date) return '';
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function formatMonthLabel(monthKey) {
+            if (!monthKey) return '--';
+            const [year, month] = monthKey.split('-').map(Number);
+            const date = new Date(year, (month || 1) - 1, 1);
+            return date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(toNumber(value));
+        }
+
+        function formatDate(value) {
+            const date = parseDateValue(value);
+            if (!date) return '-';
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function normalizeLoanRow(row) {
+            return {
+                ...row,
+                id: row.id,
+                debtor_id: row.debtor_id ?? row.client_id ?? row.clientId,
+                principal_amount: round2(row.principal_amount ?? row.principalAmount ?? 0),
+                total_amount: round2(row.total_amount ?? row.totalAmount ?? 0),
+            };
+        }
+
+        function normalizeDebtorRow(row) {
+            return {
+                ...row,
+                id: row.id,
+                name: row.name || row.full_name || 'Cliente sem nome',
+                phone: row.phone || '',
+            };
+        }
+
+        function normalizeInstallmentRow(row) {
+            return {
+                ...row,
+                id: row.id,
+                loan_id: row.loan_id ?? row.loanId,
+                debtor_id: row.debtor_id ?? row.client_id ?? row.clientId,
+                installment_number: Math.max(1, Math.trunc(toNumber(row.installment_number ?? row.installmentNumber ?? row.number ?? 1))),
+                due_date: toIsoDate(row.due_date ?? row.dueDate),
+                payment_date: toIsoDate(row.payment_date ?? row.paymentDate),
+                amount: round2(row.amount),
+                paid_amount: round2(row.paid_amount ?? row.paidAmount ?? row.amount),
+                principal_amount: row.principal_amount ?? row.principalAmount ?? null,
+                interest_amount: row.interest_amount ?? row.interestAmount ?? null,
+                status: row.status || 'Pendente',
+            };
+        }
+
+        function getLoanById(loanId) {
+            return reportsState.loans.find((loan) => sameId(loan.id, loanId));
+        }
+
+        function getDebtorById(debtorId) {
+            return reportsState.debtors.find((debtor) => sameId(debtor.id, debtorId));
+        }
+
+        function normalizeInstallmentStatus(installment) {
+            const rawStatus = normalizeAscii(installment.status);
+            if (rawStatus === 'pago' || rawStatus === 'paid') return 'Pago';
+            if (rawStatus === 'atrasado' || rawStatus === 'overdue') return 'Atrasado';
+
+            const dueDate = startOfDay(installment.due_date);
+            const today = startOfDay(new Date());
+            if (dueDate && today && dueDate < today) return 'Atrasado';
+            return 'Pendente';
+        }
+
+        function getInstallmentReferenceDate(installment, status) {
+            if (status === 'Pago' && installment.payment_date) {
+                return startOfDay(installment.payment_date);
+            }
+            return startOfDay(installment.due_date);
+        }
+
+        function getInstallmentPaidAmount(installment, status) {
+            if (status === 'Pago') return Math.max(toNumber(installment.paid_amount ?? installment.amount), 0);
+            return Math.max(Math.min(toNumber(installment.paid_amount), toNumber(installment.amount)), 0);
+        }
+
+        function getInstallmentOutstanding(installment, status) {
+            if (status === 'Pago') return 0;
+            const amount = Math.max(toNumber(installment.amount), 0);
+            const paidAmount = getInstallmentPaidAmount(installment, status);
+            return Math.max(amount - paidAmount, 0);
+        }
+
+        function getInstallmentPrincipal(installment) {
+            const explicitPrincipal = Number(installment.principal_amount);
+            if (Number.isFinite(explicitPrincipal) && explicitPrincipal > 0) return round2(explicitPrincipal);
+
+            const explicitInterest = Number(installment.interest_amount);
+            const amount = toNumber(installment.amount);
+            if (Number.isFinite(explicitInterest) && explicitInterest >= 0 && explicitInterest <= amount) {
+                return round2(Math.max(amount - explicitInterest, 0));
+            }
+
+            const loan = getLoanById(installment.loan_id);
+            const loanPrincipal = toNumber(loan?.principal_amount);
+            const loanTotal = toNumber(loan?.total_amount);
+            if (loanPrincipal > 0 && loanTotal > 0) {
+                return round2(amount * (loanPrincipal / loanTotal));
+            }
+
+            return round2(amount);
+        }
+
+        function renderStatusDistribution(installments) {
+            const container = document.getElementById('statusDistribution');
+            if (!container) return;
+
+            const statusCounts = installments.reduce((acc, installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                acc[status] = (acc[status] || 0) + 1;
+                return acc;
+            }, { Pago: 0, Pendente: 0, Atrasado: 0 });
+            const totalInstallments = installments.length;
+
+            if (!totalInstallments) {
+                container.innerHTML = '<p class="text-gray-500">Sem parcelas para o filtro selecionado.</p>';
+                return;
+            }
+
+            const rows = [
+                { key: 'Pago', color: '#22c55e', badge: 'badge-success' },
+                { key: 'Pendente', color: '#f59e0b', badge: 'badge-warn' },
+                { key: 'Atrasado', color: '#ef4444', badge: 'badge-danger' }
+            ];
+
+            container.innerHTML = rows.map(row => {
+                const count = statusCounts[row.key] || 0;
+                const percentage = totalInstallments > 0 ? (count / totalInstallments) * 100 : 0;
+                return `
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="badge ${row.badge}">${row.key}</span>
+                            <span class="text-sm text-gray-600">${count} (${percentage.toFixed(1)}%)</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width:${percentage}%; background:${row.color};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTopDebtors(installments) {
+            const tbody = document.getElementById('topDebtorsTable');
+            if (!tbody) return;
+
+            const grouped = new Map();
+            installments.forEach((installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                if (status !== 'Atrasado') return;
+
+                const debtorId = String(installment.debtor_id ?? '');
+                if (!debtorId) return;
+
+                const current = grouped.get(debtorId) || { overdueInstallments: 0, overdueAmount: 0 };
+                current.overdueInstallments += 1;
+                current.overdueAmount += getInstallmentOutstanding(installment, status);
+                grouped.set(debtorId, current);
+            });
+
+            const topDebtors = Array.from(grouped.entries())
+                .map(([debtorId, values]) => {
+                    const debtor = getDebtorById(debtorId);
+                    return {
+                        name: debtor?.name || `Cliente #${debtorId}`,
+                        phone: debtor?.phone || '',
+                        overdueInstallments: values.overdueInstallments,
+                        overdueAmount: values.overdueAmount,
+                    };
+                })
+                .sort((a, b) => b.overdueAmount - a.overdueAmount)
+                .slice(0, 5);
+
+            if (!topDebtors.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">Sem clientes em atraso para o filtro atual.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = topDebtors.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.phone || '-'}</td>
+                    <td>${item.overdueInstallments}</td>
+                    <td>${formatCurrency(item.overdueAmount)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderNextDueDates(installments) {
+            const container = document.getElementById('nextDueList');
+            if (!container) return;
+
+            const today = startOfDay(new Date());
+            const next7 = startOfDay(new Date());
+            if (!today || !next7) {
+                container.innerHTML = '<p class="text-gray-500">Não foi possível calcular os vencimentos.</p>';
+                return;
+            }
+            next7.setDate(next7.getDate() + 7);
+
+            const upcoming = installments
+                .filter((installment) => normalizeInstallmentStatus(installment) !== 'Pago')
+                .filter((installment) => {
+                    const due = startOfDay(installment.due_date);
+                    if (!due) return false;
+                    return due >= today && due <= next7;
+                })
+                .sort((a, b) => {
+                    const dueA = startOfDay(a.due_date)?.getTime() ?? 0;
+                    const dueB = startOfDay(b.due_date)?.getTime() ?? 0;
+                    return dueA - dueB;
+                })
+                .slice(0, 5);
+
+            if (!upcoming.length) {
+                container.innerHTML = '<p class="text-gray-500">Nenhum vencimento nos próximos 7 dias.</p>';
+                return;
+            }
+
+            container.innerHTML = upcoming.map((installment) => {
+                const debtor = getDebtorById(installment.debtor_id);
+                return `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-100 dark:border-slate-700 dark:bg-slate-900/40">
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-slate-100">${debtor?.name || 'Cliente'}</p>
+                            <p class="text-sm text-gray-600 dark:text-slate-300">Parcela #${installment.installment_number ?? '-'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-gray-800 dark:text-slate-100">${formatCurrency(installment.amount)}</p>
+                            <p class="text-sm text-gray-500 dark:text-slate-400">${formatDate(installment.due_date)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getPeriodBounds(periodValue) {
+            const today = startOfDay(new Date());
+            if (!today) return { start: null, end: null };
+
+            if (periodValue === 'month_current') {
+                return { start: new Date(today.getFullYear(), today.getMonth(), 1), end: today };
+            }
+
+            if (periodValue === 'last30') {
+                const start = new Date(today.getTime());
+                start.setDate(start.getDate() - 29);
+                return { start, end: today };
+            }
+
+            if (periodValue === 'quarter_current') {
+                const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3;
+                return { start: new Date(today.getFullYear(), quarterStartMonth, 1), end: today };
+            }
+
+            if (periodValue === 'year_current') {
+                return { start: new Date(today.getFullYear(), 0, 1), end: today };
+            }
+
+            if (periodValue === 'custom') {
+                let start = startOfDay(document.getElementById('reportCustomStartDate')?.value || '');
+                let end = startOfDay(document.getElementById('reportCustomEndDate')?.value || '');
+                if (start && end && start > end) {
+                    const temp = start;
+                    start = end;
+                    end = temp;
+                }
+                return { start, end };
+            }
+
+            return { start: null, end: null };
+        }
+
+        function updateReportCustomRangeVisibility() {
+            const periodValue = document.getElementById('reportPeriodFilter').value;
+            const wrap = document.getElementById('reportCustomRangeWrap');
+            wrap.classList.toggle('hidden', periodValue !== 'custom');
+        }
+
+        function populateReportClientFilter() {
+            const select = document.getElementById('reportClientFilter');
+            if (!select) return;
+
+            const previousValue = select.value || 'all';
+            const byId = new Map();
+
+            reportsState.debtors.forEach((debtor) => {
+                const key = String(debtor.id ?? '');
+                if (!key) return;
+                byId.set(key, { id: key, name: debtor.name || 'Cliente sem nome' });
+            });
+
+            reportsState.installments.forEach((installment) => {
+                const key = String(installment.debtor_id ?? '');
+                if (!key || byId.has(key)) return;
+                const debtor = getDebtorById(key);
+                byId.set(key, { id: key, name: debtor?.name || `Cliente #${key}` });
+            });
+
+            const options = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+            select.innerHTML = `<option value="all">Todos os clientes</option>${options.map((option) => `<option value="${option.id}">${option.name}</option>`).join('')}`;
+            const hasPrevious = previousValue === 'all' || options.some((option) => option.id === previousValue);
+            select.value = hasPrevious ? previousValue : 'all';
+        }
+
+        function showReportFeedback(message, tone = 'info') {
+            const element = document.getElementById('reportFeedback');
+            if (!element) return;
+
+            if (!message) {
+                element.classList.add('hidden');
+                element.textContent = '';
+                return;
+            }
+
+            element.textContent = message;
+            element.classList.remove('hidden', 'info', 'error');
+            element.classList.add(tone === 'error' ? 'error' : 'info');
+        }
+
+        function renderChart(installments) {
+            const chartContainer = document.getElementById('reportChart');
+            const subtitle = document.getElementById('reportChartSubtitle');
+            if (!chartContainer || !subtitle) return;
+
+            const monthMap = new Map();
+
+            installments.forEach((installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                const referenceDate = getInstallmentReferenceDate(installment, status) || startOfDay(installment.due_date);
+                if (!referenceDate) return;
+
+                const monthKey = toMonthKey(referenceDate);
+                if (!monthKey) return;
+
+                if (!monthMap.has(monthKey)) {
+                    monthMap.set(monthKey, { month: monthKey, loaned: 0, received: 0, overdue: 0 });
+                }
+
+                const point = monthMap.get(monthKey);
+                point.loaned += getInstallmentPrincipal(installment);
+
+                if (status === 'Pago') {
+                    point.received += toNumber(installment.amount);
+                } else if (status === 'Atrasado') {
+                    point.overdue += getInstallmentOutstanding(installment, status);
+                }
+            });
+
+            let points = Array.from(monthMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+            if (points.length > 12) points = points.slice(points.length - 12);
+
+            const selectedPeriodLabel = document.getElementById('reportPeriodFilter')?.selectedOptions?.[0]?.textContent || 'todo período';
+            subtitle.textContent = `Comparativo mensal em ${selectedPeriodLabel.toLowerCase()}.`;
+
+            if (!points.length) {
+                chartContainer.innerHTML = '<p class="text-gray-500">Sem dados para gerar gráfico no filtro atual.</p>';
+                return;
+            }
+
+            const maxValue = Math.max(1, ...points.flatMap((point) => [point.loaned, point.received, point.overdue]));
+            const heightPct = (value) => {
+                if (value <= 0) return 2;
+                return Math.max((value / maxValue) * 100, 4);
+            };
+
+            chartContainer.innerHTML = `
+                <div class="report-chart-grid">
+                    ${points.map((point) => `
+                        <div class="report-chart-column">
+                            <div class="report-chart-bars">
+                                <div class="chart-bar chart-bar-loaned" style="height:${heightPct(point.loaned)}%" title="Emprestado ${formatCurrency(point.loaned)}"></div>
+                                <div class="chart-bar chart-bar-received" style="height:${heightPct(point.received)}%" title="Recebido ${formatCurrency(point.received)}"></div>
+                                <div class="chart-bar chart-bar-overdue" style="height:${heightPct(point.overdue)}%" title="Atrasado ${formatCurrency(point.overdue)}"></div>
+                            </div>
+                            <p class="report-chart-label">${formatMonthLabel(point.month)}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderCards(installments) {
+            const totalExpected = installments.reduce((sum, installment) => sum + toNumber(installment.amount), 0);
+            const totalLoaned = installments.reduce((sum, installment) => sum + getInstallmentPrincipal(installment), 0);
+            const totalReceived = installments.reduce((sum, installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                if (status !== 'Pago') return sum;
+                return sum + toNumber(installment.amount);
+            }, 0);
+
+            const overdueInstallments = installments.filter((installment) => normalizeInstallmentStatus(installment) === 'Atrasado');
+            const overdueAmount = overdueInstallments.reduce((sum, installment) => {
+                return sum + getInstallmentOutstanding(installment, 'Atrasado');
+            }, 0);
+
+            const estimatedProfit = Math.max(totalExpected - totalLoaned, 0);
+
+            document.getElementById('reportTotalLoaned').textContent = formatCurrency(totalLoaned);
+            document.getElementById('reportTotalReceived').textContent = formatCurrency(totalReceived);
+            document.getElementById('reportOverdueAmount').textContent = formatCurrency(overdueAmount);
+            document.getElementById('reportEstimatedProfit').textContent = formatCurrency(estimatedProfit);
+            document.getElementById('reportOverdueCount').textContent = `${overdueInstallments.length} parcela(s) em atraso.`;
+        }
+
+        function renderReports() {
+            const installments = reportsState.filteredInstallments;
+            renderCards(installments);
+            renderChart(installments);
+            renderStatusDistribution(installments);
+            renderNextDueDates(installments);
+            renderTopDebtors(installments);
+        }
+
+        function applyReportFilters() {
+            const periodValue = document.getElementById('reportPeriodFilter').value;
+            const clientValue = document.getElementById('reportClientFilter').value;
+            const { start, end } = getPeriodBounds(periodValue);
+
+            reportsState.filteredInstallments = reportsState.installments.filter((installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                const referenceDate = getInstallmentReferenceDate(installment, status);
+
+                if (clientValue !== 'all' && !sameId(installment.debtor_id, clientValue)) return false;
+                if (start && (!referenceDate || referenceDate < start)) return false;
+                if (end && (!referenceDate || referenceDate > end)) return false;
+                return true;
+            });
+
+            renderReports();
+            document.getElementById('reportUpdatedAt').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function clearReportFilters() {
+            document.getElementById('reportPeriodFilter').value = 'month_current';
+            document.getElementById('reportClientFilter').value = 'all';
+            document.getElementById('reportCustomStartDate').value = '';
+            document.getElementById('reportCustomEndDate').value = '';
+            updateReportCustomRangeVisibility();
+            showReportFeedback('');
+            applyReportFilters();
+        }
+
+        function notifyExportPlaceholder(format) {
+            showReportFeedback(`Exportação ${format} será disponibilizada nas próximas etapas.`, 'info');
+        }
+
+        async function loadReportsData() {
+            try {
+                const [loans, installments, debtors] = await Promise.all([
+                    fetchTableData('loans'),
+                    fetchTableData('installments'),
+                    fetchTableData('debtors'),
+                ]);
+
+                reportsState.loans = (Array.isArray(loans) ? loans : []).map(normalizeLoanRow);
+                reportsState.installments = (Array.isArray(installments) ? installments : []).map(normalizeInstallmentRow);
+                reportsState.debtors = (Array.isArray(debtors) ? debtors : []).map(normalizeDebtorRow);
+
+                populateReportClientFilter();
+                updateReportCustomRangeVisibility();
+                applyReportFilters();
+            } catch (error) {
+                console.error('Erro ao carregar relatórios:', error);
+                showReportFeedback('Erro ao carregar dados dos relatórios.', 'error');
+                document.getElementById('reportChart').innerHTML = '<p class="text-red-600">Erro ao carregar gráfico.</p>';
+                document.getElementById('statusDistribution').innerHTML = '<p class="text-red-600">Erro ao carregar dados.</p>';
+                document.getElementById('nextDueList').innerHTML = '<p class="text-red-600">Erro ao carregar dados.</p>';
+                document.getElementById('topDebtorsTable').innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+            }
+        }
+
+        document.getElementById('reportPeriodFilter').addEventListener('change', () => {
+            updateReportCustomRangeVisibility();
+            applyReportFilters();
+        });
+        document.getElementById('reportClientFilter').addEventListener('change', applyReportFilters);
+        document.getElementById('reportCustomStartDate').addEventListener('change', applyReportFilters);
+        document.getElementById('reportCustomEndDate').addEventListener('change', applyReportFilters);
+        document.getElementById('reportApplyFiltersBtn').addEventListener('click', applyReportFilters);
+        document.getElementById('reportClearFiltersBtn').addEventListener('click', clearReportFilters);
+        document.getElementById('exportCsvBtn').addEventListener('click', () => notifyExportPlaceholder('CSV'));
+        document.getElementById('exportPdfBtn').addEventListener('click', () => notifyExportPlaceholder('PDF'));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReportsData();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

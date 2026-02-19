@@ -1,0 +1,2537 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credix - Clientes</title>
+    <style>
+        html, body { background-color: #020617; }
+    </style>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') root.classList.add('dark');
+                if (savedTheme === 'light') root.classList.remove('dark');
+            } catch (error) {}
+        })();
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = Object.assign({}, window.tailwind.config || {}, { darkMode: 'class' });
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html { font-size: 16px; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+
+        .primary-gradient { background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #111827 100%); }
+        .premium-header { background: rgba(2, 6, 23, 0.75); border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
+
+        .icon-btn {
+            color: #cbd5e1;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+        }
+
+        .icon-btn:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35) inset;
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
+            transform: translateX(0);
+            transition: transform 120ms ease-out;
+        }
+
+        .sidebar-item {
+            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
+            border-radius: 12px;
+            margin: 4px 0;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Remover outlines de foco (pedido do usuário) apenas nesta tela. */
+        a:focus,
+        a:focus-visible,
+        button:focus,
+        button:focus-visible,
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible {
+            outline: none !important;
+        }
+
+        .glass-card {
+            background: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+
+        .page-title { color: #ffffff; }
+        .muted-on-dark { color: #cbd5e1; }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #0f172a;
+        }
+
+        .filter-control {
+            background: #f8fafc;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #111827;
+            width: 100%;
+        }
+
+        .clients-data-panel {
+            background: #f8fafc;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .clients-data-panel .filter-control {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            font-size: 0.875rem;
+            padding: 8px 11px;
+            min-height: 38px;
+        }
+
+        .clients-data-panel .filter-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .clients-data-panel .filter-control:focus {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+        }
+
+        .clients-data-panel .filter-control option {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .table-shell {
+            overflow-x: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.4);
+            scrollbar-gutter: stable both-edges;
+        }
+
+        .table-shell table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-shell th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            text-align: left;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 10px 12px;
+            box-shadow: inset 0 -1px 0 rgba(203, 213, 225, 0.65);
+        }
+        .table-shell td {
+            padding: 9px 12px;
+            border-top: 1px solid #e5e7eb;
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
+        .debtor-focus-row { background: #eff6ff; box-shadow: inset 3px 0 0 #2563eb; }
+        .debtor-table-row { transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
+        .debtor-table-row:hover { background: #f8fafc; }
+        .debtor-overdue-row {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+        .debtor-overdue-row:hover { background: #f8fafc; }
+
+        .debtor-overdue-mobile {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+
+        .debtor-row-enter {
+            animation: debtorRowEnter 220ms ease-out both;
+        }
+
+        @keyframes debtorRowEnter {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table-shell th.sortable-th { cursor: pointer; user-select: none; }
+        .table-shell th.sortable-th:hover { background: #eef2ff; }
+        .table-shell th.sortable-th > button.sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            font: inherit;
+            color: inherit;
+            text-align: left;
+        }
+        .table-shell th.sortable-th.text-right > button.sort-btn { justify-content: flex-end; text-align: right; }
+        .table-shell th.sortable-th > button.sort-btn .sort-icon { opacity: 0.45; }
+        .table-shell th.sortable-th[data-sort-active="true"] > button.sort-btn .sort-icon { opacity: 0.9; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 24px;
+            padding: 0 10px;
+            border-radius: 9999px;
+            font-size: 13px;
+            line-height: 1;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; border: 1px solid #86efac; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .badge-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        .app-toast {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 420px;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.42);
+            background: linear-gradient(135deg, rgba(5, 85, 70, 0.9) 0%, rgba(3, 55, 48, 0.95) 100%);
+            color: #d1fae5;
+            padding: 12px 14px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.25;
+            box-shadow: 0 16px 38px -22px rgba(16, 185, 129, 0.75), inset 0 1px 0 rgba(167, 243, 208, 0.16);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 200ms ease, transform 200ms ease;
+            pointer-events: none;
+        }
+
+        .app-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .app-toast-error {
+            border-color: rgba(239, 68, 68, 0.42);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.95) 100%);
+            color: #fee2e2;
+            box-shadow: 0 16px 38px -22px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(254, 202, 202, 0.15);
+        }
+
+        .app-toast-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.22);
+            color: #a7f3d0;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .app-toast-error .app-toast-icon {
+            background: rgba(239, 68, 68, 0.22);
+            color: #fecaca;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+        }
+
+        .app-toast-text {
+            word-break: break-word;
+        }
+
+        main { transition: none; }
+        body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
+        body.sidebar-collapsed main { margin-left: 0 !important; }
+
+        @media (max-width: 1024px) {
+            .modern-sidebar { transform: translateX(-100%); }
+            .modern-sidebar.mobile-open { transform: translateX(0) !important; }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-value { font-size: 1.6rem; }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .icon-btn i {
+                font-size: 1rem !important;
+            }
+
+            .header-user-chevron { display: none; }
+
+            .table-shell th,
+            .table-shell td {
+                padding: 8px 10px;
+            }
+        }
+
+        /* Evita "tabela esmagada" em viewports estreitos (ex: modo desktop no celular).
+           Em telas >= sm, a tabela pode ficar mais larga e rolar horizontalmente. */
+        @media (min-width: 640px) {
+            .table-shell table { min-width: 100%; }
+            .app-toast {
+                left: auto;
+                top: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+        }
+
+        .dark .kpi-value { color: #0f172a; }
+        .dark .filter-control,
+        .dark .table-shell,
+        .dark .table-shell th,
+        .dark .table-shell td { background: #f8fafc; color: #1f2937; border-color: #e2e8f0; }
+        .dark .table-shell th { background: #f8fafc; color: #0f172a; }
+        .dark .table-shell th.sortable-th:hover { background: #eef2ff; }
+        .dark .debtor-focus-row { background: rgba(30, 64, 175, 0.25); }
+        .dark .debtor-table-row:hover { background: #f8fafc; }
+        .dark .debtor-overdue-row {
+            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+        .dark .debtor-overdue-row:hover { background: #f8fafc; }
+
+        .table-shell .text-slate-100,
+        .table-shell .text-slate-50,
+        #debtorsMobileList .text-slate-100,
+        #debtorsMobileList .text-slate-50 {
+            color: #0f172a !important;
+        }
+
+        .table-shell .text-slate-500,
+        .table-shell .text-slate-400,
+        .table-shell .text-slate-400\/90,
+        .table-shell .text-slate-300,
+        #debtorsMobileList .text-slate-500,
+        #debtorsMobileList .text-slate-400,
+        #debtorsMobileList .text-slate-400\/90,
+        #debtorsMobileList .text-slate-300 {
+            color: #64748b !important;
+        }
+
+        #debtorsMobileList [data-debtor-id] {
+            background: #f8fafc !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        #debtorsMobileList [data-debtor-id][class*="border-amber-500"] {
+            background: #fffbeb !important;
+            border-color: #fcd34d !important;
+        }
+        /* Premium DS v1 - light skin */
+        :root {
+            --premium-bg: #0B1220;
+            --premium-sidebar: #0B1730;
+            --premium-card: #F8FAFC;
+            --premium-positive: #16A34A;
+            --premium-negative: #DC2626;
+            --premium-accent: #1E40AF;
+            --premium-radius: 16px;
+            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+        }
+
+        html, body {
+            background-color: var(--premium-bg);
+        }
+
+        .primary-gradient {
+            background:
+                radial-gradient(900px 320px at -10% -10%, rgba(30, 64, 175, 0.18), transparent 60%),
+                var(--premium-bg);
+        }
+
+        .premium-header {
+            background: rgba(11, 18, 32, 0.86);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+            backdrop-filter: blur(8px);
+        }
+
+        .modern-sidebar {
+            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1B3D8F 0%, #234EA8 100%);
+        }
+
+        .glass-card,
+        .kpi-card,
+        .summary-link,
+        .modal-panel,
+        .modal-content {
+            background: var(--premium-card);
+            border-radius: var(--premium-radius);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: var(--premium-shadow-soft);
+        }
+
+        .rounded-2xl {
+            border-radius: var(--premium-radius);
+        }
+
+        .badge,
+        .status-pill {
+            border-radius: 999px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .badge-success,
+        .status-green {
+            background: rgba(22, 163, 74, 0.14);
+            color: var(--premium-positive);
+            border-color: rgba(22, 163, 74, 0.34);
+        }
+
+        .badge-danger,
+        .status-red {
+            background: rgba(220, 38, 38, 0.12);
+            color: var(--premium-negative);
+            border-color: rgba(220, 38, 38, 0.36);
+        }
+
+        .badge-warn,
+        .status-yellow {
+            background: rgba(245, 158, 11, 0.16);
+            color: #b45309;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .notification-badge,
+        .btn-primary,
+        .action-primary {
+            background: var(--premium-accent);
+        }
+</style>
+</head>
+<body class="primary-gradient min-h-screen">
+    <header class="premium-header fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+            <div class="flex items-center">
+                <button id="sidebarToggle" class="icon-btn focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <h1 class="ml-3 sm:ml-6">
+                    <a href="dashboard.html" class="flex items-center" aria-label="Credix">
+                        <%- include('partials/brand-wordmark', { size: 'header' }) %>
+                    </a>
+                </h1>
+            </div>
+            <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
+                <div class="relative min-w-0">
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                        <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                        <button type="button" data-user-menu-action="profile" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-id-card text-slate-500 dark:text-slate-300"></i>
+                            <span>Meu perfil</span>
+                        </button>
+                        <button type="button" data-user-menu-action="security" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-shield-halved text-slate-500 dark:text-slate-300"></i>
+                            <span>Segurança</span>
+                        </button>
+                        <button type="button" data-user-menu-action="help" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <i class="fas fa-circle-question text-slate-500 dark:text-slate-300"></i>
+                            <span>Ajuda</span>
+                        </button>
+                        <div class="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                        <button type="button" data-user-menu-action="logout" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
+                            <i class="fas fa-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16 sm:pt-20">
+        <aside id="sidebar" class="modern-sidebar fixed left-0 top-16 h-[calc(100%-4rem)] w-64 z-40 sm:top-20 sm:h-[calc(100%-5rem)]">
+            <nav class="mt-8 px-4">
+                <ul class="space-y-2">
+                    <li><a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span>Painel financeiro</span></a></li>
+                    <li><a href="debtors.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span class="font-medium">Clientes</span></a></li>
+                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
+                    <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
+                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">Clientes</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situação de cada cliente.</p>
+                </div>
+                <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                    <i class="fas fa-user-plus mr-2"></i>Novo cliente
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
+                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-users"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
+                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-circle-check"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
+                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-user-clock"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
+                    <div class="relative flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
+                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">0</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clients-data-panel rounded-2xl p-4 sm:p-5 lg:p-6">
+                <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+                    <div class="md:col-span-5">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Buscar</label>
+                        <input id="debtorSearch" type="text" class="filter-control text-sm" placeholder="Nome, telefone ou documento">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Status</label>
+                        <select id="statusFilter" class="filter-control text-sm">
+                            <option value="Todos">Todos</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                            <option value="Atrasado">Atrasado</option>
+                            <option value="Quitado">Quitado</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Ordenar por</label>
+                        <select id="sortBy" class="filter-control text-sm">
+                            <option value="name">Nome</option>
+                            <option value="document">Documento</option>
+                            <option value="phone">Telefone</option>
+                            <option value="open_total">Maior em aberto</option>
+                            <option value="loans_count">Empréstimos</option>
+                            <option value="overdue_count">Parcelas em atraso</option>
+                            <option value="max_overdue_days">Maior dias em atraso</option>
+                            <option value="next_due_date">Próximo vencimento</option>
+                            <option value="created_at">Data de cadastro</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-12 flex flex-wrap items-center justify-end gap-2 pt-1">
+                        <button id="clearFiltersBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                            <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
+                        </button>
+                        <button id="refreshBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50">
+                            <i class="fas fa-rotate-right mr-2"></i><span id="refreshBtnText">Atualizar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile: lista em cards (padrao tipo Painel financeiro) -->
+                <div id="debtorsMobileList" class="sm:hidden space-y-3">
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
+                        Carregando clientes...
+                    </div>
+                </div>
+
+                <!-- Desktop/Tablet: tabela completa -->
+                <div class="hidden sm:block">
+                    <div class="table-shell max-h-[520px] overflow-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="sortable-th" data-sort="name" data-sort-active="false">
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Cliente">
+                                            <span>Cliente</span>
+                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                                        </button>
+                                    </th>
+                                    <th class="sortable-th" data-sort="status" data-sort-active="false">
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Status">
+                                            <span>Status</span>
+                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                                        </button>
+                                    </th>
+                                    <th class="whitespace-nowrap">
+                                        <span>Situação</span>
+                                    </th>
+                                    <th class="whitespace-nowrap text-right sortable-th" data-sort="overdue_count" data-sort-active="false">
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Atrasos">
+                                            <span>Atrasos</span>
+                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                                        </button>
+                                    </th>
+                                    <th class="whitespace-nowrap text-right sortable-th" data-sort="open_total" data-sort-active="false">
+                                        <button type="button" class="sort-btn" aria-label="Ordenar por Total em aberto">
+                                            <span>Total em aberto</span>
+                                            <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                                        </button>
+                                    </th>
+                                    <th class="whitespace-nowrap w-[1%] text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="debtorsTableBody">
+                                <tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Carregando clientes...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+                    <p class="text-sm text-gray-500">
+                        Mostrando <span id="showingStart">0</span> até <span id="showingEnd">0</span> de <span id="totalResults">0</span> resultados
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button id="prevPageBtn" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="pageIndicator" class="text-sm text-gray-500">Página 1</span>
+                        <button id="nextPageBtn" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="debtorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
+                    <div class="mb-5 flex items-center justify-between">
+                        <h3 id="debtorModalTitle" class="text-xl font-bold text-gray-800">Novo cliente</h3>
+                        <button id="closeDebtorModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form id="newDebtorForm" class="space-y-4" novalidate>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div class="md:col-span-2">
+                                <label class="mb-1 block text-sm text-gray-600">Nome*</label>
+                                <input id="newDebtorName" class="filter-control" type="text" autocomplete="name" placeholder="Nome completo" required>
+                                <p id="newDebtorNameError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Telefone/WhatsApp*</label>
+                                <input id="newDebtorPhone" class="filter-control" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
+                                <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">CPF*</label>
+                                <input id="newDebtorCpf" class="filter-control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required>
+                                <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">E-mail (opcional)</label>
+                                <input id="newDebtorEmail" class="filter-control" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
+                                <p id="newDebtorEmailError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm text-gray-600">Status</label>
+                                <select id="newDebtorStatus" class="filter-control">
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Inativo">Inativo</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="mb-1 block text-sm text-gray-600">Endereço (opcional)</label>
+                                <input id="newDebtorAddress" class="filter-control" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button id="cancelDebtorModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar cliente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="deleteDebtorConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
+                    <h3 class="text-xl font-semibold text-gray-800">Confirmar exclusão</h3>
+                    <p class="mt-2 text-sm text-gray-600">Tem certeza que deseja excluir este cliente?</p>
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                        <button id="cancelDeleteDebtorBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button id="confirmDeleteDebtorBtn" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="registerPaymentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+                <div class="w-full max-w-lg rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
+                    <div class="mb-5 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Registrar pagamento</h3>
+                            <p class="text-sm text-gray-500">Cliente: <span id="registerPaymentDebtorName" class="font-semibold text-gray-800">-</span></p>
+                        </div>
+                        <button id="closeRegisterPaymentModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form id="registerPaymentForm" class="space-y-4">
+                        <div>
+                            <label for="registerPaymentAmount" class="mb-1 block text-sm text-gray-600">Valor (R$)</label>
+                            <input id="registerPaymentAmount" type="number" min="0.01" step="0.01" class="filter-control" required placeholder="0,00">
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="registerPaymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
+                                <input id="registerPaymentDate" type="date" class="filter-control" required>
+                            </div>
+                            <div>
+                                <label for="registerPaymentMethod" class="mb-1 block text-sm text-gray-600">Forma</label>
+                                <select id="registerPaymentMethod" class="filter-control" required>
+                                    <option value="PIX">PIX</option>
+                                    <option value="DINHEIRO">Dinheiro</option>
+                                    <option value="TRANSFERENCIA">Transferência</option>
+                                    <option value="CARTAO">Cartão</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button id="cancelRegisterPaymentModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                            <button id="saveRegisterPaymentBtn" type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                                <i class="fas fa-check mr-2"></i>Registrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="deleteDebtorToast" class="pointer-events-none fixed left-4 right-4 top-4 z-50 hidden translate-y-2 opacity-0 transition-all duration-300 ease-out sm:left-auto sm:right-6 sm:max-w-sm">
+                <div class="flex items-center gap-3 rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-emerald-100 shadow-2xl backdrop-blur">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-200">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <p class="text-sm font-medium">Cliente excluído com sucesso.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
+    <script>
+        const currentUser = window.__AUTH_USER__;
+        if (!currentUser) {
+            window.location.href = '/login';
+        } else {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            const displayName = currentUser.name || currentUser.full_name || 'Administrador';
+            document.getElementById('userName').textContent = `Olá, ${displayName}`;
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('main');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const isMobileViewport = () => window.matchMedia('(max-width: 1024px)').matches;
+        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+        const tableCache = {};
+        function getDemoTable(tableName) {
+            return Array.isArray(tableCache[tableName]) ? tableCache[tableName] : [];
+        }
+
+        async function fetchTableData(tableName) {
+            try {
+                const response = await fetch(`/api/tables/${tableName}`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                if (Array.isArray(payload?.data)) {
+                    tableCache[tableName] = payload.data;
+                    return payload.data;
+                }
+            } catch (error) {
+                console.warn(`Fallback para dados demo: ${tableName}`, error);
+            }
+            return getDemoTable(tableName);
+        }
+
+        function saveTableData(tableName, rows) {
+            const safeRows = Array.isArray(rows) ? rows : [];
+            tableCache[tableName] = safeRows;
+
+            fetch(`/api/tables/${tableName}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rows: safeRows })
+            }).catch(error => {
+                console.error(`Erro ao salvar tabela ${tableName}:`, error);
+            });
+        }
+
+        function getNextTableId(tableName, fallbackStart) {
+            const table = getDemoTable(tableName);
+            const maxId = table.reduce((max, row) => {
+                const parsed = Number(row?.id);
+                if (!Number.isFinite(parsed)) return max;
+                return parsed > max ? parsed : max;
+            }, Number(fallbackStart || 1) - 1);
+            return maxId + 1;
+        }
+
+        function setActiveSidebarItem(targetHref) {
+            sidebarLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === targetHref;
+                link.classList.toggle('active', isActive);
+                if (isActive) link.setAttribute('aria-current', 'page');
+                else link.removeAttribute('aria-current');
+            });
+        }
+
+        function syncActiveSidebarWithRoute() {
+            const currentPage = window.location.pathname.split('/').pop() || 'debtors.html';
+            setActiveSidebarItem(currentPage);
+        }
+
+        function syncSidebarLayout() {
+            if (isMobileViewport()) {
+                main.style.marginLeft = '0';
+                return;
+            }
+            sidebar.classList.remove('mobile-open');
+            main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            if (isMobileViewport()) {
+                sidebar.classList.toggle('mobile-open');
+                return;
+            }
+            document.body.classList.toggle('sidebar-collapsed');
+            syncSidebarLayout();
+        });
+
+        window.addEventListener('resize', syncSidebarLayout);
+        syncSidebarLayout();
+        syncActiveSidebarWithRoute();
+
+        function closeUserMenu() {
+            if (!userMenuDropdown) return;
+            userMenuDropdown.classList.add('hidden');
+        }
+
+        function showUserMenuNotice(message) {
+            if (typeof showMessage === 'function') {
+                showMessage(message, 'success');
+                return;
+            }
+            window.alert(message);
+        }
+
+        function showMessage(message, type) {
+            const safeType = type === 'success' ? 'success' : 'error';
+
+            if (showMessage.hideTimeoutId) {
+                clearTimeout(showMessage.hideTimeoutId);
+                showMessage.hideTimeoutId = null;
+            }
+
+            if (showMessage.removeTimeoutId) {
+                clearTimeout(showMessage.removeTimeoutId);
+                showMessage.removeTimeoutId = null;
+            }
+
+            const existing = document.getElementById('appToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
+
+            const iconWrap = document.createElement('span');
+            iconWrap.className = 'app-toast-icon';
+
+            const icon = document.createElement('i');
+            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
+            iconWrap.appendChild(icon);
+
+            const text = document.createElement('span');
+            text.className = 'app-toast-text';
+            text.textContent = String(message || '');
+
+            toast.appendChild(iconWrap);
+            toast.appendChild(text);
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            showMessage.hideTimeoutId = window.setTimeout(() => {
+                toast.classList.remove('show');
+                showMessage.removeTimeoutId = window.setTimeout(() => {
+                    toast.remove();
+                    showMessage.removeTimeoutId = null;
+                }, 220);
+                showMessage.hideTimeoutId = null;
+            }, 3000);
+        }
+
+        async function performLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = '/login';
+        }
+
+        async function handleUserMenuAction(action) {
+            if (action === 'logout') {
+                await performLogout();
+                return;
+            }
+
+            const allowedTabs = new Set(['profile', 'security', 'help']);
+            const destination = allowedTabs.has(action) ? action : 'profile';
+            window.location.href = `/admin/account.html?tab=${encodeURIComponent(destination)}`;
+        }
+
+        if (userMenuBtn && userMenuDropdown) {
+            userMenuBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+
+            userMenuDropdown.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const actionBtn = target.closest('[data-user-menu-action]');
+                if (!actionBtn) return;
+                const action = actionBtn.getAttribute('data-user-menu-action');
+                closeUserMenu();
+                void handleUserMenuAction(action);
+            });
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Node)) return;
+                if (userMenuDropdown.classList.contains('hidden')) return;
+                if (userMenuDropdown.contains(target) || userMenuBtn.contains(target)) return;
+                closeUserMenu();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeUserMenu();
+            });
+        }
+
+        const debtorsState = {
+            debtors: [],
+            loans: [],
+            installments: [],
+            filtered: [],
+            currentPage: 1,
+            pageSize: window.matchMedia('(max-width: 639px)').matches ? 6 : 8,
+            sortField: 'name',
+            sortDir: 'asc',
+            editingDebtorId: null,
+            registeringPaymentTarget: null,
+            expandedDebtorIds: new Set()
+        };
+        const focusDebtorId = String(new URLSearchParams(window.location.search).get('debtorId') || '').trim();
+        let hasAppliedDebtorFocus = false;
+
+        const debtorModal = document.getElementById('debtorModal');
+        const debtorModalTitle = document.getElementById('debtorModalTitle');
+        const newDebtorBtn = document.getElementById('newDebtorBtn');
+        const closeDebtorModalBtn = document.getElementById('closeDebtorModalBtn');
+        const cancelDebtorModalBtn = document.getElementById('cancelDebtorModalBtn');
+        const newDebtorForm = document.getElementById('newDebtorForm');
+        const newDebtorNameInput = document.getElementById('newDebtorName');
+        const newDebtorPhoneInput = document.getElementById('newDebtorPhone');
+        const newDebtorCpfInput = document.getElementById('newDebtorCpf');
+        const newDebtorEmailInput = document.getElementById('newDebtorEmail');
+        const newDebtorStatusInput = document.getElementById('newDebtorStatus');
+        const newDebtorAddressInput = document.getElementById('newDebtorAddress');
+        const newDebtorNameError = document.getElementById('newDebtorNameError');
+        const newDebtorPhoneError = document.getElementById('newDebtorPhoneError');
+        const newDebtorCpfError = document.getElementById('newDebtorCpfError');
+        const newDebtorEmailError = document.getElementById('newDebtorEmailError');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshBtnText = document.getElementById('refreshBtnText');
+        const sortBy = document.getElementById('sortBy');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const registerPaymentModal = document.getElementById('registerPaymentModal');
+        const registerPaymentForm = document.getElementById('registerPaymentForm');
+        const registerPaymentDebtorName = document.getElementById('registerPaymentDebtorName');
+        const registerPaymentAmount = document.getElementById('registerPaymentAmount');
+        const registerPaymentDate = document.getElementById('registerPaymentDate');
+        const registerPaymentMethod = document.getElementById('registerPaymentMethod');
+        const closeRegisterPaymentModalBtn = document.getElementById('closeRegisterPaymentModalBtn');
+        const cancelRegisterPaymentModalBtn = document.getElementById('cancelRegisterPaymentModalBtn');
+        const saveRegisterPaymentBtn = document.getElementById('saveRegisterPaymentBtn');
+        const deleteDebtorConfirmModal = document.getElementById('deleteDebtorConfirmModal');
+        const cancelDeleteDebtorBtn = document.getElementById('cancelDeleteDebtorBtn');
+        const confirmDeleteDebtorBtn = document.getElementById('confirmDeleteDebtorBtn');
+        const deleteDebtorToast = document.getElementById('deleteDebtorToast');
+        const debtorsMobileList = document.getElementById('debtorsMobileList');
+        const debtorsTableHead = document.querySelector('.table-shell thead');
+        let pendingDeleteDebtorId = null;
+        let deleteToastTimeoutId = null;
+        let deleteToastHideTimeoutId = null;
+        let isDebtorsLoading = false;
+        const debtorsModalScrollState = {
+            previousBodyOverflow: '',
+            openModalIds: new Set(),
+        };
+
+        function lockBodyScrollForDebtorsModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || debtorsModalScrollState.openModalIds.has(modalId)) return;
+
+            if (debtorsModalScrollState.openModalIds.size === 0) {
+                debtorsModalScrollState.previousBodyOverflow = document.body.style.overflow || '';
+                document.body.style.overflow = 'hidden';
+            }
+
+            debtorsModalScrollState.openModalIds.add(modalId);
+        }
+
+        function unlockBodyScrollForDebtorsModal(modalElement) {
+            if (!modalElement) return;
+            const modalId = modalElement.id || '';
+            if (!modalId || !debtorsModalScrollState.openModalIds.has(modalId)) return;
+
+            debtorsModalScrollState.openModalIds.delete(modalId);
+
+            if (debtorsModalScrollState.openModalIds.size === 0) {
+                document.body.style.overflow = debtorsModalScrollState.previousBodyOverflow;
+                debtorsModalScrollState.previousBodyOverflow = '';
+            }
+        }
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
+        }
+
+        function getLocalTodayDateInputValue() {
+            const now = new Date();
+            const yyyy = String(now.getFullYear());
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function highlightFocusedDebtorRow(debtorId) {
+            const candidates = [
+                ...document.querySelectorAll('#debtorsTableBody tr[data-debtor-id]'),
+                ...document.querySelectorAll('#debtorsMobileList [data-debtor-id]'),
+            ];
+            const target = candidates.find(node => sameId(node.getAttribute('data-debtor-id'), debtorId));
+            if (!target) return;
+
+            target.classList.add('debtor-focus-row');
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => target.classList.remove('debtor-focus-row'), 3500);
+        }
+
+        function toDigits(value) {
+            return String(value || '').replace(/\D/g, '');
+        }
+
+        function setInlineError(element, message) {
+            if (!element) return;
+            const text = String(message || '').trim();
+            if (!text) {
+                element.textContent = '';
+                element.classList.add('hidden');
+                return;
+            }
+            element.textContent = text;
+            element.classList.remove('hidden');
+        }
+
+        function clearDebtorFormErrors() {
+            setInlineError(newDebtorNameError, '');
+            setInlineError(newDebtorPhoneError, '');
+            setInlineError(newDebtorCpfError, '');
+            setInlineError(newDebtorEmailError, '');
+        }
+
+        function normalizeBrazilPhoneDigits(value) {
+            const digits = toDigits(value);
+            if (!digits) return '';
+
+            let normalized = digits;
+            if (normalized.startsWith('55') && normalized.length > 11) {
+                normalized = normalized.slice(2);
+            }
+            if (normalized.startsWith('0') && normalized.length > 11) {
+                // Aceita colagem tipo 0XX...: mantém apenas os últimos 11 dígitos.
+                normalized = normalized.slice(-11);
+            }
+            return normalized;
+        }
+
+        function formatPhonePartial(value) {
+            const digits = normalizeBrazilPhoneDigits(value).slice(0, 11);
+            if (!digits) return '';
+            if (digits.length <= 2) return digits;
+
+            const ddd = digits.slice(0, 2);
+            const rest = digits.slice(2);
+            const isMobile = digits.length === 11;
+            const firstLen = isMobile ? 5 : 4;
+            const first = rest.slice(0, firstLen);
+            const second = rest.slice(firstLen);
+
+            return `(${ddd}) ${first}${second ? `-${second}` : ''}`;
+        }
+
+        function formatCpfPartial(value) {
+            const digits = toDigits(value).slice(0, 11);
+            if (!digits) return '';
+
+            const p1 = digits.slice(0, 3);
+            const p2 = digits.slice(3, 6);
+            const p3 = digits.slice(6, 9);
+            const p4 = digits.slice(9, 11);
+
+            if (digits.length <= 3) return p1;
+            if (digits.length <= 6) return `${p1}.${p2}`;
+            if (digits.length <= 9) return `${p1}.${p2}.${p3}`;
+            return `${p1}.${p2}.${p3}-${p4}`;
+        }
+
+        function isValidCpfDigits(cpfDigits) {
+            const cpf = String(cpfDigits || '');
+            if (!/^\d{11}$/.test(cpf)) return false;
+            if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += Number(cpf[i]) * (10 - i);
+            }
+            let first = (sum * 10) % 11;
+            if (first === 10) first = 0;
+            if (first !== Number(cpf[9])) return false;
+
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+                sum += Number(cpf[i]) * (11 - i);
+            }
+            let second = (sum * 10) % 11;
+            if (second === 10) second = 0;
+            return second === Number(cpf[10]);
+        }
+
+        function isValidEmail(value) {
+            const email = String(value || '').trim();
+            if (!email) return true;
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function formatDocument(value) {
+            const digits = toDigits(value);
+            if (digits.length === 11) {
+                return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            if (digits.length === 14) {
+                return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            }
+            return value || '-';
+        }
+
+        function formatPhone(value) {
+            const digits = toDigits(value);
+            if (digits.length === 11) {
+                return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+            if (digits.length === 10) {
+                return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            }
+            return value || '-';
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(Number(value || 0));
+        }
+
+        function parseDateValue(value) {
+            if (!value) return null;
+            if (value instanceof Date) return new Date(value.getTime());
+
+            const raw = String(value).trim();
+            const dateOnlyMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (dateOnlyMatch) {
+                const year = Number(dateOnlyMatch[1]);
+                const month = Number(dateOnlyMatch[2]) - 1;
+                const day = Number(dateOnlyMatch[3]);
+                return new Date(year, month, day);
+            }
+
+            const parsed = new Date(raw);
+            if (Number.isNaN(parsed.getTime())) return null;
+            return parsed;
+        }
+
+        function startOfDay(value) {
+            const date = parseDateValue(value);
+            if (!date) return null;
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function formatDate(value) {
+            const date = parseDateValue(value);
+            if (!date) return '-';
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function normalizeStatus(status) {
+            const s = String(status || '').trim().toLowerCase();
+            if (s === 'ativo') return 'Ativo';
+            if (s === 'inativo') return 'Inativo';
+            if (s === 'quitado') return 'Quitado';
+            if (s === 'atrasado') return 'Atrasado';
+            return status || 'Inativo';
+        }
+
+        function isOverdueStatus(status) {
+            const normalized = String(status || '').trim().toLowerCase();
+            return ['atrasado', 'overdue', 'em atraso', 'vencido', 'late'].includes(normalized);
+        }
+
+        function normalizeEditableClientStatus(value) {
+            const s = normalizeStatus(value);
+            if (s === 'Inativo' || s === 'Quitado') return 'Inativo';
+            return 'Ativo';
+        }
+
+        function normalizeDebtorRow(row) {
+            return {
+                ...row,
+                id: row.id,
+                name: row.name || '',
+                cpf: row.cpf || row.document || '',
+                document: row.document || row.cpf || '',
+                phone: row.phone || '',
+                email: row.email || '',
+                address: row.address || '',
+                notes: row.notes || '',
+                status: normalizeStatus(row.status),
+                created_at: row.created_at || row.createdAt || new Date().toISOString().slice(0, 10)
+            };
+        }
+
+        function getDebtorOverdueCount(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return 0;
+            return debtorsState.installments.filter(installment => {
+                if (!sameId(installment.debtor_id, debtorId)) return false;
+                const status = String(installment.status || '').toLowerCase();
+                if (status === 'atrasado') return true;
+                if (status === 'pago') return false;
+                const dueDate = startOfDay(installment.due_date);
+                return dueDate && dueDate < today;
+            }).length;
+        }
+
+        function getDebtorUiStatus(debtor) {
+            const base = normalizeStatus(debtor?.status);
+            const overdueCount = getDebtorOverdueCount(debtor?.id);
+            if (overdueCount > 0) return 'Atrasado';
+            return base;
+        }
+
+        function getDebtorRegistrationStatus(debtor) {
+            const base = normalizeEditableClientStatus(debtor?.status);
+            return base === 'Inativo' ? 'Inativo' : 'Ativo';
+        }
+
+        function getDebtorFinancialSituation(debtor) {
+            const loansCount = getDebtorLoansCount(debtor?.id);
+            if (loansCount <= 0) return 'Sem empréstimo';
+
+            const overdueCount = getDebtorOverdueCount(debtor?.id);
+            if (overdueCount > 0) return 'Atrasado';
+            return 'Em dia';
+        }
+
+        function badgeForFinancialSituation(situation) {
+            if (situation === 'Atrasado') return 'badge badge-danger';
+            if (situation === 'Em dia') return 'badge badge-success';
+            return 'badge badge-neutral';
+        }
+
+        function getDebtorMaxOverdueDays(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return null;
+
+            let maxDays = null;
+            debtorsState.installments.forEach((installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return;
+
+                const status = String(installment.status || '').trim().toLowerCase();
+                if (status === 'pago') return;
+
+                const dueDate = startOfDay(installment.due_date);
+                if (!dueDate) return;
+
+                const isOverdue = status === 'atrasado' || dueDate < today;
+                if (!isOverdue) return;
+
+                const diffMs = today.getTime() - dueDate.getTime();
+                const days = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+                if (maxDays === null || days > maxDays) maxDays = days;
+            });
+
+            return maxDays;
+        }
+
+        function getDebtorOpenTotal(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return 0;
+            return debtorsState.installments.reduce((sum, installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return sum;
+                const status = String(installment.status || '').toLowerCase();
+                if (status === 'pago') return sum;
+                if (status === 'atrasado') return sum;
+
+                const dueDate = startOfDay(installment.due_date);
+                if (dueDate && dueDate < today) return sum;
+
+                return sum + Number(installment.amount ?? installment.value ?? 0);
+            }, 0);
+        }
+
+        function getDebtorNextDueInstallment(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return null;
+
+            let next = null;
+            debtorsState.installments.forEach((installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return;
+
+                const status = String(installment.status || '').trim().toLowerCase();
+                if (status === 'pago') return;
+                if (status === 'atrasado') return;
+
+                const dueDate = startOfDay(installment.due_date);
+                if (!dueDate) return;
+                if (dueDate < today) return;
+
+                const amount = Number(installment.amount ?? installment.value ?? 0);
+                if (!next || dueDate < next.dueDate) {
+                    next = { dueDate, amount };
+                }
+            });
+
+            return next;
+        }
+
+        function getDebtorPaymentTargetInstallment(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return null;
+
+            const candidates = debtorsState.installments
+                .filter((installment) => sameId(installment.debtor_id, debtorId))
+                .map((installment) => {
+                    const status = String(installment.status || '').trim().toLowerCase();
+                    const dueDate = startOfDay(installment.due_date);
+                    const isPaid = status === 'pago';
+                    const isOverdue = !isPaid && dueDate && (status === 'atrasado' || dueDate < today);
+                    const isOpen = !isPaid && dueDate && dueDate >= today;
+                    return {
+                        installment,
+                        status,
+                        dueDate,
+                        isPaid,
+                        isOverdue,
+                        isOpen,
+                    };
+                })
+                .filter((item) => item.dueDate && !item.isPaid);
+
+            if (!candidates.length) return null;
+
+            const overdue = candidates
+                .filter((item) => item.isOverdue)
+                .sort((a, b) => a.dueDate - b.dueDate);
+
+            const open = candidates
+                .filter((item) => item.isOpen)
+                .sort((a, b) => a.dueDate - b.dueDate);
+
+            const target = overdue[0] || open[0] || candidates.sort((a, b) => a.dueDate - b.dueDate)[0];
+            if (!target) return null;
+
+            const amount = Number(target.installment.amount ?? target.installment.value ?? 0);
+            return {
+                loanId: target.installment.loan_id ?? target.installment.loanId,
+                installmentId: target.installment.id,
+                amount: Number.isFinite(amount) ? amount : 0,
+            };
+        }
+
+        function getDebtorLoansCount(debtorId) {
+            return debtorsState.loans.filter(loan => sameId(loan.debtor_id, debtorId)).length;
+        }
+
+        function updateDebtorMetrics() {
+            const total = debtorsState.debtors.length;
+            const active = debtorsState.debtors.filter(d => getDebtorUiStatus(d) === 'Ativo').length;
+            const inactive = debtorsState.debtors.filter(d => ['Inativo', 'Quitado'].includes(getDebtorUiStatus(d))).length;
+            const withOverdue = debtorsState.debtors.filter(d => getDebtorUiStatus(d) === 'Atrasado').length;
+
+            document.getElementById('totalDebtors').textContent = String(total);
+            document.getElementById('activeDebtors').textContent = String(active);
+            document.getElementById('inactiveDebtors').textContent = String(inactive);
+            document.getElementById('overdueDebtors').textContent = String(withOverdue);
+        }
+
+        function badgeForStatus(status) {
+            if (status === 'Ativo') return 'badge badge-success';
+            if (status === 'Atrasado') return 'badge badge-danger';
+            if (status === 'Quitado') return 'badge badge-success';
+            if (status === 'Inativo') return 'badge badge-neutral';
+            return 'badge badge-warn';
+        }
+
+        function getDebtorRiskIndicator(maxOverdueDays) {
+            const days = Number(maxOverdueDays || 0);
+            if (days >= 30) {
+                return {
+                    label: 'Alto',
+                    badgeClass: 'border-red-300 bg-red-50 text-red-700',
+                    dotClass: 'bg-red-500',
+                };
+            }
+
+            if (days >= 8) {
+                return {
+                    label: 'Médio',
+                    badgeClass: 'border-amber-300 bg-amber-50 text-amber-700',
+                    dotClass: 'bg-amber-500',
+                };
+            }
+
+            return {
+                label: 'Baixo',
+                badgeClass: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+                dotClass: 'bg-emerald-500',
+            };
+        }
+
+        function setRefreshLoadingState(isLoading) {
+            if (!refreshBtn) return;
+            const icon = refreshBtn.querySelector('i');
+            refreshBtn.disabled = Boolean(isLoading);
+            refreshBtn.classList.toggle('opacity-80', Boolean(isLoading));
+            refreshBtn.classList.toggle('cursor-not-allowed', Boolean(isLoading));
+            refreshBtn.classList.toggle('ring-2', Boolean(isLoading));
+            refreshBtn.classList.toggle('ring-blue-200', Boolean(isLoading));
+
+            if (icon) {
+                icon.classList.toggle('fa-spin', Boolean(isLoading));
+            }
+            if (refreshBtnText) {
+                refreshBtnText.textContent = isLoading ? 'Atualizando...' : 'Atualizar';
+            }
+        }
+
+        function flashRefreshSuccess() {
+            if (!refreshBtn) return;
+            refreshBtn.classList.add('border-emerald-400', 'text-emerald-700', 'ring-2', 'ring-emerald-200');
+            setTimeout(() => {
+                refreshBtn.classList.remove('border-emerald-400', 'text-emerald-700', 'ring-2', 'ring-emerald-200');
+            }, 900);
+        }
+
+        function renderDebtorsLoadingSkeleton() {
+            const skeletonCount = Math.max(4, Math.min(8, Number(debtorsState.pageSize || 6)));
+            const tbody = document.getElementById('debtorsTableBody');
+
+            if (tbody) {
+                tbody.innerHTML = Array.from({ length: skeletonCount }).map(() => `
+                    <tr class="hidden sm:table-row">
+                        <td colspan="6" class="py-4">
+                            <div class="animate-pulse flex items-center justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="h-3 w-40 rounded bg-gray-300"></div>
+                                    <div class="mt-2 h-2 w-24 rounded bg-gray-200"></div>
+                                </div>
+                                <div class="h-6 w-24 rounded-full bg-gray-300"></div>
+                                <div class="h-6 w-20 rounded-full bg-gray-300"></div>
+                                <div class="h-6 w-24 rounded bg-gray-300"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (debtorsMobileList) {
+                debtorsMobileList.innerHTML = Array.from({ length: 4 }).map(() => `
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 shadow-sm animate-pulse">
+                        <div class="h-3 w-2/3 rounded bg-gray-300"></div>
+                        <div class="mt-2 h-2 w-1/3 rounded bg-gray-200"></div>
+                        <div class="mt-4 grid grid-cols-2 gap-3">
+                            <div class="h-10 rounded bg-gray-200"></div>
+                            <div class="h-10 rounded bg-gray-200"></div>
+                        </div>
+                        <div class="mt-4 h-10 rounded bg-gray-200"></div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearDebtorsFilters() {
+            const searchInput = document.getElementById('debtorSearch');
+            const statusInput = document.getElementById('statusFilter');
+            if (searchInput) searchInput.value = '';
+            if (statusInput) statusInput.value = 'Todos';
+            if (sortBy) sortBy.value = 'name';
+            debtorsState.sortField = 'name';
+            debtorsState.sortDir = getDefaultSortDir('name');
+            updateDebtorsSortHeaderUi();
+            applyDebtorsFilters(true);
+        }
+
+        function getDefaultSortDir(sortField) {
+            if (sortField === 'open_total') return 'desc';
+            if (sortField === 'max_overdue_days') return 'desc';
+            if (sortField === 'created_at') return 'desc';
+            if (sortField === 'loans_count') return 'desc';
+            if (sortField === 'overdue_count') return 'desc';
+            if (sortField === 'next_due_date') return 'asc';
+            return 'asc';
+        }
+
+        function compareDebtors(a, b, sortField, sortDir) {
+            const dir = sortDir === 'desc' ? -1 : 1;
+            const nameCmp = String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+
+            if (sortField === 'open_total') {
+                const aTotal = Number(getDebtorOpenTotal(a.id) || 0);
+                const bTotal = Number(getDebtorOpenTotal(b.id) || 0);
+                const delta = aTotal - bTotal;
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'max_overdue_days') {
+                const aDays = Number(getDebtorMaxOverdueDays(a.id) ?? -1);
+                const bDays = Number(getDebtorMaxOverdueDays(b.id) ?? -1);
+                const delta = aDays - bDays;
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'created_at') {
+                const aTime = Date.parse(a.created_at || '') || 0;
+                const bTime = Date.parse(b.created_at || '') || 0;
+                const delta = aTime - bTime;
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'status') {
+                const aStatus = getDebtorRegistrationStatus(a);
+                const bStatus = getDebtorRegistrationStatus(b);
+                const cmp = String(aStatus).localeCompare(String(bStatus), 'pt-BR');
+                if (cmp !== 0) return cmp * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'document') {
+                const aDoc = toDigits(a.document || a.cpf || '');
+                const bDoc = toDigits(b.document || b.cpf || '');
+                if (!aDoc && !bDoc) return nameCmp;
+                if (!aDoc) return 1;
+                if (!bDoc) return -1;
+                const cmp = aDoc.localeCompare(bDoc, 'pt-BR');
+                if (cmp !== 0) return cmp * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'phone') {
+                const aPhone = toDigits(a.phone || '');
+                const bPhone = toDigits(b.phone || '');
+                if (!aPhone && !bPhone) return nameCmp;
+                if (!aPhone) return 1;
+                if (!bPhone) return -1;
+                const cmp = aPhone.localeCompare(bPhone, 'pt-BR');
+                if (cmp !== 0) return cmp * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'loans_count') {
+                const aCount = getDebtorLoansCount(a.id);
+                const bCount = getDebtorLoansCount(b.id);
+                const delta = aCount - bCount;
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'overdue_count') {
+                const aCount = getDebtorOverdueCount(a.id);
+                const bCount = getDebtorOverdueCount(b.id);
+                const delta = aCount - bCount;
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            if (sortField === 'next_due_date') {
+                const aNext = getDebtorNextDueInstallment(a.id);
+                const bNext = getDebtorNextDueInstallment(b.id);
+                if (!aNext && !bNext) return nameCmp;
+                if (!aNext) return 1;
+                if (!bNext) return -1;
+                const delta = aNext.dueDate.getTime() - bNext.dueDate.getTime();
+                if (delta !== 0) return delta * dir;
+                return nameCmp;
+            }
+
+            const cmp = String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+            if (cmp !== 0) return cmp * dir;
+            return 0;
+        }
+
+        function updateDebtorsSortHeaderUi() {
+            const headers = document.querySelectorAll('.table-shell th[data-sort]');
+            headers.forEach((th) => {
+                const field = String(th.getAttribute('data-sort') || '');
+                const active = field && field === debtorsState.sortField;
+                th.setAttribute('data-sort-active', active ? 'true' : 'false');
+
+                const icon = th.querySelector('.sort-icon');
+                if (!icon) return;
+
+                icon.classList.remove('fa-sort', 'fa-caret-up', 'fa-caret-down');
+                if (!active) {
+                    icon.classList.add('fa-sort');
+                    return;
+                }
+
+                if (debtorsState.sortDir === 'desc') {
+                    icon.classList.add('fa-caret-down');
+                } else {
+                    icon.classList.add('fa-caret-up');
+                }
+            });
+        }
+
+        function getFilteredDebtors() {
+            const searchValue = document.getElementById('debtorSearch').value.trim().toLowerCase();
+            const statusValue = document.getElementById('statusFilter').value;
+            const sortField = debtorsState.sortField || sortBy.value || 'name';
+            const sortDir = debtorsState.sortDir || getDefaultSortDir(sortField);
+
+            const filtered = debtorsState.debtors.filter(debtor => {
+                const normalizedStatus = getDebtorUiStatus(debtor);
+                if (statusValue !== 'Todos' && normalizedStatus !== statusValue) return false;
+
+                if (!searchValue) return true;
+                const haystack = `${debtor.name || ''} ${debtor.phone || ''} ${debtor.document || debtor.cpf || ''} ${debtor.email || ''}`.toLowerCase();
+                return haystack.includes(searchValue);
+            });
+
+            return filtered.sort((a, b) => compareDebtors(a, b, sortField, sortDir));
+        }
+
+        function updatePaginationInfo(total) {
+            const totalPages = Math.max(1, Math.ceil(total / debtorsState.pageSize));
+            if (debtorsState.currentPage > totalPages) {
+                debtorsState.currentPage = totalPages;
+            }
+
+            const start = total === 0 ? 0 : (debtorsState.currentPage - 1) * debtorsState.pageSize + 1;
+            const end = total === 0 ? 0 : Math.min(start + debtorsState.pageSize - 1, total);
+
+            document.getElementById('showingStart').textContent = String(start);
+            document.getElementById('showingEnd').textContent = String(end);
+            document.getElementById('totalResults').textContent = String(total);
+            document.getElementById('pageIndicator').textContent = `Página ${debtorsState.currentPage} de ${totalPages}`;
+
+            prevPageBtn.disabled = debtorsState.currentPage <= 1;
+            nextPageBtn.disabled = debtorsState.currentPage >= totalPages;
+            prevPageBtn.classList.toggle('opacity-50', prevPageBtn.disabled);
+            nextPageBtn.classList.toggle('opacity-50', nextPageBtn.disabled);
+        }
+
+        function isDebtorDetailExpanded(debtorId) {
+            return debtorsState.expandedDebtorIds.has(String(debtorId));
+        }
+
+        function setDebtorDetailExpanded(debtorId, expanded) {
+            const key = String(debtorId || '');
+            if (!key) return;
+
+            if (expanded) {
+                debtorsState.expandedDebtorIds.add(key);
+            } else {
+                debtorsState.expandedDebtorIds.delete(key);
+            }
+
+            const detailNodes = document.querySelectorAll(`[data-debtor-detail-for="${key}"]`);
+            const mainNodes = document.querySelectorAll(`[data-expandable-row="true"][data-debtor-id="${key}"]`);
+            const toggleButtons = document.querySelectorAll(`button[data-action="toggle-debtor-details"][data-id="${key}"]`);
+
+            detailNodes.forEach((node) => {
+                node.classList.toggle('hidden', !expanded);
+            });
+
+            mainNodes.forEach((node) => {
+                node.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            });
+
+            toggleButtons.forEach((button) => {
+                button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                button.setAttribute('title', expanded ? 'Fechar detalhes' : 'Ver detalhes');
+                button.setAttribute('aria-label', expanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente');
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !expanded);
+                    icon.classList.toggle('fa-eye-slash', expanded);
+                }
+            });
+        }
+
+        function toggleDebtorDetail(debtorId) {
+            const expanded = isDebtorDetailExpanded(debtorId);
+            setDebtorDetailExpanded(debtorId, !expanded);
+        }
+
+        function renderDebtorsMobileList(pageRows) {
+            if (!debtorsMobileList) return;
+
+            debtorsMobileList.innerHTML = pageRows.map((debtor, index) => {
+                const statusLabel = getDebtorRegistrationStatus(debtor);
+                const financialSituation = getDebtorFinancialSituation(debtor);
+                const financialSituationBadge = badgeForFinancialSituation(financialSituation);
+                const loansCount = getDebtorLoansCount(debtor.id);
+                const overdueCount = getDebtorOverdueCount(debtor.id);
+                const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
+                const nextDue = getDebtorNextDueInstallment(debtor.id);
+                const openTotal = getDebtorOpenTotal(debtor.id);
+                const hasOverdue = overdueCount > 0;
+                const isExpanded = isDebtorDetailExpanded(debtor.id);
+                const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
+                const documentValue = formatDocument(rawDocument);
+                const rawPhone = debtor.phone || '';
+                const phoneValue = formatPhone(rawPhone);
+                const phoneDigits = toDigits(rawPhone);
+                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="font-semibold text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-400">-</span>';
+                const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
+
+                return `
+                    <div class="debtor-row-enter rounded-2xl border ${hasOverdue ? 'border-gray-200 bg-slate-50 debtor-overdue-mobile' : 'border-gray-200 bg-slate-50'} p-4 shadow-sm" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="truncate text-base font-semibold text-gray-900">${debtor.name || '-'}</div>
+                                <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[11px] uppercase tracking-wide text-gray-500">Total em aberto</div>
+                                <div class="mt-1 text-base font-extrabold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
+                            <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
+                            <span class="inline-flex min-w-[1.5rem] justify-center rounded-full border px-2 py-1 text-xs font-semibold ${overdueCount > 0 ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-end gap-2">
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                                <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            </button>
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
+                                <i class="fas fa-cash-register"></i>
+                            </button>
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                                <i class="fas fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-3 ${isExpanded ? '' : 'hidden'} rounded-xl border border-gray-200 bg-slate-50 p-3" data-debtor-detail-for="${debtor.id}">
+                            <div class="grid grid-cols-1 gap-2 text-xs text-gray-700">
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Documento:</span> <span class="font-semibold text-gray-800">${documentValue}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">E-mail:</span> <span class="font-semibold text-gray-800">${debtor.email || '&mdash;'}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.):</span> <span class="font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${detailNextDue}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos:</span> <span class="font-semibold text-gray-800">${loansCount}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDebtorsTable() {
+            const tbody = document.getElementById('debtorsTableBody');
+            const total = debtorsState.filtered.length;
+            updatePaginationInfo(total);
+
+            if (!total) {
+                if (tbody) {
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Nenhum cliente encontrado.</td></tr>';
+                }
+                if (debtorsMobileList) {
+                    debtorsMobileList.innerHTML = `
+                        <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
+                            Nenhum cliente encontrado.
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const startIndex = (debtorsState.currentPage - 1) * debtorsState.pageSize;
+            const pageRows = debtorsState.filtered.slice(startIndex, startIndex + debtorsState.pageSize);
+
+            if (tbody) {
+                tbody.innerHTML = pageRows.map((debtor, index) => {
+                const statusLabel = getDebtorRegistrationStatus(debtor);
+                const financialSituation = getDebtorFinancialSituation(debtor);
+                const financialSituationBadge = badgeForFinancialSituation(financialSituation);
+                const loansCount = getDebtorLoansCount(debtor.id);
+                const overdueCount = getDebtorOverdueCount(debtor.id);
+                const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
+                const nextDue = getDebtorNextDueInstallment(debtor.id);
+                const openTotal = getDebtorOpenTotal(debtor.id);
+                const hasOverdue = overdueCount > 0;
+                const isExpanded = isDebtorDetailExpanded(debtor.id);
+                const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
+                const documentValue = formatDocument(rawDocument);
+                const rawPhone = debtor.phone || '';
+                const phoneValue = formatPhone(rawPhone);
+                const phoneDigits = toDigits(rawPhone);
+                const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-500">-</span>';
+                const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
+
+                return `
+                    <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
+                        <td>
+                            <div class="text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
+                            <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
+                        </td>
+                        <td>
+                            <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
+                        </td>
+                        <td>
+                            <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
+                        </td>
+                        <td class="whitespace-nowrap text-right">
+                            <span class="inline-flex min-w-[1.5rem] justify-end text-base ${overdueCount > 0 ? 'font-semibold text-amber-700' : 'font-medium text-gray-600'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
+                        </td>
+                        <td class="whitespace-nowrap text-right text-base font-semibold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</td>
+                        <td class="whitespace-nowrap w-[1%]">
+                            <div class="flex items-center justify-end gap-2">
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                                    <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
+                                    <i class="fas fa-cash-register"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                                    <i class="fas fa-pen-to-square"></i>
+                                </button>
+                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="${isExpanded ? '' : 'hidden'}" data-debtor-detail-for="${debtor.id}">
+                        <td colspan="6" class="border-t border-gray-200 bg-slate-50 px-4 py-3">
+                            <div class="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2 xl:grid-cols-5">
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Documento</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${documentValue}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">E-mail</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${debtor.email || '&mdash;'}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.)</div>
+                                    <div class="mt-1 font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${detailNextDue}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos</div>
+                                    <div class="mt-1 font-semibold text-gray-800">${loansCount}</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            }
+
+            renderDebtorsMobileList(pageRows);
+        }
+
+        function applyDebtorsFilters(resetPage) {
+            if (resetPage) {
+                debtorsState.currentPage = 1;
+            }
+            debtorsState.filtered = getFilteredDebtors();
+            renderDebtorsTable();
+        }
+
+        function syncDebtorsPageSizeForViewport() {
+            const nextSize = window.matchMedia('(max-width: 639px)').matches ? 6 : 8;
+            if (debtorsState.pageSize === nextSize) return;
+
+            debtorsState.pageSize = nextSize;
+            if (debtorsState.debtors.length > 0) {
+                applyDebtorsFilters(true);
+            }
+        }
+
+        function applyDebtorFocusFromQuery() {
+            if (!focusDebtorId || hasAppliedDebtorFocus) return;
+
+            const debtorExists = debtorsState.debtors.some(debtor => sameId(debtor.id, focusDebtorId));
+            if (!debtorExists) return;
+
+            hasAppliedDebtorFocus = true;
+
+            document.getElementById('debtorSearch').value = '';
+            document.getElementById('statusFilter').value = 'Todos';
+            sortBy.value = 'name';
+            debtorsState.sortField = 'name';
+            debtorsState.sortDir = getDefaultSortDir('name');
+            updateDebtorsSortHeaderUi();
+
+            debtorsState.filtered = getFilteredDebtors();
+            const debtorIndex = debtorsState.filtered.findIndex(debtor => sameId(debtor.id, focusDebtorId));
+
+            if (debtorIndex < 0) {
+                renderDebtorsTable();
+                return;
+            }
+
+            debtorsState.currentPage = Math.floor(debtorIndex / debtorsState.pageSize) + 1;
+            renderDebtorsTable();
+            highlightFocusedDebtorRow(focusDebtorId);
+        }
+
+        function openDebtorModal(mode, debtor) {
+            debtorsState.editingDebtorId = mode === 'edit' ? debtor.id : null;
+            debtorModalTitle.textContent = mode === 'edit' ? 'Editar cliente' : 'Novo cliente';
+
+            clearDebtorFormErrors();
+
+            if (newDebtorNameInput) newDebtorNameInput.value = debtor?.name || '';
+            if (newDebtorPhoneInput) newDebtorPhoneInput.value = formatPhonePartial(debtor?.phone || '');
+            if (newDebtorCpfInput) newDebtorCpfInput.value = formatCpfPartial(debtor?.document || debtor?.cpf || '');
+            if (newDebtorEmailInput) newDebtorEmailInput.value = debtor?.email || '';
+            if (newDebtorStatusInput) newDebtorStatusInput.value = normalizeEditableClientStatus(debtor?.status || 'Ativo');
+            if (newDebtorAddressInput) newDebtorAddressInput.value = debtor?.address || '';
+
+            debtorModal.classList.remove('hidden');
+            debtorModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(debtorModal);
+            if (newDebtorNameInput) newDebtorNameInput.focus();
+        }
+
+        function closeDebtorModal() {
+            debtorsState.editingDebtorId = null;
+            debtorModal.classList.add('hidden');
+            debtorModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(debtorModal);
+            newDebtorForm.reset();
+            clearDebtorFormErrors();
+        }
+
+        function openDeleteDebtorConfirmModal(debtorId) {
+            if (!deleteDebtorConfirmModal) {
+                performDebtorDeletion(debtorId);
+                return;
+            }
+            pendingDeleteDebtorId = debtorId;
+            deleteDebtorConfirmModal.classList.remove('hidden');
+            deleteDebtorConfirmModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(deleteDebtorConfirmModal);
+            if (confirmDeleteDebtorBtn) confirmDeleteDebtorBtn.focus();
+        }
+
+        function closeDeleteDebtorConfirmModal() {
+            pendingDeleteDebtorId = null;
+            if (!deleteDebtorConfirmModal) return;
+            deleteDebtorConfirmModal.classList.add('hidden');
+            deleteDebtorConfirmModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(deleteDebtorConfirmModal);
+        }
+
+        function showDeleteDebtorSuccessToast() {
+            showMessage('Cliente excluído com sucesso.', 'success');
+        }
+
+        function performDebtorDeletion(debtorId) {
+            if (debtorId === null || debtorId === undefined || debtorId === '') return;
+
+            debtorsState.debtors = debtorsState.debtors.filter(debtor => !sameId(debtor.id, debtorId));
+            debtorsState.loans = debtorsState.loans.filter(loan => !sameId(loan.debtor_id, debtorId));
+            debtorsState.installments = debtorsState.installments.filter(installment => !sameId(installment.debtor_id, debtorId));
+
+            saveTableData('debtors', debtorsState.debtors);
+            saveTableData('loans', debtorsState.loans);
+            saveTableData('installments', debtorsState.installments);
+
+            updateDebtorMetrics();
+            applyDebtorsFilters(false);
+            showDeleteDebtorSuccessToast();
+        }
+
+        function confirmDeleteDebtor() {
+            if (pendingDeleteDebtorId === null || pendingDeleteDebtorId === undefined || pendingDeleteDebtorId === '') {
+                closeDeleteDebtorConfirmModal();
+                return;
+            }
+
+            const debtorId = pendingDeleteDebtorId;
+            closeDeleteDebtorConfirmModal();
+            performDebtorDeletion(debtorId);
+        }
+
+        function deleteDebtor(debtorId) {
+            openDeleteDebtorConfirmModal(debtorId);
+        }
+
+        async function loadDebtorsData(options = {}) {
+            const showSkeleton = options.showSkeleton !== false;
+            const showRefreshState = options.showRefreshState === true;
+            const feedbackOnSuccess = options.feedbackOnSuccess === true;
+            if (isDebtorsLoading) return;
+
+            isDebtorsLoading = true;
+            if (showRefreshState) setRefreshLoadingState(true);
+            if (showSkeleton) renderDebtorsLoadingSkeleton();
+
+            try {
+                const [debtors, loans, installments] = await Promise.all([
+                    fetchTableData('debtors'),
+                    fetchTableData('loans'),
+                    fetchTableData('installments')
+                ]);
+
+                debtorsState.debtors = debtors.map(normalizeDebtorRow);
+                debtorsState.loans = loans;
+                debtorsState.installments = installments;
+
+                updateDebtorMetrics();
+                applyDebtorsFilters(true);
+                applyDebtorFocusFromQuery();
+                if (feedbackOnSuccess) flashRefreshSuccess();
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                const tbody = document.getElementById('debtorsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-red-600">Erro ao carregar dados.</td></tr>';
+                }
+                if (debtorsMobileList) {
+                    debtorsMobileList.innerHTML = `
+                        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm font-semibold text-red-700">
+                            Erro ao carregar dados.
+                        </div>
+                    `;
+                }
+            } finally {
+                isDebtorsLoading = false;
+                if (showRefreshState) setRefreshLoadingState(false);
+            }
+        }
+
+        function openRegisterPaymentModal(debtor) {
+            if (!registerPaymentModal || !registerPaymentForm) return;
+
+            const target = getDebtorPaymentTargetInstallment(debtor?.id);
+            if (!target?.loanId || !target?.installmentId) {
+                showMessage('Este cliente não possui parcelas em aberto.', 'error');
+                return;
+            }
+
+            debtorsState.registeringPaymentTarget = {
+                debtorId: debtor.id,
+                loanId: target.loanId,
+                installmentId: target.installmentId,
+            };
+
+            if (registerPaymentDebtorName) registerPaymentDebtorName.textContent = debtor?.name || '-';
+            if (registerPaymentAmount) registerPaymentAmount.value = String(target.amount || '');
+            if (registerPaymentDate) registerPaymentDate.value = getLocalTodayDateInputValue();
+            if (registerPaymentMethod) registerPaymentMethod.value = 'PIX';
+
+            registerPaymentModal.classList.remove('hidden');
+            registerPaymentModal.classList.add('flex');
+            lockBodyScrollForDebtorsModal(registerPaymentModal);
+            if (registerPaymentAmount) registerPaymentAmount.focus();
+        }
+
+        function closeRegisterPaymentModal() {
+            debtorsState.registeringPaymentTarget = null;
+            if (!registerPaymentModal) return;
+            registerPaymentModal.classList.add('hidden');
+            registerPaymentModal.classList.remove('flex');
+            unlockBodyScrollForDebtorsModal(registerPaymentModal);
+            if (registerPaymentForm) registerPaymentForm.reset();
+        }
+
+        function setRegisterPaymentSaving(isSaving) {
+            if (!saveRegisterPaymentBtn) return;
+            saveRegisterPaymentBtn.disabled = Boolean(isSaving);
+            saveRegisterPaymentBtn.classList.toggle('opacity-60', Boolean(isSaving));
+            saveRegisterPaymentBtn.classList.toggle('cursor-not-allowed', Boolean(isSaving));
+        }
+
+        window.addEventListener('resize', syncDebtorsPageSizeForViewport);
+        syncDebtorsPageSizeForViewport();
+
+        if (newDebtorNameInput) {
+            newDebtorNameInput.addEventListener('input', function () {
+                setInlineError(newDebtorNameError, '');
+            });
+        }
+
+        if (newDebtorPhoneInput) {
+            newDebtorPhoneInput.addEventListener('input', function () {
+                newDebtorPhoneInput.value = formatPhonePartial(newDebtorPhoneInput.value);
+                setInlineError(newDebtorPhoneError, '');
+            });
+
+            newDebtorPhoneInput.addEventListener('blur', function () {
+                const digits = normalizeBrazilPhoneDigits(newDebtorPhoneInput.value);
+                if (!digits || (digits.length !== 10 && digits.length !== 11)) {
+                    setInlineError(newDebtorPhoneError, 'Informe um telefone válido (10 ou 11 dígitos).');
+                    return;
+                }
+                newDebtorPhoneInput.value = formatPhonePartial(digits);
+            });
+        }
+
+        if (newDebtorCpfInput) {
+            newDebtorCpfInput.addEventListener('input', function () {
+                newDebtorCpfInput.value = formatCpfPartial(newDebtorCpfInput.value);
+                setInlineError(newDebtorCpfError, '');
+            });
+
+            newDebtorCpfInput.addEventListener('blur', function () {
+                const digits = toDigits(newDebtorCpfInput.value);
+                if (!isValidCpfDigits(digits)) {
+                    setInlineError(newDebtorCpfError, 'CPF inválido.');
+                    return;
+                }
+                newDebtorCpfInput.value = formatCpfPartial(digits);
+            });
+        }
+
+        if (newDebtorEmailInput) {
+            newDebtorEmailInput.addEventListener('input', function () {
+                setInlineError(newDebtorEmailError, '');
+            });
+
+            newDebtorEmailInput.addEventListener('blur', function () {
+                if (!isValidEmail(newDebtorEmailInput.value)) {
+                    setInlineError(newDebtorEmailError, 'E-mail inválido.');
+                }
+            });
+        }
+
+        document.getElementById('debtorSearch').addEventListener('input', function () {
+            applyDebtorsFilters(true);
+        });
+        document.getElementById('statusFilter').addEventListener('change', function () {
+            applyDebtorsFilters(true);
+        });
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', function () {
+                clearDebtorsFilters();
+                clearFiltersBtn.classList.add('ring-2', 'ring-blue-200');
+                setTimeout(() => clearFiltersBtn.classList.remove('ring-2', 'ring-blue-200'), 450);
+            });
+        }
+        sortBy.addEventListener('change', function () {
+            debtorsState.sortField = sortBy.value;
+            debtorsState.sortDir = getDefaultSortDir(debtorsState.sortField);
+            updateDebtorsSortHeaderUi();
+            applyDebtorsFilters(true);
+        });
+
+        if (debtorsTableHead) {
+            debtorsTableHead.addEventListener('click', function (event) {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+
+                const th = target.closest('th[data-sort]');
+                if (!th) return;
+
+                const field = String(th.getAttribute('data-sort') || '').trim();
+                if (!field) return;
+
+                if (debtorsState.sortField === field) {
+                    debtorsState.sortDir = debtorsState.sortDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    debtorsState.sortField = field;
+                    debtorsState.sortDir = getDefaultSortDir(field);
+                }
+
+                if (sortBy) {
+                    const hasOption = Array.from(sortBy.options || []).some(opt => opt.value === field);
+                    if (hasOption) sortBy.value = field;
+                }
+
+                updateDebtorsSortHeaderUi();
+                applyDebtorsFilters(true);
+            });
+        }
+
+        // Garantir que o estado inicial de ordenação esteja refletido no cabeçalho.
+        debtorsState.sortField = sortBy.value || debtorsState.sortField;
+        debtorsState.sortDir = getDefaultSortDir(debtorsState.sortField);
+        updateDebtorsSortHeaderUi();
+        refreshBtn.addEventListener('click', function () {
+            loadDebtorsData({ showSkeleton: true, showRefreshState: true, feedbackOnSuccess: true });
+        });
+
+        prevPageBtn.addEventListener('click', function () {
+            if (debtorsState.currentPage <= 1) return;
+            debtorsState.currentPage -= 1;
+            renderDebtorsTable();
+        });
+        nextPageBtn.addEventListener('click', function () {
+            const totalPages = Math.max(1, Math.ceil(debtorsState.filtered.length / debtorsState.pageSize));
+            if (debtorsState.currentPage >= totalPages) return;
+            debtorsState.currentPage += 1;
+            renderDebtorsTable();
+        });
+
+        newDebtorBtn.addEventListener('click', function () {
+            openDebtorModal('create');
+        });
+        closeDebtorModalBtn.addEventListener('click', closeDebtorModal);
+        cancelDebtorModalBtn.addEventListener('click', closeDebtorModal);
+        debtorModal.addEventListener('click', function (event) {
+            if (event.target === debtorModal) {
+                closeDebtorModal();
+            }
+        });
+
+        if (closeRegisterPaymentModalBtn) closeRegisterPaymentModalBtn.addEventListener('click', closeRegisterPaymentModal);
+        if (cancelRegisterPaymentModalBtn) cancelRegisterPaymentModalBtn.addEventListener('click', closeRegisterPaymentModal);
+        if (registerPaymentModal) {
+            registerPaymentModal.addEventListener('click', function (event) {
+                if (event.target === registerPaymentModal) {
+                    closeRegisterPaymentModal();
+                }
+            });
+        }
+
+        if (cancelDeleteDebtorBtn) cancelDeleteDebtorBtn.addEventListener('click', closeDeleteDebtorConfirmModal);
+        if (confirmDeleteDebtorBtn) confirmDeleteDebtorBtn.addEventListener('click', confirmDeleteDebtor);
+        if (deleteDebtorConfirmModal) {
+            deleteDebtorConfirmModal.addEventListener('click', function (event) {
+                if (event.target === deleteDebtorConfirmModal) {
+                    closeDeleteDebtorConfirmModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') return;
+            if (deleteDebtorConfirmModal && !deleteDebtorConfirmModal.classList.contains('hidden')) {
+                closeDeleteDebtorConfirmModal();
+                return;
+            }
+            if (debtorModal && !debtorModal.classList.contains('hidden')) {
+                closeDebtorModal();
+                return;
+            }
+            closeRegisterPaymentModal();
+        });
+
+        function handleDebtorsListClick(event) {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+
+            const detailsBtn = target.closest('button[data-action="toggle-debtor-details"]');
+            if (detailsBtn) {
+                toggleDebtorDetail(detailsBtn.getAttribute('data-id'));
+                return;
+            }
+
+            const registerBtn = target.closest('button[data-action="register-payment"]');
+            if (registerBtn) {
+                const debtor = debtorsState.debtors.find(item => sameId(item.id, registerBtn.getAttribute('data-id')));
+                if (debtor) openRegisterPaymentModal(debtor);
+                return;
+            }
+
+            const editBtn = target.closest('button[data-action="edit-debtor"]');
+            if (editBtn) {
+                const debtor = debtorsState.debtors.find(item => sameId(item.id, editBtn.getAttribute('data-id')));
+                if (debtor) openDebtorModal('edit', debtor);
+                return;
+            }
+
+            const deleteBtn = target.closest('button[data-action="delete-debtor"]');
+            if (deleteBtn) {
+                deleteDebtor(deleteBtn.getAttribute('data-id'));
+                return;
+            }
+        }
+
+        const debtorsTableBody = document.getElementById('debtorsTableBody');
+        if (debtorsTableBody) debtorsTableBody.addEventListener('click', handleDebtorsListClick);
+        if (debtorsMobileList) debtorsMobileList.addEventListener('click', handleDebtorsListClick);
+
+        if (registerPaymentForm) {
+            registerPaymentForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const target = debtorsState.registeringPaymentTarget;
+                if (!target) return;
+
+                const amount = Number(registerPaymentAmount?.value || 0);
+                if (!Number.isFinite(amount) || amount <= 0) {
+                    showMessage('Informe um valor válido maior que zero.', 'error');
+                    if (registerPaymentAmount) registerPaymentAmount.focus();
+                    return;
+                }
+
+                const paymentDateValue = String(registerPaymentDate?.value || '').trim() || getLocalTodayDateInputValue();
+                const methodValue = String(registerPaymentMethod?.value || 'PIX').trim();
+
+                setRegisterPaymentSaving(true);
+                try {
+                    const response = await fetch('/api/payments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            loanId: target.loanId,
+                            installmentId: target.installmentId,
+                            amount,
+                            paymentDate: paymentDateValue,
+                            method: methodValue,
+                            notes: 'Registrado via Clientes',
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        let message = 'Erro ao registrar pagamento.';
+                        try {
+                            const payload = await response.json();
+                            if (payload?.message) message = payload.message;
+                        } catch {}
+                        throw new Error(message);
+                    }
+
+                    closeRegisterPaymentModal();
+                    showMessage('Pagamento registrado com sucesso.', 'success');
+                    await loadDebtorsData({ showSkeleton: false });
+                } catch (error) {
+                    console.error(error);
+                    showMessage(error?.message || 'Erro ao registrar pagamento.', 'error');
+                } finally {
+                    setRegisterPaymentSaving(false);
+                }
+            });
+        }
+
+        newDebtorForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            clearDebtorFormErrors();
+
+            const isEdit = Boolean(debtorsState.editingDebtorId);
+
+            const name = String(newDebtorNameInput?.value || '').trim();
+            if (!name) {
+                setInlineError(newDebtorNameError, 'Informe o nome.');
+                if (newDebtorNameInput) newDebtorNameInput.focus();
+                return;
+            }
+
+            const phoneDigits = normalizeBrazilPhoneDigits(newDebtorPhoneInput?.value || '');
+            if (!phoneDigits || (phoneDigits.length !== 10 && phoneDigits.length !== 11)) {
+                setInlineError(newDebtorPhoneError, 'Informe um telefone válido (10 ou 11 dígitos).');
+                if (newDebtorPhoneInput) newDebtorPhoneInput.focus();
+                return;
+            }
+
+            const cpfDigits = toDigits(newDebtorCpfInput?.value || '');
+            if (!isValidCpfDigits(cpfDigits)) {
+                setInlineError(newDebtorCpfError, 'CPF inválido.');
+                if (newDebtorCpfInput) newDebtorCpfInput.focus();
+                return;
+            }
+
+            const email = String(newDebtorEmailInput?.value || '').trim();
+            if (!isValidEmail(email)) {
+                setInlineError(newDebtorEmailError, 'E-mail inválido.');
+                if (newDebtorEmailInput) newDebtorEmailInput.focus();
+                return;
+            }
+
+            const status = normalizeEditableClientStatus(newDebtorStatusInput?.value || 'Ativo');
+            const address = String(newDebtorAddressInput?.value || '').trim();
+
+            if (newDebtorPhoneInput) newDebtorPhoneInput.value = formatPhonePartial(phoneDigits);
+            if (newDebtorCpfInput) newDebtorCpfInput.value = formatCpfPartial(cpfDigits);
+
+            const basePayload = {
+                name,
+                phone: phoneDigits,
+                cpf: cpfDigits,
+                document: cpfDigits,
+                email,
+                status,
+                address,
+            };
+
+            const payload = basePayload;
+
+            if (debtorsState.editingDebtorId) {
+                debtorsState.debtors = debtorsState.debtors.map(debtor =>
+                    sameId(debtor.id, debtorsState.editingDebtorId) ? normalizeDebtorRow({ ...debtor, ...payload }) : debtor
+                );
+            } else {
+                const newDebtor = normalizeDebtorRow({
+                    id: getNextTableId('debtors', 1),
+                    ...payload
+                });
+                debtorsState.debtors = [newDebtor, ...debtorsState.debtors];
+            }
+
+            saveTableData('debtors', debtorsState.debtors);
+            updateDebtorMetrics();
+            applyDebtorsFilters(true);
+            closeDebtorModal();
+            showMessage(isEdit ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.', 'success');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDebtorsData({ showSkeleton: true });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
