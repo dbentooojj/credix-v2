@@ -794,7 +794,16 @@
             });
 
             if (!response.ok) {
-                throw new Error(`Falha ao salvar ${tableName}: HTTP ${response.status}`);
+                let details = `HTTP ${response.status}`;
+                try {
+                    const errorPayload = await response.json();
+                    if (errorPayload && typeof errorPayload.message === 'string' && errorPayload.message.trim()) {
+                        details = errorPayload.message.trim();
+                    }
+                } catch (error) {
+                    // Mantem o fallback com status HTTP quando nao houver JSON de erro.
+                }
+                throw new Error(`Falha ao salvar ${tableName}: ${details}`);
             }
 
             const payload = await response.json().catch(() => null);
@@ -2349,6 +2358,15 @@
             return maxId + 1;
         }
 
+        function getCrossUserSafeStart(startAt) {
+            const minStart = Math.max(1, Math.trunc(toNumber(startAt)));
+            const unixNow = Math.trunc(Date.now() / 1000);
+            const randomOffset = Math.trunc(Math.random() * 1_000_000);
+            const candidate = unixNow + randomOffset;
+            const int32SafeLimit = 2147000000;
+            return Math.min(int32SafeLimit, Math.max(minStart, candidate));
+        }
+
         async function saveLoanAndInstallments(loanPayload, plan, isEditing) {
             if (isEditing) {
                 loansState.loans = loansState.loans.map(loan => sameId(loan.id, loanPayload.id) ? loanPayload : loan);
@@ -2358,7 +2376,7 @@
 
             loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanPayload.id));
 
-            const nextInstallmentId = getNextLocalId(loansState.installments, 1000);
+            const nextInstallmentId = getNextLocalId(loansState.installments, getCrossUserSafeStart(1000));
             const generatedInstallments = plan.map((item, index) => ({
                 id: nextInstallmentId + index,
                 loan_id: loanPayload.id,
@@ -2722,7 +2740,7 @@
 
             const loanId = isEditing
                 ? loansState.editingLoanId
-                : getNextLocalId(loansState.loans, 100);
+                : getNextLocalId(loansState.loans, getCrossUserSafeStart(100));
             const status = deriveLoanStatus(plan);
             const firstScheduleDueDate = plan[0]?.due_date || values.firstDueDate;
             const lastScheduleDueDate = plan[plan.length - 1]?.due_date || values.firstDueDate;
@@ -2758,7 +2776,10 @@
                 showMessage(isEditing ? 'Empréstimo atualizado com sucesso.' : 'Empréstimo criado com sucesso.', 'success');
             } catch (error) {
                 console.error('Erro ao salvar empréstimo:', error);
-                showMessage('Erro ao salvar empréstimo. Tente novamente.', 'error');
+                const errorMessage = error instanceof Error && error.message
+                    ? error.message
+                    : 'Erro ao salvar empréstimo. Tente novamente.';
+                showMessage(errorMessage, 'error');
                 await loadLoansData();
             }
         });
