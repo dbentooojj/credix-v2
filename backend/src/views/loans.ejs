@@ -88,6 +88,15 @@
             line-height: 1.05;
             font-weight: 700;
         }
+        .kpi-insight {
+            margin-top: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.3;
+        }
+        .kpi-insight-positive { color: #047857; }
+        .kpi-insight-negative { color: #b91c1c; }
         .filter-control {
             background: #f8fafc;
             border: 1px solid #d1d5db;
@@ -230,6 +239,9 @@
             box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35);
         }
         .dark .kpi-value { color: #f8fafc; }
+        .dark .kpi-insight { color: #cbd5e1; }
+        .dark .kpi-insight-positive { color: #86efac; }
+        .dark .kpi-insight-negative { color: #fca5a5; }
         .dark .filter-control,
         .dark .table-shell,
         .dark .table-shell th,
@@ -327,6 +339,75 @@
             border-color: rgba(245, 158, 11, 0.35);
         }
 
+        .app-toast {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 420px;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.42);
+            background: linear-gradient(135deg, rgba(5, 85, 70, 0.9) 0%, rgba(3, 55, 48, 0.95) 100%);
+            color: #d1fae5;
+            padding: 12px 14px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.25;
+            box-shadow: 0 16px 38px -22px rgba(16, 185, 129, 0.75), inset 0 1px 0 rgba(167, 243, 208, 0.16);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 200ms ease, transform 200ms ease;
+            pointer-events: none;
+        }
+
+        .app-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .app-toast-error {
+            border-color: rgba(239, 68, 68, 0.42);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.95) 100%);
+            color: #fee2e2;
+            box-shadow: 0 16px 38px -22px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(254, 202, 202, 0.15);
+        }
+
+        .app-toast-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.22);
+            color: #a7f3d0;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .app-toast-error .app-toast-icon {
+            background: rgba(239, 68, 68, 0.22);
+            color: #fecaca;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+        }
+
+        .app-toast-text {
+            word-break: break-word;
+        }
+
+        @media (min-width: 640px) {
+            .app-toast {
+                left: auto;
+                top: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+
         .notification-badge,
         .btn-primary,
         .action-primary {
@@ -404,21 +485,25 @@
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hashtag"></i></span>
                     <p class="kpi-label">Qtd. empréstimos</p>
                     <p id="totalLoans" class="kpi-value mt-3">0</p>
+                    <p id="totalLoansInsight" class="kpi-insight">--</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-hand-holding-usd"></i></span>
                     <p class="kpi-label">Principal total</p>
                     <p id="totalPrincipal" class="kpi-value mt-3">R$ 0,00</p>
+                    <p id="totalPrincipalInsight" class="kpi-insight">--</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-chart-line"></i></span>
                     <p class="kpi-label">Total contratado</p>
                     <p id="totalContracted" class="kpi-value mt-3">R$ 0,00</p>
+                    <p id="totalContractedInsight" class="kpi-insight">--</p>
                 </div>
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-circle-check"></i></span>
                     <p class="kpi-label">Empréstimos ativos</p>
                     <p id="activeLoans" class="kpi-value mt-3">0</p>
+                    <p id="activeLoansInsight" class="kpi-insight">--</p>
                 </div>
             </div>
 
@@ -438,25 +523,33 @@
                     </div>
                 </div>
 
-                <div class="table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Cliente</th>
-                                <th>Principal</th>
-                                <th>Total</th>
-                                <th>Parcelas</th>
-                                <th>Juros</th>
-                                <th>Data de início</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loansTableBody">
-                            <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando empréstimos...</td></tr>
-                        </tbody>
-                    </table>
+                <div id="loansMobileList" class="sm:hidden space-y-3">
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
+                        Carregando empréstimos...
+                    </div>
+                </div>
+
+                <div class="hidden sm:block">
+                    <div class="table-shell">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Principal</th>
+                                    <th>Total</th>
+                                    <th>Parcelas</th>
+                                    <th>Juros</th>
+                                    <th>Data de início</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loansTableBody">
+                                <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando empréstimos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="mt-4 flex items-center justify-between">
@@ -489,12 +582,14 @@
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div class="md:col-span-2">
                                     <label class="mb-1 block text-sm text-gray-600">Cliente</label>
-                                    <select id="loanDebtor" class="filter-control focus:ring-2 focus:ring-blue-500/40" required></select>
+                                    <select id="loanDebtor" class="filter-control focus:ring-2 focus:ring-blue-500/40" required>
+                                        <option value="" selected disabled>Selecione o cliente</option>
+                                    </select>
                                     <p id="loanDebtorError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Valor principal (R$)</label>
-                                    <input id="loanPrincipal" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0.01" step="0.01" required>
+                                    <input id="loanPrincipal" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="text" inputmode="decimal" autocomplete="off" required placeholder="0,00">
                                     <p id="loanPrincipalError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
@@ -513,8 +608,8 @@
                                     <p id="loanInterestTypeError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div id="loanInterestRateWrap">
-                                    <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)</label>
-                                    <input id="loanInterestRate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="20" required placeholder="Ex: 8">
+                                    <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)*</label>
+                                    <input id="loanInterestRate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0.01" step="0.01" value="0" required placeholder="Ex: 8">
                                     <p id="loanInterestRateError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div id="loanFixedAdditionWrap" class="hidden">
@@ -523,8 +618,8 @@
                                     <p id="loanFixedAdditionError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Parcelas</label>
-                                    <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="6" required>
+                                    <label class="mb-1 block text-sm text-gray-600">Parcelas*</label>
+                                    <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="0" required>
                                     <p id="loanInstallmentsError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
@@ -825,7 +920,8 @@
             filtered: [],
             currentPage: 1,
             pageSize: 8,
-            editingLoanId: null
+            editingLoanId: null,
+            expandedLoanIds: new Set()
         };
 
         const loanModal = document.getElementById('loanModal');
@@ -836,6 +932,7 @@
         const installmentsPreviewCard = document.getElementById('installmentsPreviewCard');
         const installmentsPreviewList = document.getElementById('installmentsPreviewList');
         const loanScheduleBody = document.getElementById('loanScheduleBody');
+        const loansMobileList = document.getElementById('loansMobileList');
         const loanOpenedModalIds = new Set();
         let previousBodyOverflow = '';
         let pendingDeleteLoanId = null;
@@ -890,6 +987,44 @@
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(toNumber(value));
         }
 
+        function parseCurrencyInput(value) {
+            const raw = String(value ?? '').trim();
+            if (!raw) return 0;
+
+            const sanitized = raw
+                .replace(/\s+/g, '')
+                .replace(/R\$/gi, '')
+                .replace(/[^\d,.-]/g, '');
+
+            const commaIndex = sanitized.lastIndexOf(',');
+            const dotIndex = sanitized.lastIndexOf('.');
+            let normalized = sanitized;
+
+            if (commaIndex >= 0 && dotIndex >= 0) {
+                if (commaIndex > dotIndex) {
+                    normalized = sanitized.replace(/\./g, '').replace(',', '.');
+                } else {
+                    normalized = sanitized.replace(/,/g, '');
+                }
+            } else if (commaIndex >= 0) {
+                normalized = sanitized.replace(/\./g, '').replace(',', '.');
+            } else {
+                normalized = sanitized.replace(/,/g, '');
+            }
+
+            const parsed = Number(normalized);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatCurrencyInput(value) {
+            const parsed = parseCurrencyInput(value);
+            if (parsed <= 0) return '';
+            return parsed.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
         function formatDate(value) {
             if (!value) return '-';
             const date = new Date(value);
@@ -901,6 +1036,137 @@
             const date = new Date(value);
             if (Number.isNaN(date.getTime())) return '';
             return date.toISOString().slice(0, 10);
+        }
+
+        function startOfDay(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return null;
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function getMonthEquivalentBounds(referenceDate = new Date(), offsetMonths = 0) {
+            const reference = startOfDay(referenceDate);
+            if (!reference) return { start: null, end: null };
+
+            const start = new Date(reference.getFullYear(), reference.getMonth() + offsetMonths, 1);
+            start.setHours(0, 0, 0, 0);
+
+            if (offsetMonths === 0) {
+                return { start, end: reference };
+            }
+
+            const targetMonthLastDay = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+            const boundedDay = Math.min(reference.getDate(), targetMonthLastDay);
+            const end = new Date(start.getFullYear(), start.getMonth(), boundedDay);
+            end.setHours(0, 0, 0, 0);
+            return { start, end };
+        }
+
+        function shiftRangeByYears(start, end, years = -1) {
+            const safeStart = startOfDay(start);
+            const safeEnd = startOfDay(end);
+            if (!safeStart || !safeEnd || safeEnd < safeStart) return { start: null, end: null };
+
+            const shiftedStart = new Date(safeStart.getFullYear() + years, safeStart.getMonth(), safeStart.getDate());
+            const shiftedEnd = new Date(safeEnd.getFullYear() + years, safeEnd.getMonth(), safeEnd.getDate());
+            shiftedStart.setHours(0, 0, 0, 0);
+            shiftedEnd.setHours(0, 0, 0, 0);
+            return { start: shiftedStart, end: shiftedEnd };
+        }
+
+        function isDateInRange(value, start, end) {
+            const date = startOfDay(value);
+            if (!date || !start || !end) return false;
+            return date >= start && date <= end;
+        }
+
+        function getComparisonPercent(currentValue, baselineValue, minRobustBase = 0) {
+            const current = Number.isFinite(Number(currentValue)) ? Number(currentValue) : 0;
+            const baseline = Number.isFinite(Number(baselineValue)) ? Number(baselineValue) : 0;
+            if (Math.abs(baseline) < Math.max(0, Number(minRobustBase) || 0)) return null;
+            return ((current - baseline) / Math.abs(baseline)) * 100;
+        }
+
+        function formatPercentMagnitude(percentValue) {
+            return Math.abs(percentValue).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
+        function getInsightTone(percentValue, invert = false) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) return 'neutral';
+            const isPositive = percentValue > 0;
+            if (invert) return isPositive ? 'negative' : 'positive';
+            return isPositive ? 'positive' : 'negative';
+        }
+
+        function formatPrimaryInsightText(percentValue, label) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
+                return `0,00% ${label}`;
+            }
+            return `${percentValue > 0 ? '↑' : '↓'} ${formatPercentMagnitude(percentValue)}% ${label}`;
+        }
+
+        function formatSecondaryInsightText(percentValue, label) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
+                return `${label}: 0,00%`;
+            }
+            return `${label}: ${percentValue > 0 ? '+' : '-'}${formatPercentMagnitude(percentValue)}%`;
+        }
+
+        function buildSmartKpiInsight(currentValue, comparisons, options = {}) {
+            const {
+                invert = false,
+                minRobustBase = 0,
+            } = options;
+
+            const average3Pct = getComparisonPercent(currentValue, comparisons?.average3, minRobustBase);
+            const previousPct = getComparisonPercent(currentValue, comparisons?.previous, minRobustBase);
+            const yearAgoPct = getComparisonPercent(currentValue, comparisons?.yearAgo, minRobustBase);
+
+            const primary = Number.isFinite(average3Pct)
+                ? { key: 'average3', pct: average3Pct, label: 'vs média 3M' }
+                : Number.isFinite(previousPct)
+                    ? { key: 'previous', pct: previousPct, label: 'vs M-1' }
+                    : Number.isFinite(yearAgoPct)
+                        ? { key: 'yearAgo', pct: yearAgoPct, label: 'vs A/A' }
+                        : null;
+
+            if (!primary) {
+                return { tone: 'neutral', text: 'sem base robusta para comparação' };
+            }
+
+            const secondary = [];
+            if (primary.key !== 'previous' && Number.isFinite(previousPct)) {
+                secondary.push(formatSecondaryInsightText(previousPct, 'M-1'));
+            }
+            if (primary.key !== 'yearAgo' && Number.isFinite(yearAgoPct)) {
+                secondary.push(formatSecondaryInsightText(yearAgoPct, 'A/A'));
+            }
+            if (primary.key !== 'average3' && Number.isFinite(average3Pct)) {
+                secondary.unshift(formatSecondaryInsightText(average3Pct, '3M'));
+            }
+
+            let text = formatPrimaryInsightText(primary.pct, primary.label);
+            if (secondary.length) {
+                text += ` | ${secondary.join(' | ')}`;
+            }
+
+            return {
+                tone: getInsightTone(primary.pct, invert),
+                text,
+            };
+        }
+
+        function renderKpiInsight(elementId, prefixText, insight) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.classList.remove('kpi-insight-positive', 'kpi-insight-negative');
+            if (insight?.tone === 'positive') element.classList.add('kpi-insight-positive');
+            if (insight?.tone === 'negative') element.classList.add('kpi-insight-negative');
+            element.textContent = prefixText ? `${prefixText} ${insight?.text || ''}` : (insight?.text || '--');
         }
 
         function normalizeLoanStatus(status) {
@@ -1180,6 +1446,71 @@
             document.getElementById('totalPrincipal').textContent = formatCurrency(principal);
             document.getElementById('totalContracted').textContent = formatCurrency(contracted);
             document.getElementById('activeLoans').textContent = String(active);
+
+            const referenceDate = startOfDay(new Date());
+            const currentRange = getMonthEquivalentBounds(referenceDate, 0);
+            const previousRange = getMonthEquivalentBounds(referenceDate, -1);
+            const monthMinus2Range = getMonthEquivalentBounds(referenceDate, -2);
+            const monthMinus3Range = getMonthEquivalentBounds(referenceDate, -3);
+            const yearAgoRange = shiftRangeByYears(currentRange.start, currentRange.end, -1);
+
+            const getLoansByRange = (range) => loansState.loans.filter((loan) => isDateInRange(loan.start_date, range?.start, range?.end));
+            const summarizeRange = (rows) => ({
+                loansCount: rows.length,
+                principalAmount: rows.reduce((sum, loan) => sum + toNumber(loan.principal_amount), 0),
+                contractedAmount: rows.reduce((sum, loan) => sum + toNumber(loan.total_amount), 0),
+                activeCreatedCount: rows.filter((loan) => normalizeLoanStatus(loan.status) === 'Ativo').length,
+            });
+
+            const currentSummary = summarizeRange(getLoansByRange(currentRange));
+            const previousSummary = summarizeRange(getLoansByRange(previousRange));
+            const monthMinus2Summary = summarizeRange(getLoansByRange(monthMinus2Range));
+            const monthMinus3Summary = summarizeRange(getLoansByRange(monthMinus3Range));
+            const yearAgoSummary = summarizeRange(getLoansByRange(yearAgoRange));
+
+            const average3Summary = {
+                loansCount: (previousSummary.loansCount + monthMinus2Summary.loansCount + monthMinus3Summary.loansCount) / 3,
+                principalAmount: (previousSummary.principalAmount + monthMinus2Summary.principalAmount + monthMinus3Summary.principalAmount) / 3,
+                contractedAmount: (previousSummary.contractedAmount + monthMinus2Summary.contractedAmount + monthMinus3Summary.contractedAmount) / 3,
+                activeCreatedCount: (previousSummary.activeCreatedCount + monthMinus2Summary.activeCreatedCount + monthMinus3Summary.activeCreatedCount) / 3,
+            };
+
+            renderKpiInsight(
+                'totalLoansInsight',
+                `Novos no mês: ${currentSummary.loansCount.toLocaleString('pt-BR')} |`,
+                buildSmartKpiInsight(currentSummary.loansCount, {
+                    average3: average3Summary.loansCount,
+                    previous: previousSummary.loansCount,
+                    yearAgo: yearAgoSummary.loansCount,
+                }, { minRobustBase: 1 })
+            );
+            renderKpiInsight(
+                'totalPrincipalInsight',
+                `Liberado no mês: ${formatCurrency(currentSummary.principalAmount)} |`,
+                buildSmartKpiInsight(currentSummary.principalAmount, {
+                    average3: average3Summary.principalAmount,
+                    previous: previousSummary.principalAmount,
+                    yearAgo: yearAgoSummary.principalAmount,
+                }, { minRobustBase: 50 })
+            );
+            renderKpiInsight(
+                'totalContractedInsight',
+                `Contratado no mês: ${formatCurrency(currentSummary.contractedAmount)} |`,
+                buildSmartKpiInsight(currentSummary.contractedAmount, {
+                    average3: average3Summary.contractedAmount,
+                    previous: previousSummary.contractedAmount,
+                    yearAgo: yearAgoSummary.contractedAmount,
+                }, { minRobustBase: 50 })
+            );
+            renderKpiInsight(
+                'activeLoansInsight',
+                `Ativos novos no mês: ${currentSummary.activeCreatedCount.toLocaleString('pt-BR')} |`,
+                buildSmartKpiInsight(currentSummary.activeCreatedCount, {
+                    average3: average3Summary.activeCreatedCount,
+                    previous: previousSummary.activeCreatedCount,
+                    yearAgo: yearAgoSummary.activeCreatedCount,
+                }, { minRobustBase: 1 })
+            );
         }
 
         function updatePaginationInfo(total) {
@@ -1204,18 +1535,137 @@
             nextPageBtn.classList.toggle('opacity-50', nextPageBtn.disabled);
         }
 
+        function isLoanDetailExpanded(loanId) {
+            return loansState.expandedLoanIds.has(String(loanId));
+        }
+
+        function setLoanDetailExpanded(loanId, expanded) {
+            const key = String(loanId || '');
+            if (!key) return;
+
+            if (expanded) {
+                loansState.expandedLoanIds.add(key);
+            } else {
+                loansState.expandedLoanIds.delete(key);
+            }
+
+            const detailNodes = document.querySelectorAll(`[data-loan-detail-for="${key}"]`);
+            const toggleButtons = document.querySelectorAll(`#loansMobileList button[data-action="view-loan"][data-id="${key}"]`);
+
+            detailNodes.forEach((node) => {
+                node.classList.toggle('hidden', !expanded);
+            });
+
+            toggleButtons.forEach((button) => {
+                button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                button.setAttribute('title', expanded ? 'Fechar detalhes' : 'Ver detalhes');
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !expanded);
+                    icon.classList.toggle('fa-eye-slash', expanded);
+                }
+            });
+        }
+
+        function toggleLoanDetail(loanId) {
+            const expanded = isLoanDetailExpanded(loanId);
+            setLoanDetailExpanded(loanId, !expanded);
+        }
+
+        function renderLoansMobileList(pageRows) {
+            if (!loansMobileList) return;
+
+            loansMobileList.innerHTML = pageRows.map((loan) => {
+                const status = normalizeLoanStatus(loan.status);
+                const installments = getLoanInstallments(loan.id);
+                const installmentsInfo = getLoanInstallmentsSummary(loan);
+                const financialSituation = getLoanFinancialSituation(installments);
+                const interestType = normalizeInterestType(loan.interest_type);
+                const interestPrimary = interestType === 'fixo'
+                    ? formatCurrency(loan.interest_rate)
+                    : `${loan.interest_rate}%`;
+                const interestTypeLabel = formatInterestTypeLabel(interestType);
+                const frequencyLabel = getFrequencyLabel(loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id));
+                const totalInstallments = toNumber(loan.installments_count || installments.length);
+                const paidInstallments = installments.filter(item => isPaidInstallmentStatus(item.status)).length;
+                const pendingInstallments = Math.max(0, totalInstallments - paidInstallments);
+                const nextOpenInstallment = installments.find(item => !isPaidInstallmentStatus(item.status));
+                const nextDueLabel = nextOpenInstallment
+                    ? `${formatDate(nextOpenInstallment.due_date)} | ${formatCurrency(nextOpenInstallment.amount)}`
+                    : '&mdash;';
+                const isExpanded = isLoanDetailExpanded(loan.id);
+
+                return `
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 shadow-sm" data-loan-id="${loan.id}" aria-expanded="${isExpanded ? 'true' : 'false'}">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimo #${loan.id ?? '-'}</div>
+                                <div class="mt-1 truncate text-base font-semibold text-gray-900">${getDebtorName(loan.debtor_id)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[11px] uppercase tracking-wide text-gray-500">Total</div>
+                                <div class="mt-1 text-base font-extrabold text-gray-900">${formatCurrency(loan.total_amount)}</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-700">
+                            <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Principal:</span> <span class="font-semibold text-gray-800">${formatCurrency(loan.principal_amount)}</span></div>
+                            <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Parcelas:</span> <span class="font-semibold text-gray-800">${installmentsInfo}</span></div>
+                            <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Juros:</span> <span class="font-semibold text-gray-800">${interestPrimary}</span></div>
+                            <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Início:</span> <span class="font-semibold text-gray-800">${formatDate(loan.start_date)}</span></div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <span class="${badgeForStatus(status)}">${status}</span>
+                            <span class="${financialSituation.badgeClass}">${financialSituation.label}</span>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-end gap-1">
+                            <button type="button" class="action-btn action-btn-view rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="view-loan" data-id="${loan.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}"><i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                            <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
+                            <button type="button" class="action-btn action-btn-delete rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </div>
+
+                        <div class="mt-3 ${isExpanded ? '' : 'hidden'} rounded-xl border border-gray-200 bg-slate-50 p-3" data-loan-detail-for="${loan.id}">
+                            <div class="grid grid-cols-1 gap-2 text-xs text-gray-700">
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Juros:</span> <span class="font-semibold text-gray-800">${interestPrimary} (${interestTypeLabel})</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">1º vencimento:</span> <span class="font-semibold text-gray-800">${formatDate(loan.first_due_date)}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Frequência:</span> <span class="font-semibold text-gray-800">${frequencyLabel}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Parcelas pagas/em aberto:</span> <span class="font-semibold text-gray-800">${paidInstallments}/${pendingInstallments}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${nextDueLabel}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Forma pagto.:</span> <span class="font-semibold text-gray-800">${loan.payment_method || '&mdash;'}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderLoansTable() {
             const tbody = document.getElementById('loansTableBody');
             const total = loansState.filtered.length;
             updatePaginationInfo(total);
 
             if (!total) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum empréstimo encontrado.</td></tr>';
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum empréstimo encontrado.</td></tr>';
+                }
+                if (loansMobileList) {
+                    loansMobileList.innerHTML = `
+                        <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
+                            Nenhum empréstimo encontrado.
+                        </div>
+                    `;
+                }
                 return;
             }
 
             const startIndex = (loansState.currentPage - 1) * loansState.pageSize;
             const pageRows = loansState.filtered.slice(startIndex, startIndex + loansState.pageSize);
+
+            renderLoansMobileList(pageRows);
+
+            if (!tbody) return;
 
             tbody.innerHTML = pageRows.map((loan) => {
                 const status = normalizeLoanStatus(loan.status);
@@ -1279,11 +1729,52 @@
         }
 
         function showMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `fixed top-5 right-5 px-5 py-3 rounded-xl text-white text-sm font-semibold z-50 shadow-lg ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-            messageDiv.textContent = message;
-            document.body.appendChild(messageDiv);
-            setTimeout(() => messageDiv.remove(), 3000);
+            const safeType = type === 'success' ? 'success' : 'error';
+
+            if (showMessage.hideTimeoutId) {
+                clearTimeout(showMessage.hideTimeoutId);
+                showMessage.hideTimeoutId = null;
+            }
+
+            if (showMessage.removeTimeoutId) {
+                clearTimeout(showMessage.removeTimeoutId);
+                showMessage.removeTimeoutId = null;
+            }
+
+            const existing = document.getElementById('appToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
+
+            const iconWrap = document.createElement('span');
+            iconWrap.className = 'app-toast-icon';
+
+            const icon = document.createElement('i');
+            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
+            iconWrap.appendChild(icon);
+
+            const text = document.createElement('span');
+            text.className = 'app-toast-text';
+            text.textContent = String(message || '');
+
+            toast.appendChild(iconWrap);
+            toast.appendChild(text);
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            showMessage.hideTimeoutId = window.setTimeout(() => {
+                toast.classList.remove('show');
+                showMessage.removeTimeoutId = window.setTimeout(() => {
+                    toast.remove();
+                    showMessage.removeTimeoutId = null;
+                }, 220);
+                showMessage.hideTimeoutId = null;
+            }, 3000);
         }
 
         function populateDebtorOptions(selectedDebtorId) {
@@ -1303,9 +1794,11 @@
                 return;
             }
 
-            select.innerHTML = source
+            const placeholderOption = `<option value="" disabled ${selectedDebtorId ? '' : 'selected'}>Selecione o cliente</option>`;
+            const debtorOptions = source
                 .map(item => `<option value="${item.id}">${item.name || item.full_name || `Cliente #${item.id}`}</option>`)
                 .join('');
+            select.innerHTML = `${placeholderOption}${debtorOptions}`;
 
             if (selectedDebtorId) {
                 const hasSelected = source.some(item => sameId(item.id, selectedDebtorId));
@@ -1551,9 +2044,9 @@
             resetSimulationState();
             setDefaultLoanDates();
             document.getElementById('loanFixedAddition').value = 0;
-            document.getElementById('loanInterestRate').value = 20;
+            document.getElementById('loanInterestRate').value = 0;
             document.getElementById('loanInterestType').value = 'composto';
-            document.getElementById('loanInstallments').value = 6;
+            document.getElementById('loanInstallments').value = 0;
             document.getElementById('loanPaymentMethod').value = 'Pix';
             document.getElementById('loanFrequency').value = 'mensal';
             document.getElementById('loanEditingId').value = '';
@@ -1573,7 +2066,7 @@
 
                 populateDebtorOptions(loan.debtor_id);
                 document.getElementById('loanDebtor').value = String(loan.debtor_id);
-                document.getElementById('loanPrincipal').value = loan.principal_amount;
+                document.getElementById('loanPrincipal').value = formatCurrencyInput(loan.principal_amount);
                 document.getElementById('loanInstallments').value = loan.installments_count;
                 const paymentMethodSelect = document.getElementById('loanPaymentMethod');
                 paymentMethodSelect.value = loan.payment_method || 'Pix';
@@ -1643,7 +2136,7 @@
 
             return {
                 debtorId: document.getElementById('loanDebtor').value,
-                principal: round2(document.getElementById('loanPrincipal').value),
+                principal: round2(parseCurrencyInput(document.getElementById('loanPrincipal').value)),
                 interestRate: round2(document.getElementById('loanInterestRate').value),
                 fixedAddition: round2(document.getElementById('loanFixedAddition').value),
                 interestType,
@@ -1665,8 +2158,8 @@
 
             if (values.interestType === 'fixo') {
                 if (values.fixedAddition < 0) errors.fixedAddition = 'O acréscimo fixo não pode ser negativo.';
-            } else if (values.interestRate < 0) {
-                errors.interestRate = 'A taxa mensal não pode ser negativa.';
+            } else if (values.interestRate <= 0) {
+                errors.interestRate = 'Informe uma taxa mensal maior que zero.';
             }
 
             if (!values.startDate) errors.startDate = 'Informe a data de início.';
@@ -1785,6 +2278,7 @@
 
         function calculateLoanFromForm(showErrors) {
             captureScheduleFromTable();
+            refreshSchedule(false);
             const values = getLoanFormValues();
             const errors = validateLoanFormValues(values);
             applyFieldErrors(errors);
@@ -2011,7 +2505,17 @@
                 applyLoansFilters(true);
             } catch (error) {
                 console.error('Erro ao carregar empréstimos:', error);
-                document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="9" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+                const tbody = document.getElementById('loansTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-red-600">Erro ao carregar dados.</td></tr>';
+                }
+                if (loansMobileList) {
+                    loansMobileList.innerHTML = `
+                        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm font-semibold text-red-700">
+                            Erro ao carregar dados.
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -2082,6 +2586,45 @@
             clearFieldErrors();
             resetSimulationState();
         });
+
+        ['loanPrincipal', 'loanInterestRate', 'loanFixedAddition', 'loanInstallments'].forEach((fieldId) => {
+            const numericField = document.getElementById(fieldId);
+            if (!(numericField instanceof HTMLInputElement)) return;
+
+            numericField.addEventListener('beforeinput', function (event) {
+                const incoming = typeof event.data === 'string' ? event.data : '';
+                if (/[eE+\-]/.test(incoming)) {
+                    event.preventDefault();
+                }
+            });
+
+            numericField.addEventListener('keydown', function (event) {
+                if (event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') {
+                    event.preventDefault();
+                }
+            });
+
+            numericField.addEventListener('input', function () {
+                const sanitized = String(numericField.value || '').replace(/[eE+\-]/g, '');
+                if (sanitized !== numericField.value) {
+                    numericField.value = sanitized;
+                }
+            });
+        });
+
+        const loanPrincipalInput = document.getElementById('loanPrincipal');
+        if (loanPrincipalInput instanceof HTMLInputElement) {
+            loanPrincipalInput.addEventListener('input', function () {
+                const sanitized = String(loanPrincipalInput.value || '').replace(/[^\d,.\sR$]/gi, '');
+                if (sanitized !== loanPrincipalInput.value) {
+                    loanPrincipalInput.value = sanitized;
+                }
+            });
+
+            loanPrincipalInput.addEventListener('blur', function () {
+                loanPrincipalInput.value = formatCurrencyInput(loanPrincipalInput.value);
+            });
+        }
 
         document.getElementById('loanInstallments').addEventListener('input', function () {
             refreshSchedule(true);
@@ -2155,22 +2698,11 @@
         });
 
         document.getElementById('calculateLoanBtn').addEventListener('click', function () {
-            const generated = refreshSchedule(false);
-            if (!generated) {
-                showMessage('Preencha parcelas e datas antes de simular.', 'error');
-                return;
-            }
             calculateLoanFromForm(true);
         });
 
         loanForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-
-            const generated = refreshSchedule(false);
-            if (!generated) {
-                showMessage('Preencha parcelas e datas antes de salvar.', 'error');
-                return;
-            }
 
             const result = calculateLoanFromForm(true);
             if (!result) return;
@@ -2231,16 +2763,23 @@
             }
         });
 
-        document.getElementById('loansTableBody').addEventListener('click', function (event) {
-            const actionBtn = event.target.closest('button[data-action]');
-            const row = event.target.closest('tr[data-loan-id]');
+        function handleLoansListClick(event) {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+
+            const actionBtn = target.closest('button[data-action]');
+            const row = target.closest('[data-loan-id]');
             if (!row) return;
+            const inMobileList = Boolean(target.closest('#loansMobileList'));
+
             const rowLoanId = row.getAttribute('data-loan-id');
             const rowLoan = loansState.loans.find(item => sameId(item.id, rowLoanId));
             if (!rowLoan) return;
 
             if (!actionBtn) {
-                openLoanDetails(rowLoan.id);
+                if (!inMobileList) {
+                    openLoanDetails(rowLoan.id);
+                }
                 return;
             }
 
@@ -2251,7 +2790,11 @@
             if (!loan) return;
 
             if (action === 'view-loan') {
-                openLoanDetails(loan.id);
+                if (inMobileList) {
+                    toggleLoanDetail(loan.id);
+                } else {
+                    openLoanDetails(loan.id);
+                }
                 return;
             }
 
@@ -2263,7 +2806,11 @@
             if (action === 'delete-loan') {
                 openDeleteLoanConfirmModal(loan.id);
             }
-        });
+        }
+
+        const loansTableBody = document.getElementById('loansTableBody');
+        if (loansTableBody) loansTableBody.addEventListener('click', handleLoansListClick);
+        if (loansMobileList) loansMobileList.addEventListener('click', handleLoansListClick);
 
         document.getElementById('closeLoanDetailsBtn').addEventListener('click', closeLoanDetailsModal);
         document.getElementById('closeLoanDetailsFooterBtn').addEventListener('click', closeLoanDetailsModal);

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { type Request, type Response, Router } from "express";
 import { env } from "../config/env";
 import { requireAuthApi } from "../middleware/auth";
 import { AppError } from "../middleware/error-handler";
@@ -85,7 +85,7 @@ router.post("/whatsapp/batch", validateBody(whatsappBatchSchema), async (req, re
   });
 });
 
-router.post("/email/due-tomorrow", async (req, res) => {
+async function handleDueEmail(req: Request, res: Response) {
   const targetDateRaw = typeof req.body?.targetDate === "string" ? req.body.targetDate.trim() : undefined;
   if (targetDateRaw && !/^\d{4}-\d{2}-\d{2}$/.test(targetDateRaw)) {
     throw new AppError("targetDate invalido. Use YYYY-MM-DD", 400);
@@ -104,6 +104,11 @@ router.post("/email/due-tomorrow", async (req, res) => {
     message: result.message,
     result,
   });
-});
+}
+
+router.post("/email/due-today", handleDueEmail);
+
+// Mantido por compatibilidade com integracoes anteriores.
+router.post("/email/due-tomorrow", handleDueEmail);
 
 export { router as notificationsRoutes };

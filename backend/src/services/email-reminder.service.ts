@@ -2,7 +2,6 @@ import { InstallmentStatus } from "@prisma/client";
 import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../config/env";
 import {
-  addDays,
   getHourMinuteInTimeZone,
   getIsoTodayInTimeZone,
   normalizeTimeZone,
@@ -78,6 +77,17 @@ function parseRecipients(raw?: string): string[] {
   return [...seen];
 }
 
+function extractEmail(raw?: string): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+
+  const angleMatch = value.match(/<([^<>]+)>/);
+  const candidate = (angleMatch?.[1] || value).replace(/^mailto:/i, "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate)) return null;
+
+  return candidate;
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -106,8 +116,23 @@ function getEmailRecipients(override?: string[]): string[] {
   if (override && override.length > 0) {
     return override.map((item) => item.trim().toLowerCase()).filter(Boolean);
   }
-  const fallback = process.env.ADMIN_EMAIL?.trim();
-  return parseRecipients(env.EMAIL_NOTIFY_TO || fallback);
+
+  const configured = parseRecipients(env.EMAIL_NOTIFY_TO);
+  const isLegacyPlaceholder = configured.length === 1 && configured[0] === "usecredix@gmail.com";
+  if (configured.length > 0 && !isLegacyPlaceholder) return configured;
+
+  const fallbackCandidates = [
+    env.SMTP_USER,
+    extractEmail(env.SMTP_FROM) || undefined,
+    process.env.ADMIN_EMAIL?.trim(),
+  ];
+
+  for (const candidate of fallbackCandidates) {
+    const parsed = parseRecipients(candidate);
+    if (parsed.length > 0) return parsed;
+  }
+
+  return [];
 }
 
 function smtpConfigErrorMessage(): string | null {
@@ -181,7 +206,7 @@ async function fetchDueTomorrowInstallments(targetDateIso: string): Promise<DueT
 
 function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
   const dateLabel = formatDateIso(targetDateIso);
-  return `[Credix] Vencimentos de amanha (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
+  return `[Credix] Vencimentos do dia (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
 }
 
 function buildTextBody(items: DueTomorrowInstallment[], targetDateIso: string, totalAmount: number): string {
@@ -192,7 +217,7 @@ function buildTextBody(items: DueTomorrowInstallment[], targetDateIso: string, t
   });
 
   return [
-    `Resumo de parcelas que vencem em ${dateLabel}.`,
+    `Resumo de parcelas com vencimento em ${dateLabel}.`,
     "",
     `Total de parcelas: ${items.length}`,
     `Valor total: ${formatCurrency(totalAmount)}`,
@@ -223,7 +248,7 @@ function buildHtmlBody(items: DueTomorrowInstallment[], targetDateIso: string, t
 
   return `
     <div style="font-family:Arial,sans-serif;color:#111827;">
-      <h2 style="margin:0 0 8px;">Parcelas para amanha (${dateLabel})</h2>
+      <h2 style="margin:0 0 8px;">Parcelas com vencimento em ${dateLabel}</h2>
       <p style="margin:0 0 12px;">Total de parcelas: <strong>${items.length}</strong> | Valor total: <strong>${formatCurrency(totalAmount)}</strong></p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <thead>
@@ -264,7 +289,7 @@ export async function sendDueTomorrowInstallmentsEmail(
   const todayIso = getIsoTodayInTimeZone(timeZone);
   const targetDateIso = (() => {
     const explicit = options.targetDateIso?.trim();
-    if (!explicit) return addDays(todayIso, 1);
+    if (!explicit) return todayIso;
     return isIsoDate(explicit) ? explicit : "";
   })();
 
@@ -313,7 +338,7 @@ export async function sendDueTomorrowInstallmentsEmail(
     return {
       ok: true,
       skipped: true,
-      message: `Sem parcelas para ${formatDateIso(targetDateIso)}`,
+      message: `Sem parcelas com vencimento em ${formatDateIso(targetDateIso)}`,
       targetDateIso,
       recipients,
       dueCount: 0,

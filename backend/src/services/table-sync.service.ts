@@ -318,14 +318,18 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
           throw new AppError("Nome do cliente e obrigatorio.");
         }
 
+        const hasCpfField = Object.prototype.hasOwnProperty.call(row, "cpf")
+          || Object.prototype.hasOwnProperty.call(row, "document");
         const cpfInput = normalizeText(row.cpf ?? row.document);
         const cpfDigits = normalizeDigits(cpfInput);
 
-        let cpf: string;
-        if (cpfDigits.length === 11) {
+        let cpf: string | null;
+        if (!hasCpfField) {
+          cpf = current?.cpf ?? null;
+        } else if (!cpfDigits) {
+          cpf = null;
+        } else if (cpfDigits.length === 11) {
           cpf = cpfDigits;
-        } else if (current && normalizeText(current.cpf) === cpfInput) {
-          cpf = current.cpf;
         } else {
           throw new AppError("CPF invalido. Informe um CPF com 11 digitos.");
         }

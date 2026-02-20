@@ -101,6 +101,14 @@
             color: #0f172a;
         }
 
+        .kpi-insight-line {
+            margin-top: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #64748b;
+        }
+
         .filter-control {
             background: #f8fafc;
             border: 1px solid #d1d5db;
@@ -173,6 +181,11 @@
         .debtor-focus-row { background: #eff6ff; box-shadow: inset 3px 0 0 #2563eb; }
         .debtor-table-row { transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
         .debtor-table-row:hover { background: #f8fafc; }
+        .debtor-expanded-row {
+            background: #f1f5f9;
+            box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.45);
+        }
+        .debtor-expanded-row:hover { background: #ecf2ff; }
         .debtor-overdue-row {
             box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
         }
@@ -180,6 +193,18 @@
 
         .debtor-overdue-mobile {
             box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        }
+
+        .debtor-detail-row > td {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .debtor-detail-card {
+            border-radius: 14px;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
         }
 
         .debtor-row-enter {
@@ -351,10 +376,19 @@
         .dark .table-shell th.sortable-th:hover { background: #eef2ff; }
         .dark .debtor-focus-row { background: rgba(30, 64, 175, 0.25); }
         .dark .debtor-table-row:hover { background: #f8fafc; }
+        .dark .debtor-expanded-row {
+            background: #eef2ff;
+            box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.45);
+        }
+        .dark .debtor-expanded-row:hover { background: #e9efff; }
         .dark .debtor-overdue-row {
             box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
         }
         .dark .debtor-overdue-row:hover { background: #f8fafc; }
+        .dark .debtor-detail-card {
+            border-color: #dbeafe;
+            background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+        }
 
         .table-shell .text-slate-100,
         .table-shell .text-slate-50,
@@ -542,6 +576,7 @@
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
                             <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">0</p>
+                            <p id="totalDebtorsInsight" class="kpi-insight-line">--</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-users"></i>
@@ -554,6 +589,7 @@
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
                             <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">0</p>
+                            <p id="activeDebtorsInsight" class="kpi-insight-line">--</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-circle-check"></i>
@@ -566,6 +602,7 @@
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
                             <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">0</p>
+                            <p id="inactiveDebtorsInsight" class="kpi-insight-line">--</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-user-clock"></i>
@@ -578,6 +615,7 @@
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
                             <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">0</p>
+                            <p id="overdueDebtorsInsight" class="kpi-insight-line">--</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-triangle-exclamation"></i>
@@ -588,7 +626,7 @@
 
             <div class="clients-data-panel rounded-2xl p-4 sm:p-5 lg:p-6">
                 <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
-                    <div class="md:col-span-5">
+                    <div class="md:col-span-4">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Buscar</label>
                         <input id="debtorSearch" type="text" class="filter-control text-sm" placeholder="Nome, telefone ou documento">
                     </div>
@@ -602,7 +640,7 @@
                             <option value="Quitado">Quitado</option>
                         </select>
                     </div>
-                    <div class="md:col-span-4">
+                    <div class="md:col-span-3">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Ordenar por</label>
                         <select id="sortBy" class="filter-control text-sm">
                             <option value="name">Nome</option>
@@ -617,12 +655,9 @@
                             <option value="status">Status</option>
                         </select>
                     </div>
-                    <div class="md:col-span-12 flex flex-wrap items-center justify-end gap-2 pt-1">
-                        <button id="clearFiltersBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                    <div class="md:col-span-2 md:self-end">
+                        <button id="clearFiltersBtn" type="button" class="inline-flex w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
                             <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
-                        </button>
-                        <button id="refreshBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50">
-                            <i class="fas fa-rotate-right mr-2"></i><span id="refreshBtnText">Atualizar</span>
                         </button>
                     </div>
                 </div>
@@ -655,6 +690,9 @@
                                     <th class="whitespace-nowrap">
                                         <span>Situação</span>
                                     </th>
+                                    <th class="whitespace-nowrap text-center">
+                                        <span>Índice Credix</span>
+                                    </th>
                                     <th class="whitespace-nowrap text-right sortable-th" data-sort="overdue_count" data-sort-active="false">
                                         <button type="button" class="sort-btn" aria-label="Ordenar por Atrasos">
                                             <span>Atrasos</span>
@@ -671,7 +709,7 @@
                                 </tr>
                             </thead>
                             <tbody id="debtorsTableBody">
-                                <tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Carregando clientes...</td></tr>
+                                <tr class="hidden sm:table-row"><td colspan="7" class="py-8 text-center text-gray-500">Carregando clientes...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -712,8 +750,8 @@
                                 <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
-                                <label class="mb-1 block text-sm text-gray-600">CPF*</label>
-                                <input id="newDebtorCpf" class="filter-control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required>
+                                <label class="mb-1 block text-sm text-gray-600">CPF (opcional)</label>
+                                <input id="newDebtorCpf" class="filter-control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
                                 <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
@@ -768,7 +806,7 @@
                     <form id="registerPaymentForm" class="space-y-4">
                         <div>
                             <label for="registerPaymentAmount" class="mb-1 block text-sm text-gray-600">Valor (R$)</label>
-                            <input id="registerPaymentAmount" type="number" min="0.01" step="0.01" class="filter-control" required placeholder="0,00">
+                            <input id="registerPaymentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control" required placeholder="0,00">
                         </div>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
@@ -1255,6 +1293,54 @@
             }).format(Number(value || 0));
         }
 
+        function parseCurrencyInput(value) {
+            const raw = String(value ?? '').trim();
+            if (!raw) return 0;
+
+            const sanitized = raw
+                .replace(/\s+/g, '')
+                .replace(/R\$/gi, '')
+                .replace(/[^\d,.-]/g, '');
+
+            const commaIndex = sanitized.lastIndexOf(',');
+            const dotIndex = sanitized.lastIndexOf('.');
+            let normalized = sanitized;
+
+            if (commaIndex >= 0 && dotIndex >= 0) {
+                if (commaIndex > dotIndex) {
+                    normalized = sanitized.replace(/\./g, '').replace(',', '.');
+                } else {
+                    normalized = sanitized.replace(/,/g, '');
+                }
+            } else if (commaIndex >= 0) {
+                normalized = sanitized.replace(/\./g, '').replace(',', '.');
+            } else {
+                normalized = sanitized.replace(/,/g, '');
+            }
+
+            const parsed = Number(normalized);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatCurrencyInput(value) {
+            const parsed = parseCurrencyInput(value);
+            if (parsed <= 0) return '';
+            return parsed.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
+        function formatPercent(value, fractionDigits = 1) {
+            const safeDigits = Number.isInteger(fractionDigits) ? Math.max(0, fractionDigits) : 1;
+            const safeValue = Number(value);
+            const normalized = Number.isFinite(safeValue) ? safeValue : 0;
+            return `${normalized.toLocaleString('pt-BR', {
+                minimumFractionDigits: safeDigits,
+                maximumFractionDigits: safeDigits,
+            })}%`;
+        }
+
         function parseDateValue(value) {
             if (!value) return null;
             if (value instanceof Date) return new Date(value.getTime());
@@ -1284,6 +1370,11 @@
             const date = parseDateValue(value);
             if (!date) return '-';
             return date.toLocaleDateString('pt-BR');
+        }
+
+        function daysBetween(fromDate, toDate) {
+            if (!(fromDate instanceof Date) || !(toDate instanceof Date)) return 0;
+            return Math.floor((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
         }
 
         function normalizeStatus(status) {
@@ -1403,6 +1494,425 @@
             }, 0);
         }
 
+        function getDebtorOverdueTotal(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return 0;
+
+            return debtorsState.installments.reduce((sum, installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return sum;
+
+                const status = String(installment.status || '').trim().toLowerCase();
+                if (status === 'pago') return sum;
+
+                const dueDate = startOfDay(installment.due_date);
+                if (!dueDate) return sum;
+
+                const isOverdue = status === 'atrasado' || dueDate < today;
+                if (!isOverdue) return sum;
+
+                return sum + Number(installment.amount ?? installment.value ?? 0);
+            }, 0);
+        }
+
+        function getDebtorDueInstallmentsHistory(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return [];
+
+            return debtorsState.installments
+                .filter((installment) => sameId(installment.debtor_id, debtorId))
+                .map((installment) => {
+                    const dueDate = startOfDay(installment.due_date);
+                    const paymentDate = startOfDay(installment.payment_date);
+                    if (!dueDate) return null;
+                    const status = String(installment.status || '').trim().toLowerCase();
+                    const amount = Number(installment.amount ?? installment.value ?? 0);
+                    return {
+                        dueDate,
+                        paymentDate,
+                        status,
+                        amount: Number.isFinite(amount) ? amount : 0,
+                    };
+                })
+                .filter((item) => item && item.dueDate <= today)
+                .sort((a, b) => a.dueDate - b.dueDate);
+        }
+
+        function getDebtorClosedLoansCount(debtorId) {
+            return debtorsState.loans.filter((loan) => {
+                if (!sameId(loan.debtor_id, debtorId)) return false;
+                const status = String(loan.status || '').trim().toLowerCase();
+                return status === 'finalizado' || status === 'quitado';
+            }).length;
+        }
+
+        function getDebtorCreditScore(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) {
+                return {
+                    score: 700,
+                    totalDueCount: 0,
+                    paidOnTimeCount: 0,
+                    paidLateCount: 0,
+                    unpaidOverdueCount: 0,
+                    avgLateDays: 0,
+                    onTimeRatio: null,
+                    onTimeStreak: 0,
+                    closedLoansCount: 0,
+                    scoreTrend: 'stable',
+                };
+            }
+
+            const history = getDebtorDueInstallmentsHistory(debtorId);
+            const closedLoansCount = getDebtorClosedLoansCount(debtorId);
+
+            if (!history.length) {
+                return {
+                    score: 700,
+                    totalDueCount: 0,
+                    paidOnTimeCount: 0,
+                    paidLateCount: 0,
+                    unpaidOverdueCount: 0,
+                    avgLateDays: 0,
+                    onTimeRatio: null,
+                    onTimeStreak: 0,
+                    closedLoansCount,
+                    scoreTrend: 'stable',
+                };
+            }
+
+            let scoreRaw = 700;
+            let paidOnTimeCount = 0;
+            let paidLateCount = 0;
+            let unpaidOverdueCount = 0;
+            let totalLateDays = 0;
+            let totalOverdueOpenDays = 0;
+
+            const outcomeSeries = [];
+
+            history.forEach((item) => {
+                const isPaid = item.status === 'pago' || Boolean(item.paymentDate);
+                const paymentDate = item.paymentDate;
+
+                if (isPaid) {
+                    const lateDays = paymentDate ? Math.max(daysBetween(item.dueDate, paymentDate), 0) : 0;
+                    if (lateDays === 0) {
+                        scoreRaw += 12;
+                        paidOnTimeCount += 1;
+                        outcomeSeries.push(1);
+                    } else if (lateDays <= 3) {
+                        scoreRaw -= 8;
+                        paidLateCount += 1;
+                        totalLateDays += lateDays;
+                        outcomeSeries.push(0);
+                    } else if (lateDays <= 7) {
+                        scoreRaw -= 20;
+                        paidLateCount += 1;
+                        totalLateDays += lateDays;
+                        outcomeSeries.push(0);
+                    } else if (lateDays <= 15) {
+                        scoreRaw -= 38;
+                        paidLateCount += 1;
+                        totalLateDays += lateDays;
+                        outcomeSeries.push(0);
+                    } else {
+                        scoreRaw -= 60;
+                        paidLateCount += 1;
+                        totalLateDays += lateDays;
+                        outcomeSeries.push(0);
+                    }
+                    return;
+                }
+
+                const overdueDays = Math.max(daysBetween(item.dueDate, today), 0);
+                if (overdueDays > 0) {
+                    unpaidOverdueCount += 1;
+                    totalOverdueOpenDays += overdueDays;
+                    if (overdueDays <= 7) scoreRaw -= 48;
+                    else if (overdueDays <= 15) scoreRaw -= 78;
+                    else if (overdueDays <= 30) scoreRaw -= 118;
+                    else scoreRaw -= 165;
+                    outcomeSeries.push(-1);
+                } else {
+                    outcomeSeries.push(0);
+                }
+            });
+
+            let onTimeStreak = 0;
+            for (let index = history.length - 1; index >= 0; index -= 1) {
+                const item = history[index];
+                const isPaid = item.status === 'pago' || Boolean(item.paymentDate);
+                if (!isPaid) break;
+                const lateDays = item.paymentDate ? Math.max(daysBetween(item.dueDate, item.paymentDate), 0) : 0;
+                if (lateDays === 0) {
+                    onTimeStreak += 1;
+                } else {
+                    break;
+                }
+            }
+
+            scoreRaw += Math.min(onTimeStreak * 6, 30);
+            scoreRaw += Math.min(closedLoansCount * 10, 40);
+
+            const totalDueCount = history.length;
+            const onTimeRatio = totalDueCount > 0 ? (paidOnTimeCount / totalDueCount) : null;
+            if (onTimeRatio !== null) {
+                if (totalDueCount >= 6 && onTimeRatio >= 0.9) scoreRaw += 24;
+                else if (totalDueCount >= 6 && onTimeRatio >= 0.75) scoreRaw += 10;
+                else if (totalDueCount >= 6 && onTimeRatio < 0.5) scoreRaw -= 22;
+            }
+
+            let scoreTrend = 'stable';
+            if (outcomeSeries.length >= 8) {
+                const recent = outcomeSeries.slice(-4);
+                const previous = outcomeSeries.slice(-8, -4);
+                const avgRecent = recent.reduce((sum, value) => sum + value, 0) / recent.length;
+                const avgPrevious = previous.reduce((sum, value) => sum + value, 0) / previous.length;
+                const delta = avgRecent - avgPrevious;
+                if (delta >= 0.25) {
+                    scoreRaw += 12;
+                    scoreTrend = 'up';
+                } else if (delta <= -0.25) {
+                    scoreRaw -= 12;
+                    scoreTrend = 'down';
+                }
+            }
+
+            const avgLateDays = paidLateCount > 0 ? (totalLateDays / paidLateCount) : 0;
+            const score = Math.max(0, Math.min(1000, Math.round(scoreRaw)));
+
+            return {
+                score,
+                totalDueCount,
+                paidOnTimeCount,
+                paidLateCount,
+                unpaidOverdueCount,
+                avgLateDays,
+                onTimeRatio,
+                onTimeStreak,
+                closedLoansCount,
+                scoreTrend,
+                totalOverdueOpenDays,
+            };
+        }
+
+        function getScoreIndicator(scoreValue) {
+            const score = Number.isFinite(Number(scoreValue)) ? Number(scoreValue) : 0;
+
+            if (score >= 850) {
+                return {
+                    badgeClass: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+                    dotClass: 'bg-emerald-500',
+                    textClass: 'text-emerald-700',
+                };
+            }
+
+            if (score >= 700) {
+                return {
+                    badgeClass: 'border-yellow-300 bg-yellow-50 text-yellow-700',
+                    dotClass: 'bg-yellow-500',
+                    textClass: 'text-yellow-700',
+                };
+            }
+
+            if (score >= 550) {
+                return {
+                    badgeClass: 'border-orange-300 bg-orange-50 text-orange-700',
+                    dotClass: 'bg-orange-500',
+                    textClass: 'text-orange-700',
+                };
+            }
+
+            return {
+                badgeClass: 'border-red-300 bg-red-50 text-red-700',
+                dotClass: 'bg-red-500',
+                textClass: 'text-red-700',
+            };
+        }
+
+        function getDebtorPunctuality90d(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return { dueCount: 0, onTimeCount: 0, percent: null };
+
+            const windowStart = new Date(today.getTime());
+            windowStart.setDate(windowStart.getDate() - 90);
+
+            let dueCount = 0;
+            let onTimeCount = 0;
+
+            debtorsState.installments.forEach((installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return;
+
+                const dueDate = startOfDay(installment.due_date);
+                if (!dueDate) return;
+                if (dueDate < windowStart || dueDate > today) return;
+
+                dueCount += 1;
+
+                const status = String(installment.status || '').trim().toLowerCase();
+                const paymentDate = startOfDay(installment.payment_date);
+
+                if (status === 'pago') {
+                    if (!paymentDate || paymentDate <= dueDate) {
+                        onTimeCount += 1;
+                    }
+                }
+            });
+
+            if (dueCount === 0) {
+                return { dueCount, onTimeCount, percent: null };
+            }
+
+            return {
+                dueCount,
+                onTimeCount,
+                percent: (onTimeCount / dueCount) * 100,
+            };
+        }
+
+        function getDebtorLastPaymentInfo(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) return { date: null, daysSince: null };
+
+            let lastPaymentDate = null;
+
+            debtorsState.installments.forEach((installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return;
+
+                const paymentDate = startOfDay(installment.payment_date);
+                if (!paymentDate) return;
+                if (!lastPaymentDate || paymentDate > lastPaymentDate) {
+                    lastPaymentDate = paymentDate;
+                }
+            });
+
+            if (!lastPaymentDate) return { date: null, daysSince: null };
+
+            const diffMs = today.getTime() - lastPaymentDate.getTime();
+            const daysSince = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+            return { date: lastPaymentDate, daysSince };
+        }
+
+        function getDebtorTrend3m(debtorId) {
+            const today = startOfDay(new Date());
+            if (!today) {
+                return { tone: 'neutral', text: 'Sem dados para tendência 3M' };
+            }
+
+            const recentStart = new Date(today.getTime());
+            recentStart.setDate(recentStart.getDate() - 90);
+            const previousEnd = new Date(recentStart.getTime());
+            previousEnd.setDate(previousEnd.getDate() - 1);
+            const previousStart = new Date(previousEnd.getTime());
+            previousStart.setDate(previousStart.getDate() - 90);
+
+            let recentTotal = 0;
+            let previousTotal = 0;
+
+            debtorsState.installments.forEach((installment) => {
+                if (!sameId(installment.debtor_id, debtorId)) return;
+                const paymentDate = startOfDay(installment.payment_date);
+                if (!paymentDate) return;
+
+                const amount = Number(installment.amount ?? installment.value ?? 0);
+                const safeAmount = Number.isFinite(amount) ? amount : 0;
+
+                if (paymentDate >= recentStart && paymentDate <= today) {
+                    recentTotal += safeAmount;
+                    return;
+                }
+
+                if (paymentDate >= previousStart && paymentDate <= previousEnd) {
+                    previousTotal += safeAmount;
+                }
+            });
+
+            if (recentTotal <= 0 && previousTotal <= 0) {
+                return { tone: 'neutral', text: 'Tendência 3M: estável (sem recebimentos)' };
+            }
+
+            if (previousTotal <= 0 && recentTotal > 0) {
+                return { tone: 'positive', text: 'Tendência 3M: ↑ sem base comparativa' };
+            }
+
+            const pct = ((recentTotal - previousTotal) / Math.abs(previousTotal)) * 100;
+            if (Math.abs(pct) < 0.05) {
+                return { tone: 'neutral', text: 'Tendência 3M: estável' };
+            }
+
+            return {
+                tone: pct > 0 ? 'positive' : 'negative',
+                text: `Tendência 3M: ${pct > 0 ? '↑' : '↓'} ${formatPercent(Math.abs(pct), 1)}`,
+            };
+        }
+
+        function getDebtorInsightSnapshot(debtorId, scoreData = null) {
+            const score = scoreData || getDebtorCreditScore(debtorId);
+            const punctuality = getDebtorPunctuality90d(debtorId);
+            const lastPayment = getDebtorLastPaymentInfo(debtorId);
+            const trend3m = getDebtorTrend3m(debtorId);
+
+            let punctualityText = 'Pontualidade 90d: sem vencimentos';
+            let punctualityClass = 'text-gray-600';
+
+            if (punctuality.percent !== null) {
+                punctualityText = `Pontualidade 90d: ${formatPercent(punctuality.percent, 1)} (${punctuality.onTimeCount}/${punctuality.dueCount})`;
+                if (punctuality.percent >= 90) punctualityClass = 'text-emerald-700';
+                else if (punctuality.percent >= 70) punctualityClass = 'text-amber-700';
+                else punctualityClass = 'text-red-700';
+            }
+
+            let lastPaymentText = 'Último pagamento: sem registro';
+            let lastPaymentClass = 'text-gray-600';
+
+            if (lastPayment.date) {
+                if (lastPayment.daysSince === 0) {
+                    lastPaymentText = `Último pagamento: hoje (${formatDate(lastPayment.date)})`;
+                    lastPaymentClass = 'text-emerald-700';
+                } else {
+                    lastPaymentText = `Último pagamento: há ${lastPayment.daysSince} dia(s) (${formatDate(lastPayment.date)})`;
+                    lastPaymentClass = lastPayment.daysSince >= 30 ? 'text-amber-700' : 'text-gray-700';
+                }
+            }
+
+            const trendClass = trend3m.tone === 'positive'
+                ? 'text-emerald-700'
+                : trend3m.tone === 'negative'
+                    ? 'text-red-700'
+                    : 'text-gray-600';
+
+            const scoreIndicator = getScoreIndicator(score.score);
+            const scoreClass = scoreIndicator.textClass;
+
+            const scoreTrendText = score.scoreTrend === 'up'
+                ? 'subindo'
+                : score.scoreTrend === 'down'
+                    ? 'caindo'
+                    : 'estável';
+
+            const scoreText = `${score.score}/1000`;
+            const behaviorText = score.totalDueCount > 0
+                ? `Atrasos pagos: ${score.paidLateCount} | atraso médio: ${score.avgLateDays.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} dia(s) | índice ${scoreTrendText}`
+                : 'Sem histórico suficiente para cálculo do Índice Credix';
+            const behaviorClass = score.scoreTrend === 'up'
+                ? 'text-emerald-700'
+                : score.scoreTrend === 'down'
+                    ? 'text-red-700'
+                    : 'text-gray-600';
+
+            return {
+                punctualityText,
+                punctualityClass,
+                lastPaymentText,
+                lastPaymentClass,
+                trendText: trend3m.text,
+                trendClass,
+                scoreText,
+                scoreClass,
+                behaviorText,
+                behaviorClass,
+            };
+        }
+
         function getDebtorNextDueInstallment(debtorId) {
             const today = startOfDay(new Date());
             if (!today) return null;
@@ -1482,10 +1992,58 @@
             const inactive = debtorsState.debtors.filter(d => ['Inativo', 'Quitado'].includes(getDebtorUiStatus(d))).length;
             const withOverdue = debtorsState.debtors.filter(d => getDebtorUiStatus(d) === 'Atrasado').length;
 
+            const today = startOfDay(new Date());
+            const createdLast30Days = debtorsState.debtors.filter((debtor) => {
+                if (!today) return false;
+                const createdAt = startOfDay(debtor.created_at);
+                if (!createdAt) return false;
+                const days = Math.floor((today.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+                return days >= 0 && days <= 30;
+            }).length;
+
+            const activeRatio = total > 0 ? (active / total) * 100 : 0;
+            const overdueRatio = total > 0 ? (withOverdue / total) * 100 : 0;
+            const inactiveNoPayment60 = debtorsState.debtors.filter((debtor) => {
+                if (getDebtorUiStatus(debtor) === 'Ativo') return false;
+                const lastPayment = getDebtorLastPaymentInfo(debtor.id);
+                return lastPayment.daysSince !== null && lastPayment.daysSince >= 60;
+            }).length;
+
+            const overdueTicketAverage = withOverdue > 0
+                ? debtorsState.debtors.reduce((sum, debtor) => {
+                    if (getDebtorUiStatus(debtor) !== 'Atrasado') return sum;
+                    return sum + getDebtorOverdueTotal(debtor.id);
+                }, 0) / withOverdue
+                : 0;
+
             document.getElementById('totalDebtors').textContent = String(total);
             document.getElementById('activeDebtors').textContent = String(active);
             document.getElementById('inactiveDebtors').textContent = String(inactive);
             document.getElementById('overdueDebtors').textContent = String(withOverdue);
+
+            const totalDebtorsInsight = document.getElementById('totalDebtorsInsight');
+            if (totalDebtorsInsight) {
+                totalDebtorsInsight.textContent = `${createdLast30Days} novo(s) nos últimos 30 dias`;
+            }
+
+            const activeDebtorsInsight = document.getElementById('activeDebtorsInsight');
+            if (activeDebtorsInsight) {
+                activeDebtorsInsight.textContent = `${formatPercent(activeRatio, 1)} da base ativa`;
+            }
+
+            const inactiveDebtorsInsight = document.getElementById('inactiveDebtorsInsight');
+            if (inactiveDebtorsInsight) {
+                inactiveDebtorsInsight.textContent = `${inactiveNoPayment60} sem pagamento há 60+ dias`;
+            }
+
+            const overdueDebtorsInsight = document.getElementById('overdueDebtorsInsight');
+            if (overdueDebtorsInsight) {
+                if (withOverdue > 0) {
+                    overdueDebtorsInsight.textContent = `${formatPercent(overdueRatio, 1)} da base | ticket médio ${formatCurrency(overdueTicketAverage)}`;
+                } else {
+                    overdueDebtorsInsight.textContent = 'Sem clientes em atraso no momento';
+                }
+            }
         }
 
         function badgeForStatus(status) {
@@ -1496,28 +2054,15 @@
             return 'badge badge-warn';
         }
 
-        function getDebtorRiskIndicator(maxOverdueDays) {
-            const days = Number(maxOverdueDays || 0);
-            if (days >= 30) {
-                return {
-                    label: 'Alto',
-                    badgeClass: 'border-red-300 bg-red-50 text-red-700',
-                    dotClass: 'bg-red-500',
-                };
-            }
-
-            if (days >= 8) {
-                return {
-                    label: 'Médio',
-                    badgeClass: 'border-amber-300 bg-amber-50 text-amber-700',
-                    dotClass: 'bg-amber-500',
-                };
-            }
-
+        function getDebtorScoreBadgeModel(scoreData) {
+            const score = Number.isFinite(Number(scoreData?.score)) ? Number(scoreData.score) : 0;
+            const totalDueCount = Number.isFinite(Number(scoreData?.totalDueCount)) ? Number(scoreData.totalDueCount) : 0;
+            const indicator = getScoreIndicator(score);
             return {
-                label: 'Baixo',
-                badgeClass: 'border-emerald-300 bg-emerald-50 text-emerald-700',
-                dotClass: 'bg-emerald-500',
+                score,
+                badgeClass: indicator.badgeClass,
+                dotClass: indicator.dotClass,
+                noHistory: totalDueCount <= 0,
             };
         }
 
@@ -1553,7 +2098,7 @@
             if (tbody) {
                 tbody.innerHTML = Array.from({ length: skeletonCount }).map(() => `
                     <tr class="hidden sm:table-row">
-                        <td colspan="6" class="py-4">
+                        <td colspan="7" class="py-4">
                             <div class="animate-pulse flex items-center justify-between gap-4">
                                 <div class="min-w-0">
                                     <div class="h-3 w-40 rounded bg-gray-300"></div>
@@ -1812,6 +2357,9 @@
                 const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
                 const nextDue = getDebtorNextDueInstallment(debtor.id);
                 const openTotal = getDebtorOpenTotal(debtor.id);
+                const scoreData = getDebtorCreditScore(debtor.id);
+                const scoreBadge = getDebtorScoreBadgeModel(scoreData);
+                const insightSnapshot = getDebtorInsightSnapshot(debtor.id, scoreData);
                 const hasOverdue = overdueCount > 0;
                 const isExpanded = isDebtorDetailExpanded(debtor.id);
                 const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
@@ -1821,6 +2369,10 @@
                 const phoneDigits = toDigits(rawPhone);
                 const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="font-semibold text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-400">-</span>';
                 const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
+                const scoreBadgeText = `${scoreBadge.score}/1000`;
+                const scoreBadgeTitle = scoreBadge.noHistory
+                    ? `Sem histórico de crédito (índice base ${scoreBadge.score} de 1000)`
+                    : `Índice Credix ${scoreBadge.score} de 1000`;
 
                 return `
                     <div class="debtor-row-enter rounded-2xl border ${hasOverdue ? 'border-gray-200 bg-slate-50 debtor-overdue-mobile' : 'border-gray-200 bg-slate-50'} p-4 shadow-sm" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
@@ -1832,6 +2384,10 @@
                             <div class="text-right">
                                 <div class="text-[11px] uppercase tracking-wide text-gray-500">Total em aberto</div>
                                 <div class="mt-1 text-base font-extrabold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</div>
+                                <div class="mt-2 inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold ${scoreBadge.badgeClass}" title="${scoreBadgeTitle}" aria-label="${scoreBadgeTitle}">
+                                    <span class="h-1.5 w-1.5 rounded-full ${scoreBadge.dotClass}"></span>
+                                    ${scoreBadgeText}
+                                </div>
                             </div>
                         </div>
 
@@ -1863,6 +2419,14 @@
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.):</span> <span class="font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${detailNextDue}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos:</span> <span class="font-semibold text-gray-800">${loansCount}</span></div>
+                                <div>
+                                    <span class="text-[11px] uppercase tracking-wide text-gray-500">Índice Credix:</span> <span class="font-semibold ${insightSnapshot.scoreClass}">${insightSnapshot.scoreText}</span>
+                                    <div class="mt-1 text-[11px] text-gray-500">Índice calculado com base no histórico de pagamentos</div>
+                                </div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Comportamento:</span> <span class="font-semibold ${insightSnapshot.behaviorClass}">${insightSnapshot.behaviorText}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Pontualidade:</span> <span class="font-semibold ${insightSnapshot.punctualityClass}">${insightSnapshot.punctualityText.replace('Pontualidade 90d: ', '')}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Último pagamento:</span> <span class="font-semibold ${insightSnapshot.lastPaymentClass}">${insightSnapshot.lastPaymentText.replace('Último pagamento: ', '')}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Tendência:</span> <span class="font-semibold ${insightSnapshot.trendClass}">${insightSnapshot.trendText.replace('Tendência 3M: ', '')}</span></div>
                             </div>
                         </div>
                     </div>
@@ -1877,7 +2441,7 @@
 
             if (!total) {
                 if (tbody) {
-                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-gray-500">Nenhum cliente encontrado.</td></tr>';
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="7" class="py-8 text-center text-gray-500">Nenhum cliente encontrado.</td></tr>';
                 }
                 if (debtorsMobileList) {
                     debtorsMobileList.innerHTML = `
@@ -1902,6 +2466,9 @@
                 const maxOverdueDays = getDebtorMaxOverdueDays(debtor.id);
                 const nextDue = getDebtorNextDueInstallment(debtor.id);
                 const openTotal = getDebtorOpenTotal(debtor.id);
+                const scoreData = getDebtorCreditScore(debtor.id);
+                const scoreBadge = getDebtorScoreBadgeModel(scoreData);
+                const insightSnapshot = getDebtorInsightSnapshot(debtor.id, scoreData);
                 const hasOverdue = overdueCount > 0;
                 const isExpanded = isDebtorDetailExpanded(debtor.id);
                 const rawDocument = debtor.document || debtor.cpf || debtor.cnpj || '';
@@ -1911,9 +2478,13 @@
                 const phoneDigits = toDigits(rawPhone);
                 const phoneHtml = phoneDigits ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="text-blue-600 hover:text-blue-500">${phoneValue}</a>` : '<span class="text-gray-500">-</span>';
                 const detailNextDue = nextDue ? `${formatDate(nextDue.dueDate)} | ${formatCurrency(nextDue.amount)}` : '&mdash;';
+                const scoreBadgeText = `${scoreBadge.score}/1000`;
+                const scoreBadgeTitle = scoreBadge.noHistory
+                    ? `Sem histórico de crédito (índice base ${scoreBadge.score} de 1000)`
+                    : `Índice Credix ${scoreBadge.score} de 1000`;
 
                 return `
-                    <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
+                    <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''} ${isExpanded ? 'debtor-expanded-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
                         <td>
                             <div class="text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
                             <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
@@ -1923,6 +2494,12 @@
                         </td>
                         <td>
                             <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
+                        </td>
+                        <td class="whitespace-nowrap text-center">
+                            <span class="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold ${scoreBadge.badgeClass}" title="${scoreBadgeTitle}" aria-label="${scoreBadgeTitle}">
+                                <span class="h-1.5 w-1.5 rounded-full ${scoreBadge.dotClass}"></span>
+                                ${scoreBadgeText}
+                            </span>
                         </td>
                         <td class="whitespace-nowrap text-right">
                             <span class="inline-flex min-w-[1.5rem] justify-end text-base ${overdueCount > 0 ? 'font-semibold text-amber-700' : 'font-medium text-gray-600'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
@@ -1945,9 +2522,14 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="${isExpanded ? '' : 'hidden'}" data-debtor-detail-for="${debtor.id}">
-                        <td colspan="6" class="border-t border-gray-200 bg-slate-50 px-4 py-3">
-                            <div class="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2 xl:grid-cols-5">
+                    <tr class="debtor-detail-row ${isExpanded ? '' : 'hidden'}" data-debtor-detail-for="${debtor.id}">
+                        <td colspan="7" class="bg-slate-50 px-4 pb-3 pt-0">
+                            <div class="debtor-detail-card px-4 py-4">
+                                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                    <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Detalhes do cliente</div>
+                                    <div class="text-[11px] text-slate-500">Visualização expandida</div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2 xl:grid-cols-4">
                                 <div>
                                     <div class="text-[11px] uppercase tracking-wide text-gray-500">Documento</div>
                                     <div class="mt-1 font-semibold text-gray-800">${documentValue}</div>
@@ -1968,6 +2550,28 @@
                                     <div class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos</div>
                                     <div class="mt-1 font-semibold text-gray-800">${loansCount}</div>
                                 </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Índice Credix</div>
+                                    <div class="mt-1 font-semibold ${insightSnapshot.scoreClass}">${insightSnapshot.scoreText}</div>
+                                    <div class="mt-1 text-[11px] text-gray-500">Índice calculado com base no histórico de pagamentos</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Comportamento</div>
+                                    <div class="mt-1 font-semibold ${insightSnapshot.behaviorClass}">${insightSnapshot.behaviorText}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Pontualidade 90d</div>
+                                    <div class="mt-1 font-semibold ${insightSnapshot.punctualityClass}">${insightSnapshot.punctualityText.replace('Pontualidade 90d: ', '')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Último pagamento</div>
+                                    <div class="mt-1 font-semibold ${insightSnapshot.lastPaymentClass}">${insightSnapshot.lastPaymentText.replace('Último pagamento: ', '')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Tendência 3M</div>
+                                    <div class="mt-1 font-semibold ${insightSnapshot.trendClass}">${insightSnapshot.trendText.replace('Tendência 3M: ', '')}</div>
+                                </div>
+                            </div>
                             </div>
                         </td>
                     </tr>
@@ -2136,7 +2740,7 @@
                 console.error('Erro ao carregar clientes:', error);
                 const tbody = document.getElementById('debtorsTableBody');
                 if (tbody) {
-                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="6" class="py-8 text-center text-red-600">Erro ao carregar dados.</td></tr>';
+                    tbody.innerHTML = '<tr class="hidden sm:table-row"><td colspan="7" class="py-8 text-center text-red-600">Erro ao carregar dados.</td></tr>';
                 }
                 if (debtorsMobileList) {
                     debtorsMobileList.innerHTML = `
@@ -2167,7 +2771,7 @@
             };
 
             if (registerPaymentDebtorName) registerPaymentDebtorName.textContent = debtor?.name || '-';
-            if (registerPaymentAmount) registerPaymentAmount.value = String(target.amount || '');
+            if (registerPaymentAmount) registerPaymentAmount.value = formatCurrencyInput(target.amount || 0);
             if (registerPaymentDate) registerPaymentDate.value = getLocalTodayDateInputValue();
             if (registerPaymentMethod) registerPaymentMethod.value = 'PIX';
 
@@ -2226,6 +2830,11 @@
 
             newDebtorCpfInput.addEventListener('blur', function () {
                 const digits = toDigits(newDebtorCpfInput.value);
+                if (!digits) {
+                    setInlineError(newDebtorCpfError, '');
+                    newDebtorCpfInput.value = '';
+                    return;
+                }
                 if (!isValidCpfDigits(digits)) {
                     setInlineError(newDebtorCpfError, 'CPF inválido.');
                     return;
@@ -2298,9 +2907,11 @@
         debtorsState.sortField = sortBy.value || debtorsState.sortField;
         debtorsState.sortDir = getDefaultSortDir(debtorsState.sortField);
         updateDebtorsSortHeaderUi();
-        refreshBtn.addEventListener('click', function () {
-            loadDebtorsData({ showSkeleton: true, showRefreshState: true, feedbackOnSuccess: true });
-        });
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function () {
+                loadDebtorsData({ showSkeleton: true, showRefreshState: true, feedbackOnSuccess: true });
+            });
+        }
 
         prevPageBtn.addEventListener('click', function () {
             if (debtorsState.currentPage <= 1) return;
@@ -2399,7 +3010,7 @@
                 const target = debtorsState.registeringPaymentTarget;
                 if (!target) return;
 
-                const amount = Number(registerPaymentAmount?.value || 0);
+                const amount = parseCurrencyInput(registerPaymentAmount?.value || 0);
                 if (!Number.isFinite(amount) || amount <= 0) {
                     showMessage('Informe um valor válido maior que zero.', 'error');
                     if (registerPaymentAmount) registerPaymentAmount.focus();
@@ -2446,6 +3057,12 @@
             });
         }
 
+        if (registerPaymentAmount) {
+            registerPaymentAmount.addEventListener('blur', function () {
+                registerPaymentAmount.value = formatCurrencyInput(registerPaymentAmount.value);
+            });
+        }
+
         newDebtorForm.addEventListener('submit', function (event) {
             event.preventDefault();
 
@@ -2468,7 +3085,7 @@
             }
 
             const cpfDigits = toDigits(newDebtorCpfInput?.value || '');
-            if (!isValidCpfDigits(cpfDigits)) {
+            if (cpfDigits && !isValidCpfDigits(cpfDigits)) {
                 setInlineError(newDebtorCpfError, 'CPF inválido.');
                 if (newDebtorCpfInput) newDebtorCpfInput.focus();
                 return;
@@ -2486,12 +3103,13 @@
 
             if (newDebtorPhoneInput) newDebtorPhoneInput.value = formatPhonePartial(phoneDigits);
             if (newDebtorCpfInput) newDebtorCpfInput.value = formatCpfPartial(cpfDigits);
+            const cpfValue = cpfDigits || null;
 
             const basePayload = {
                 name,
                 phone: phoneDigits,
-                cpf: cpfDigits,
-                document: cpfDigits,
+                cpf: cpfValue,
+                document: cpfValue,
                 email,
                 status,
                 address,

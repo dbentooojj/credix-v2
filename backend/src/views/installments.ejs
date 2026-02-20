@@ -63,16 +63,17 @@
             flex-direction: column;
             justify-content: space-between;
             cursor: pointer;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
             transition: border-color 120ms ease-out, box-shadow 120ms ease-out, transform 120ms ease-out;
         }
         .kpi-card:hover {
-            border-color: #cbd5e1;
+            border-color: rgba(59, 130, 246, 0.45);
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
             transform: translateY(-1px);
         }
         .kpi-card.is-active {
             border-color: #60a5fa;
-            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 6px 14px rgba(59, 130, 246, 0.12);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 6px 14px rgba(59, 130, 246, 0.16);
         }
         .kpi-label {
             color: #64748b;
@@ -94,6 +95,15 @@
             color: #64748b;
             margin-top: 8px;
         }
+        .kpi-insight {
+            margin-top: 6px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.3;
+        }
+        .kpi-insight-positive { color: #047857; }
+        .kpi-insight-negative { color: #b91c1c; }
         .kpi-info { color: #94a3b8; cursor: help; }
         .kpi-tone-paid .kpi-value, .kpi-tone-paid .kpi-icon { color: #047857; }
         .kpi-tone-pending .kpi-value, .kpi-tone-pending .kpi-icon { color: #b45309; }
@@ -147,8 +157,6 @@
         }
         .modal-backdrop { backdrop-filter: blur(4px); background: rgba(2, 6, 23, 0.72); }
         .modal-panel { background: #f8fafc; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 18px 40px rgba(2, 6, 23, 0.4); }
-        .drawer-backdrop { background: rgba(2, 6, 23, 0.64); }
-        .drawer-panel { background: #f8fafc; border-left: 1px solid #e2e8f0; box-shadow: -12px 0 30px rgba(2, 6, 23, 0.3); }
         .empty-state { border: 1px dashed rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.7); border-radius: 14px; }
         main { transition: none; }
         body.sidebar-collapsed .modern-sidebar { transform: translateX(-100%); }
@@ -174,18 +182,37 @@
 
             .header-user-chevron { display: none; }
         }
+        @media (max-width: 639px) {
+            #installmentsTableWrapper { display: none !important; }
+        }
+        @media (min-width: 640px) {
+            #installmentsMobileList { display: none !important; }
+        }
         .dark .glass-card,
         .dark .kpi-card,
-        .dark .modal-panel,
-        .dark .drawer-panel {
+        .dark .modal-panel {
             background: rgba(15, 23, 42, 0.82);
             border: 1px solid rgba(148, 163, 184, 0.2);
             color: #e2e8f0;
+        }
+        .dark .kpi-card {
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
+        }
+        .dark .kpi-card:hover {
+            border-color: rgba(148, 163, 184, 0.42);
+            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.5);
+        }
+        .dark .kpi-card.is-active {
+            border-color: rgba(96, 165, 250, 0.72);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45), 0 10px 22px rgba(30, 64, 175, 0.28);
         }
         .dark .kpi-label,
         .dark .kpi-note,
         .dark .kpi-info { color: #cbd5e1 !important; }
         .dark .kpi-value { color: #f8fafc !important; }
+        .dark .kpi-insight { color: #cbd5e1 !important; }
+        .dark .kpi-insight-positive { color: #86efac !important; }
+        .dark .kpi-insight-negative { color: #fca5a5 !important; }
         .dark .filter-control, .dark .table-shell, .dark .table-shell th, .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
         .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
         .dark .text-gray-800 { color: #f8fafc !important; }
@@ -197,7 +224,6 @@
         .dark .bg-gray-50 { background: rgba(15, 23, 42, 0.8) !important; }
         .dark .empty-state { background: rgba(15, 23, 42, 0.45); border-color: rgba(148, 163, 184, 0.35); }
         .dark .modal-panel { background: rgba(15, 23, 42, 0.98); border-color: rgba(148, 163, 184, 0.3); color: #e2e8f0; }
-        .dark .drawer-panel { background: rgba(15, 23, 42, 0.98); border-color: rgba(148, 163, 184, 0.3); color: #e2e8f0; }
         .dark textarea, .dark select, .dark input { color: #e2e8f0; }
         /* Premium DS v1 - light skin */
         :root {
@@ -237,7 +263,6 @@
         }
 
         .glass-card,
-        .kpi-card,
         .summary-link,
         .modal-panel,
         .modal-content {
@@ -346,11 +371,8 @@
                     <h2 class="page-title text-3xl font-bold">Controle de Cobrança</h2>
                     <p class="muted-on-dark mt-1 text-sm">Acompanhe pendências, atrasos e recebimentos com ação rápida.</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center">
                     <p class="text-xs text-slate-300">Atualizado: <span id="lastUpdatedAt" class="font-semibold text-slate-200">--:--</span></p>
-                    <button id="refreshBtn" class="rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                        <i class="fas fa-rotate mr-2"></i>Atualizar
-                    </button>
                 </div>
             </div>
             <div id="kpiSkeletonGrid" class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 mb-6">
@@ -366,6 +388,7 @@
                     </div>
                     <p id="receivedMonthValue" class="kpi-value">R$ 0,00</p>
                     <p id="receivedMonthCount" class="kpi-note"><i class="fas fa-check-circle kpi-icon mr-1"></i>0 parcela(s) paga(s)</p>
+                    <p id="receivedMonthInsight" class="kpi-insight">--</p>
                 </button>
                 <button type="button" class="kpi-card kpi-tone-pending text-left" data-kpi-filter="pending_total">
                     <div class="flex items-start justify-between">
@@ -374,6 +397,7 @@
                     </div>
                     <p id="pendingTotalValue" class="kpi-value">R$ 0,00</p>
                     <p id="pendingTotalCount" class="kpi-note"><i class="fas fa-clock kpi-icon mr-1"></i>0 parcela(s) em aberto</p>
+                    <p id="pendingTotalInsight" class="kpi-insight">--</p>
                 </button>
                 <button type="button" class="kpi-card kpi-tone-overdue text-left" data-kpi-filter="overdue_total">
                     <div class="flex items-start justify-between">
@@ -382,12 +406,13 @@
                     </div>
                     <p id="overdueTotalValue" class="kpi-value">R$ 0,00</p>
                     <p id="overdueTotalCount" class="kpi-note"><i class="fas fa-triangle-exclamation kpi-icon mr-1"></i>0 parcela(s) em atraso</p>
+                    <p id="overdueTotalInsight" class="kpi-insight">--</p>
                 </button>
             </div>
 
             <div class="glass-card rounded-2xl p-6 mb-6">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
-                    <div class="md:col-span-2 xl:col-span-4">
+                    <div class="md:col-span-2 xl:col-span-3">
                         <label for="installmentSearch" class="block text-sm text-gray-600 mb-1">Buscar</label>
                         <div class="relative">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
@@ -431,18 +456,17 @@
                             <option value="Outro">Outro</option>
                         </select>
                     </div>
-                    <div id="customRangeWrap" class="hidden md:col-span-2 xl:col-span-4">
+                    <div class="md:col-span-2 xl:col-span-1 flex items-end">
+                        <button id="clearFiltersBtn" type="button" class="inline-flex h-[42px] w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:bg-slate-100">
+                            <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
+                        </button>
+                    </div>
+                    <div id="customRangeWrap" class="hidden md:col-span-2 xl:col-span-6">
                         <label class="block text-sm text-gray-600 mb-1">Período personalizado</label>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                             <input id="customStartDate" type="date" class="filter-control" aria-label="Data inicial">
                             <input id="customEndDate" type="date" class="filter-control" aria-label="Data final">
                         </div>
-                    </div>
-                    <div class="md:col-span-2 xl:col-span-8 flex flex-wrap items-end justify-start gap-2 xl:justify-end">
-                        <button id="clearFiltersBtn" type="button" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:bg-slate-100 sm:w-auto">Limpar filtros</button>
-                        <button id="refreshFiltersBtn" type="button" class="w-full rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-blue-500 sm:w-auto">
-                            <i class="fas fa-rotate mr-1"></i>Atualizar
-                        </button>
                     </div>
                 </div>
             </div>
@@ -451,6 +475,12 @@
                 <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h3 class="text-xl font-bold text-gray-800">Parcelas da cobrança</h3>
                     <span class="text-sm text-gray-500">Resultados: <strong id="filteredCount" class="text-gray-700">0</strong></span>
+                </div>
+
+                <div id="installmentsMobileList" class="space-y-3 sm:hidden">
+                    <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-center text-sm text-gray-500">
+                        Carregando parcelas...
+                    </div>
                 </div>
 
                 <div id="installmentsTableWrapper" class="table-shell">
@@ -567,17 +597,30 @@
         </div>
     </div>
 
-    <div id="installmentDetailsDrawer" class="fixed inset-0 z-50 hidden">
-        <div id="installmentDetailsBackdrop" class="drawer-backdrop absolute inset-0"></div>
-        <aside class="drawer-panel absolute right-0 top-0 flex h-full w-full max-w-lg flex-col p-5">
+    <div id="actionConfirmModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel w-full max-w-md p-6">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 id="actionConfirmTitle" class="text-xl font-semibold text-gray-800">Confirmar ação</h3>
+                <button id="actionConfirmCloseBtn" type="button" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <p id="actionConfirmMessage" class="text-sm text-gray-700">Deseja continuar?</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="actionConfirmCancelBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
+                <button id="actionConfirmBtn" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installmentDetailsDrawer" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5">
             <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
                 <h3 class="text-lg font-semibold text-gray-800">Detalhes da parcela</h3>
                 <button id="closeInstallmentDetailsBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="installmentDetailsContent" class="min-h-0 flex-1 overflow-y-auto"></div>
-        </aside>
+            <div id="installmentDetailsContent"></div>
+        </div>
     </div>
 
     <div id="toastContainer" class="pointer-events-none fixed right-4 top-4 z-[70] flex w-full max-w-sm flex-col gap-2 sm:right-6 sm:top-6"></div>
@@ -604,8 +647,13 @@
 
         const paymentModal = document.getElementById('paymentModal');
         const notificationModal = document.getElementById('notificationModal');
+        const actionConfirmModal = document.getElementById('actionConfirmModal');
         const installmentDetailsDrawer = document.getElementById('installmentDetailsDrawer');
-        const installmentDetailsBackdrop = document.getElementById('installmentDetailsBackdrop');
+        const actionConfirmTitle = document.getElementById('actionConfirmTitle');
+        const actionConfirmMessage = document.getElementById('actionConfirmMessage');
+        const actionConfirmBtn = document.getElementById('actionConfirmBtn');
+
+        let actionConfirmResolver = null;
 
         const installmentsState = {
             installments: [],
@@ -763,6 +811,237 @@
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(toNumber(value));
+        }
+
+        function getMonthEquivalentBounds(referenceDate = new Date(), offsetMonths = 0) {
+            const reference = startOfDay(referenceDate);
+            if (!reference) return { start: null, end: null };
+
+            const start = new Date(reference.getFullYear(), reference.getMonth() + offsetMonths, 1);
+            start.setHours(0, 0, 0, 0);
+
+            if (offsetMonths === 0) {
+                return { start, end: reference };
+            }
+
+            const targetMonthLastDay = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+            const boundedDay = Math.min(reference.getDate(), targetMonthLastDay);
+            const end = new Date(start.getFullYear(), start.getMonth(), boundedDay);
+            end.setHours(0, 0, 0, 0);
+            return { start, end };
+        }
+
+        function getPeriodBoundsFromFilter(periodValue, customStartValue = '', customEndValue = '') {
+            const today = startOfDay(new Date());
+            if (!today) return { start: null, end: null, label: 'Período atual', isMonthly: false };
+
+            if (periodValue === 'today') {
+                return { start: today, end: today, label: 'Hoje', isMonthly: false };
+            }
+
+            if (periodValue === 'next7') {
+                const end = new Date(today.getTime());
+                end.setDate(end.getDate() + 7);
+                end.setHours(0, 0, 0, 0);
+                return { start: today, end, label: 'Próx. 7 dias', isMonthly: false };
+            }
+
+            if (periodValue === 'last30') {
+                const start = new Date(today.getTime());
+                start.setDate(start.getDate() - 29);
+                start.setHours(0, 0, 0, 0);
+                return { start, end: today, label: 'Últimos 30 dias', isMonthly: false };
+            }
+
+            if (periodValue === 'custom') {
+                let start = startOfDay(customStartValue);
+                let end = startOfDay(customEndValue);
+                if (start && end && start > end) {
+                    const temp = start;
+                    start = end;
+                    end = temp;
+                }
+                if (start && end) {
+                    return { start, end, label: 'Período personalizado', isMonthly: false };
+                }
+            }
+
+            const monthBounds = getMonthEquivalentBounds(today, 0);
+            return { ...monthBounds, label: 'Mês atual', isMonthly: true };
+        }
+
+        function shiftRangeByYears(start, end, years = -1) {
+            const safeStart = startOfDay(start);
+            const safeEnd = startOfDay(end);
+            if (!safeStart || !safeEnd || safeEnd < safeStart) return { start: null, end: null };
+
+            const shiftedStart = new Date(safeStart.getFullYear() + years, safeStart.getMonth(), safeStart.getDate());
+            const shiftedEnd = new Date(safeEnd.getFullYear() + years, safeEnd.getMonth(), safeEnd.getDate());
+            shiftedStart.setHours(0, 0, 0, 0);
+            shiftedEnd.setHours(0, 0, 0, 0);
+            return { start: shiftedStart, end: shiftedEnd };
+        }
+
+        function getPreviousPeriodBounds(start, end, periodsBack = 1) {
+            const safeStart = startOfDay(start);
+            const safeEnd = startOfDay(end);
+            if (!safeStart || !safeEnd || safeEnd < safeStart) return { start: null, end: null };
+
+            const dayMs = 24 * 60 * 60 * 1000;
+            const durationDays = Math.max(1, Math.round((safeEnd.getTime() - safeStart.getTime()) / dayMs) + 1);
+            const offset = durationDays * Math.max(1, Math.trunc(toNumber(periodsBack, 1)));
+            const shiftedStart = new Date(safeStart.getTime() - (offset * dayMs));
+            const shiftedEnd = new Date(safeEnd.getTime() - (offset * dayMs));
+            shiftedStart.setHours(0, 0, 0, 0);
+            shiftedEnd.setHours(0, 0, 0, 0);
+            return { start: shiftedStart, end: shiftedEnd };
+        }
+
+        function getInsightComparisonRanges(periodValue, currentBounds) {
+            const start = startOfDay(currentBounds?.start);
+            const end = startOfDay(currentBounds?.end);
+            if (!start || !end || end < start) {
+                return {
+                    previous: { start: null, end: null },
+                    avgRanges: [{ start: null, end: null }, { start: null, end: null }, { start: null, end: null }],
+                    yearAgo: { start: null, end: null },
+                };
+            }
+
+            if (periodValue === 'month_current' || periodValue === 'all') {
+                const previous = getMonthEquivalentBounds(end, -1);
+                const minus2 = getMonthEquivalentBounds(end, -2);
+                const minus3 = getMonthEquivalentBounds(end, -3);
+                const yearAgo = shiftRangeByYears(start, end, -1);
+                return { previous, avgRanges: [previous, minus2, minus3], yearAgo };
+            }
+
+            const previous = getPreviousPeriodBounds(start, end, 1);
+            const minus2 = getPreviousPeriodBounds(start, end, 2);
+            const minus3 = getPreviousPeriodBounds(start, end, 3);
+            const yearAgo = shiftRangeByYears(start, end, -1);
+            return { previous, avgRanges: [previous, minus2, minus3], yearAgo };
+        }
+
+        function isDateInRange(value, start, end) {
+            const date = startOfDay(value);
+            if (!date || !start || !end) return false;
+            return date >= start && date <= end;
+        }
+
+        function getInstallmentMetricInRange(metricKey, list, start, end) {
+            if (!start || !end) return 0;
+
+            return list.reduce((sum, installment) => {
+                const status = normalizeInstallmentStatus(installment);
+                if (metricKey === 'received') {
+                    if (status !== 'Pago') return sum;
+                    if (!isDateInRange(installment.payment_date, start, end)) return sum;
+                    return sum + toNumber(installment.paid_amount || installment.amount || 0);
+                }
+
+                if (metricKey === 'pending') {
+                    if (status === 'Pago') return sum;
+                    if (!isDateInRange(installment.due_date, start, end)) return sum;
+                    return sum + toNumber(installment.amount || 0);
+                }
+
+                if (metricKey === 'overdue') {
+                    if (status !== 'Atrasado') return sum;
+                    if (!isDateInRange(installment.due_date, start, end)) return sum;
+                    return sum + toNumber(installment.amount || 0);
+                }
+
+                return sum;
+            }, 0);
+        }
+
+        function getComparisonPercent(currentValue, baselineValue, minRobustBase = 0) {
+            const current = Number.isFinite(Number(currentValue)) ? Number(currentValue) : 0;
+            const baseline = Number.isFinite(Number(baselineValue)) ? Number(baselineValue) : 0;
+            if (Math.abs(baseline) < Math.max(0, Number(minRobustBase) || 0)) return null;
+            return ((current - baseline) / Math.abs(baseline)) * 100;
+        }
+
+        function formatPercentMagnitude(percentValue) {
+            return Math.abs(percentValue).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
+        function getInsightTone(percentValue, invert = false) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) return 'neutral';
+            const isPositive = percentValue > 0;
+            if (invert) return isPositive ? 'negative' : 'positive';
+            return isPositive ? 'positive' : 'negative';
+        }
+
+        function formatPrimaryInsightText(percentValue, label) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
+                return `0,00% ${label}`;
+            }
+            return `${percentValue > 0 ? '↑' : '↓'} ${formatPercentMagnitude(percentValue)}% ${label}`;
+        }
+
+        function formatSecondaryInsightText(percentValue, label) {
+            if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
+                return `${label}: 0,00%`;
+            }
+            return `${label}: ${percentValue > 0 ? '+' : '-'}${formatPercentMagnitude(percentValue)}%`;
+        }
+
+        function buildSmartKpiInsight(currentValue, comparisons, options = {}) {
+            const {
+                invert = false,
+                minRobustBase = 0,
+            } = options;
+
+            const average3Pct = getComparisonPercent(currentValue, comparisons?.average3, minRobustBase);
+            const previousPct = getComparisonPercent(currentValue, comparisons?.previous, minRobustBase);
+            const yearAgoPct = getComparisonPercent(currentValue, comparisons?.yearAgo, minRobustBase);
+
+            const primary = Number.isFinite(average3Pct)
+                ? { key: 'average3', pct: average3Pct, label: 'vs média 3 períodos' }
+                : Number.isFinite(previousPct)
+                    ? { key: 'previous', pct: previousPct, label: 'vs período anterior' }
+                    : Number.isFinite(yearAgoPct)
+                        ? { key: 'yearAgo', pct: yearAgoPct, label: 'vs A/A' }
+                        : null;
+
+            if (!primary) {
+                return { tone: 'neutral', text: 'sem base robusta para comparação' };
+            }
+
+            const secondary = [];
+            if (primary.key !== 'previous' && Number.isFinite(previousPct)) {
+                secondary.push(formatSecondaryInsightText(previousPct, 'M-1'));
+            }
+            if (primary.key !== 'yearAgo' && Number.isFinite(yearAgoPct)) {
+                secondary.push(formatSecondaryInsightText(yearAgoPct, 'A/A'));
+            }
+            if (primary.key !== 'average3' && Number.isFinite(average3Pct)) {
+                secondary.unshift(formatSecondaryInsightText(average3Pct, '3P'));
+            }
+
+            let text = formatPrimaryInsightText(primary.pct, primary.label);
+            if (secondary.length) {
+                text += ` | ${secondary.join(' | ')}`;
+            }
+
+            return {
+                tone: getInsightTone(primary.pct, invert),
+                text,
+            };
+        }
+
+        function applyKpiInsight(elementId, prefixText, insight) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.classList.remove('kpi-insight-positive', 'kpi-insight-negative');
+            if (insight?.tone === 'positive') element.classList.add('kpi-insight-positive');
+            if (insight?.tone === 'negative') element.classList.add('kpi-insight-negative');
+            element.textContent = prefixText ? `${prefixText} ${insight?.text || ''}` : (insight?.text || '--');
         }
 
         function formatDate(value) {
@@ -925,6 +1204,43 @@
             const overdueTotal = overdueInstallments
                 .reduce((sum, installment) => sum + Number(installment.amount || 0), 0);
 
+            const periodValue = document.getElementById('installmentPeriodFilter')?.value || 'all';
+            const customStartDate = document.getElementById('customStartDate')?.value || '';
+            const customEndDate = document.getElementById('customEndDate')?.value || '';
+            const currentBounds = getPeriodBoundsFromFilter(periodValue, customStartDate, customEndDate);
+            const comparisonRanges = getInsightComparisonRanges(periodValue, currentBounds);
+
+            const buildMetricComparisons = (metricKey) => {
+                const current = getInstallmentMetricInRange(metricKey, list, currentBounds.start, currentBounds.end);
+                const previous = getInstallmentMetricInRange(
+                    metricKey,
+                    list,
+                    comparisonRanges.previous?.start,
+                    comparisonRanges.previous?.end
+                );
+                const yearAgo = getInstallmentMetricInRange(
+                    metricKey,
+                    list,
+                    comparisonRanges.yearAgo?.start,
+                    comparisonRanges.yearAgo?.end
+                );
+                const avgValues = (comparisonRanges.avgRanges || [])
+                    .map((range) => getInstallmentMetricInRange(metricKey, list, range?.start, range?.end));
+                const average3 = avgValues.length
+                    ? avgValues.reduce((sum, value) => sum + value, 0) / avgValues.length
+                    : 0;
+
+                return { current, previous, average3, yearAgo };
+            };
+
+            const receivedComparisons = buildMetricComparisons('received');
+            const pendingComparisons = buildMetricComparisons('pending');
+            const overdueComparisons = buildMetricComparisons('overdue');
+
+            const receivedPrefix = currentBounds.isMonthly ? 'Mês atual:' : 'Período atual:';
+            const pendingPrefix = currentBounds.isMonthly ? 'Em aberto no mês:' : 'Em aberto no período:';
+            const overduePrefix = currentBounds.isMonthly ? 'Atrasos no mês:' : 'Atrasos no período:';
+
             document.getElementById('receivedMonthValue').textContent = formatCurrency(receivedThisMonth);
             document.getElementById('pendingTotalValue').textContent = formatCurrency(pendingTotal);
             document.getElementById('overdueTotalValue').textContent = formatCurrency(overdueTotal);
@@ -932,6 +1248,34 @@
             document.getElementById('receivedMonthCount').innerHTML = `<i class="fas fa-check-circle kpi-icon mr-1"></i>${receivedThisMonthInstallments.length} parcela(s) paga(s)`;
             document.getElementById('pendingTotalCount').innerHTML = `<i class="fas fa-clock kpi-icon mr-1"></i>${pendingInstallments.length} parcela(s) em aberto`;
             document.getElementById('overdueTotalCount').innerHTML = `<i class="fas fa-triangle-exclamation kpi-icon mr-1"></i>${overdueInstallments.length} parcela(s) em atraso`;
+
+            applyKpiInsight(
+                'receivedMonthInsight',
+                receivedPrefix,
+                buildSmartKpiInsight(receivedComparisons.current, {
+                    average3: receivedComparisons.average3,
+                    previous: receivedComparisons.previous,
+                    yearAgo: receivedComparisons.yearAgo,
+                }, { minRobustBase: 50 })
+            );
+            applyKpiInsight(
+                'pendingTotalInsight',
+                pendingPrefix,
+                buildSmartKpiInsight(pendingComparisons.current, {
+                    average3: pendingComparisons.average3,
+                    previous: pendingComparisons.previous,
+                    yearAgo: pendingComparisons.yearAgo,
+                }, { invert: true, minRobustBase: 50 })
+            );
+            applyKpiInsight(
+                'overdueTotalInsight',
+                overduePrefix,
+                buildSmartKpiInsight(overdueComparisons.current, {
+                    average3: overdueComparisons.average3,
+                    previous: overdueComparisons.previous,
+                    yearAgo: overdueComparisons.yearAgo,
+                }, { invert: true, minRobustBase: 50 })
+            );
 
             document.querySelectorAll('[data-kpi-filter]').forEach((button) => {
                 const isActive = button.getAttribute('data-kpi-filter') === installmentsState.kpiFilter;
@@ -941,6 +1285,7 @@
 
         function renderInstallmentsTable() {
             const tbody = document.getElementById('installmentsTableBody');
+            const mobileList = document.getElementById('installmentsMobileList');
             const tableWrapper = document.getElementById('installmentsTableWrapper');
             const emptyState = document.getElementById('installmentsEmptyState');
             const list = installmentsState.filtered;
@@ -962,6 +1307,17 @@
                         <td><div class="skeleton h-8 w-28"></div></td>
                     </tr>
                 `).join('');
+                if (mobileList) {
+                    mobileList.innerHTML = Array.from({ length: 5 }, () => `
+                        <div class="rounded-2xl border border-gray-200 bg-slate-50 p-4">
+                            <div class="skeleton h-4 w-40"></div>
+                            <div class="skeleton h-3 w-24 mt-2"></div>
+                            <div class="skeleton h-3 w-32 mt-4"></div>
+                            <div class="skeleton h-3 w-28 mt-2"></div>
+                            <div class="skeleton h-8 w-32 mt-4"></div>
+                        </div>
+                    `).join('');
+                }
                 updatePaginationInfo(0, 0, 0, 1);
                 return;
             }
@@ -970,6 +1326,7 @@
                 tableWrapper.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 tbody.innerHTML = '';
+                if (mobileList) mobileList.innerHTML = '';
                 updatePaginationInfo(0, 0, 0, 1);
                 return;
             }
@@ -1033,6 +1390,71 @@
                     </tr>
                 `;
             }).join('');
+
+            if (mobileList) {
+                mobileList.innerHTML = pageRows.map((installment) => {
+                    const status = normalizeInstallmentStatus(installment);
+                    const badge = getStatusBadge(status);
+                    const loan = getLoanById(installment.loan_id);
+                    const installmentNumber = getInstallmentLabel(installment, loan);
+                    const phone = getDebtorPhone(installment.debtor_id);
+                    const canRegisterPayment = status !== 'Pago';
+                    const canWhatsapp = status !== 'Pago';
+                    const hasPhone = Boolean(normalizePhoneForWhatsApp(phone));
+                    const dueHint = getDueHint(installment, status);
+
+                    return `
+                        <article class="rounded-2xl border border-gray-200 bg-slate-50 p-4 shadow-sm" data-installment-id="${installment.id}">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="truncate text-base font-semibold text-slate-800">${getDebtorName(installment.debtor_id)}</p>
+                                    <p class="text-xs text-gray-500">${phone || 'Sem telefone'}</p>
+                                </div>
+                                <span class="${badge.className}">${badge.text}</span>
+                            </div>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimo</p>
+                                    <p class="font-semibold text-slate-700">#${installment.loan_id ?? '-'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] uppercase tracking-wide text-gray-500">Parcela</p>
+                                    <p class="font-semibold text-slate-700">${installmentNumber}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <p class="text-[11px] uppercase tracking-wide text-gray-500">Vencimento</p>
+                                    <p class="font-semibold ${status === 'Atrasado' ? 'text-red-600' : 'text-slate-700'}">${formatDate(installment.due_date)} <span class="${status === 'Atrasado' ? 'text-red-600' : 'text-gray-500'}">${dueHint}</span></p>
+                                </div>
+                                <div class="col-span-2">
+                                    <p class="text-[11px] uppercase tracking-wide text-gray-500">Valor</p>
+                                    <p class="text-lg font-bold text-slate-800">${formatCurrency(installment.amount)}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <p class="text-[11px] uppercase tracking-wide text-gray-500">Resumo</p>
+                                    <p class="text-sm text-gray-600">${getLoanSummary(loan)}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-center justify-end gap-2">
+                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action text-slate-700" title="Ver detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${canRegisterPayment ? `<button type="button" data-action="quick-pay-installment" data-id="${installment.id}" class="table-action border border-emerald-600 bg-emerald-600 px-2 text-white hover:border-emerald-500 hover:bg-emerald-500" title="Marcar como pago agora"><i class="fas fa-check mr-1"></i>Pago hoje</button>` : ''}
+                                ${canWhatsapp ? `
+                                    <button
+                                        type="button"
+                                        data-action="whatsapp"
+                                        data-id="${installment.id}"
+                                        class="table-action text-emerald-600"
+                                        title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}"
+                                        ${hasPhone ? '' : 'disabled'}>
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
 
             updatePaginationInfo(list.length, pagination.startIndex, pagination.endIndex, pagination.totalPages);
         }
@@ -1179,8 +1601,52 @@
         function closeModal(modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-            if (installmentDetailsDrawer.classList.contains('hidden') && paymentModal.classList.contains('hidden') && notificationModal.classList.contains('hidden')) {
+            if (
+                installmentDetailsDrawer.classList.contains('hidden')
+                && paymentModal.classList.contains('hidden')
+                && notificationModal.classList.contains('hidden')
+                && actionConfirmModal.classList.contains('hidden')
+            ) {
                 document.body.style.overflow = '';
+            }
+        }
+
+        function openActionConfirm(options = {}) {
+            if (!actionConfirmModal || !actionConfirmBtn) return Promise.resolve(false);
+
+            const {
+                title = 'Confirmar ação',
+                message = 'Deseja continuar?',
+                confirmLabel = 'Confirmar',
+                tone = 'primary',
+            } = options;
+
+            if (actionConfirmTitle) actionConfirmTitle.textContent = String(title);
+            if (actionConfirmMessage) actionConfirmMessage.textContent = String(message);
+            actionConfirmBtn.textContent = String(confirmLabel);
+
+            actionConfirmBtn.className = 'rounded-xl px-4 py-2 text-sm font-semibold text-white';
+            if (tone === 'danger') {
+                actionConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-500');
+            } else if (tone === 'success') {
+                actionConfirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+            } else {
+                actionConfirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+            }
+
+            return new Promise((resolve) => {
+                actionConfirmResolver = resolve;
+                openModal(actionConfirmModal);
+            });
+        }
+
+        function closeActionConfirm(confirmed = false) {
+            if (!actionConfirmModal) return;
+            closeModal(actionConfirmModal);
+            if (typeof actionConfirmResolver === 'function') {
+                const resolver = actionConfirmResolver;
+                actionConfirmResolver = null;
+                resolver(Boolean(confirmed));
             }
         }
 
@@ -1228,20 +1694,28 @@
                             ${status !== 'Pago'
                                 ? `<button type="button" data-action="drawer-quick-pay-installment" data-id="${installment.id}" class="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Pago rápido</button><button type="button" data-action="drawer-pay-installment" data-id="${installment.id}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Registrar pagamento</button>`
                                 : ''}
-                            <button type="button" data-action="drawer-whatsapp" data-id="${installment.id}" class="rounded-xl bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-500 ${hasPhone && status !== 'Pago' ? '' : 'opacity-50 cursor-not-allowed'}" title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}" ${hasPhone && status !== 'Pago' ? '' : 'disabled'}>Cobrar WhatsApp</button>
+                            ${status !== 'Pago'
+                                ? `<button type="button" data-action="drawer-whatsapp" data-id="${installment.id}" class="rounded-xl bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-500 ${hasPhone ? '' : 'opacity-50 cursor-not-allowed'}" title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}" ${hasPhone ? '' : 'disabled'}>Cobrar WhatsApp</button>`
+                                : ''}
                         </div>
                     </section>
                 </div>
             `;
 
             installmentDetailsDrawer.classList.remove('hidden');
+            installmentDetailsDrawer.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
 
         function closeInstallmentDetails() {
             installmentsState.detailsInstallmentId = null;
             installmentDetailsDrawer.classList.add('hidden');
-            if (paymentModal.classList.contains('hidden') && notificationModal.classList.contains('hidden')) {
+            installmentDetailsDrawer.classList.remove('flex');
+            if (
+                paymentModal.classList.contains('hidden')
+                && notificationModal.classList.contains('hidden')
+                && actionConfirmModal.classList.contains('hidden')
+            ) {
                 document.body.style.overflow = '';
             }
         }
@@ -1359,7 +1833,12 @@
                 return;
             }
 
-            const confirmed = confirm(`Marcar a parcela #${installment.installment_number ?? '-'} do cliente ${getDebtorName(installment.debtor_id)} como paga hoje?`);
+            const confirmed = await openActionConfirm({
+                title: 'Confirmar pagamento rápido',
+                message: `Marcar a parcela #${installment.installment_number ?? '-'} do cliente ${getDebtorName(installment.debtor_id)} como paga hoje?`,
+                confirmLabel: 'Confirmar pagamento',
+                tone: 'success',
+            });
             if (!confirmed) return;
 
             const loan = getLoanById(installment.loan_id);
@@ -1388,7 +1867,12 @@
                 return;
             }
 
-            const confirmed = confirm('Deseja estornar este pagamento?');
+            const confirmed = await openActionConfirm({
+                title: 'Estornar pagamento',
+                message: 'Deseja estornar este pagamento?',
+                confirmLabel: 'Estornar',
+                tone: 'danger',
+            });
             if (!confirmed) return;
 
             const dueDate = startOfDay(current.due_date);
@@ -1609,8 +2093,7 @@
         }
 
         function setRefreshingState(isRefreshing) {
-            ['refreshBtn', 'refreshFiltersBtn'].forEach((id) => {
-                const button = document.getElementById(id);
+            document.querySelectorAll('[data-refresh-control]').forEach((button) => {
                 const icon = button?.querySelector('i');
                 if (!button || !icon) return;
                 button.disabled = isRefreshing;
@@ -1819,8 +2302,6 @@
         document.getElementById('installmentPaymentMethodFilter').addEventListener('change', () => applyInstallmentsFilters({ resetPage: true, source: 'controls' }));
         document.getElementById('customStartDate').addEventListener('change', () => applyInstallmentsFilters({ resetPage: true, source: 'controls' }));
         document.getElementById('customEndDate').addEventListener('change', () => applyInstallmentsFilters({ resetPage: true, source: 'controls' }));
-        document.getElementById('refreshBtn').addEventListener('click', () => loadInstallmentsData({ silent: true, preservePage: true }));
-        document.getElementById('refreshFiltersBtn').addEventListener('click', () => loadInstallmentsData({ silent: true, preservePage: true }));
         document.getElementById('clearFiltersBtn').addEventListener('click', clearInstallmentFilters);
         document.querySelectorAll('[data-kpi-filter]').forEach((button) => {
             button.addEventListener('click', () => applyKpiFilter(button.getAttribute('data-kpi-filter')));
@@ -1834,13 +2315,16 @@
         document.getElementById('paymentForm').addEventListener('submit', registerInstallmentPayment);
         document.getElementById('closePaymentModalBtn').addEventListener('click', () => closeModal(paymentModal));
         document.getElementById('cancelPaymentBtn').addEventListener('click', () => closeModal(paymentModal));
+        document.getElementById('actionConfirmCloseBtn').addEventListener('click', () => closeActionConfirm(false));
+        document.getElementById('actionConfirmCancelBtn').addEventListener('click', () => closeActionConfirm(false));
+        if (actionConfirmBtn) actionConfirmBtn.addEventListener('click', () => closeActionConfirm(true));
 
-        document.getElementById('installmentsTableBody').addEventListener('click', function(event) {
+        function handleInstallmentsListClick(event) {
             const target = event.target;
             if (!(target instanceof Element)) return;
 
             const actionBtn = target.closest('button[data-action]');
-            const row = target.closest('tr[data-installment-id]');
+            const row = target.closest('[data-installment-id]');
 
             if (actionBtn) {
                 event.stopPropagation();
@@ -1875,7 +2359,12 @@
 
             if (!row) return;
             openInstallmentDetails(row.getAttribute('data-installment-id'));
-        });
+        }
+
+        const installmentsTableBody = document.getElementById('installmentsTableBody');
+        const installmentsMobileList = document.getElementById('installmentsMobileList');
+        if (installmentsTableBody) installmentsTableBody.addEventListener('click', handleInstallmentsListClick);
+        if (installmentsMobileList) installmentsMobileList.addEventListener('click', handleInstallmentsListClick);
 
         document.getElementById('installmentDetailsContent').addEventListener('click', function(event) {
             const target = event.target;
@@ -1919,12 +2408,20 @@
                 if (event.target === modal) closeModal(modal);
             });
         });
+        if (actionConfirmModal) {
+            actionConfirmModal.addEventListener('click', function(event) {
+                if (event.target === actionConfirmModal) closeActionConfirm(false);
+            });
+        }
 
-        installmentDetailsBackdrop.addEventListener('click', closeInstallmentDetails);
+        installmentDetailsDrawer.addEventListener('click', function(event) {
+            if (event.target === installmentDetailsDrawer) closeInstallmentDetails();
+        });
         document.getElementById('closeInstallmentDetailsBtn').addEventListener('click', closeInstallmentDetails);
 
         document.addEventListener('keydown', function(event) {
             if (event.key !== 'Escape') return;
+            if (!actionConfirmModal.classList.contains('hidden')) closeActionConfirm(false);
             if (!paymentModal.classList.contains('hidden')) closeModal(paymentModal);
             if (!notificationModal.classList.contains('hidden')) closeModal(notificationModal);
             if (!installmentDetailsDrawer.classList.contains('hidden')) closeInstallmentDetails();

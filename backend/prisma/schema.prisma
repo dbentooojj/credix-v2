@@ -60,7 +60,7 @@ model Client {
   ownerUserId  Int
   ownerUser    User         @relation(fields: [ownerUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name         String
-  cpf          String
+  cpf          String?
   phone        String
   email        String?
   status       ClientStatus @default(ATIVO)

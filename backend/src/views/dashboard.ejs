@@ -158,6 +158,38 @@
             color: #b91c1c;
         }
 
+        .kpi-insight {
+            margin-top: 6px;
+            min-height: 18px;
+            font-size: 0.78rem;
+            line-height: 1.2;
+            font-weight: 600;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .kpi-insight-positive {
+            color: #166534;
+        }
+
+        .kpi-insight-negative {
+            color: #b91c1c;
+        }
+
+        .kpi-sparkline-wrap {
+            margin-top: 8px;
+            height: 34px;
+            width: 100%;
+        }
+
+        .kpi-sparkline {
+            width: 100%;
+            height: 34px;
+            display: block;
+        }
+
         .summary-link {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -459,6 +491,9 @@
         .dark .summary-title,
         .dark .metric-value { color: #f8fafc; }
         .dark .kpi-note { color: #cbd5e1; }
+        .dark .kpi-insight { color: #cbd5e1; }
+        .dark .kpi-insight-positive { color: #86efac; }
+        .dark .kpi-insight-negative { color: #fca5a5; }
         .dark .summary-count,
         .dark .summary-value,
         .dark .text-gray-800 { color: #f8fafc !important; }
@@ -647,28 +682,40 @@
                 <article class="kpi-card glass-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total a receber</span><i class="fas fa-circle-info kpi-info" title="Valor previsto para entrar no caixa."></i></div>
                     <div class="kpi-value" id="kpiTotalToReceive">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiTotalToReceiveInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalToReceiveSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
                 <article class="kpi-card glass-card kpi-danger">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige ação."></i></div>
                     <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiTotalOverdueInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalOverdueSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                     <p class="kpi-note" id="kpiOverdueRate">Inadimplência: --</p>
                 </article>
                 <article class="kpi-card glass-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Recebido no mês</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mês."></i></div>
                     <div class="kpi-value" id="kpiReceivedThisMonth">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiReceivedThisMonthInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiReceivedThisMonthSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
                 <article class="kpi-card glass-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total emprestado</span><i class="fas fa-circle-info kpi-info" title="Capital ja colocado na rua."></i></div>
                     <div class="kpi-value" id="kpiTotalLoaned">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiTotalLoanedInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalLoanedSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
                 <article class="kpi-card glass-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Lucro total</span><i class="fas fa-circle-info kpi-info" title="Retorno acumulado da carteira."></i></div>
                     <div class="kpi-value" id="kpiProfitTotal">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiProfitTotalInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiProfitTotalSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                     <p class="kpi-note" id="kpiRoiRate">ROI: 0,00%</p>
                 </article>
                 <article class="kpi-card glass-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total recebido</span><i class="fas fa-circle-info kpi-info" title="Tudo o que ja voltou para o caixa."></i></div>
                     <div class="kpi-value" id="kpiTotalReceived">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiTotalReceivedInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalReceivedSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
             </section>
 
@@ -684,7 +731,7 @@
                         <p class="summary-value" id="dueTodayValue">R$ 0,00</p>
                     </a>
                     <a id="summaryOverdue" class="summary-link" href="/admin/installments.html?status=overdue">
-                        <p class="summary-title">Em atraso</p>
+                        <p class="summary-title">Em atraso (mês)</p>
                         <p class="summary-count text-red-600" id="overdueCount">0</p>
                         <p class="summary-value text-red-600" id="overdueValue">R$ 0,00</p>
                     </a>
@@ -699,7 +746,8 @@
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
                     <div class="glass-card rounded-2xl p-5">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Próximos vencimentos (em dia)</h3>
+                        <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
+                        <p class="mb-4 mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
                         <div id="upcomingList" class="space-y-3 fixed-scroll-panel">
                             <div class="text-center py-10 text-gray-500"><i class="fas fa-calendar-check text-4xl mb-3 opacity-50"></i><p>Nenhuma parcela pendente.</p></div>
                         </div>
@@ -880,6 +928,15 @@
             'kpiTotalReceived',
         ];
 
+        const KPI_CARD_CONFIG = [
+            { key: 'totalToReceive', insightId: 'kpiTotalToReceiveInsight', sparklineId: 'kpiTotalToReceiveSparkline' },
+            { key: 'totalOverdue', insightId: 'kpiTotalOverdueInsight', sparklineId: 'kpiTotalOverdueSparkline' },
+            { key: 'receivedThisMonth', insightId: 'kpiReceivedThisMonthInsight', sparklineId: 'kpiReceivedThisMonthSparkline' },
+            { key: 'totalLoaned', insightId: 'kpiTotalLoanedInsight', sparklineId: 'kpiTotalLoanedSparkline' },
+            { key: 'profitTotal', insightId: 'kpiProfitTotalInsight', sparklineId: 'kpiProfitTotalSparkline' },
+            { key: 'totalReceived', insightId: 'kpiTotalReceivedInsight', sparklineId: 'kpiTotalReceivedSparkline' },
+        ];
+
         function lockBodyScrollForModal(modalElement) {
             if (!modalElement) return;
             const modalId = modalElement.id || '';
@@ -919,6 +976,149 @@
         function formatPercent(value) {
             const safe = Number.isFinite(Number(value)) ? Number(value) : 0;
             return `${safe.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+        }
+
+        function buildKpiInsight(currentValue, previousValue) {
+            const current = Number.isFinite(Number(currentValue)) ? Number(currentValue) : 0;
+            const previous = Number.isFinite(Number(previousValue)) ? Number(previousValue) : 0;
+            const delta = current - previous;
+
+            if (Math.abs(previous) < 0.00001) {
+                if (Math.abs(current) < 0.00001) {
+                    return {
+                        tone: 'neutral',
+                        text: '0,00% em relação ao mês anterior',
+                    };
+                }
+
+                return {
+                    tone: delta >= 0 ? 'positive' : 'negative',
+                    text: `${delta >= 0 ? '↑' : '↓'} sem base comparativa no mês anterior`,
+                };
+            }
+
+            const pct = (delta / Math.abs(previous)) * 100;
+            const pctText = Math.abs(pct).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+
+            if (Math.abs(pct) < 0.005) {
+                return {
+                    tone: 'neutral',
+                    text: '0,00% em relação ao mês anterior',
+                };
+            }
+
+            return {
+                tone: pct > 0 ? 'positive' : 'negative',
+                text: `${pct > 0 ? '↑' : '↓'} ${pctText}% em relação ao mês anterior`,
+            };
+        }
+
+        function renderSparkline(svgElement, seriesValues, tone = 'neutral') {
+            if (!svgElement) return;
+
+            const values = Array.isArray(seriesValues)
+                ? seriesValues
+                    .map((value) => Number(value))
+                    .filter((value) => Number.isFinite(value))
+                : [];
+
+            if (!values.length) {
+                svgElement.innerHTML = '';
+                return;
+            }
+
+            const color = tone === 'positive' ? '#16a34a' : tone === 'negative' ? '#dc2626' : '#64748b';
+            const fillColor = tone === 'positive'
+                ? 'rgba(22, 163, 74, 0.12)'
+                : tone === 'negative'
+                    ? 'rgba(220, 38, 38, 0.12)'
+                    : 'rgba(100, 116, 139, 0.10)';
+
+            const width = 100;
+            const height = 34;
+            const topPad = 3;
+            const bottomPad = 3;
+            const usableHeight = height - topPad - bottomPad;
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const range = maxValue - minValue || 1;
+            const stepX = values.length > 1 ? width / (values.length - 1) : width;
+
+            const points = values.map((value, index) => {
+                const x = values.length > 1 ? index * stepX : width / 2;
+                const normalized = (value - minValue) / range;
+                const y = topPad + (1 - normalized) * usableHeight;
+                return { x, y };
+            });
+
+            const linePath = points
+                .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+                .join(' ');
+            const firstPoint = points[0];
+            const lastPoint = points[points.length - 1];
+            const areaPath = `${linePath} L ${lastPoint.x.toFixed(2)} ${(height - 1).toFixed(2)} L ${firstPoint.x.toFixed(2)} ${(height - 1).toFixed(2)} Z`;
+
+            svgElement.innerHTML = `
+                <path d="${areaPath}" fill="${fillColor}"></path>
+                <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            `;
+
+            const lineElement = svgElement.querySelector('path:last-child');
+            if (!lineElement) return;
+
+            const pathLength = lineElement.getTotalLength();
+            lineElement.style.strokeDasharray = `${pathLength}`;
+            lineElement.style.strokeDashoffset = `${pathLength}`;
+            lineElement.style.transition = 'stroke-dashoffset 520ms ease-out';
+            requestAnimationFrame(() => {
+                lineElement.style.strokeDashoffset = '0';
+            });
+        }
+
+        function renderKpiCardExtras(kpiCardsPayload) {
+            const payload = (kpiCardsPayload && typeof kpiCardsPayload === 'object') ? kpiCardsPayload : {};
+
+            KPI_CARD_CONFIG.forEach((card) => {
+                const insightElement = document.getElementById(card.insightId);
+                const sparklineElement = document.getElementById(card.sparklineId);
+                const metricData = payload[card.key] || {};
+
+                const currentValue = Number(metricData.currentValue ?? 0);
+                const previousValue = Number(metricData.previousValue ?? 0);
+                const customInsight = metricData.insight && typeof metricData.insight === 'object'
+                    ? metricData.insight
+                    : null;
+                const customTone = customInsight && typeof customInsight.tone === 'string'
+                    ? customInsight.tone
+                    : '';
+                const hasCustomText = Boolean(customInsight && typeof customInsight.text === 'string' && customInsight.text.trim().length > 0);
+
+                const insight = hasCustomText
+                    ? {
+                        tone: customTone === 'positive' || customTone === 'negative' ? customTone : 'neutral',
+                        text: customInsight.text,
+                    }
+                    : buildKpiInsight(currentValue, previousValue);
+
+                if (insightElement) {
+                    insightElement.classList.remove('kpi-insight-positive', 'kpi-insight-negative');
+                    if (insight.tone === 'positive') insightElement.classList.add('kpi-insight-positive');
+                    if (insight.tone === 'negative') insightElement.classList.add('kpi-insight-negative');
+                    insightElement.textContent = insight.text;
+                }
+
+                const rawSeries = Array.isArray(metricData.series) ? metricData.series : [];
+                const seriesValues = rawSeries.map((point) => {
+                    if (typeof point === 'number') return point;
+                    if (point && typeof point === 'object' && 'value' in point) return Number(point.value);
+                    return Number.NaN;
+                });
+
+                renderSparkline(sparklineElement, seriesValues, insight.tone);
+            });
         }
 
         function formatDate(isoDate) {
@@ -1184,7 +1384,7 @@
                 : 'Sem registros';
         }
 
-        function renderKpis(kpis) {
+        function renderKpis(kpis, kpiCards) {
             document.getElementById('kpiTotalToReceive').textContent = formatCurrency(kpis?.totalToReceive);
             document.getElementById('kpiTotalOverdue').textContent = formatCurrency(kpis?.totalOverdue);
             document.getElementById('kpiReceivedThisMonth').textContent = formatCurrency(kpis?.receivedThisMonth);
@@ -1198,6 +1398,8 @@
                 : 'Inadimplência: --';
 
             document.getElementById('kpiRoiRate').textContent = `ROI: ${formatPercent(kpis?.roiRate)}`;
+
+            renderKpiCardExtras(kpiCards);
         }
 
         function updateChartTypeButtons() {
@@ -1468,7 +1670,7 @@
         }
 
         function renderDashboard(payload) {
-            renderKpis(payload.kpis);
+            renderKpis(payload.kpis, payload.kpiCards);
             renderDailySummary(payload.dailySummary);
             renderChart(payload.chart);
             renderUpcoming(payload.upcomingDue);

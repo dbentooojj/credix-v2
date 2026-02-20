@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuthPage } from "../middleware/auth";
+import { env } from "../config/env";
 const router = Router();
 
 function extractCurrentUser(req: { user?: { sub: string; email: string; name: string; role: string } }) {
@@ -11,6 +12,38 @@ function extractCurrentUser(req: { user?: { sub: string; email: string; name: st
     name: req.user.name,
     role: req.user.role,
   };
+}
+
+function extractEmail(raw?: string): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+
+  const angleMatch = value.match(/<([^<>]+)>/);
+  const candidate = (angleMatch?.[1] || value).replace(/^mailto:/i, "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate)) return null;
+
+  return candidate;
+}
+
+function resolveSupportEmail(): string {
+  const notifyFirst = env.EMAIL_NOTIFY_TO
+    ?.split(/[;,]/)
+    .map((item) => item.trim())
+    .find(Boolean);
+
+  const candidates = [
+    env.SMTP_FROM,
+    env.SMTP_USER,
+    notifyFirst,
+    process.env.ADMIN_EMAIL,
+  ];
+
+  for (const item of candidates) {
+    const email = extractEmail(item);
+    if (email) return email;
+  }
+
+  return "usecredix@gmail.com";
 }
 
 router.get(["/", "/login", "/index.html"], (req, res) => {
@@ -52,7 +85,10 @@ router.get("/admin/dashboard-advanced.html", requireAuthPage, (req, res) => {
 });
 
 router.get("/admin/account.html", requireAuthPage, (req, res) => {
-  return res.render("account", { currentUser: extractCurrentUser(req) });
+  return res.render("account", {
+    currentUser: extractCurrentUser(req),
+    supportEmail: resolveSupportEmail(),
+  });
 });
 
 router.get("/dashboard", requireAuthPage, (_req, res) => res.redirect("/admin/dashboard-advanced.html"));
