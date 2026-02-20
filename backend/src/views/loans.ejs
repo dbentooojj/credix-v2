@@ -1901,12 +1901,18 @@
                 rateWrap.classList.add('hidden');
                 fixedWrap.classList.remove('hidden');
                 rateInput.required = false;
+                rateInput.disabled = true;
+                rateInput.removeAttribute('min');
                 fixedInput.required = true;
+                fixedInput.disabled = false;
             } else {
                 rateWrap.classList.remove('hidden');
                 fixedWrap.classList.add('hidden');
+                rateInput.disabled = false;
                 rateInput.required = true;
+                rateInput.min = '0.01';
                 fixedInput.required = false;
+                fixedInput.disabled = true;
             }
         }
 
@@ -2360,26 +2366,76 @@
 
         function getCrossUserSafeStart(startAt) {
             const minStart = Math.max(1, Math.trunc(toNumber(startAt)));
-            const unixNow = Math.trunc(Date.now() / 1000);
-            const randomOffset = Math.trunc(Math.random() * 1_000_000);
-            const candidate = unixNow + randomOffset;
+            const randomBase = 1400000000;
+            const randomOffset = Math.trunc(Math.random() * 700000000);
+            const candidate = randomBase + randomOffset;
             const int32SafeLimit = 2147000000;
             return Math.min(int32SafeLimit, Math.max(minStart, candidate));
         }
 
+        function resolvePersistedCreatedLoanId(savedLoans, draftLoan, previousLoans) {
+            const normalizedSaved = Array.isArray(savedLoans) ? savedLoans.map(normalizeLoanRow) : [];
+            const previousIdSet = new Set((Array.isArray(previousLoans) ? previousLoans : []).map((loan) => String(loan?.id ?? '')));
+
+            const sameMoney = (a, b) => Math.abs(round2(a) - round2(b)) <= 0.01;
+            const sameDate = (a, b) => String(a || '') === String(b || '');
+
+            const exactIdMatch = normalizedSaved.find((loan) => sameId(loan.id, draftLoan.id));
+            if (exactIdMatch) return exactIdMatch.id;
+
+            const candidates = normalizedSaved.filter((loan) => {
+                if (!sameId(loan.debtor_id, draftLoan.debtor_id)) return false;
+                if (!sameMoney(loan.principal_amount, draftLoan.principal_amount)) return false;
+                if (!sameMoney(loan.total_amount, draftLoan.total_amount)) return false;
+                if (!sameMoney(loan.interest_rate, draftLoan.interest_rate)) return false;
+                if (!sameMoney(loan.installment_amount, draftLoan.installment_amount)) return false;
+                if (!sameDate(loan.start_date, draftLoan.start_date)) return false;
+                if (!sameDate(loan.first_due_date, draftLoan.first_due_date)) return false;
+                if (!sameDate(loan.due_date, draftLoan.due_date)) return false;
+                return toNumber(loan.installments_count) === toNumber(draftLoan.installments_count);
+            });
+
+            if (!candidates.length) return null;
+
+            const freshCandidates = candidates.filter((loan) => !previousIdSet.has(String(loan.id ?? '')));
+            const pool = freshCandidates.length > 0 ? freshCandidates : candidates;
+            pool.sort((a, b) => toNumber(b.id) - toNumber(a.id));
+            return pool[0]?.id ?? null;
+        }
+
         async function saveLoanAndInstallments(loanPayload, plan, isEditing) {
+            const previousLoansSnapshot = [...loansState.loans];
+
             if (isEditing) {
                 loansState.loans = loansState.loans.map(loan => sameId(loan.id, loanPayload.id) ? loanPayload : loan);
             } else {
                 loansState.loans = [loanPayload, ...loansState.loans];
             }
 
-            loansState.installments = loansState.installments.filter(item => !sameId(item.loan_id, loanPayload.id));
+            const persistedLoansRaw = await saveTableData('loans', loansState.loans);
+            loansState.loans = (Array.isArray(persistedLoansRaw) ? persistedLoansRaw : loansState.loans).map(normalizeLoanRow);
 
-            const nextInstallmentId = getNextLocalId(loansState.installments, getCrossUserSafeStart(1000));
-            const generatedInstallments = plan.map((item, index) => ({
-                id: nextInstallmentId + index,
-                loan_id: loanPayload.id,
+            const effectiveLoanId = (() => {
+                if (isEditing) {
+                    const exists = loansState.loans.some((loan) => sameId(loan.id, loanPayload.id));
+                    return exists ? loanPayload.id : null;
+                }
+                return resolvePersistedCreatedLoanId(loansState.loans, loanPayload, previousLoansSnapshot);
+            })();
+
+            if (!effectiveLoanId) {
+                throw new Error('Nao foi possivel confirmar o emprestimo salvo. Atualize a pagina e tente novamente.');
+            }
+
+            loansState.installments = loansState.installments.filter((item) => {
+                const loanId = item?.loan_id;
+                if (sameId(loanId, effectiveLoanId)) return false;
+                if (!isEditing && sameId(loanId, loanPayload.id)) return false;
+                return true;
+            });
+
+            const generatedInstallments = plan.map((item) => ({
+                loan_id: effectiveLoanId,
                 debtor_id: loanPayload.debtor_id,
                 installment_number: item.installment_number,
                 due_date: item.due_date,
@@ -2392,8 +2448,10 @@
 
             loansState.installments = [...generatedInstallments, ...loansState.installments];
 
-            await saveTableData('loans', loansState.loans);
-            await saveTableData('installments', loansState.installments);
+            const persistedInstallmentsRaw = await saveTableData('installments', loansState.installments);
+            if (Array.isArray(persistedInstallmentsRaw)) {
+                loansState.installments = persistedInstallmentsRaw;
+            }
         }
 
         async function deleteLoan(loanId) {
