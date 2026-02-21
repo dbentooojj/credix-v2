@@ -1,7 +1,5 @@
-import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../config/env";
-
-let cachedTransporter: Transporter | null = null;
+import { isEmailServiceConfigured, sendEmail } from "./email.service";
 
 function normalizeOptional(value?: string): string | null {
   const normalized = value?.trim();
@@ -17,35 +15,6 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-function smtpConfigErrorMessage(): string | null {
-  if (!env.SMTP_HOST) return "SMTP_HOST nao configurado";
-  if (!env.SMTP_FROM) return "SMTP_FROM nao configurado";
-  if ((env.SMTP_USER && !env.SMTP_PASS) || (!env.SMTP_USER && env.SMTP_PASS)) {
-    return "Defina SMTP_USER e SMTP_PASS juntos, ou deixe ambos vazios";
-  }
-  return null;
-}
-
-function getTransporter(): Transporter {
-  if (cachedTransporter) return cachedTransporter;
-
-  const configError = smtpConfigErrorMessage();
-  if (configError) {
-    throw new Error(configError);
-  }
-
-  cachedTransporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
-    auth: env.SMTP_USER && env.SMTP_PASS
-      ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-      : undefined,
-  });
-
-  return cachedTransporter;
-}
-
 type SendPasswordRecoveryEmailInput = {
   recipientName?: string | null;
   recipientEmail: string;
@@ -53,11 +22,10 @@ type SendPasswordRecoveryEmailInput = {
 };
 
 export function isPasswordRecoveryEmailConfigured(): boolean {
-  return smtpConfigErrorMessage() === null;
+  return isEmailServiceConfigured();
 }
 
 export async function sendPasswordRecoveryEmail(input: SendPasswordRecoveryEmailInput): Promise<void> {
-  const transporter = getTransporter();
   const safeName = normalizeOptional(input.recipientName || undefined) || "usuario";
   const safeEmail = input.recipientEmail.trim().toLowerCase();
   const safeLink = input.resetLink.trim();
@@ -91,12 +59,10 @@ export async function sendPasswordRecoveryEmail(input: SendPasswordRecoveryEmail
     </div>
   `;
 
-  await transporter.sendMail({
-    from: env.SMTP_FROM,
+  await sendEmail({
     to: safeEmail,
     subject: "[Credix] Recuperacao de senha",
     text,
     html,
   });
 }
-

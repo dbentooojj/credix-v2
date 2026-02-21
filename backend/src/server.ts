@@ -5,6 +5,7 @@ import express from "express";
 import morgan from "morgan";
 import path from "path";
 import { env } from "./config/env";
+import { startDueTodayEmailJob } from "./jobs/due-today-email.job";
 import { errorHandler } from "./middleware/error-handler";
 import { optionalAuth } from "./middleware/auth";
 import { authRoutes } from "./routes/auth.routes";
@@ -13,7 +14,6 @@ import { notificationsRoutes } from "./routes/notifications.routes";
 import { pageRoutes } from "./routes/page.routes";
 import { paymentsRoutes } from "./routes/payments.routes";
 import { tablesRoutes } from "./routes/tables.routes";
-import { startDueTomorrowEmailScheduler } from "./services/email-reminder.service";
 
 const app = express();
 
@@ -49,7 +49,7 @@ app.use((_req, res) => {
 
 app.use(errorHandler);
 
-startDueTomorrowEmailScheduler();
+startDueTodayEmailJob();
 
 app.listen(env.PORT, () => {
   console.log(`Servidor iniciado na porta ${env.PORT}`);

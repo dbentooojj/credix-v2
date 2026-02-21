@@ -1,32 +1,27 @@
 import { InstallmentStatus } from "@prisma/client";
-import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../config/env";
-import {
-  getHourMinuteInTimeZone,
-  getIsoTodayInTimeZone,
-  normalizeTimeZone,
-} from "../lib/date-time";
+import { getIsoTodayInTimeZone, normalizeTimeZone } from "../lib/date-time";
 import { toSafeNumber } from "../lib/numbers";
 import { prisma } from "../lib/prisma";
+import { getSmtpConfigError, sendEmail } from "./email.service";
 
-type DueTomorrowInstallment = {
+type DueTodayInstallment = {
   installmentId: number;
   installmentNumber: number;
   loanId: number;
-  debtorName: string;
-  debtorPhone: string | null;
-  dueDateIso: string;
+  clientName: string;
+  clientPhone: string | null;
   amount: number;
 };
 
-type SendDueTomorrowEmailOptions = {
+type SendDueTodayEmailOptions = {
   force?: boolean;
   targetDateIso?: string;
   recipients?: string[];
   timeZone?: string;
 };
 
-export type SendDueTomorrowEmailResult = {
+export type SendDueTodayEmailResult = {
   ok: boolean;
   skipped: boolean;
   message: string;
@@ -35,13 +30,6 @@ export type SendDueTomorrowEmailResult = {
   dueCount: number;
   totalAmount: number;
 };
-
-const SCHEDULER_TICK_MS = 30_000;
-
-let schedulerTimer: NodeJS.Timeout | null = null;
-let schedulerBusy = false;
-let schedulerLastRunDate: string | null = null;
-let cachedTransporter: Transporter | null = null;
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -77,17 +65,6 @@ function parseRecipients(raw?: string): string[] {
   return [...seen];
 }
 
-function extractEmail(raw?: string): string | null {
-  const value = raw?.trim();
-  if (!value) return null;
-
-  const angleMatch = value.match(/<([^<>]+)>/);
-  const candidate = (angleMatch?.[1] || value).replace(/^mailto:/i, "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate)) return null;
-
-  return candidate;
-}
-
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -117,72 +94,26 @@ function getEmailRecipients(override?: string[]): string[] {
     return override.map((item) => item.trim().toLowerCase()).filter(Boolean);
   }
 
-  const configured = parseRecipients(env.EMAIL_NOTIFY_TO);
-  const isLegacyPlaceholder = configured.length === 1 && configured[0] === "usecredix@gmail.com";
-  if (configured.length > 0 && !isLegacyPlaceholder) return configured;
-
-  const fallbackCandidates = [
-    env.SMTP_USER,
-    extractEmail(env.SMTP_FROM) || undefined,
-    process.env.ADMIN_EMAIL?.trim(),
-  ];
-
-  for (const candidate of fallbackCandidates) {
-    const parsed = parseRecipients(candidate);
-    if (parsed.length > 0) return parsed;
-  }
-
-  return [];
+  return parseRecipients(env.EMAIL_NOTIFY_TO);
 }
 
-function smtpConfigErrorMessage(): string | null {
-  if (!env.SMTP_HOST) return "SMTP_HOST nao configurado";
-  if (!env.SMTP_FROM) return "SMTP_FROM nao configurado";
-  if ((env.SMTP_USER && !env.SMTP_PASS) || (!env.SMTP_USER && env.SMTP_PASS)) {
-    return "Defina SMTP_USER e SMTP_PASS juntos, ou deixe ambos vazios";
-  }
-  return null;
-}
-
-function getTransporter(): Transporter {
-  if (cachedTransporter) return cachedTransporter;
-
-  const smtpError = smtpConfigErrorMessage();
-  if (smtpError) {
-    throw new Error(smtpError);
-  }
-
-  cachedTransporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
-    auth: env.SMTP_USER && env.SMTP_PASS
-      ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-      : undefined,
-  });
-
-  return cachedTransporter;
-}
-
-async function fetchDueTomorrowInstallments(targetDateIso: string): Promise<DueTomorrowInstallment[]> {
+async function fetchDueTodayInstallments(targetDateIso: string): Promise<DueTodayInstallment[]> {
   const dueDate = new Date(`${targetDateIso}T00:00:00Z`);
 
   const rows = await prisma.installment.findMany({
     where: {
       dueDate,
       status: { not: InstallmentStatus.PAGO },
-      payments: { none: {} },
     },
     orderBy: [
-      { dueDate: "asc" },
       { client: { name: "asc" } },
       { installmentNumber: "asc" },
+      { id: "asc" },
     ],
     select: {
       id: true,
       loanId: true,
       installmentNumber: true,
-      dueDate: true,
       amount: true,
       client: {
         select: {
@@ -197,81 +128,99 @@ async function fetchDueTomorrowInstallments(targetDateIso: string): Promise<DueT
     installmentId: row.id,
     installmentNumber: row.installmentNumber,
     loanId: row.loanId,
-    debtorName: row.client.name,
-    debtorPhone: row.client.phone,
-    dueDateIso: row.dueDate.toISOString().slice(0, 10),
+    clientName: row.client.name,
+    clientPhone: row.client.phone,
     amount: toSafeNumber(row.amount),
   }));
 }
 
 function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
   const dateLabel = formatDateIso(targetDateIso);
-  return `[Credix] Vencimentos do dia (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
+  if (dueCount === 0) {
+    return `[Credix] Vencimentos de hoje (${dateLabel}): 0 parcela(s)`;
+  }
+  return `[Credix] Vencimentos de hoje (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
 }
 
-function buildTextBody(items: DueTomorrowInstallment[], targetDateIso: string, totalAmount: number): string {
+function buildTextBody(items: DueTodayInstallment[], targetDateIso: string, totalAmount: number): string {
+  if (items.length === 0) {
+    return "Nenhuma parcela vence hoje.";
+  }
+
   const dateLabel = formatDateIso(targetDateIso);
   const lines = items.map((item, index) => {
-    const debtorPhone = item.debtorPhone ? ` | WhatsApp: ${item.debtorPhone}` : " | WhatsApp: nao informado";
-    return `${index + 1}. ${item.debtorName} | Parcela #${item.installmentNumber} | Emprestimo #${item.loanId} | Valor ${formatCurrency(item.amount)}${debtorPhone}`;
+    const whatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
+    const whatsappLink = whatsappPhone ? `https://wa.me/${whatsappPhone}` : "-";
+    return `${index + 1}. ${item.clientName} | #${item.installmentNumber} | #${item.loanId} | ${formatCurrency(item.amount)} | ${whatsappLink}`;
   });
 
   return [
-    `Resumo de parcelas com vencimento em ${dateLabel}.`,
+    `Parcelas para hoje (${dateLabel})`,
+    `Total de parcelas: ${items.length} | Valor total: ${formatCurrency(totalAmount)}`,
     "",
-    `Total de parcelas: ${items.length}`,
-    `Valor total: ${formatCurrency(totalAmount)}`,
-    "",
+    "Cliente | Parcela | Emprestimo | Valor | Telefone (WhatsApp)",
     ...lines,
     "",
     "Mensagem automatica do Credix.",
   ].join("\n");
 }
 
-function buildHtmlBody(items: DueTomorrowInstallment[], targetDateIso: string, totalAmount: number): string {
+function buildHtmlBody(items: DueTodayInstallment[], targetDateIso: string, totalAmount: number): string {
+  if (items.length === 0) {
+    return `
+      <div style="font-family:Arial,sans-serif;color:#111827;">
+        <p style="margin:0;">Nenhuma parcela vence hoje.</p>
+      </div>
+    `;
+  }
+
   const dateLabel = formatDateIso(targetDateIso);
   const rows = items.map((item) => {
-    const whatsappPhone = normalizeWhatsAppPhone(item.debtorPhone);
+    const whatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
+    const displayPhone = item.clientPhone ? escapeHtml(item.clientPhone) : "-";
     const phoneCell = whatsappPhone
-      ? `<a href="https://wa.me/${whatsappPhone}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.debtorPhone || whatsappPhone)}</a>`
-      : (item.debtorPhone ? escapeHtml(item.debtorPhone) : "-");
+      ? `<a href="https://wa.me/${whatsappPhone}" target="_blank" rel="noopener noreferrer">${displayPhone}</a>`
+      : displayPhone;
+
     return `
       <tr>
-        <td style="padding:8px;border:1px solid #e5e7eb;">${escapeHtml(item.debtorName)}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:center;">#${item.installmentNumber}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:center;">#${item.loanId}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:right;">${formatCurrency(item.amount)}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;">${phoneCell}</td>
+        <td style="padding:10px;border:1px solid #e5e7eb;">${escapeHtml(item.clientName)}</td>
+        <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.installmentNumber}</td>
+        <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.loanId}</td>
+        <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">${formatCurrency(item.amount)}</td>
+        <td style="padding:10px;border:1px solid #e5e7eb;">${phoneCell}</td>
       </tr>
     `;
   }).join("");
 
   return `
-    <div style="font-family:Arial,sans-serif;color:#111827;">
-      <h2 style="margin:0 0 8px;">Parcelas com vencimento em ${dateLabel}</h2>
-      <p style="margin:0 0 12px;">Total de parcelas: <strong>${items.length}</strong> | Valor total: <strong>${formatCurrency(totalAmount)}</strong></p>
+    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.4;">
+      <h1 style="margin:0 0 10px;font-size:22px;">Parcelas para hoje (${dateLabel})</h1>
+      <p style="margin:0 0 14px;font-size:14px;">
+        Total de parcelas: <strong>${items.length}</strong> | Valor total: <strong>${formatCurrency(totalAmount)}</strong>
+      </p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <thead>
           <tr>
-            <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;background:#f9fafb;">Cliente</th>
-            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;background:#f9fafb;">Parcela</th>
-            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;background:#f9fafb;">Emprestimo</th>
-            <th style="padding:8px;border:1px solid #e5e7eb;text-align:right;background:#f9fafb;">Valor</th>
-            <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;background:#f9fafb;">Telefone (WhatsApp)</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;background:#f8fafc;">Cliente</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Parcela</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Emprestimo</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;text-align:right;background:#f8fafc;">Valor</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;background:#f8fafc;">Telefone (WhatsApp)</th>
           </tr>
         </thead>
         <tbody>
           ${rows}
         </tbody>
       </table>
-      <p style="margin-top:12px;color:#6b7280;font-size:12px;">Mensagem automatica do Credix.</p>
+      <p style="margin:14px 0 0;font-size:12px;color:#6b7280;">Mensagem automatica do Credix.</p>
     </div>
   `;
 }
 
-export async function sendDueTomorrowInstallmentsEmail(
-  options: SendDueTomorrowEmailOptions = {},
-): Promise<SendDueTomorrowEmailResult> {
+export async function sendDueTodayInstallmentsEmail(
+  options: SendDueTodayEmailOptions = {},
+): Promise<SendDueTodayEmailResult> {
   const force = Boolean(options.force);
   if (!env.EMAIL_NOTIFY_ENABLED && !force) {
     return {
@@ -305,7 +254,10 @@ export async function sendDueTomorrowInstallmentsEmail(
     };
   }
 
+  const dueItems = await fetchDueTodayInstallments(targetDateIso);
+  const totalAmount = dueItems.reduce((sum, item) => sum + item.amount, 0);
   const recipients = getEmailRecipients(options.recipients);
+
   if (recipients.length === 0) {
     return {
       ok: false,
@@ -313,12 +265,12 @@ export async function sendDueTomorrowInstallmentsEmail(
       message: "EMAIL_NOTIFY_TO nao configurado",
       targetDateIso,
       recipients,
-      dueCount: 0,
-      totalAmount: 0,
+      dueCount: dueItems.length,
+      totalAmount,
     };
   }
 
-  const smtpError = smtpConfigErrorMessage();
+  const smtpError = getSmtpConfigError();
   if (smtpError) {
     return {
       ok: false,
@@ -326,30 +278,13 @@ export async function sendDueTomorrowInstallmentsEmail(
       message: smtpError,
       targetDateIso,
       recipients,
-      dueCount: 0,
-      totalAmount: 0,
+      dueCount: dueItems.length,
+      totalAmount,
     };
   }
 
-  const dueItems = await fetchDueTomorrowInstallments(targetDateIso);
-  const totalAmount = dueItems.reduce((sum, item) => sum + item.amount, 0);
-
-  if (dueItems.length === 0) {
-    return {
-      ok: true,
-      skipped: true,
-      message: `Sem parcelas com vencimento em ${formatDateIso(targetDateIso)}`,
-      targetDateIso,
-      recipients,
-      dueCount: 0,
-      totalAmount: 0,
-    };
-  }
-
-  const transporter = getTransporter();
-  await transporter.sendMail({
-    from: env.SMTP_FROM,
-    to: recipients.join(","),
+  await sendEmail({
+    to: recipients,
     subject: buildSubject(targetDateIso, dueItems.length, totalAmount),
     text: buildTextBody(dueItems, targetDateIso, totalAmount),
     html: buildHtmlBody(dueItems, targetDateIso, totalAmount),
@@ -366,54 +301,12 @@ export async function sendDueTomorrowInstallmentsEmail(
   };
 }
 
-export function startDueTomorrowEmailScheduler(): void {
-  if (schedulerTimer) return;
+// Mantido por compatibilidade com imports antigos.
+export type SendDueTomorrowEmailResult = SendDueTodayEmailResult;
 
-  if (!env.EMAIL_NOTIFY_ENABLED) {
-    console.log("[email-reminder] Scheduler de e-mail desativado.");
-    return;
-  }
-
-  const timeZone = normalizeTimeZone(env.EMAIL_NOTIFY_TZ);
-  const scheduleTime = env.EMAIL_NOTIFY_TIME;
-  console.log(`[email-reminder] Scheduler ativo para ${scheduleTime} (${timeZone}).`);
-
-  const tick = async () => {
-    if (schedulerBusy) return;
-
-    const todayIso = getIsoTodayInTimeZone(timeZone);
-    const hourMinute = getHourMinuteInTimeZone(timeZone);
-
-    if (hourMinute !== scheduleTime) return;
-    if (schedulerLastRunDate === todayIso) return;
-
-    schedulerBusy = true;
-    try {
-      const result = await sendDueTomorrowInstallmentsEmail({ force: true, timeZone });
-      const log = result.ok ? console.log : console.error;
-      log(`[email-reminder] ${result.message}`);
-      schedulerLastRunDate = todayIso;
-    } catch (error) {
-      console.error("[email-reminder] Falha ao executar scheduler:", error);
-      schedulerLastRunDate = todayIso;
-    } finally {
-      schedulerBusy = false;
-    }
-  };
-
-  schedulerTimer = setInterval(() => {
-    void tick();
-  }, SCHEDULER_TICK_MS);
-
-  if (env.EMAIL_NOTIFY_RUN_ON_START) {
-    void (async () => {
-      try {
-        const result = await sendDueTomorrowInstallmentsEmail({ force: true, timeZone });
-        const log = result.ok ? console.log : console.error;
-        log(`[email-reminder] Execucao inicial: ${result.message}`);
-      } catch (error) {
-        console.error("[email-reminder] Falha na execucao inicial:", error);
-      }
-    })();
-  }
+// Mantido por compatibilidade com imports antigos.
+export async function sendDueTomorrowInstallmentsEmail(
+  options: SendDueTodayEmailOptions = {},
+): Promise<SendDueTodayEmailResult> {
+  return sendDueTodayInstallmentsEmail(options);
 }

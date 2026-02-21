@@ -4,7 +4,7 @@ import { requireAuthApi } from "../middleware/auth";
 import { AppError } from "../middleware/error-handler";
 import { validateBody } from "../middleware/validate";
 import { whatsappBatchSchema, type WhatsAppBatchInput } from "../schemas/whatsapp.schemas";
-import { sendDueTomorrowInstallmentsEmail } from "../services/email-reminder.service";
+import { sendDueTodayInstallmentsEmail } from "../services/email-reminder.service";
 import { normalizePhoneForWhatsApp, sendWhatsAppTextMessage } from "../services/whatsapp.service";
 
 const router = Router();
@@ -91,7 +91,7 @@ async function handleDueEmail(req: Request, res: Response) {
     throw new AppError("targetDate invalido. Use YYYY-MM-DD", 400);
   }
 
-  const result = await sendDueTomorrowInstallmentsEmail({
+  const result = await sendDueTodayInstallmentsEmail({
     force: true,
     targetDateIso: targetDateRaw,
   });

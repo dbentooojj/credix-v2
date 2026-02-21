@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "notify:due-today:once": "tsx src/scripts/run-due-today-email.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:demo": "tsx prisma/seed-demo.ts",
     "db:seed:stress": "tsx prisma/seed-stress.ts",
