@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Painel financeiro</title>
+    <%- include('partials/favicon') %>
     <style>
         html, body { background-color: #020617; }
     </style>
@@ -200,8 +201,8 @@
         }
 
         .summary-link:hover {
-            background: #f8fafc;
-            border-color: #bfdbfe;
+            background: #d3ddea;
+            border-color: #becbdd;
         }
 
         .summary-title {
@@ -253,8 +254,8 @@
         }
 
         .upcoming-item {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #e3e9f2;
+            border: 1px solid #c6d0df;
             border-radius: 12px;
             padding: 12px;
             display: grid;
@@ -290,7 +291,7 @@
             justify-content: center;
             text-align: center;
             color: #64748b;
-            background: rgba(248, 250, 252, 0.74);
+            background: rgba(227, 233, 242, 0.9);
             border-radius: 12px;
         }
 
@@ -312,9 +313,9 @@
         }
 
         .modal-panel {
-            background: #f8fafc;
+            background: #e3e9f2;
             border-radius: 14px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #c6d0df;
             box-shadow: 0 18px 40px rgba(2, 6, 23, 0.4);
         }
 
@@ -370,11 +371,11 @@
         }
 
         .page-title {
-            color: #ffffff;
+            color: #e7edf7;
         }
 
         .muted-on-dark {
-            color: #cbd5e1;
+            color: #b8c3d8;
         }
 
         .app-toast {
@@ -526,14 +527,14 @@
         }
         /* Premium DS v1 - light skin */
         :root {
-            --premium-bg: #0B1220;
-            --premium-sidebar: #0B1730;
-            --premium-card: #F8FAFC;
+            --premium-bg: #121b2a;
+            --premium-sidebar: #13203a;
+            --premium-card: #E3E9F2;
             --premium-positive: #16A34A;
             --premium-negative: #DC2626;
             --premium-accent: #1E40AF;
             --premium-radius: 16px;
-            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
         }
 
         html, body {
@@ -547,13 +548,13 @@
         }
 
         .premium-header {
-            background: rgba(11, 18, 32, 0.86);
+            background: rgba(18, 27, 42, 0.88);
             border-bottom: 1px solid rgba(148, 163, 184, 0.24);
             backdrop-filter: blur(8px);
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
             border-right: 1px solid rgba(148, 163, 184, 0.2);
         }
 
@@ -609,6 +610,15 @@
         .action-primary {
             background: var(--premium-accent);
         }
+
+        html:not(.dark) main .bg-white { background-color: #e3e9f2 !important; }
+        html:not(.dark) main .bg-slate-50 { background-color: #d9e1ec !important; }
+        html:not(.dark) main .border-gray-200,
+        html:not(.dark) main .border-gray-300,
+        html:not(.dark) main .border-slate-200,
+        html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
+        html:not(.dark) main .hover\:bg-gray-50:hover,
+        html:not(.dark) main .hover\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -673,7 +683,7 @@
                     <h2 class="page-title text-2xl font-bold">Painel financeiro</h2>
                     <p class="muted-on-dark mt-1 text-sm font-normal">Resumo da carteira, risco e lucro em tempo real.</p>
                 </div>
-                <div class="text-sm text-slate-300">
+                <div class="text-sm text-slate-400">
                     Atualizado: <span id="lastRefresh">--:--</span>
                 </div>
             </div>
@@ -1006,7 +1016,7 @@
             if (Math.abs(pct) < 0.005) {
                 return {
                     tone: 'neutral',
-                    text: '0,00% em relação ao mês anterior',
+                        text: '0,00% em relação ao mês anterior',
                 };
             }
 
@@ -1999,6 +2009,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

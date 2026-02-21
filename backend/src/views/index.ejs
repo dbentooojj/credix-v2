@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Credix - Login</title>
+<%- include('partials/favicon') %>
 
 <style>
 html, body { background-color: #020617; }
@@ -68,14 +69,14 @@ body { font-family: 'Inter', sans-serif; }
 }
         /* Premium DS v1 - light skin */
         :root {
-            --premium-bg: #0B1220;
-            --premium-sidebar: #0B1730;
-            --premium-card: #F8FAFC;
+            --premium-bg: #121b2a;
+            --premium-sidebar: #13203a;
+            --premium-card: #E3E9F2;
             --premium-positive: #16A34A;
             --premium-negative: #DC2626;
             --premium-accent: #1E40AF;
             --premium-radius: 16px;
-            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
         }
 
         html, body {
@@ -89,13 +90,13 @@ body { font-family: 'Inter', sans-serif; }
         }
 
         .premium-header {
-            background: rgba(11, 18, 32, 0.86);
+            background: rgba(18, 27, 42, 0.88);
             border-bottom: 1px solid rgba(148, 163, 184, 0.24);
             backdrop-filter: blur(8px);
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
             border-right: 1px solid rgba(148, 163, 184, 0.2);
         }
 
@@ -151,6 +152,14 @@ body { font-family: 'Inter', sans-serif; }
         .action-primary {
             background: var(--premium-accent);
         }
+        html:not(.dark) .bg-white { background-color: #e3e9f2 !important; }
+        html:not(.dark) .bg-slate-50 { background-color: #d9e1ec !important; }
+        html:not(.dark) .border-gray-200,
+        html:not(.dark) .border-gray-300,
+        html:not(.dark) .border-slate-200,
+        html:not(.dark) .border-slate-300 { border-color: #c6d0df !important; }
+        html:not(.dark) .hover\\:bg-gray-50:hover,
+        html:not(.dark) .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
 </head>
 
@@ -158,7 +167,7 @@ body { font-family: 'Inter', sans-serif; }
 
 <div class="w-full max-w-md">
 
-    <!-- Título -->
+    <!-- Titulo -->
     <div class="text-center mb-7">
         <div class="flex flex-col items-center gap-2">
             <%- include('partials/brand-wordmark', { size: 'login' }) %>
@@ -194,7 +203,7 @@ body { font-family: 'Inter', sans-serif; }
                 <div class="relative">
                     <input type="password" id="password" required autocomplete="current-password"
                     class="modern-input w-full px-4 py-3 pr-11 rounded-lg focus:outline-none"
-                    placeholder="••••••••">
+                    placeholder="********">
                     <button type="button" id="togglePassword"
                     class="absolute right-3 top-3 text-gray-500"
                     aria-label="Mostrar senha" aria-pressed="false">
@@ -203,7 +212,7 @@ body { font-family: 'Inter', sans-serif; }
                 </div>
             </div>
 
-            <!-- Opções -->
+            <!-- Opcoes -->
             <div class="flex items-center justify-between text-sm">
                 <label class="flex items-center">
                     <input type="checkbox" id="rememberMe" class="mr-2">
@@ -216,7 +225,7 @@ body { font-family: 'Inter', sans-serif; }
 
             <div id="loginMessage" class="hidden text-sm rounded-lg px-3 py-2"></div>
 
-            <!-- Botão -->
+            <!-- Botao -->
             <button type="submit"
             class="modern-button w-full text-white py-3.5 rounded-lg font-medium text-base">
                 <i class="fas fa-sign-in-alt mr-2"></i>Entrar
@@ -229,7 +238,7 @@ body { font-family: 'Inter', sans-serif; }
     <!-- Footer -->
     <div class="text-center mt-4">
         <p class="text-xs text-blue-200 opacity-70">
-            © 2026 Credix
+            &copy; 2026 Credix
         </p>
     </div>
 
@@ -243,7 +252,7 @@ async function checkSession() {
             window.location.href = '/admin/dashboard.html';
         }
     } catch (error) {
-        // Ignora erro de rede aqui e mantém tela de login
+        // Ignora erro de rede aqui e mantem tela de login
     }
 }
 
@@ -285,7 +294,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         const payload = await response.json();
 
         if (!response.ok) {
-            throw new Error(payload?.message || 'E-mail ou senha inválidos.');
+            throw new Error(payload?.message || 'E-mail ou senha invalidos.');
         }
 
         localStorage.setItem('isLoggedIn', 'true');
@@ -308,6 +317,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 

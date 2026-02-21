@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Empréstimos</title>
+    <%- include('partials/favicon') %>
     <style>
         html, body { background-color: #020617; }
-    </style>
+</style>
     <script>
         (function () {
             const root = document.documentElement;
@@ -261,14 +262,14 @@
         }
         /* Premium DS v1 - light skin */
         :root {
-            --premium-bg: #0B1220;
-            --premium-sidebar: #0B1730;
-            --premium-card: #F8FAFC;
+            --premium-bg: #121b2a;
+            --premium-sidebar: #13203a;
+            --premium-card: #E3E9F2;
             --premium-positive: #16A34A;
             --premium-negative: #DC2626;
             --premium-accent: #1E40AF;
             --premium-radius: 16px;
-            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
         }
 
         html, body {
@@ -282,13 +283,13 @@
         }
 
         .premium-header {
-            background: rgba(11, 18, 32, 0.86);
+            background: rgba(18, 27, 42, 0.88);
             border-bottom: 1px solid rgba(148, 163, 184, 0.24);
             backdrop-filter: blur(8px);
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
             border-right: 1px solid rgba(148, 163, 184, 0.2);
         }
 
@@ -413,6 +414,14 @@
         .action-primary {
             background: var(--premium-accent);
         }
+        html:not(.dark) main .bg-white { background-color: #e3e9f2 !important; }
+        html:not(.dark) main .bg-slate-50 { background-color: #d9e1ec !important; }
+        html:not(.dark) main .border-gray-200,
+        html:not(.dark) main .border-gray-300,
+        html:not(.dark) main .border-slate-200,
+        html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
+        html:not(.dark) main .hover\\:bg-gray-50:hover,
+        html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -623,7 +632,6 @@
                                     <p id="loanInstallmentsError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
-                            <input id="loanPaymentMethod" type="hidden" value="Pix">
                         </div>
 
                         <div class="rounded-xl border border-gray-200 p-4">
@@ -640,7 +648,6 @@
                                     <p id="loanFirstDueDateError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
-                            <input id="loanFrequency" type="hidden" value="mensal">
                         </div>
 
                         <div id="loanCalculationCard" class="calc-card p-4 hidden">
@@ -963,7 +970,6 @@
             fixedAddition: document.getElementById('loanFixedAddition'),
             installments: document.getElementById('loanInstallments'),
             startDate: document.getElementById('loanStartDate'),
-            frequency: document.getElementById('loanFrequency'),
             firstDueDate: document.getElementById('loanFirstDueDate')
         };
 
@@ -975,7 +981,6 @@
             fixedAddition: 'loanFixedAdditionError',
             installments: 'loanInstallmentsError',
             startDate: 'loanStartDateError',
-            frequency: 'loanFrequencyError',
             firstDueDate: 'loanFirstDueDateError'
         };
 
@@ -1331,13 +1336,13 @@
             const dueDates = (Array.isArray(scheduleRows) ? scheduleRows : []).map((item, index) => {
                 const parsed = new Date(item?.due_date);
                 if (!Number.isNaN(parsed.getTime())) return parsed;
-                const fallback = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                const fallback = getDueDateByFrequency(values.firstDueDate, index);
                 return fallback || new Date(values.firstDueDate);
             });
 
             while (dueDates.length < n) {
                 const index = dueDates.length;
-                const fallback = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                const fallback = getDueDateByFrequency(values.firstDueDate, index);
                 dueDates.push(fallback || new Date(values.firstDueDate));
             }
 
@@ -1594,7 +1599,6 @@
                     ? formatCurrency(loan.interest_rate)
                     : `${loan.interest_rate}%`;
                 const interestTypeLabel = formatInterestTypeLabel(interestType);
-                const frequencyLabel = getFrequencyLabel(loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id));
                 const totalInstallments = toNumber(loan.installments_count || installments.length);
                 const paidInstallments = installments.filter(item => isPaidInstallmentStatus(item.status)).length;
                 const pendingInstallments = Math.max(0, totalInstallments - paidInstallments);
@@ -1639,10 +1643,8 @@
                             <div class="grid grid-cols-1 gap-2 text-xs text-gray-700">
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Juros:</span> <span class="font-semibold text-gray-800">${interestPrimary} (${interestTypeLabel})</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">1º vencimento:</span> <span class="font-semibold text-gray-800">${formatDate(loan.first_due_date)}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Frequência:</span> <span class="font-semibold text-gray-800">${frequencyLabel}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Parcelas pagas/em aberto:</span> <span class="font-semibold text-gray-800">${paidInstallments}/${pendingInstallments}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${nextDueLabel}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Forma pagto.:</span> <span class="font-semibold text-gray-800">${loan.payment_method || '&mdash;'}</span></div>
                             </div>
                         </div>
                     </div>
@@ -1821,45 +1823,16 @@
             return copy;
         }
 
-        function normalizeFrequency(value) {
-            return String(value || '').trim().toLowerCase() === 'quinzenal' ? 'quinzenal' : 'mensal';
-        }
-
-        function getFrequencyLabel(frequency) {
-            return normalizeFrequency(frequency) === 'quinzenal' ? 'Quinzenal (15 dias)' : 'Mensal';
-        }
-
-        function suggestFirstDueDate(startDateIso, frequency) {
+        function suggestFirstDueDate(startDateIso) {
             const start = new Date(startDateIso);
             if (Number.isNaN(start.getTime())) return '';
-            if (frequency === 'quinzenal') return toIsoDate(addDays(start, 15));
             return toIsoDate(addDays(start, 30));
         }
 
-        function getDueDateByFrequency(firstDueDateIso, index, frequency) {
+        function getDueDateByFrequency(firstDueDateIso, index) {
             const firstDue = new Date(firstDueDateIso);
             if (Number.isNaN(firstDue.getTime())) return null;
-            if (frequency === 'quinzenal') return addDays(firstDue, index * 15);
             return addMonths(firstDue, index);
-        }
-
-        function inferFrequencyFromInstallments(loanId) {
-            const installments = getLoanInstallments(loanId);
-            if (installments.length < 2) return 'mensal';
-
-            const diffs = [];
-            for (let i = 1; i < installments.length; i += 1) {
-                const previous = new Date(installments[i - 1].due_date);
-                const current = new Date(installments[i].due_date);
-                if (Number.isNaN(previous.getTime()) || Number.isNaN(current.getTime())) continue;
-                const diffDays = Math.round((current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24));
-                diffs.push(diffDays);
-            }
-
-            if (!diffs.length) return 'mensal';
-            if (diffs.every(diff => diff >= 14 && diff <= 16)) return 'quinzenal';
-            if (diffs.every(diff => diff >= 27 && diff <= 32)) return 'mensal';
-            return 'mensal';
         }
 
         function clearFieldErrors() {
@@ -1935,7 +1908,7 @@
             for (let index = 0; index < total; index += 1) {
                 let dueDate = current[index]?.due_date || '';
                 if (forceGenerate || !dueDate) {
-                    const calculated = getDueDateByFrequency(values.firstDueDate, index, values.frequency);
+                    const calculated = getDueDateByFrequency(values.firstDueDate, index);
                     dueDate = calculated ? toIsoDate(calculated) : '';
                 }
 
@@ -1978,7 +1951,7 @@
 
             const hint = document.getElementById('loanScheduleHint');
             if (hint) {
-                hint.textContent = `Frequência ${getFrequencyLabel(values.frequency).toLowerCase()}: você pode editar as datas e regerar quando precisar.`;
+                hint.textContent = 'Datas mensais sugeridas: você pode editar as datas e regerar quando precisar.';
             }
         }
 
@@ -2020,8 +1993,7 @@
         function setDefaultLoanDates() {
             const todayIso = getTodayIsoDate();
             document.getElementById('loanStartDate').value = todayIso;
-            document.getElementById('loanFrequency').value = 'mensal';
-            document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(todayIso, 'mensal');
+            document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(todayIso);
             loanFormState.firstDueTouched = false;
         }
 
@@ -2062,18 +2034,14 @@
             document.getElementById('loanInterestRate').value = 0;
             document.getElementById('loanInterestType').value = 'composto';
             document.getElementById('loanInstallments').value = 0;
-            document.getElementById('loanPaymentMethod').value = 'Pix';
-            document.getElementById('loanFrequency').value = 'mensal';
             document.getElementById('loanEditingId').value = '';
             loanFormState.schedule = [];
 
             if (mode === 'edit' && loan) {
                 const installments = getLoanInstallments(loan.id);
-                const inferredFrequency = loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id);
-                const safeFrequency = normalizeFrequency(inferredFrequency);
                 const interestType = normalizeInterestType(loan.loan_meta?.interestMode || loan.interest_type);
                 const startDateValue = toIsoDate(loan.start_date) || getTodayIsoDate();
-                const firstDueValue = toIsoDate(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue, safeFrequency);
+                const firstDueValue = toIsoDate(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue);
 
                 document.getElementById('loanModalTitle').textContent = `Editar empréstimo #${loan.id}`;
                 document.getElementById('saveLoanBtn').textContent = 'Salvar alterações';
@@ -2083,11 +2051,7 @@
                 document.getElementById('loanDebtor').value = String(loan.debtor_id);
                 document.getElementById('loanPrincipal').value = formatCurrencyInput(loan.principal_amount);
                 document.getElementById('loanInstallments').value = loan.installments_count;
-                const paymentMethodSelect = document.getElementById('loanPaymentMethod');
-                paymentMethodSelect.value = loan.payment_method || 'Pix';
-                if (!paymentMethodSelect.value) paymentMethodSelect.value = 'Pix';
                 document.getElementById('loanStartDate').value = startDateValue;
-                document.getElementById('loanFrequency').value = safeFrequency;
                 document.getElementById('loanFirstDueDate').value = firstDueValue;
                 document.getElementById('loanObservations').value = loan.observations || '';
 
@@ -2156,9 +2120,7 @@
                 fixedAddition: round2(document.getElementById('loanFixedAddition').value),
                 interestType,
                 installments: installmentsRaw > 0 ? installmentsRaw : 0,
-                paymentMethod: document.getElementById('loanPaymentMethod').value || 'Pix',
                 startDate: document.getElementById('loanStartDate').value,
-                frequency: normalizeFrequency(document.getElementById('loanFrequency').value || 'mensal'),
                 firstDueDate: document.getElementById('loanFirstDueDate').value,
                 observations: document.getElementById('loanObservations').value.trim()
             };
@@ -2320,7 +2282,7 @@
                     const dueDate = loanFormState.schedule[index]?.due_date;
                     const due = new Date(dueDate);
                     const safeDue = Number.isNaN(due.getTime())
-                        ? (getDueDateByFrequency(values.firstDueDate, index, values.frequency) || new Date(values.firstDueDate))
+                        ? (getDueDateByFrequency(values.firstDueDate, index) || new Date(values.firstDueDate))
                         : due;
 
                     return {
@@ -2353,24 +2315,6 @@
             renderInstallmentPreview(plan);
 
             return { values, calcResult, plan };
-        }
-
-        function getNextLocalId(rows, startAt) {
-            const start = Math.max(1, Math.trunc(toNumber(startAt)));
-            const maxId = rows.reduce((max, row) => {
-                const parsed = toNumber(row?.id);
-                return parsed > max ? parsed : max;
-            }, start - 1);
-            return maxId + 1;
-        }
-
-        function getCrossUserSafeStart(startAt) {
-            const minStart = Math.max(1, Math.trunc(toNumber(startAt)));
-            const randomBase = 1400000000;
-            const randomOffset = Math.trunc(Math.random() * 700000000);
-            const candidate = randomBase + randomOffset;
-            const int32SafeLimit = 2147000000;
-            return Math.min(int32SafeLimit, Math.max(minStart, candidate));
         }
 
         function resolvePersistedCreatedLoanId(savedLoans, draftLoan, previousLoans) {
@@ -2499,7 +2443,6 @@
             const interestValue = interestType === 'fixo'
                 ? `${formatCurrency(loan.interest_rate)} (${interestTypeLabel})`
                 : `${loan.interest_rate}% (${interestTypeLabel})`;
-            const frequencyLabel = getFrequencyLabel(loan.loan_meta?.frequency || inferFrequencyFromInstallments(loan.id));
 
             document.getElementById('loanDetailsTitle').textContent = `Detalhes do empréstimo #${loan.id}`;
 
@@ -2511,10 +2454,8 @@
                     <div class="details-item"><p class="text-xs text-gray-500">Principal</p><p class="font-semibold">${formatCurrency(loan.principal_amount)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Total contratado</p><p class="font-semibold">${formatCurrency(loan.total_amount)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Juros</p><p class="font-semibold">${interestValue}</p></div>
-                    <div class="details-item"><p class="text-xs text-gray-500">Forma de pagamento</p><p class="font-semibold">${loan.payment_method || '-'}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Data de início</p><p class="font-semibold">${formatDate(loan.start_date)}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">1º vencimento</p><p class="font-semibold">${formatDate(loan.first_due_date)}</p></div>
-                    <div class="details-item"><p class="text-xs text-gray-500">Frequência</p><p class="font-semibold">${frequencyLabel}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas pagas</p><p class="font-semibold">${paid}</p></div>
                     <div class="details-item"><p class="text-xs text-gray-500">Parcelas em aberto</p><p class="font-semibold">${pending}</p></div>
                 </div>
@@ -2637,19 +2578,8 @@
         });
 
         document.getElementById('loanStartDate').addEventListener('change', function () {
-            const frequency = document.getElementById('loanFrequency').value || 'mensal';
             if (!loanFormState.firstDueTouched || !document.getElementById('loanFirstDueDate').value) {
-                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(this.value, frequency);
-            }
-            refreshSchedule(true);
-            clearFieldErrors();
-            resetSimulationState();
-        });
-
-        document.getElementById('loanFrequency').addEventListener('change', function () {
-            const startDate = document.getElementById('loanStartDate').value || getTodayIsoDate();
-            if (!loanFormState.firstDueTouched || !document.getElementById('loanFirstDueDate').value) {
-                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(startDate, this.value);
+                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(this.value);
             }
             refreshSchedule(true);
             clearFieldErrors();
@@ -2796,21 +2726,18 @@
                 }
             }
 
-            const loanId = isEditing
-                ? loansState.editingLoanId
-                : getNextLocalId(loansState.loans, getCrossUserSafeStart(100));
+            const loanId = isEditing ? loansState.editingLoanId : null;
             const status = deriveLoanStatus(plan);
             const firstScheduleDueDate = plan[0]?.due_date || values.firstDueDate;
             const lastScheduleDueDate = plan[plan.length - 1]?.due_date || values.firstDueDate;
             const loanMeta = {
                 interestMode: values.interestType,
-                frequency: values.frequency,
                 fixedAddition: values.interestType === 'fixo' ? round2(values.fixedAddition) : 0
             };
             // TODO: persistir frequency/interestMode em colunas próprias quando o backend expor esses campos.
 
             const payload = normalizeLoanRow({
-                id: loanId,
+                ...(isEditing ? { id: loanId } : {}),
                 debtor_id: values.debtorId,
                 principal_amount: values.principal,
                 total_amount: calcResult.totalAmount,
@@ -2818,7 +2745,6 @@
                 interest_rate: values.interestType === 'fixo' ? round2(values.fixedAddition) : values.interestRate,
                 interest_type: values.interestType === 'fixo' ? 'composto' : values.interestType,
                 installment_amount: calcResult.installmentAmount,
-                payment_method: values.paymentMethod,
                 observations: encodeLoanObservations(values.observations, loanMeta),
                 start_date: values.startDate,
                 first_due_date: firstScheduleDueDate,
@@ -2918,6 +2844,10 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
 

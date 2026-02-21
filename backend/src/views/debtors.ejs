@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Clientes</title>
+    <%- include('partials/favicon') %>
     <style>
         html, body { background-color: #020617; }
-    </style>
+</style>
     <script>
         (function () {
             const root = document.documentElement;
@@ -419,14 +420,14 @@
         }
         /* Premium DS v1 - light skin */
         :root {
-            --premium-bg: #0B1220;
-            --premium-sidebar: #0B1730;
-            --premium-card: #F8FAFC;
+            --premium-bg: #121b2a;
+            --premium-sidebar: #13203a;
+            --premium-card: #E3E9F2;
             --premium-positive: #16A34A;
             --premium-negative: #DC2626;
             --premium-accent: #1E40AF;
             --premium-radius: 16px;
-            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
         }
 
         html, body {
@@ -440,13 +441,13 @@
         }
 
         .premium-header {
-            background: rgba(11, 18, 32, 0.86);
+            background: rgba(18, 27, 42, 0.88);
             border-bottom: 1px solid rgba(148, 163, 184, 0.24);
             backdrop-filter: blur(8px);
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
             border-right: 1px solid rgba(148, 163, 184, 0.2);
         }
 
@@ -502,6 +503,14 @@
         .action-primary {
             background: var(--premium-accent);
         }
+        html:not(.dark) main .bg-white { background-color: #e3e9f2 !important; }
+        html:not(.dark) main .bg-slate-50 { background-color: #d9e1ec !important; }
+        html:not(.dark) main .border-gray-200,
+        html:not(.dark) main .border-gray-300,
+        html:not(.dark) main .border-slate-200,
+        html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
+        html:not(.dark) main .hover\\:bg-gray-50:hover,
+        html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -884,28 +893,40 @@
             return getDemoTable(tableName);
         }
 
-        function saveTableData(tableName, rows) {
+        async function saveTableData(tableName, rows) {
             const safeRows = Array.isArray(rows) ? rows : [];
+            const previousRows = Array.isArray(tableCache[tableName]) ? tableCache[tableName] : [];
             tableCache[tableName] = safeRows;
 
-            fetch(`/api/tables/${tableName}`, {
+            const response = await fetch(`/api/tables/${tableName}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ rows: safeRows })
-            }).catch(error => {
-                console.error(`Erro ao salvar tabela ${tableName}:`, error);
             });
-        }
 
-        function getNextTableId(tableName, fallbackStart) {
-            const table = getDemoTable(tableName);
-            const maxId = table.reduce((max, row) => {
-                const parsed = Number(row?.id);
-                if (!Number.isFinite(parsed)) return max;
-                return parsed > max ? parsed : max;
-            }, Number(fallbackStart || 1) - 1);
-            return maxId + 1;
+            if (!response.ok) {
+                tableCache[tableName] = previousRows;
+
+                let details = `HTTP ${response.status}`;
+                try {
+                    const errorPayload = await response.json();
+                    if (errorPayload && typeof errorPayload.message === 'string' && errorPayload.message.trim()) {
+                        details = errorPayload.message.trim();
+                    }
+                } catch (_error) {
+                    // Mantem fallback com status HTTP quando nao houver JSON de erro.
+                }
+
+                throw new Error(`Falha ao salvar ${tableName}: ${details}`);
+            }
+
+            const payload = await response.json().catch(() => null);
+            if (Array.isArray(payload?.data)) {
+                tableCache[tableName] = payload.data;
+            }
+
+            return tableCache[tableName];
         }
 
         function setActiveSidebarItem(targetHref) {
@@ -2487,7 +2508,7 @@
                     <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''} ${isExpanded ? 'debtor-expanded-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
                         <td>
                             <div class="text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
-                            <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
+                                <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
                         </td>
                         <td>
                             <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
@@ -2658,7 +2679,7 @@
 
         function openDeleteDebtorConfirmModal(debtorId) {
             if (!deleteDebtorConfirmModal) {
-                performDebtorDeletion(debtorId);
+                void performDebtorDeletion(debtorId);
                 return;
             }
             pendingDeleteDebtorId = debtorId;
@@ -2680,23 +2701,36 @@
             showMessage('Cliente excluído com sucesso.', 'success');
         }
 
-        function performDebtorDeletion(debtorId) {
+        async function performDebtorDeletion(debtorId) {
             if (debtorId === null || debtorId === undefined || debtorId === '') return;
+
+            const previousDebtors = [...debtorsState.debtors];
+            const previousLoans = [...debtorsState.loans];
+            const previousInstallments = [...debtorsState.installments];
 
             debtorsState.debtors = debtorsState.debtors.filter(debtor => !sameId(debtor.id, debtorId));
             debtorsState.loans = debtorsState.loans.filter(loan => !sameId(loan.debtor_id, debtorId));
             debtorsState.installments = debtorsState.installments.filter(installment => !sameId(installment.debtor_id, debtorId));
 
-            saveTableData('debtors', debtorsState.debtors);
-            saveTableData('loans', debtorsState.loans);
-            saveTableData('installments', debtorsState.installments);
+            try {
+                await saveTableData('debtors', debtorsState.debtors);
+                await saveTableData('loans', debtorsState.loans);
+                await saveTableData('installments', debtorsState.installments);
 
-            updateDebtorMetrics();
-            applyDebtorsFilters(false);
-            showDeleteDebtorSuccessToast();
+                updateDebtorMetrics();
+                applyDebtorsFilters(false);
+                showDeleteDebtorSuccessToast();
+            } catch (error) {
+                debtorsState.debtors = previousDebtors;
+                debtorsState.loans = previousLoans;
+                debtorsState.installments = previousInstallments;
+                updateDebtorMetrics();
+                applyDebtorsFilters(false);
+                showMessage(error instanceof Error ? error.message : 'Erro ao excluir cliente.', 'error');
+            }
         }
 
-        function confirmDeleteDebtor() {
+        async function confirmDeleteDebtor() {
             if (pendingDeleteDebtorId === null || pendingDeleteDebtorId === undefined || pendingDeleteDebtorId === '') {
                 closeDeleteDebtorConfirmModal();
                 return;
@@ -2704,7 +2738,7 @@
 
             const debtorId = pendingDeleteDebtorId;
             closeDeleteDebtorConfirmModal();
-            performDebtorDeletion(debtorId);
+            await performDebtorDeletion(debtorId);
         }
 
         function deleteDebtor(debtorId) {
@@ -3063,7 +3097,7 @@
             });
         }
 
-        newDebtorForm.addEventListener('submit', function (event) {
+        newDebtorForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
             clearDebtorFormErrors();
@@ -3079,21 +3113,21 @@
 
             const phoneDigits = normalizeBrazilPhoneDigits(newDebtorPhoneInput?.value || '');
             if (!phoneDigits || (phoneDigits.length !== 10 && phoneDigits.length !== 11)) {
-                setInlineError(newDebtorPhoneError, 'Informe um telefone válido (10 ou 11 dígitos).');
+                    setInlineError(newDebtorPhoneError, 'Informe um telefone válido (10 ou 11 dígitos).');
                 if (newDebtorPhoneInput) newDebtorPhoneInput.focus();
                 return;
             }
 
             const cpfDigits = toDigits(newDebtorCpfInput?.value || '');
             if (cpfDigits && !isValidCpfDigits(cpfDigits)) {
-                setInlineError(newDebtorCpfError, 'CPF inválido.');
+                    setInlineError(newDebtorCpfError, 'CPF inválido.');
                 if (newDebtorCpfInput) newDebtorCpfInput.focus();
                 return;
             }
 
             const email = String(newDebtorEmailInput?.value || '').trim();
             if (!isValidEmail(email)) {
-                setInlineError(newDebtorEmailError, 'E-mail inválido.');
+                    setInlineError(newDebtorEmailError, 'E-mail inválido.');
                 if (newDebtorEmailInput) newDebtorEmailInput.focus();
                 return;
             }
@@ -3117,23 +3151,33 @@
 
             const payload = basePayload;
 
+            const previousDebtors = [...debtorsState.debtors];
+
             if (debtorsState.editingDebtorId) {
                 debtorsState.debtors = debtorsState.debtors.map(debtor =>
                     sameId(debtor.id, debtorsState.editingDebtorId) ? normalizeDebtorRow({ ...debtor, ...payload }) : debtor
                 );
             } else {
                 const newDebtor = normalizeDebtorRow({
-                    id: getNextTableId('debtors', 1),
                     ...payload
                 });
                 debtorsState.debtors = [newDebtor, ...debtorsState.debtors];
             }
 
-            saveTableData('debtors', debtorsState.debtors);
-            updateDebtorMetrics();
-            applyDebtorsFilters(true);
-            closeDebtorModal();
-            showMessage(isEdit ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.', 'success');
+            try {
+                const persistedDebtors = await saveTableData('debtors', debtorsState.debtors);
+                debtorsState.debtors = (Array.isArray(persistedDebtors) ? persistedDebtors : debtorsState.debtors)
+                    .map(normalizeDebtorRow);
+                updateDebtorMetrics();
+                applyDebtorsFilters(true);
+                closeDebtorModal();
+                showMessage(isEdit ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.', 'success');
+            } catch (error) {
+                debtorsState.debtors = previousDebtors;
+                updateDebtorMetrics();
+                applyDebtorsFilters(false);
+                showMessage(error instanceof Error ? error.message : 'Erro ao salvar cliente.', 'error');
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -3142,6 +3186,10 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
 

@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Controle de Cobrança</title>
+    <%- include('partials/favicon') %>
     <style>
         html, body { background-color: #020617; }
-    </style>
+</style>
     <script>
         (function () {
             const root = document.documentElement;
@@ -54,9 +55,9 @@
         .page-title { color: #ffffff; }
         .muted-on-dark { color: #cbd5e1; }
         .kpi-card {
-            background: #f8fafc;
+            background: #e3e9f2;
             border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #c6d0df;
             min-height: 126px;
             padding: 18px;
             display: flex;
@@ -64,16 +65,18 @@
             justify-content: space-between;
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-            transition: border-color 120ms ease-out, box-shadow 120ms ease-out, transform 120ms ease-out;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out;
         }
         .kpi-card:hover {
-            border-color: rgba(59, 130, 246, 0.45);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-            transform: translateY(-1px);
+            background: #d9e1ec;
+            border-color: #c6d0df;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+            transform: none;
         }
         .kpi-card.is-active {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 6px 14px rgba(59, 130, 246, 0.16);
+            background: #d3ddea;
+            border-color: #94a3b8;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
         }
         .kpi-label {
             color: #64748b;
@@ -199,12 +202,12 @@
             box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
         }
         .dark .kpi-card:hover {
-            border-color: rgba(148, 163, 184, 0.42);
-            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.5);
+            border-color: rgba(148, 163, 184, 0.3);
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
         }
         .dark .kpi-card.is-active {
-            border-color: rgba(96, 165, 250, 0.72);
-            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45), 0 10px 22px rgba(30, 64, 175, 0.28);
+            border-color: rgba(148, 163, 184, 0.45);
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
         }
         .dark .kpi-label,
         .dark .kpi-note,
@@ -227,14 +230,14 @@
         .dark textarea, .dark select, .dark input { color: #e2e8f0; }
         /* Premium DS v1 - light skin */
         :root {
-            --premium-bg: #0B1220;
-            --premium-sidebar: #0B1730;
-            --premium-card: #F8FAFC;
+            --premium-bg: #121b2a;
+            --premium-sidebar: #13203a;
+            --premium-card: #E3E9F2;
             --premium-positive: #16A34A;
             --premium-negative: #DC2626;
             --premium-accent: #1E40AF;
             --premium-radius: 16px;
-            --premium-shadow-soft: 0 8px 20px rgba(2, 12, 27, 0.12);
+            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
         }
 
         html, body {
@@ -248,13 +251,13 @@
         }
 
         .premium-header {
-            background: rgba(11, 18, 32, 0.86);
+            background: rgba(18, 27, 42, 0.88);
             border-bottom: 1px solid rgba(148, 163, 184, 0.24);
             backdrop-filter: blur(8px);
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, #0C1A36 0%, var(--premium-sidebar) 100%);
+            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
             border-right: 1px solid rgba(148, 163, 184, 0.2);
         }
 
@@ -263,6 +266,7 @@
         }
 
         .glass-card,
+        .kpi-card,
         .summary-link,
         .modal-panel,
         .modal-content {
@@ -309,6 +313,14 @@
         .action-primary {
             background: var(--premium-accent);
         }
+        html:not(.dark) main .bg-white { background-color: #e3e9f2 !important; }
+        html:not(.dark) main .bg-slate-50 { background-color: #d9e1ec !important; }
+        html:not(.dark) main .border-gray-200,
+        html:not(.dark) main .border-gray-300,
+        html:not(.dark) main .border-slate-200,
+        html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
+        html:not(.dark) main .hover\\:bg-gray-50:hover,
+        html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -548,8 +560,8 @@
                     <select id="paymentMethod" class="filter-control" required>
                         <option value="Pix">Pix</option>
                         <option value="Dinheiro">Dinheiro</option>
-                        <option value="Transferência">Transferência</option>
-                        <option value="Cartão">Cartão</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Cartão">Cartão</option>
                         <option value="Outro">Outro</option>
                     </select>
                 </div>
@@ -981,7 +993,7 @@
             if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
                 return `0,00% ${label}`;
             }
-            return `${percentValue > 0 ? '↑' : '↓'} ${formatPercentMagnitude(percentValue)}% ${label}`;
+            return `${percentValue > 0 ? '?' : '?'} ${formatPercentMagnitude(percentValue)}% ${label}`;
         }
 
         function formatSecondaryInsightText(percentValue, label) {
@@ -1344,8 +1356,6 @@
                 const installmentNumber = getInstallmentLabel(installment, loan);
                 const phone = getDebtorPhone(installment.debtor_id);
                 const canRegisterPayment = status !== 'Pago';
-                const canWhatsapp = status !== 'Pago';
-                const hasPhone = Boolean(normalizePhoneForWhatsApp(phone));
                 const dueHint = getDueHint(installment, status);
 
                 return `
@@ -1374,17 +1384,6 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 ${canRegisterPayment ? `<button type="button" data-action="quick-pay-installment" data-id="${installment.id}" class="table-action border border-emerald-600 bg-emerald-600 px-2 text-white hover:border-emerald-500 hover:bg-emerald-500" title="Marcar como pago agora"><i class="fas fa-check mr-1"></i><span class="hidden sm:inline">Pago hoje</span></button>` : ''}
-                                ${canWhatsapp ? `
-                                    <button
-                                        type="button"
-                                        data-action="whatsapp"
-                                        data-id="${installment.id}"
-                                        class="table-action text-emerald-600"
-                                        title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}"
-                                        ${hasPhone ? '' : 'disabled'}>
-                                        <i class="fab fa-whatsapp"></i>
-                                    </button>
-                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -1399,8 +1398,6 @@
                     const installmentNumber = getInstallmentLabel(installment, loan);
                     const phone = getDebtorPhone(installment.debtor_id);
                     const canRegisterPayment = status !== 'Pago';
-                    const canWhatsapp = status !== 'Pago';
-                    const hasPhone = Boolean(normalizePhoneForWhatsApp(phone));
                     const dueHint = getDueHint(installment, status);
 
                     return `
@@ -1439,17 +1436,6 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 ${canRegisterPayment ? `<button type="button" data-action="quick-pay-installment" data-id="${installment.id}" class="table-action border border-emerald-600 bg-emerald-600 px-2 text-white hover:border-emerald-500 hover:bg-emerald-500" title="Marcar como pago agora"><i class="fas fa-check mr-1"></i>Pago hoje</button>` : ''}
-                                ${canWhatsapp ? `
-                                    <button
-                                        type="button"
-                                        data-action="whatsapp"
-                                        data-id="${installment.id}"
-                                        class="table-action text-emerald-600"
-                                        title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}"
-                                        ${hasPhone ? '' : 'disabled'}>
-                                        <i class="fab fa-whatsapp"></i>
-                                    </button>
-                                ` : ''}
                             </div>
                         </article>
                     `;
@@ -1660,7 +1646,6 @@
             const loan = getLoanById(installment.loan_id);
             const paymentMethod = getInstallmentPaymentMethod(installment) || '-';
             const phone = getDebtorPhone(installment.debtor_id);
-            const hasPhone = Boolean(normalizePhoneForWhatsApp(phone));
 
             document.getElementById('installmentDetailsContent').innerHTML = `
                 <div class="space-y-4">
@@ -1693,9 +1678,6 @@
                         <div class="flex flex-wrap justify-end gap-2">
                             ${status !== 'Pago'
                                 ? `<button type="button" data-action="drawer-quick-pay-installment" data-id="${installment.id}" class="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Pago rápido</button><button type="button" data-action="drawer-pay-installment" data-id="${installment.id}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Registrar pagamento</button>`
-                                : ''}
-                            ${status !== 'Pago'
-                                ? `<button type="button" data-action="drawer-whatsapp" data-id="${installment.id}" class="rounded-xl bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-500 ${hasPhone ? '' : 'opacity-50 cursor-not-allowed'}" title="${hasPhone ? 'Cobrar no WhatsApp' : 'Cliente sem telefone cadastrado'}" ${hasPhone ? '' : 'disabled'}>Cobrar WhatsApp</button>`
                                 : ''}
                         </div>
                     </section>
@@ -1894,10 +1876,6 @@
             showMessage('Pagamento estornado com sucesso!', 'success');
         }
 
-        function buildWhatsAppMessage(installment) {
-            return `Olá, ${getDebtorName(installment.debtor_id)}. Passando para lembrar da parcela #${installment.installment_number ?? '-'} do empréstimo #${installment.loan_id ?? '-'}, vencimento ${formatDate(installment.due_date)}, no valor de ${formatCurrency(installment.amount)}. Consegue me confirmar o pagamento?`;
-        }
-
         function normalizePhoneForWhatsApp(phoneRaw) {
             const digits = String(phoneRaw || '').replace(/\D/g, '');
             if (!digits) return '';
@@ -1918,26 +1896,6 @@
                 : refs.join(', ');
 
             return `${message}\n\nParcelas: ${details}`;
-        }
-
-        function sendInstallmentWhatsApp(installmentId) {
-            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
-            if (!installment) return;
-
-            if (normalizeInstallmentStatus(installment) === 'Pago') {
-                showMessage('Essa parcela já está paga.', 'error');
-                return;
-            }
-
-            const phone = normalizePhoneForWhatsApp(getDebtorPhone(installment.debtor_id));
-            if (!phone) {
-                showMessage('Cliente sem telefone cadastrado.', 'error');
-                return;
-            }
-
-            const url = `https://wa.me/${phone}?text=${encodeURIComponent(buildWhatsAppMessage(installment))}`;
-            window.open(url, '_blank', 'noopener');
-            showMessage('Mensagem pronta no WhatsApp.', 'success');
         }
 
         function getNotificationTargets(template) {
@@ -2346,11 +2304,6 @@
                     return;
                 }
 
-                if (action === 'whatsapp') {
-                    sendInstallmentWhatsApp(installmentId);
-                    return;
-                }
-
                 if (action === 'undo-payment') {
                     undoInstallmentPayment(installmentId);
                 }
@@ -2383,10 +2336,6 @@
             if (action === 'drawer-quick-pay-installment') {
                 quickMarkInstallmentAsPaid(installmentId);
                 return;
-            }
-
-            if (action === 'drawer-whatsapp') {
-                sendInstallmentWhatsApp(installmentId);
             }
         });
 
@@ -2437,6 +2386,7 @@
     </script>
 </body>
 </html>
+
 
 
 
