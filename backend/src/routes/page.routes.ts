@@ -54,6 +54,22 @@ router.get(["/", "/login", "/index.html"], (req, res) => {
   return res.render("index", { currentUser: null });
 });
 
+router.get(["/forgot-password", "/forgot-password.html"], (req, res) => {
+  if (req.user) {
+    return res.redirect("/admin/dashboard.html");
+  }
+
+  return res.render("forgot-password", { currentUser: null });
+});
+
+router.get(["/reset-password", "/reset-password.html"], (req, res) => {
+  if (req.user) {
+    return res.redirect("/admin/dashboard.html");
+  }
+
+  return res.render("reset-password", { currentUser: null });
+});
+
 router.use("/admin", requireAuthPage);
 
 router.get("/admin", requireAuthPage, (_req, res) => {

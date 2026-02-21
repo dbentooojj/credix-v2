@@ -1,4 +1,4 @@
-﻿
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Empréstimos</title>
     <%- include('partials/favicon') %>
+    <%- include('partials/toast') %>
+    <%- include('partials/session-timeout') %>
     <style>
         html, body { background-color: #020617; }
 </style>
@@ -184,6 +186,38 @@
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.08) 0%, rgba(59, 130, 246, 0.12) 100%);
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
         }
+
+        .loan-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding-top: 0.5rem;
+        }
+
+        .loan-btn-secondary {
+            border-color: #b7c9ea;
+            background: #eef4ff;
+            color: #28446f;
+        }
+
+        .loan-btn-secondary:hover {
+            background: #e2ecfb;
+            border-color: #9fb5d8;
+            color: #1f3a61;
+        }
+
+        .loan-btn-primary {
+            border: 1px solid #9fb5d8;
+            background: #c9d8ee;
+            color: #163a66;
+        }
+
+        .loan-btn-primary:hover {
+            background: #bccfe8;
+            border-color: #8ea8d0;
+            color: #122f55;
+        }
         .installment-preview {
             border-radius: 12px;
             border: 1px solid #e5e7eb;
@@ -231,6 +265,19 @@
             }
 
             .header-user-chevron { display: none; }
+
+            #userMenuBtn {
+                max-width: min(46vw, 11rem);
+                justify-content: flex-end;
+            }
+
+            .header-user-name {
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
 
         .dark .glass-card {
@@ -259,6 +306,30 @@
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.2) 0%, rgba(59, 130, 246, 0.22) 100%);
             border-color: rgba(96, 165, 250, 0.35);
             box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35);
+        }
+
+        .dark .loan-btn-secondary {
+            border-color: rgba(148, 163, 184, 0.45);
+            background: rgba(51, 65, 85, 0.55);
+            color: #e2e8f0;
+        }
+
+        .dark .loan-btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.6);
+            border-color: rgba(148, 163, 184, 0.55);
+            color: #f8fafc;
+        }
+
+        .dark .loan-btn-primary {
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(30, 64, 175, 0.38);
+            color: #dbeafe;
+        }
+
+        .dark .loan-btn-primary:hover {
+            background: rgba(37, 99, 235, 0.44);
+            border-color: rgba(147, 197, 253, 0.55);
+            color: #eff6ff;
         }
         /* Premium DS v1 - light skin */
         :root {
@@ -422,6 +493,18 @@
         html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
         html:not(.dark) main .hover\\:bg-gray-50:hover,
         html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
+
+        @media (max-width: 640px) {
+            .loan-action-row {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .loan-action-row > button {
+                width: 100%;
+            }
+        }
 </style>
 </head>
 <body class="primary-gradient min-h-screen">
@@ -437,8 +520,8 @@
             </div>
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
-                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full overflow-hidden">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -618,17 +701,17 @@
                                 </div>
                                 <div id="loanInterestRateWrap">
                                     <label class="mb-1 block text-sm text-gray-600">Taxa mensal (%)*</label>
-                                    <input id="loanInterestRate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0.01" step="0.01" value="0" required placeholder="Ex: 8">
+                                    <input id="loanInterestRate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0.01" step="0.01" value="" required placeholder="Ex: 8">
                                     <p id="loanInterestRateError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div id="loanFixedAdditionWrap" class="hidden">
                                     <label class="mb-1 block text-sm text-gray-600">Acréscimo fixo (R$)</label>
-                                    <input id="loanFixedAddition" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="0">
+                                    <input id="loanFixedAddition" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="">
                                     <p id="loanFixedAdditionError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Parcelas*</label>
-                                    <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="0" required>
+                                    <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="" required>
                                     <p id="loanInstallmentsError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
@@ -710,10 +793,10 @@
                             <textarea id="loanObservations" class="filter-control focus:ring-2 focus:ring-blue-500/40" rows="3" placeholder="Observações sobre o empréstimo"></textarea>
                         </div>
 
-                        <div class="flex items-center justify-end gap-3 pt-2">
+                        <div class="loan-action-row">
                                 <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                                <button id="calculateLoanBtn" type="button" class="rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100">Simular parcelas</button>
-                                <button id="saveLoanBtn" type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar empréstimo</button>
+                                <button id="calculateLoanBtn" type="button" class="loan-btn-secondary rounded-xl border px-4 py-2 text-sm font-semibold">Simular parcelas</button>
+                                <button id="saveLoanBtn" type="submit" class="loan-btn-primary rounded-xl px-4 py-2 text-sm font-semibold">Salvar empréstimo</button>
                         </div>
                     </form>
                 </div>
@@ -791,13 +874,37 @@
 
         async function saveTableData(tableName, rows) {
             const safeRows = Array.isArray(rows) ? rows : [];
-            tableCache[tableName] = safeRows;
+            const serializedRows = tableName === 'loans'
+                ? safeRows.map((row) => {
+                    const parsed = parseLoanMeta(row?.observations ?? row?.notes ?? '');
+                    const rowMeta = row?.loan_meta && typeof row.loan_meta === 'object' ? row.loan_meta : null;
+                    const baseMeta = rowMeta || parsed.meta || null;
+                    const interestMode = normalizeInterestType(baseMeta?.interestMode || row?.interest_type);
+                    const fixedAddition = interestMode === 'fixo'
+                        ? round2(baseMeta?.fixedAddition ?? row?.interest_rate)
+                        : 0;
+                    const mergedMeta = {
+                        ...(baseMeta && typeof baseMeta === 'object' ? baseMeta : {}),
+                        interestMode,
+                        fixedAddition,
+                    };
+
+                    return {
+                        ...row,
+                        // O backend persiste apenas simples/composto; modo fixo segue no meta de observacoes.
+                        interest_type: interestMode === 'fixo' ? 'composto' : interestMode,
+                        observations: encodeLoanObservations(parsed.userText, mergedMeta),
+                    };
+                })
+                : safeRows;
+
+            tableCache[tableName] = serializedRows;
 
             const response = await fetch(`/api/tables/${tableName}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ rows: safeRows })
+                body: JSON.stringify({ rows: serializedRows })
             });
 
             if (!response.ok) {
@@ -1247,7 +1354,20 @@
             const interestRate = round2(row.interest_rate ?? row.interest ?? row.monthly_interest ?? 0);
             const installmentAmount = installmentsCount > 0 ? round2(row.installment_amount ?? (totalAmount / installmentsCount)) : 0;
             const parsed = parseLoanMeta(row.observations || row.notes || '');
-            const interestMode = normalizeInterestType(parsed.meta?.interestMode || row.interest_type);
+            const storedMode = normalizeInterestType(parsed.meta?.interestMode || row.interest_type);
+            const inferredFixedByTotals = storedMode === 'composto'
+                && !parsed.meta?.interestMode
+                && interestRate > 0
+                && totalAmount >= principalAmount
+                && Math.abs(round2(totalAmount - principalAmount) - interestRate) <= 0.01;
+            const interestMode = inferredFixedByTotals ? 'fixo' : storedMode;
+            const loanMeta = {
+                ...(parsed.meta && typeof parsed.meta === 'object' ? parsed.meta : {}),
+                interestMode,
+                fixedAddition: interestMode === 'fixo'
+                    ? round2(parsed.meta?.fixedAddition ?? interestRate)
+                    : 0,
+            };
 
             return {
                 ...row,
@@ -1261,7 +1381,7 @@
                 interest_type: interestMode,
                 payment_method: row.payment_method || 'Pix',
                 observations: parsed.userText,
-                loan_meta: parsed.meta || null,
+                loan_meta: loanMeta,
                 status: normalizeLoanStatus(row.status),
                 start_date: row.start_date || row.created_at || '',
                 first_due_date: row.first_due_date || row.due_date || ''
@@ -1739,55 +1859,6 @@
             renderLoansTable();
         }
 
-        function showMessage(message, type) {
-            const safeType = type === 'success' ? 'success' : 'error';
-
-            if (showMessage.hideTimeoutId) {
-                clearTimeout(showMessage.hideTimeoutId);
-                showMessage.hideTimeoutId = null;
-            }
-
-            if (showMessage.removeTimeoutId) {
-                clearTimeout(showMessage.removeTimeoutId);
-                showMessage.removeTimeoutId = null;
-            }
-
-            const existing = document.getElementById('appToast');
-            if (existing) existing.remove();
-
-            const toast = document.createElement('div');
-            toast.id = 'appToast';
-            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
-
-            const iconWrap = document.createElement('span');
-            iconWrap.className = 'app-toast-icon';
-
-            const icon = document.createElement('i');
-            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
-            iconWrap.appendChild(icon);
-
-            const text = document.createElement('span');
-            text.className = 'app-toast-text';
-            text.textContent = String(message || '');
-
-            toast.appendChild(iconWrap);
-            toast.appendChild(text);
-            document.body.appendChild(toast);
-
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
-            });
-
-            showMessage.hideTimeoutId = window.setTimeout(() => {
-                toast.classList.remove('show');
-                showMessage.removeTimeoutId = window.setTimeout(() => {
-                    toast.remove();
-                    showMessage.removeTimeoutId = null;
-                }, 220);
-                showMessage.hideTimeoutId = null;
-            }, 3000);
-        }
-
         function populateDebtorOptions(selectedDebtorId) {
             const select = document.getElementById('loanDebtor');
             const activeDebtors = loansState.debtors.filter(item => String(item.status || '').toLowerCase() === 'ativo');
@@ -2030,10 +2101,10 @@
             clearFieldErrors();
             resetSimulationState();
             setDefaultLoanDates();
-            document.getElementById('loanFixedAddition').value = 0;
-            document.getElementById('loanInterestRate').value = 0;
+            document.getElementById('loanFixedAddition').value = '';
+            document.getElementById('loanInterestRate').value = '';
             document.getElementById('loanInterestType').value = 'composto';
-            document.getElementById('loanInstallments').value = 0;
+            document.getElementById('loanInstallments').value = '';
             document.getElementById('loanEditingId').value = '';
             loanFormState.schedule = [];
 
@@ -2610,9 +2681,25 @@
                 }
             });
 
+            numericField.addEventListener('focus', function () {
+                if (String(numericField.value || '').trim() === '0') {
+                    numericField.value = '';
+                }
+            });
+
             numericField.addEventListener('input', function () {
-                const sanitized = String(numericField.value || '').replace(/[eE+\-]/g, '');
-                if (sanitized !== numericField.value) {
+                const rawValue = String(numericField.value || '');
+                let sanitized = rawValue.replace(/[eE+\-]/g, '');
+
+                if (fieldId === 'loanInstallments') {
+                    sanitized = sanitized.replace(/[^\d]/g, '');
+                    sanitized = sanitized.replace(/^0+(?=\d)/, '');
+                } else {
+                    sanitized = sanitized.replace(',', '.');
+                    sanitized = sanitized.replace(/^0+(?=\d)/, '');
+                }
+
+                if (sanitized !== rawValue) {
                     numericField.value = sanitized;
                 }
             });
@@ -2844,15 +2931,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
 
 

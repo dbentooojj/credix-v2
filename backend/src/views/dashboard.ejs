@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Painel financeiro</title>
     <%- include('partials/favicon') %>
+    <%- include('partials/toast') %>
+    <%- include('partials/session-timeout') %>
     <style>
         html, body { background-color: #020617; }
     </style>
@@ -470,6 +472,19 @@
             }
 
             .header-user-chevron { display: none; }
+
+            #userMenuBtn {
+                max-width: min(46vw, 11rem);
+                justify-content: flex-end;
+            }
+
+            .header-user-name {
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
 
         @media (min-width: 640px) {
@@ -636,8 +651,8 @@
             </div>
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
-                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full overflow-hidden">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -1147,55 +1162,6 @@
             const method = String(value || '').trim().toUpperCase();
             if (method === 'DINHEIRO' || method === 'TRANSFERENCIA' || method === 'PIX') return method;
             return 'PIX';
-        }
-
-        function showMessage(message, type) {
-            const safeType = type === 'success' ? 'success' : 'error';
-
-            if (showMessage.hideTimeoutId) {
-                clearTimeout(showMessage.hideTimeoutId);
-                showMessage.hideTimeoutId = null;
-            }
-
-            if (showMessage.removeTimeoutId) {
-                clearTimeout(showMessage.removeTimeoutId);
-                showMessage.removeTimeoutId = null;
-            }
-
-            const existing = document.getElementById('appToast');
-            if (existing) existing.remove();
-
-            const toast = document.createElement('div');
-            toast.id = 'appToast';
-            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
-
-            const iconWrap = document.createElement('span');
-            iconWrap.className = 'app-toast-icon';
-
-            const icon = document.createElement('i');
-            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
-            iconWrap.appendChild(icon);
-
-            const text = document.createElement('span');
-            text.className = 'app-toast-text';
-            text.textContent = String(message || '');
-
-            toast.appendChild(iconWrap);
-            toast.appendChild(text);
-            document.body.appendChild(toast);
-
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
-            });
-
-            showMessage.hideTimeoutId = window.setTimeout(() => {
-                toast.classList.remove('show');
-                showMessage.removeTimeoutId = window.setTimeout(() => {
-                    toast.remove();
-                    showMessage.removeTimeoutId = null;
-                }, 220);
-                showMessage.hideTimeoutId = null;
-            }, 3000);
         }
 
         function closeUserMenu() {
@@ -2009,9 +1975,6 @@
     </script>
 </body>
 </html>
-
-
-
 
 
 

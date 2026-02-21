@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Clientes</title>
     <%- include('partials/favicon') %>
+    <%- include('partials/toast') %>
+    <%- include('partials/session-timeout') %>
     <style>
         html, body { background-color: #020617; }
 </style>
@@ -345,6 +347,18 @@
 
             .header-user-chevron { display: none; }
 
+            #userMenuBtn {
+                max-width: min(46vw, 11rem);
+                justify-content: flex-end;
+            }
+
+            .header-user-name {
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
             .table-shell th,
             .table-shell td {
                 padding: 8px 10px;
@@ -526,8 +540,8 @@
             </div>
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
-                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full overflow-hidden">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -584,8 +598,8 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
-                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">0</p>
-                            <p id="totalDebtorsInsight" class="kpi-insight-line">--</p>
+                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">—</p>
+                            <p id="totalDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-users"></i>
@@ -597,8 +611,8 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
-                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">0</p>
-                            <p id="activeDebtorsInsight" class="kpi-insight-line">--</p>
+                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">—</p>
+                            <p id="activeDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-circle-check"></i>
@@ -610,8 +624,8 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
-                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">0</p>
-                            <p id="inactiveDebtorsInsight" class="kpi-insight-line">--</p>
+                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">—</p>
+                            <p id="inactiveDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-user-clock"></i>
@@ -623,8 +637,8 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
-                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">0</p>
-                            <p id="overdueDebtorsInsight" class="kpi-insight-line">--</p>
+                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">—</p>
+                            <p id="overdueDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
                             <i class="fas fa-triangle-exclamation"></i>
@@ -978,55 +992,6 @@
             window.alert(message);
         }
 
-        function showMessage(message, type) {
-            const safeType = type === 'success' ? 'success' : 'error';
-
-            if (showMessage.hideTimeoutId) {
-                clearTimeout(showMessage.hideTimeoutId);
-                showMessage.hideTimeoutId = null;
-            }
-
-            if (showMessage.removeTimeoutId) {
-                clearTimeout(showMessage.removeTimeoutId);
-                showMessage.removeTimeoutId = null;
-            }
-
-            const existing = document.getElementById('appToast');
-            if (existing) existing.remove();
-
-            const toast = document.createElement('div');
-            toast.id = 'appToast';
-            toast.className = `app-toast ${safeType === 'error' ? 'app-toast-error' : ''}`;
-
-            const iconWrap = document.createElement('span');
-            iconWrap.className = 'app-toast-icon';
-
-            const icon = document.createElement('i');
-            icon.className = `fas fa-${safeType === 'success' ? 'check' : 'triangle-exclamation'}`;
-            iconWrap.appendChild(icon);
-
-            const text = document.createElement('span');
-            text.className = 'app-toast-text';
-            text.textContent = String(message || '');
-
-            toast.appendChild(iconWrap);
-            toast.appendChild(text);
-            document.body.appendChild(toast);
-
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
-            });
-
-            showMessage.hideTimeoutId = window.setTimeout(() => {
-                toast.classList.remove('show');
-                showMessage.removeTimeoutId = window.setTimeout(() => {
-                    toast.remove();
-                    showMessage.removeTimeoutId = null;
-                }, 220);
-                showMessage.hideTimeoutId = null;
-            }, 3000);
-        }
-
         async function performLogout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('currentUser');
@@ -1131,10 +1096,66 @@
         let deleteToastTimeoutId = null;
         let deleteToastHideTimeoutId = null;
         let isDebtorsLoading = false;
+        const DEBTORS_METRICS_CACHE_KEY = 'credfacil:debtors-metrics:v1';
         const debtorsModalScrollState = {
             previousBodyOverflow: '',
             openModalIds: new Set(),
         };
+
+        function applyDebtorMetricsSnapshot(snapshot) {
+            if (!snapshot || typeof snapshot !== 'object') return;
+
+            const totalDebtors = document.getElementById('totalDebtors');
+            const activeDebtors = document.getElementById('activeDebtors');
+            const inactiveDebtors = document.getElementById('inactiveDebtors');
+            const overdueDebtors = document.getElementById('overdueDebtors');
+            const totalDebtorsInsight = document.getElementById('totalDebtorsInsight');
+            const activeDebtorsInsight = document.getElementById('activeDebtorsInsight');
+            const inactiveDebtorsInsight = document.getElementById('inactiveDebtorsInsight');
+            const overdueDebtorsInsight = document.getElementById('overdueDebtorsInsight');
+
+            if (totalDebtors) totalDebtors.textContent = String(snapshot.total);
+            if (activeDebtors) activeDebtors.textContent = String(snapshot.active);
+            if (inactiveDebtors) inactiveDebtors.textContent = String(snapshot.inactive);
+            if (overdueDebtors) overdueDebtors.textContent = String(snapshot.withOverdue);
+            if (totalDebtorsInsight) totalDebtorsInsight.textContent = String(snapshot.totalInsight || '');
+            if (activeDebtorsInsight) activeDebtorsInsight.textContent = String(snapshot.activeInsight || '');
+            if (inactiveDebtorsInsight) inactiveDebtorsInsight.textContent = String(snapshot.inactiveInsight || '');
+            if (overdueDebtorsInsight) overdueDebtorsInsight.textContent = String(snapshot.overdueInsight || '');
+        }
+
+        function cacheDebtorMetricsSnapshot(snapshot) {
+            try {
+                localStorage.setItem(DEBTORS_METRICS_CACHE_KEY, JSON.stringify(snapshot));
+            } catch (_error) {}
+        }
+
+        function restoreDebtorMetricsSnapshot() {
+            try {
+                const raw = localStorage.getItem(DEBTORS_METRICS_CACHE_KEY);
+                if (!raw) return false;
+                const snapshot = JSON.parse(raw);
+                if (!snapshot || typeof snapshot !== 'object') return false;
+
+                const numericFields = ['total', 'active', 'inactive', 'withOverdue'];
+                const hasValidNumbers = numericFields.every((field) => Number.isFinite(Number(snapshot[field])));
+                if (!hasValidNumbers) return false;
+
+                applyDebtorMetricsSnapshot({
+                    total: Number(snapshot.total),
+                    active: Number(snapshot.active),
+                    inactive: Number(snapshot.inactive),
+                    withOverdue: Number(snapshot.withOverdue),
+                    totalInsight: snapshot.totalInsight || '',
+                    activeInsight: snapshot.activeInsight || '',
+                    inactiveInsight: snapshot.inactiveInsight || '',
+                    overdueInsight: snapshot.overdueInsight || '',
+                });
+                return true;
+            } catch (_error) {
+                return false;
+            }
+        }
 
         function lockBodyScrollForDebtorsModal(modalElement) {
             if (!modalElement) return;
@@ -2037,34 +2058,21 @@
                 }, 0) / withOverdue
                 : 0;
 
-            document.getElementById('totalDebtors').textContent = String(total);
-            document.getElementById('activeDebtors').textContent = String(active);
-            document.getElementById('inactiveDebtors').textContent = String(inactive);
-            document.getElementById('overdueDebtors').textContent = String(withOverdue);
+            const snapshot = {
+                total,
+                active,
+                inactive,
+                withOverdue,
+                totalInsight: `${createdLast30Days} novo(s) nos últimos 30 dias`,
+                activeInsight: `${formatPercent(activeRatio, 1)} da base ativa`,
+                inactiveInsight: `${inactiveNoPayment60} sem pagamento há 60+ dias`,
+                overdueInsight: withOverdue > 0
+                    ? `${formatPercent(overdueRatio, 1)} da base | ticket médio ${formatCurrency(overdueTicketAverage)}`
+                    : 'Sem clientes em atraso no momento',
+            };
 
-            const totalDebtorsInsight = document.getElementById('totalDebtorsInsight');
-            if (totalDebtorsInsight) {
-                totalDebtorsInsight.textContent = `${createdLast30Days} novo(s) nos últimos 30 dias`;
-            }
-
-            const activeDebtorsInsight = document.getElementById('activeDebtorsInsight');
-            if (activeDebtorsInsight) {
-                activeDebtorsInsight.textContent = `${formatPercent(activeRatio, 1)} da base ativa`;
-            }
-
-            const inactiveDebtorsInsight = document.getElementById('inactiveDebtorsInsight');
-            if (inactiveDebtorsInsight) {
-                inactiveDebtorsInsight.textContent = `${inactiveNoPayment60} sem pagamento há 60+ dias`;
-            }
-
-            const overdueDebtorsInsight = document.getElementById('overdueDebtorsInsight');
-            if (overdueDebtorsInsight) {
-                if (withOverdue > 0) {
-                    overdueDebtorsInsight.textContent = `${formatPercent(overdueRatio, 1)} da base | ticket médio ${formatCurrency(overdueTicketAverage)}`;
-                } else {
-                    overdueDebtorsInsight.textContent = 'Sem clientes em atraso no momento';
-                }
-            }
+            applyDebtorMetricsSnapshot(snapshot);
+            cacheDebtorMetricsSnapshot(snapshot);
         }
 
         function badgeForStatus(status) {
@@ -2422,9 +2430,6 @@
                             <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
                                 <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
-                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
-                                <i class="fas fa-cash-register"></i>
-                            </button>
                             <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
                                 <i class="fas fa-pen-to-square"></i>
                             </button>
@@ -2530,9 +2535,6 @@
                             <div class="flex items-center justify-end gap-2">
                                 <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
                                     <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
-                                </button>
-                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-emerald-700 transition-colors hover:bg-emerald-50" data-action="register-payment" data-id="${debtor.id}" title="Registrar pagamento" aria-label="Registrar pagamento do cliente ${debtor.name || ''}">
-                                    <i class="fas fa-cash-register"></i>
                                 </button>
                                 <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
                                     <i class="fas fa-pen-to-square"></i>
@@ -3013,13 +3015,6 @@
                 return;
             }
 
-            const registerBtn = target.closest('button[data-action="register-payment"]');
-            if (registerBtn) {
-                const debtor = debtorsState.debtors.find(item => sameId(item.id, registerBtn.getAttribute('data-id')));
-                if (debtor) openRegisterPaymentModal(debtor);
-                return;
-            }
-
             const editBtn = target.closest('button[data-action="edit-debtor"]');
             if (editBtn) {
                 const debtor = debtorsState.debtors.find(item => sameId(item.id, editBtn.getAttribute('data-id')));
@@ -3181,19 +3176,12 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            restoreDebtorMetricsSnapshot();
             loadDebtorsData({ showSkeleton: true });
         });
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 

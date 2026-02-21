@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Controle de Cobrança</title>
     <%- include('partials/favicon') %>
+    <%- include('partials/toast') %>
+    <%- include('partials/session-timeout') %>
     <style>
         html, body { background-color: #020617; }
 </style>
@@ -184,6 +186,19 @@
             }
 
             .header-user-chevron { display: none; }
+
+            #userMenuBtn {
+                max-width: min(46vw, 11rem);
+                justify-content: flex-end;
+            }
+
+            .header-user-name {
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
         @media (max-width: 639px) {
             #installmentsTableWrapper { display: none !important; }
@@ -336,8 +351,8 @@
             </div>
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
-                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full overflow-hidden">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -634,8 +649,6 @@
             <div id="installmentDetailsContent"></div>
         </div>
     </div>
-
-    <div id="toastContainer" class="pointer-events-none fixed right-4 top-4 z-[70] flex w-full max-w-sm flex-col gap-2 sm:right-6 sm:top-6"></div>
 
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
     <script>
@@ -993,7 +1006,7 @@
             if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
                 return `0,00% ${label}`;
             }
-            return `${percentValue > 0 ? '?' : '?'} ${formatPercentMagnitude(percentValue)}% ${label}`;
+            return `${percentValue > 0 ? '↑' : '↓'} ${formatPercentMagnitude(percentValue)}% ${label}`;
         }
 
         function formatSecondaryInsightText(percentValue, label) {
@@ -2037,19 +2050,6 @@
             showMessage(`Notificacoes enviadas: ${summary.join(' | ')}.`, 'success');
         }
 
-        function showMessage(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `pointer-events-auto rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg transition-opacity duration-150 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
-            toast.innerHTML = `<div class="flex items-start gap-2"><i class="mt-0.5 fas fa-${type === 'success' ? 'check-circle' : 'triangle-exclamation'}"></i><span>${message}</span></div>`;
-            const container = document.getElementById('toastContainer');
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 150);
-            }, 3200);
-        }
-
         function setRefreshingState(isRefreshing) {
             document.querySelectorAll('[data-refresh-control]').forEach((button) => {
                 const icon = button?.querySelector('i');
@@ -2386,10 +2386,6 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 
 

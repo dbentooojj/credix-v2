@@ -15,8 +15,19 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1),
+  APP_BASE_URL: z
+    .string()
+    .optional()
+    .transform((value) => normalizeOptional(value))
+    .refine((value) => !value || /^https?:\/\/.+/i.test(value), "APP_BASE_URL invalida"),
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default("7d"),
+  RESET_PASSWORD_SECRET: z
+    .string()
+    .optional()
+    .transform((value) => normalizeOptional(value)),
+  RESET_PASSWORD_EXPIRES_IN: z.string().default("30m"),
+  SESSION_IDLE_MINUTES: z.coerce.number().int().min(1).max(1440).default(30),
   COOKIE_NAME: z.string().default("credfacil_token"),
   COOKIE_SECURE: z
     .string()

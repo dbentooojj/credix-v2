@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credix - Relatórios (Central da Carteira)</title>
     <%- include('partials/favicon') %>
+    <%- include('partials/toast') %>
+    <%- include('partials/session-timeout') %>
     <style>
         html, body { background-color: #020617; }
 </style>
@@ -125,6 +127,81 @@
             padding: 10px 12px;
             color: #111827;
             width: 100%;
+        }
+
+        .report-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 10px 12px;
+            align-items: end;
+        }
+
+        .report-filter-field {
+            min-width: 0;
+        }
+
+        .report-filter-field .filter-control {
+            min-height: 38px;
+            padding: 8px 11px;
+            font-size: 0.875rem;
+        }
+
+        .report-filter-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .report-filter-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-filter-actions .action-btn {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .report-page-toolbar {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .report-page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .report-page-actions .action-btn {
+            padding: 7px 11px;
+            font-size: 0.78rem;
+        }
+
+        @media (min-width: 640px) {
+            .report-filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .report-page-toolbar {
+                align-items: flex-end;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .report-filter-grid {
+                grid-template-columns: 1.05fr 1.05fr 1.1fr 0.72fr 0.72fr 0.72fr 0.62fr 0.62fr;
+            }
+
+            .report-filter-field-range {
+                grid-column: span 2;
+            }
         }
 
         .action-btn {
@@ -320,16 +397,27 @@
             }
 
             .header-user-chevron { display: none; }
+
+            #userMenuBtn {
+                max-width: min(46vw, 11rem);
+                justify-content: flex-end;
+            }
+
+            .header-user-name {
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
 
-        @media (max-width: 767px) {
-            #filterAccordionBody {
-                display: none;
-            }
+        #filterAccordionBody {
+            display: none;
+        }
 
-            #filterAccordionBody.open {
-                display: block;
-            }
+        #filterAccordionBody.open {
+            display: block;
         }
 
         .dark .glass-card {
@@ -1338,6 +1426,78 @@
             color: #64748b;
         }
 
+        .report-empty-state-rich {
+            min-height: 260px;
+            padding: 24px;
+        }
+
+        .report-empty-state-content {
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-empty-state-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e40af;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            font-size: 16px;
+        }
+
+        .report-empty-state-title {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.35;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .report-empty-state-note {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: #475569;
+        }
+
+        .report-empty-state-meta {
+            margin: 0;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            color: #64748b;
+        }
+
+        .report-empty-state-actions {
+            margin-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .report-empty-state-content {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .report-empty-state-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .report-empty-state-actions .action-btn {
+                width: 100%;
+            }
+        }
+
         .insight-item {
             border: 1px solid #e2e8f0;
             background: #f8fafc;
@@ -1983,8 +2143,8 @@
             </div>
             <div class="flex flex-1 items-center justify-end gap-1 sm:gap-4 lg:gap-6 min-w-0">
                 <div class="relative min-w-0">
-                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full">
-                        <span id="userName" class="header-user-name font-semibold min-w-0 max-w-[16rem] truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
+                    <button id="userMenuBtn" class="flex items-center gap-2 text-slate-200 hover:text-white focus:outline-none min-w-0 max-w-full overflow-hidden">
+                        <span id="userName" class="header-user-name font-semibold min-w-0 truncate">Olá, <%= currentUser?.name || currentUser?.full_name || 'Administrador' %></span>
                         <i class="header-user-chevron fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="userMenuDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -2028,26 +2188,35 @@
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                     <h2 class="page-title text-3xl font-bold">Relatórios</h2>
-                    <p class="muted-on-dark mt-1 text-sm">Central de Inteligência da Carteira: decisão rápida com dados, risco e projeções.</p>
+                    <p class="muted-on-dark mt-1 text-sm">Resumo da carteira, risco e projeções em tempo real.</p>
                 </div>
-                <p class="text-xs text-slate-300">Última atualização: <span id="reportUpdatedAt" class="font-semibold text-slate-100" aria-live="polite">--:--</span></p>
+                <div class="report-page-toolbar">
+                    <p class="text-xs text-slate-300">Última atualização: <span id="reportUpdatedAt" class="font-semibold text-slate-100" aria-live="polite">--:--</span></p>
+                    <div class="report-page-actions">
+                        <button id="exportCsvBtn" type="button" class="action-btn action-btn-soft">
+                            <i class="fas fa-file-csv mr-1"></i>Exportar CSV
+                        </button>
+                        <button id="exportPdfBtn" type="button" class="action-btn action-btn-soft">
+                            <i class="fas fa-file-pdf mr-1"></i>Exportar PDF
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <section id="reportFilterBar" class="glass-card mb-6 rounded-2xl p-4 sm:p-6">
+            <section id="reportFilterBar" class="glass-card mb-4 rounded-2xl p-4 sm:p-6">
                 <div class="intel-section-head">
                     <div>
                         <h3 class="intel-section-title">Filtros avançados</h3>
-                        <p class="intel-section-subtitle">Refine período, perfil e status para decisões operacionais e executivas.</p>
                     </div>
                     <button id="filterAccordionToggle" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700" aria-expanded="false" aria-controls="filterAccordionBody">
                         <i class="fas fa-sliders"></i>
-                        <span>Ocultar filtros</span>
+                        <span>Mostrar filtros</span>
                     </button>
                 </div>
 
-                <div id="filterAccordionBody" class="mt-4 space-y-4">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
-                        <div class="xl:col-span-2">
+                <div id="filterAccordionBody" class="mt-3 space-y-3">
+                    <div class="report-filter-grid">
+                        <div class="report-filter-field">
                             <label for="reportPeriodFilter" class="mb-1 block text-sm text-gray-600">Período</label>
                             <select id="reportPeriodFilter" class="filter-control">
                                 <option value="all">Todo período</option>
@@ -2059,24 +2228,24 @@
                                 <option value="custom">Intervalo custom</option>
                             </select>
                         </div>
-                        <div id="reportCustomRangeWrap" class="hidden xl:col-span-3">
+                        <div id="reportCustomRangeWrap" class="hidden report-filter-field report-filter-field-range">
                             <label class="mb-1 block text-sm text-gray-600">Intervalo custom</label>
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 <input id="reportCustomStartDate" type="date" class="filter-control" aria-label="Data inicial do relatório">
                                 <input id="reportCustomEndDate" type="date" class="filter-control" aria-label="Data final do relatório">
                             </div>
                         </div>
-                        <div class="xl:col-span-2">
+                        <div class="report-filter-field">
                             <label for="reportClientFilter" class="mb-1 block text-sm text-gray-600">Cliente</label>
                             <select id="reportClientFilter" class="filter-control">
                                 <option value="all">Todos os clientes</option>
                             </select>
                         </div>
-                        <div class="xl:col-span-2">
+                        <div class="report-filter-field">
                             <label for="reportClientSearch" class="mb-1 block text-sm text-gray-600">Busca de cliente</label>
                             <input id="reportClientSearch" type="text" class="filter-control" placeholder="Nome, telefone ou documento">
                         </div>
-                        <div class="xl:col-span-1">
+                        <div class="report-filter-field">
                             <label for="reportStatusFilter" class="mb-1 block text-sm text-gray-600">Status</label>
                             <select id="reportStatusFilter" class="filter-control">
                                 <option value="all">Todos</option>
@@ -2085,7 +2254,7 @@
                                 <option value="overdue">Atrasado</option>
                             </select>
                         </div>
-                        <div class="xl:col-span-1">
+                        <div class="report-filter-field">
                             <label for="reportInterestTypeFilter" class="mb-1 block text-sm text-gray-600">Tipo de juros</label>
                             <select id="reportInterestTypeFilter" class="filter-control">
                                 <option value="all">Todos</option>
@@ -2094,7 +2263,7 @@
                                 <option value="fixo">Valor fixo</option>
                             </select>
                         </div>
-                        <div class="xl:col-span-1">
+                        <div class="report-filter-field">
                             <label for="reportFrequencyFilter" class="mb-1 block text-sm text-gray-600">Forma</label>
                             <select id="reportFrequencyFilter" class="filter-control">
                                 <option value="all">Todas</option>
@@ -2102,43 +2271,36 @@
                                 <option value="quinzenal">Quinzenal</option>
                             </select>
                         </div>
-                        <div class="xl:col-span-1">
+                        <div class="report-filter-field">
                             <label for="reportMinValue" class="mb-1 block text-sm text-gray-600">Valor mín.</label>
                             <input id="reportMinValue" type="number" min="0" step="0.01" class="filter-control" placeholder="0,00">
                         </div>
-                        <div class="xl:col-span-1">
+                        <div class="report-filter-field">
                             <label for="reportMaxValue" class="mb-1 block text-sm text-gray-600">Valor máx.</label>
                             <input id="reportMaxValue" type="number" min="0" step="0.01" class="filter-control" placeholder="0,00">
                         </div>
-                        <div class="xl:col-span-2 flex items-end">
-                            <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                                <input id="reportOnlyOverdue" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                Somente atrasados
-                            </label>
-                        </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button id="reportApplyFiltersBtn" type="button" class="action-btn action-btn-primary">
-                            <i class="fas fa-filter mr-1"></i>Aplicar
-                        </button>
-                        <button id="reportClearFiltersBtn" type="button" class="action-btn action-btn-soft">Limpar</button>
-                        <button id="exportCsvBtn" type="button" class="action-btn action-btn-soft">
-                            <i class="fas fa-file-csv mr-1"></i>Exportar CSV
-                        </button>
-                        <button id="exportPdfBtn" type="button" class="action-btn action-btn-soft">
-                            <i class="fas fa-file-pdf mr-1"></i>Exportar PDF
-                        </button>
+                    <div class="report-filter-footer">
+                        <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                            <input id="reportOnlyOverdue" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            Somente atrasados
+                        </label>
+                        <div class="report-filter-actions">
+                            <button id="reportApplyFiltersBtn" type="button" class="action-btn action-btn-primary">
+                                <i class="fas fa-filter mr-1"></i>Aplicar
+                            </button>
+                            <button id="reportClearFiltersBtn" type="button" class="action-btn action-btn-soft">Limpar</button>
+                        </div>
                     </div>
                 </div>
                 <p id="reportFeedback" class="report-feedback info mt-4 hidden" role="status" aria-live="polite"></p>
             </section>
 
-            <section id="reportKpiSection" class="mb-6">
-                <div class="intel-section-head mb-3">
+            <section id="reportKpiSection" class="mb-5">
+                <div class="intel-section-head mb-1">
                     <div>
-                        <h3 class="intel-section-title">Seção A: Visão Executiva</h3>
-                        <p class="intel-section-subtitle">Receita, lucro, inadimplência e ticket com comparação direta vs período anterior.</p>
+                        <h3 class="intel-section-title text-slate-200">Seção A: Visão Executiva</h3>
                     </div>
                 </div>
                 <div id="reportPortfolioScoreCard" class="portfolio-score-card glass-card mb-4 rounded-2xl p-5" role="region" aria-label="Score da Carteira">
@@ -2501,31 +2663,20 @@
             });
         }
 
-        function syncFilterAccordionViewport() {
-            if (!filterAccordionBody) return;
-            const label = filterAccordionToggle?.querySelector('span');
-            if (window.matchMedia('(min-width: 768px)').matches) {
-                filterAccordionBody.classList.add('open');
-                if (filterAccordionToggle) filterAccordionToggle.setAttribute('aria-expanded', 'true');
-                if (label) label.textContent = 'Ocultar filtros';
-                return;
-            }
-            if (!filterAccordionBody.classList.contains('open')) {
-                filterAccordionBody.classList.remove('open');
-                if (filterAccordionToggle) filterAccordionToggle.setAttribute('aria-expanded', 'false');
-                if (label) label.textContent = 'Mostrar filtros';
-            }
+        function syncFilterAccordionLabel(isOpen) {
+            if (!filterAccordionToggle) return;
+            const label = filterAccordionToggle.querySelector('span');
+            if (label) label.textContent = isOpen ? 'Ocultar filtros' : 'Mostrar filtros';
+            filterAccordionToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
 
         if (filterAccordionToggle && filterAccordionBody) {
             filterAccordionToggle.addEventListener('click', () => {
                 const isOpen = filterAccordionBody.classList.toggle('open');
-                const label = filterAccordionToggle.querySelector('span');
-                if (label) label.textContent = isOpen ? 'Ocultar filtros' : 'Mostrar filtros';
-                filterAccordionToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                syncFilterAccordionLabel(isOpen);
             });
-            syncFilterAccordionViewport();
-            window.addEventListener('resize', syncFilterAccordionViewport);
+
+            syncFilterAccordionLabel(filterAccordionBody.classList.contains('open'));
         }
 
         const reportsState = {
@@ -3614,6 +3765,51 @@
             });
         }
 
+        function renderPerformanceEmptyState(chartContainer, options = {}) {
+            if (!chartContainer) return;
+
+            const selectedPeriodLabel = String(options.selectedPeriodLabel || 'todo período').trim() || 'todo período';
+            const hasSourceData = Boolean(options.hasSourceData);
+            const title = hasSourceData
+                ? 'Sem dados no recorte atual'
+                : 'Ainda não há dados para comparar';
+            const note = hasSourceData
+                ? 'Não encontramos parcelas suficientes para montar o comparativo de performance com os filtros atuais.'
+                : 'Cadastre clientes e empréstimos para liberar o comparativo de previsto, recebido e em aberto.';
+            const meta = hasSourceData
+                ? `Período atual: ${selectedPeriodLabel}. Dica: limpe filtros ou amplie o período.`
+                : 'Dica: após o primeiro empréstimo, o gráfico começa a ser preenchido automaticamente.';
+
+            chartContainer.innerHTML = `
+                <div class="report-empty-state report-empty-state-rich">
+                    <div class="report-empty-state-content">
+                        <span class="report-empty-state-icon" aria-hidden="true"><i class="fas fa-chart-column"></i></span>
+                        <p class="report-empty-state-title">${escapeHtml(title)}</p>
+                        <p class="report-empty-state-note">${escapeHtml(note)}</p>
+                        <p class="report-empty-state-meta">${escapeHtml(meta)}</p>
+                        <div class="report-empty-state-actions">
+                            <button type="button" class="action-btn action-btn-soft py-1.5 text-xs" data-report-empty-action="clear-filters">Limpar filtros</button>
+                            <button type="button" class="action-btn action-btn-primary py-1.5 text-xs" data-report-empty-action="open-loans">Ir para empréstimos</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const clearButton = chartContainer.querySelector('[data-report-empty-action="clear-filters"]');
+            if (clearButton) {
+                clearButton.addEventListener('click', () => {
+                    clearReportFilters();
+                });
+            }
+
+            const openLoansButton = chartContainer.querySelector('[data-report-empty-action="open-loans"]');
+            if (openLoansButton) {
+                openLoansButton.addEventListener('click', () => {
+                    window.location.href = 'loans.html';
+                });
+            }
+        }
+
         function renderChart(installments) {
             const chartContainer = document.getElementById('reportChart');
             const subtitle = document.getElementById('reportChartSubtitle');
@@ -3686,10 +3882,14 @@
             if (points.length > maxBuckets) points = points.slice(points.length - maxBuckets);
 
             if (!points.length) {
-                if (peakReceivedElement) peakReceivedElement.textContent = '--';
-                if (peakOverdueElement) peakOverdueElement.textContent = '--';
-                if (currentProfitElement) currentProfitElement.textContent = '--';
-                chartContainer.innerHTML = '<div class="report-empty-state">Sem dados suficientes no filtro atual para montar o comparativo de performance.</div>';
+                if (peakReceivedElement) peakReceivedElement.textContent = formatCompactCurrency(0);
+                if (peakOverdueElement) peakOverdueElement.textContent = formatCompactCurrency(0);
+                if (currentProfitElement) currentProfitElement.textContent = formatCompactCurrency(0);
+                subtitle.textContent = `Sem dados para comparativo em ${selectedPeriodLabel.toLowerCase()}.`;
+                renderPerformanceEmptyState(chartContainer, {
+                    selectedPeriodLabel,
+                    hasSourceData: reportsState.installments.length > 0,
+                });
                 return;
             }
 
@@ -4176,12 +4376,21 @@
             showReportFeedback('CSVs exportados: Resumo, Parcelas e Clientes de risco.', 'info');
         }
 
+        function getReportPdfLogoUrl() {
+            try {
+                const customLogoUrl = String(localStorage.getItem('credfacil:pdf-logo-url') || '').trim();
+                if (customLogoUrl) return customLogoUrl;
+            } catch (_error) {}
+            return `${window.location.origin}/android-chrome-192x192.png`;
+        }
+
         function exportReportsPdf(rows, metrics, previousMetrics, scoreData, filterSnapshot, projectionData, sparkRows) {
             const popup = window.open('', '_blank', 'width=1240,height=920');
             if (!popup) {
                 showReportFeedback('Permita pop-up para exportar PDF.', 'error');
                 return;
             }
+            const logoUrl = getReportPdfLogoUrl();
 
             const topRows = buildTopDebtorsRows(rows).slice(0, 10);
             const paidRows = buildRecentPaidRows(rows).slice(0, 10);
@@ -4213,6 +4422,10 @@
                         h1, h2, h3 { margin: 0; color: #0f172a; }
                         p { margin: 0; }
                         .section { margin-bottom: 9mm; break-inside: avoid; page-break-inside: avoid; }
+                        .header-wrap { display: flex; align-items: flex-start; gap: 10px; }
+                        .header-logo-shell { width: 46px; height: 46px; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+                        .header-logo { width: 34px; height: 34px; object-fit: contain; display: block; }
+                        .header-content { min-width: 0; }
                         .header-title { font-size: 20px; font-weight: 800; }
                         .header-subtitle { margin-top: 2px; color: #475569; }
                         .header-meta { margin-top: 8px; color: #475569; font-size: 10px; }
@@ -4252,9 +4465,16 @@
                 </head>
                 <body>
                     <section class="section">
-                        <h1 class="header-title">Relatórios - Central de Inteligência da Carteira</h1>
-                        <p class="header-subtitle">Relatório estratégico exportado da central.</p>
-                        <p class="header-meta">Gerado em ${new Date().toLocaleString('pt-BR')} • Recorte: ${escapeHtml(filterSnapshot.rangeLabel)}</p>
+                        <div class="header-wrap">
+                            <span class="header-logo-shell">
+                                <img src="${escapeHtml(logoUrl)}" alt="Logo" class="header-logo" onerror="this.style.display='none';" />
+                            </span>
+                            <div class="header-content">
+                                <h1 class="header-title">Relatórios - Central de Inteligência da Carteira</h1>
+                                <p class="header-subtitle">Relatório estratégico exportado da central.</p>
+                                <p class="header-meta">Gerado em ${new Date().toLocaleString('pt-BR')} • Recorte: ${escapeHtml(filterSnapshot.rangeLabel)}</p>
+                            </div>
+                        </div>
                         <div class="filters">
                             <span class="chip">Período: ${escapeHtml(filterSnapshot.periodLabel)}</span>
                             <span class="chip">Status: ${escapeHtml(filterSnapshot.statusLabel)}</span>
@@ -4418,9 +4638,41 @@
                 </html>
             `);
             popup.document.close();
-            popup.focus();
-            popup.print();
-            showReportFeedback('PDF da Central preparado para impressão.', 'info');
+
+            const triggerPrint = () => {
+                popup.focus();
+                popup.print();
+                showReportFeedback('PDF da Central preparado para impressão.', 'info');
+            };
+
+            const images = Array.from(popup.document.images || []);
+            if (!images.length) {
+                setTimeout(triggerPrint, 120);
+                return;
+            }
+
+            let pending = images.length;
+            let finished = false;
+            const finalize = () => {
+                if (finished) return;
+                finished = true;
+                setTimeout(triggerPrint, 120);
+            };
+            const onImageSettled = () => {
+                pending -= 1;
+                if (pending <= 0) finalize();
+            };
+
+            images.forEach((imageElement) => {
+                if (imageElement.complete) {
+                    onImageSettled();
+                    return;
+                }
+                imageElement.addEventListener('load', onImageSettled, { once: true });
+                imageElement.addEventListener('error', onImageSettled, { once: true });
+            });
+
+            setTimeout(finalize, 1600);
         }
 
         function notifyExportPlaceholder(format) {

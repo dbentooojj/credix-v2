@@ -5,6 +5,10 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
 export const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().trim().email(),
@@ -24,3 +28,19 @@ export const updatePasswordSchema = z.object({
   currentPassword: z.string().min(1),
   newPassword: strongPasswordSchema,
 });
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().trim().min(16).max(4096),
+    newPassword: strongPasswordSchema,
+    confirmPassword: z.string().min(1),
+  })
+  .superRefine((value, ctx) => {
+    if (value.newPassword !== value.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmPassword"],
+        message: "A confirmacao da nova senha nao confere",
+      });
+    }
+  });

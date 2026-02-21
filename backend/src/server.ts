@@ -27,6 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(optionalAuth);
 app.use(express.static(path.join(process.cwd(), "src", "public")));
+app.use((_req, res, next) => {
+  res.locals.sessionIdleMinutes = env.SESSION_IDLE_MINUTES;
+  next();
+});
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });

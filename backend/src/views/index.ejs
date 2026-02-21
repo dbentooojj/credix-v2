@@ -218,7 +218,7 @@ body { font-family: 'Inter', sans-serif; }
                     <input type="checkbox" id="rememberMe" class="mr-2">
                     Lembrar-me
                 </label>
-                <a href="#" class="text-blue-600 hover:underline">
+                <a href="/forgot-password" class="text-blue-600 hover:underline">
                     Esqueceu?
                 </a>
             </div>
@@ -257,6 +257,27 @@ async function checkSession() {
 }
 
 checkSession();
+
+function showLoginReasonMessage() {
+    const params = new URLSearchParams(window.location.search);
+    const reason = String(params.get('reason') || '').trim().toLowerCase();
+    if (!reason) return;
+
+    const message = document.getElementById('loginMessage');
+    if (!message) return;
+
+    if (reason === 'timeout') {
+        message.className = 'text-sm rounded-lg px-3 py-2 bg-amber-100 text-amber-800';
+        message.textContent = 'Sua sessao expirou por inatividade. Faca login novamente.';
+        message.classList.remove('hidden');
+    } else if (reason === 'reset-success') {
+        message.className = 'text-sm rounded-lg px-3 py-2 bg-green-100 text-green-700';
+        message.textContent = 'Senha redefinida com sucesso. Entre com sua nova senha.';
+        message.classList.remove('hidden');
+    }
+}
+
+showLoginReasonMessage();
 
 document.getElementById('togglePassword').addEventListener('click', function() {
     const input = document.getElementById('password');
