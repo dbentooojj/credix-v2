@@ -129,12 +129,48 @@ function getDueReference(daysAhead: number): { title: string; sentence: string }
   return { title: "na data selecionada", sentence: "na data selecionada" };
 }
 
-function getEmailRecipients(override?: string[]): string[] {
+type RecipientSource = "override" | "env" | "internal-users";
+
+type RecipientResolution = {
+  recipients: string[];
+  source: RecipientSource;
+};
+
+async function getInternalUserRecipients(): Promise<string[]> {
+  const rows = await prisma.$queryRaw<Array<{ email: string | null }>>`
+    SELECT "email"
+    FROM "User"
+    WHERE UPPER(TRIM(("role")::text)) IN ('ADMIN', 'OWNER')
+    ORDER BY "id" ASC
+  `;
+
+  return parseRecipients(
+    rows
+      .map((row) => String(row.email || "").trim().toLowerCase())
+      .filter(Boolean)
+      .join(","),
+  );
+}
+
+async function getEmailRecipients(override?: string[]): Promise<RecipientResolution> {
   if (override && override.length > 0) {
-    return parseRecipients(override.join(","));
+    return {
+      recipients: parseRecipients(override.join(",")),
+      source: "override",
+    };
   }
 
-  return parseRecipients(env.EMAIL_NOTIFY_TO);
+  if (env.EMAIL_NOTIFY_TO) {
+    return {
+      recipients: parseRecipients(env.EMAIL_NOTIFY_TO),
+      source: "env",
+    };
+  }
+
+  return {
+    recipients: await getInternalUserRecipients(),
+    source: "internal-users",
+  };
 }
 
 async function fetchDueInstallments(targetDateIso: string): Promise<DueInstallment[]> {
@@ -398,13 +434,20 @@ export async function sendDueTodayInstallmentsEmail(
   const dueCount = dueItems.length;
   const clientCount = dueGroups.length;
   const totalAmount = dueItems.reduce((sum, item) => sum + item.amount, 0);
-  const recipients = getEmailRecipients(options.recipients);
+  const recipientResolution = await getEmailRecipients(options.recipients);
+  const recipients = recipientResolution.recipients;
 
   if (recipients.length === 0) {
+    const noRecipientsMessageBySource: Record<RecipientSource, string> = {
+      override: "Nenhum destinatario valido no override de recipients",
+      env: "EMAIL_NOTIFY_TO definido, mas sem destinatarios validos",
+      "internal-users": "Nenhum usuario interno (ADMIN/OWNER) com e-mail valido encontrado",
+    };
+
     return {
       ok: false,
       skipped: true,
-      message: "EMAIL_NOTIFY_TO nao configurado",
+      message: noRecipientsMessageBySource[recipientResolution.source],
       targetDateIso,
       recipients,
       dueCount,
