@@ -434,6 +434,21 @@ export async function sendDueTodayInstallmentsEmail(
   const dueCount = dueItems.length;
   const clientCount = dueGroups.length;
   const totalAmount = dueItems.reduce((sum, item) => sum + item.amount, 0);
+
+  if (dueCount === 0) {
+    return {
+      ok: true,
+      skipped: true,
+      message: `Nenhuma parcela encontrada para ${formatDateIso(targetDateIso)}. E-mail nao enviado`,
+      targetDateIso,
+      recipients: [],
+      dueCount,
+      clientCount,
+      totalAmount,
+      daysAhead: effectiveDaysAhead,
+    };
+  }
+
   const recipientResolution = await getEmailRecipients(options.recipients);
   const recipients = recipientResolution.recipients;
 

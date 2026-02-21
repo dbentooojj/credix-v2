@@ -55,7 +55,9 @@ export function startDueTodayEmailJob(): void {
       console.log(`[due-today-email-job] (${label}) Total de clientes: ${result.clientCount}`);
       console.log(`[due-today-email-job] (${label}) Total geral: ${formatCurrency(result.totalAmount)}`);
 
-      if (!result.ok) {
+      if (result.skipped) {
+        console.log(`[due-today-email-job] (${label}) Envio pulado: ${result.message}`);
+      } else if (!result.ok) {
         console.error(`[due-today-email-job] (${label}) Erro no envio do e-mail: ${result.message}`);
       } else {
         console.log(`[due-today-email-job] (${label}) Sucesso no envio do e-mail.`);
