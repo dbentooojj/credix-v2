@@ -116,6 +116,15 @@ const envSchema = z.object({
       return normalized || "08:00";
     })
     .pipe(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "EMAIL_NOTIFY_TIME invalido")),
+  EMAIL_NOTIFY_DAYS_AHEAD: z.preprocess((value) => {
+    if (value === undefined || value === null) return 0;
+    if (typeof value === "string") {
+      const normalized = value.trim();
+      if (!normalized) return 0;
+      return Number(normalized);
+    }
+    return value;
+  }, z.number().int().min(0)),
   EMAIL_NOTIFY_RUN_ON_START: z
     .string()
     .optional()

@@ -1,5 +1,6 @@
 import { env } from "../config/env";
 import {
+  addDays,
   getHourMinuteInTimeZone,
   getIsoTodayInTimeZone,
   normalizeTimeZone,
@@ -31,21 +32,28 @@ export function startDueTodayEmailJob(): void {
 
   const timeZone = normalizeTimeZone(env.EMAIL_NOTIFY_TZ);
   const scheduleTime = env.EMAIL_NOTIFY_TIME;
+  const daysAhead = env.EMAIL_NOTIFY_DAYS_AHEAD;
 
-  console.log(`[due-today-email-job] Job iniciado. Execucao diaria as ${scheduleTime} (${timeZone}).`);
+  console.log(
+    `[due-today-email-job] Job iniciado. Execucao diaria as ${scheduleTime} (${timeZone}), daysAhead=${daysAhead}.`,
+  );
 
   const run = async (label: string) => {
-    const todayIso = getIsoTodayInTimeZone(timeZone);
+    const runDateIso = getIsoTodayInTimeZone(timeZone);
+    const targetDateIso = addDays(runDateIso, daysAhead);
 
     try {
       const result = await sendDueTodayInstallmentsEmail({
         force: true,
-        targetDateIso: todayIso,
+        targetDateIso,
         timeZone,
+        daysAhead,
       });
 
-      console.log(`[due-today-email-job] (${label}) Quantidade de parcelas encontradas: ${result.dueCount}`);
-      console.log(`[due-today-email-job] (${label}) Total calculado: ${formatCurrency(result.totalAmount)}`);
+      console.log(`[due-today-email-job] (${label}) Data alvo: ${result.targetDateIso}`);
+      console.log(`[due-today-email-job] (${label}) Total de parcelas: ${result.dueCount}`);
+      console.log(`[due-today-email-job] (${label}) Total de clientes: ${result.clientCount}`);
+      console.log(`[due-today-email-job] (${label}) Total geral: ${formatCurrency(result.totalAmount)}`);
 
       if (!result.ok) {
         console.error(`[due-today-email-job] (${label}) Erro no envio do e-mail: ${result.message}`);

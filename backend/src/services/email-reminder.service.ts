@@ -1,17 +1,29 @@
 import { InstallmentStatus } from "@prisma/client";
 import { env } from "../config/env";
-import { getIsoTodayInTimeZone, normalizeTimeZone } from "../lib/date-time";
+import { addDays, getIsoTodayInTimeZone, normalizeTimeZone } from "../lib/date-time";
 import { toSafeNumber } from "../lib/numbers";
 import { prisma } from "../lib/prisma";
 import { getSmtpConfigError, sendEmail } from "./email.service";
 
-type DueTodayInstallment = {
+type DueInstallment = {
   installmentId: number;
   installmentNumber: number;
   loanId: number;
+  dueDateIso: string;
+  status: InstallmentStatus;
+  clientId: number;
   clientName: string;
   clientPhone: string | null;
   amount: number;
+};
+
+type DueInstallmentGroup = {
+  clientId: number;
+  clientName: string;
+  clientPhone: string | null;
+  installments: DueInstallment[];
+  dueCount: number;
+  totalAmount: number;
 };
 
 type SendDueTodayEmailOptions = {
@@ -19,6 +31,7 @@ type SendDueTodayEmailOptions = {
   targetDateIso?: string;
   recipients?: string[];
   timeZone?: string;
+  daysAhead?: number;
 };
 
 export type SendDueTodayEmailResult = {
@@ -28,7 +41,9 @@ export type SendDueTodayEmailResult = {
   targetDateIso: string;
   recipients: string[];
   dueCount: number;
+  clientCount: number;
   totalAmount: number;
+  daysAhead: number;
 };
 
 function formatCurrency(value: number): string {
@@ -83,21 +98,46 @@ function normalizeWhatsAppPhone(rawPhone: string | null | undefined): string | n
   return null;
 }
 
+function getPhoneDisplay(rawPhone: string | null | undefined): string {
+  const normalized = String(rawPhone || "").trim();
+  return normalized || "-";
+}
+
 function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+function normalizeDaysAhead(raw: number): number {
+  if (!Number.isFinite(raw)) return 0;
+  const integer = Math.trunc(raw);
+  return integer >= 0 ? integer : 0;
+}
+
+function getIsoDateDiff(baseIso: string, targetIso: string): number {
+  const baseDate = new Date(`${baseIso}T00:00:00Z`);
+  const targetDate = new Date(`${targetIso}T00:00:00Z`);
+  if (Number.isNaN(baseDate.getTime()) || Number.isNaN(targetDate.getTime())) return 0;
+  return Math.round((targetDate.getTime() - baseDate.getTime()) / 86_400_000);
+}
+
+function getDueReference(daysAhead: number): { title: string; sentence: string } {
+  if (daysAhead === 0) return { title: "hoje", sentence: "hoje" };
+  if (daysAhead === 1) return { title: "amanha", sentence: "amanha" };
+  if (daysAhead > 1) return { title: `em ${daysAhead} dia(s)`, sentence: `em ${daysAhead} dia(s)` };
+  return { title: "na data selecionada", sentence: "na data selecionada" };
+}
+
 function getEmailRecipients(override?: string[]): string[] {
   if (override && override.length > 0) {
-    return override.map((item) => item.trim().toLowerCase()).filter(Boolean);
+    return parseRecipients(override.join(","));
   }
 
   return parseRecipients(env.EMAIL_NOTIFY_TO);
 }
 
-async function fetchDueTodayInstallments(targetDateIso: string): Promise<DueTodayInstallment[]> {
+async function fetchDueInstallments(targetDateIso: string): Promise<DueInstallment[]> {
   const dueDate = new Date(`${targetDateIso}T00:00:00Z`);
 
   const rows = await prisma.installment.findMany({
@@ -114,9 +154,12 @@ async function fetchDueTodayInstallments(targetDateIso: string): Promise<DueToda
       id: true,
       loanId: true,
       installmentNumber: true,
+      dueDate: true,
       amount: true,
+      status: true,
       client: {
         select: {
+          id: true,
           name: true,
           phone: true,
         },
@@ -128,92 +171,176 @@ async function fetchDueTodayInstallments(targetDateIso: string): Promise<DueToda
     installmentId: row.id,
     installmentNumber: row.installmentNumber,
     loanId: row.loanId,
+    dueDateIso: row.dueDate.toISOString().slice(0, 10),
+    status: row.status,
+    clientId: row.client.id,
     clientName: row.client.name,
     clientPhone: row.client.phone,
     amount: toSafeNumber(row.amount),
   }));
 }
 
-function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
-  const dateLabel = formatDateIso(targetDateIso);
-  if (dueCount === 0) {
-    return `[Credix] Vencimentos de hoje (${dateLabel}): 0 parcela(s)`;
+function groupByClient(items: DueInstallment[]): DueInstallmentGroup[] {
+  const map = new Map<number, DueInstallmentGroup>();
+
+  for (const item of items) {
+    const current = map.get(item.clientId);
+    if (!current) {
+      map.set(item.clientId, {
+        clientId: item.clientId,
+        clientName: item.clientName,
+        clientPhone: item.clientPhone,
+        installments: [item],
+        dueCount: 1,
+        totalAmount: item.amount,
+      });
+      continue;
+    }
+
+    current.installments.push(item);
+    current.dueCount += 1;
+    current.totalAmount += item.amount;
   }
-  return `[Credix] Vencimentos de hoje (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
+
+  return [...map.values()];
 }
 
-function buildTextBody(items: DueTodayInstallment[], targetDateIso: string, totalAmount: number): string {
-  if (items.length === 0) {
-    return "Nenhuma parcela vence hoje.";
+function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
+  const dateLabel = formatDateIso(targetDateIso);
+  return `[Credix] Vencimentos (${dateLabel}): ${dueCount} parcela(s) - ${formatCurrency(totalAmount)}`;
+}
+
+function buildTextBody(
+  groups: DueInstallmentGroup[],
+  targetDateIso: string,
+  totalAmount: number,
+  daysAhead: number,
+): string {
+  const dateLabel = formatDateIso(targetDateIso);
+  const dueCount = groups.reduce((sum, group) => sum + group.dueCount, 0);
+  const reference = getDueReference(daysAhead);
+
+  if (dueCount === 0) {
+    return [
+      `Parcelas para ${reference.title} (${dateLabel})`,
+      `Total de parcelas: 0 | Valor total: ${formatCurrency(0)}`,
+      "",
+      `Nenhuma parcela vence ${reference.sentence}.`,
+      "",
+      "Mensagem automatica do Credix.",
+    ].join("\n");
   }
 
-  const dateLabel = formatDateIso(targetDateIso);
-  const lines = items.map((item, index) => {
-    const whatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
-    const whatsappLink = whatsappPhone ? `https://wa.me/${whatsappPhone}` : "-";
-    return `${index + 1}. ${item.clientName} | #${item.installmentNumber} | #${item.loanId} | ${formatCurrency(item.amount)} | ${whatsappLink}`;
-  });
+  const clientSections = groups
+    .map((group) => {
+      const phoneDisplay = getPhoneDisplay(group.clientPhone);
+      const whatsappPhone = normalizeWhatsAppPhone(group.clientPhone);
+      const clientPhoneLabel = whatsappPhone
+        ? `${phoneDisplay} (https://wa.me/${whatsappPhone})`
+        : phoneDisplay;
+
+      const rows = group.installments.map((item) => {
+        const rowPhoneDisplay = getPhoneDisplay(item.clientPhone);
+        const rowWhatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
+        const rowPhoneLabel = rowWhatsappPhone
+          ? `${rowPhoneDisplay} (https://wa.me/${rowWhatsappPhone})`
+          : rowPhoneDisplay;
+
+        return `#${item.installmentNumber} | #${item.loanId} | ${formatDateIso(item.dueDateIso)} | ${formatCurrency(item.amount)} | ${rowPhoneLabel}`;
+      });
+
+      return [
+        `Cliente: ${group.clientName} | Telefone: ${clientPhoneLabel}`,
+        `Subtotal do cliente: ${group.dueCount} parcela(s) | ${formatCurrency(group.totalAmount)}`,
+        "Parcela | Emprestimo | Vencimento | Valor | Telefone (WhatsApp)",
+        ...rows,
+      ].join("\n");
+    })
+    .join("\n\n");
 
   return [
-    `Parcelas para hoje (${dateLabel})`,
-    `Total de parcelas: ${items.length} | Valor total: ${formatCurrency(totalAmount)}`,
+    `Parcelas para ${reference.title} (${dateLabel})`,
+    `Total de parcelas: ${dueCount} | Valor total: ${formatCurrency(totalAmount)}`,
     "",
-    "Cliente | Parcela | Emprestimo | Valor | Telefone (WhatsApp)",
-    ...lines,
+    clientSections,
     "",
     "Mensagem automatica do Credix.",
   ].join("\n");
 }
 
-function buildHtmlBody(items: DueTodayInstallment[], targetDateIso: string, totalAmount: number): string {
-  if (items.length === 0) {
-    return `
-      <div style="font-family:Arial,sans-serif;color:#111827;">
-        <p style="margin:0;">Nenhuma parcela vence hoje.</p>
-      </div>
-    `;
-  }
-
+function buildHtmlBody(
+  groups: DueInstallmentGroup[],
+  targetDateIso: string,
+  totalAmount: number,
+  daysAhead: number,
+): string {
   const dateLabel = formatDateIso(targetDateIso);
-  const rows = items.map((item) => {
-    const whatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
-    const displayPhone = item.clientPhone ? escapeHtml(item.clientPhone) : "-";
-    const phoneCell = whatsappPhone
-      ? `<a href="https://wa.me/${whatsappPhone}" target="_blank" rel="noopener noreferrer">${displayPhone}</a>`
-      : displayPhone;
+  const dueCount = groups.reduce((sum, group) => sum + group.dueCount, 0);
+  const reference = getDueReference(daysAhead);
 
-    return `
-      <tr>
-        <td style="padding:10px;border:1px solid #e5e7eb;">${escapeHtml(item.clientName)}</td>
-        <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.installmentNumber}</td>
-        <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.loanId}</td>
-        <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">${formatCurrency(item.amount)}</td>
-        <td style="padding:10px;border:1px solid #e5e7eb;">${phoneCell}</td>
-      </tr>
-    `;
-  }).join("");
+  const sections = groups
+    .map((group) => {
+      const clientPhoneDisplay = escapeHtml(getPhoneDisplay(group.clientPhone));
+      const clientWhatsappPhone = normalizeWhatsAppPhone(group.clientPhone);
+      const clientPhoneCell = clientWhatsappPhone
+        ? `<a href="https://wa.me/${clientWhatsappPhone}" target="_blank" rel="noopener noreferrer">${clientPhoneDisplay}</a>`
+        : clientPhoneDisplay;
+
+      const rows = group.installments
+        .map((item) => {
+          const rowPhoneDisplay = escapeHtml(getPhoneDisplay(item.clientPhone));
+          const rowWhatsappPhone = normalizeWhatsAppPhone(item.clientPhone);
+          const rowPhoneCell = rowWhatsappPhone
+            ? `<a href="https://wa.me/${rowWhatsappPhone}" target="_blank" rel="noopener noreferrer">${rowPhoneDisplay}</a>`
+            : rowPhoneDisplay;
+
+          return `
+            <tr>
+              <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.installmentNumber}</td>
+              <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">#${item.loanId}</td>
+              <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${formatDateIso(item.dueDateIso)}</td>
+              <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">${formatCurrency(item.amount)}</td>
+              <td style="padding:10px;border:1px solid #e5e7eb;">${rowPhoneCell}</td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      return `
+        <section style="margin-top:20px;">
+          <h2 style="margin:0 0 8px;font-size:17px;color:#111827;">
+            ${escapeHtml(group.clientName)} - ${clientPhoneCell}
+          </h2>
+          <p style="margin:0 0 10px;font-size:14px;color:#374151;">
+            Subtotal do cliente: <strong>${group.dueCount}</strong> parcela(s) | <strong>${formatCurrency(group.totalAmount)}</strong>
+          </p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead>
+              <tr>
+                <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Parcela</th>
+                <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Emprestimo</th>
+                <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Vencimento</th>
+                <th style="padding:10px;border:1px solid #e5e7eb;text-align:right;background:#f8fafc;">Valor</th>
+                <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;background:#f8fafc;">Telefone (WhatsApp)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </section>
+      `;
+    })
+    .join("");
 
   return `
-    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.4;">
-      <h1 style="margin:0 0 10px;font-size:22px;">Parcelas para hoje (${dateLabel})</h1>
+    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.45;">
+      <h1 style="margin:0 0 10px;font-size:22px;">Parcelas para ${reference.title} (${dateLabel})</h1>
       <p style="margin:0 0 14px;font-size:14px;">
-        Total de parcelas: <strong>${items.length}</strong> | Valor total: <strong>${formatCurrency(totalAmount)}</strong>
+        Total de parcelas: <strong>${dueCount}</strong> | Valor total: <strong>${formatCurrency(totalAmount)}</strong>
       </p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <thead>
-          <tr>
-            <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;background:#f8fafc;">Cliente</th>
-            <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Parcela</th>
-            <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;background:#f8fafc;">Emprestimo</th>
-            <th style="padding:10px;border:1px solid #e5e7eb;text-align:right;background:#f8fafc;">Valor</th>
-            <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;background:#f8fafc;">Telefone (WhatsApp)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-      <p style="margin:14px 0 0;font-size:12px;color:#6b7280;">Mensagem automatica do Credix.</p>
+      ${dueCount === 0 ? `<p style="margin:0;font-size:14px;">Nenhuma parcela vence ${reference.sentence}.</p>` : sections}
+      <p style="margin:16px 0 0;font-size:12px;color:#6b7280;">Mensagem automatica do Credix.</p>
     </div>
   `;
 }
@@ -221,7 +348,9 @@ function buildHtmlBody(items: DueTodayInstallment[], targetDateIso: string, tota
 export async function sendDueTodayInstallmentsEmail(
   options: SendDueTodayEmailOptions = {},
 ): Promise<SendDueTodayEmailResult> {
+  const configuredDaysAhead = normalizeDaysAhead(options.daysAhead ?? env.EMAIL_NOTIFY_DAYS_AHEAD);
   const force = Boolean(options.force);
+
   if (!env.EMAIL_NOTIFY_ENABLED && !force) {
     return {
       ok: true,
@@ -230,16 +359,20 @@ export async function sendDueTodayInstallmentsEmail(
       targetDateIso: "",
       recipients: [],
       dueCount: 0,
+      clientCount: 0,
       totalAmount: 0,
+      daysAhead: configuredDaysAhead,
     };
   }
 
   const timeZone = normalizeTimeZone(options.timeZone ?? env.EMAIL_NOTIFY_TZ);
   const todayIso = getIsoTodayInTimeZone(timeZone);
+  const defaultTargetDateIso = addDays(todayIso, configuredDaysAhead);
+  const explicitTargetDateIso = options.targetDateIso?.trim();
+
   const targetDateIso = (() => {
-    const explicit = options.targetDateIso?.trim();
-    if (!explicit) return todayIso;
-    return isIsoDate(explicit) ? explicit : "";
+    if (!explicitTargetDateIso) return defaultTargetDateIso;
+    return isIsoDate(explicitTargetDateIso) ? explicitTargetDateIso : "";
   })();
 
   if (!targetDateIso) {
@@ -250,11 +383,20 @@ export async function sendDueTodayInstallmentsEmail(
       targetDateIso: "",
       recipients: [],
       dueCount: 0,
+      clientCount: 0,
       totalAmount: 0,
+      daysAhead: configuredDaysAhead,
     };
   }
 
-  const dueItems = await fetchDueTodayInstallments(targetDateIso);
+  const effectiveDaysAhead = explicitTargetDateIso
+    ? getIsoDateDiff(todayIso, targetDateIso)
+    : configuredDaysAhead;
+
+  const dueItems = await fetchDueInstallments(targetDateIso);
+  const dueGroups = groupByClient(dueItems);
+  const dueCount = dueItems.length;
+  const clientCount = dueGroups.length;
   const totalAmount = dueItems.reduce((sum, item) => sum + item.amount, 0);
   const recipients = getEmailRecipients(options.recipients);
 
@@ -265,8 +407,10 @@ export async function sendDueTodayInstallmentsEmail(
       message: "EMAIL_NOTIFY_TO nao configurado",
       targetDateIso,
       recipients,
-      dueCount: dueItems.length,
+      dueCount,
+      clientCount,
       totalAmount,
+      daysAhead: effectiveDaysAhead,
     };
   }
 
@@ -278,26 +422,30 @@ export async function sendDueTodayInstallmentsEmail(
       message: smtpError,
       targetDateIso,
       recipients,
-      dueCount: dueItems.length,
+      dueCount,
+      clientCount,
       totalAmount,
+      daysAhead: effectiveDaysAhead,
     };
   }
 
   await sendEmail({
     to: recipients,
-    subject: buildSubject(targetDateIso, dueItems.length, totalAmount),
-    text: buildTextBody(dueItems, targetDateIso, totalAmount),
-    html: buildHtmlBody(dueItems, targetDateIso, totalAmount),
+    subject: buildSubject(targetDateIso, dueCount, totalAmount),
+    text: buildTextBody(dueGroups, targetDateIso, totalAmount, effectiveDaysAhead),
+    html: buildHtmlBody(dueGroups, targetDateIso, totalAmount, effectiveDaysAhead),
   });
 
   return {
     ok: true,
     skipped: false,
-    message: `E-mail enviado para ${recipients.length} destinatario(s) com ${dueItems.length} parcela(s)`,
+    message: `E-mail enviado para ${recipients.length} destinatario(s) com ${dueCount} parcela(s) em ${clientCount} cliente(s)`,
     targetDateIso,
     recipients,
-    dueCount: dueItems.length,
+    dueCount,
+    clientCount,
     totalAmount,
+    daysAhead: effectiveDaysAhead,
   };
 }
 
