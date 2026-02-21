@@ -581,7 +581,7 @@
             </nav>
         </aside>
 
-        <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                     <h2 class="page-title text-3xl font-bold">Clientes</h2>
@@ -694,7 +694,7 @@
 
                 <!-- Desktop/Tablet: tabela completa -->
                 <div class="hidden sm:block">
-                    <div class="table-shell max-h-[520px] overflow-auto">
+                    <div class="table-shell">
                         <table>
                             <thead>
                                 <tr>
@@ -960,10 +960,22 @@
         function syncSidebarLayout() {
             if (isMobileViewport()) {
                 main.style.marginLeft = '0';
+                main.style.width = '100%';
+                main.style.flex = '1 1 100%';
                 return;
             }
+
             sidebar.classList.remove('mobile-open');
-            main.style.marginLeft = document.body.classList.contains('sidebar-collapsed') ? '0' : '16rem';
+            if (document.body.classList.contains('sidebar-collapsed')) {
+                main.style.marginLeft = '0';
+                main.style.width = '100%';
+                main.style.flex = '1 1 100%';
+                return;
+            }
+
+            main.style.marginLeft = '16rem';
+            main.style.width = 'calc(100% - 16rem)';
+            main.style.flex = '0 1 calc(100% - 16rem)';
         }
 
         sidebarToggle.addEventListener('click', function() {
