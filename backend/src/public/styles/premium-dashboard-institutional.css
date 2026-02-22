@@ -1,0 +1,41 @@
+.dashboard-premium.dashboard-financial {
+  --inst-text-primary: #E5E7EB;
+  --inst-text-secondary: #A7B0C0;
+  --inst-text-muted: #7B869B;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert {
+  background: linear-gradient(135deg, #3B0F19, #2A0D14) !important;
+  border: 1px solid rgba(244, 63, 94, 0.30) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert .kpi-label,
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert .kpi-note,
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert .kpi-insight,
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert .kpi-info {
+  color: #d9b2bb !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert .kpi-value {
+  color: #f1d6dc !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-label,
+.dashboard-premium.dashboard-financial .summary-title {
+  color: var(--inst-text-muted) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-note,
+.dashboard-premium.dashboard-financial .kpi-insight,
+.dashboard-premium.dashboard-financial .muted-on-dark,
+.dashboard-premium.dashboard-financial .text-xs.text-gray-500,
+.dashboard-premium.dashboard-financial .text-xs.text-slate-500,
+.dashboard-premium.dashboard-financial .text-sm.text-gray-500 {
+  color: var(--inst-text-secondary) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-value,
+.dashboard-premium.dashboard-financial .text-gray-800,
+.dashboard-premium.dashboard-financial .text-slate-900 {
+  color: var(--inst-text-primary) !important;
+}
