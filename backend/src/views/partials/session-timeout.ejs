@@ -102,10 +102,10 @@
             }
         });
 
+        // On first load of an authenticated page, refresh activity timestamp first.
+        // This avoids immediate timeout right after a successful login.
+        markActivity(true);
         checkInactivity();
-        if (!logoutInProgress) {
-            markActivity(true);
-        }
         window.setInterval(checkInactivity, CHECK_INTERVAL_MS);
     })();
 </script>
