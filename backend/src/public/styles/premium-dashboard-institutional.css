@@ -264,3 +264,61 @@
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #94A3B8 !important;
 }
+
+.dashboard-premium.dashboard-debtors .clients-data-panel {
+  background: var(--clients-surface) !important;
+  border: 1px solid var(--clients-border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--clients-shadow) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel label {
+  color: var(--clients-text-secondary) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .filter-control {
+  min-height: 40px;
+  border-radius: 14px !important;
+  border: 1px solid var(--clients-border) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--clients-text-primary) !important;
+  transition: border-color 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1), background-color 160ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .filter-control::placeholder {
+  color: var(--clients-text-muted) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .filter-control:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .filter-control:focus,
+.dashboard-premium.dashboard-debtors .clients-data-panel .filter-control:focus-visible {
+  border-color: rgba(129, 140, 248, 0.48) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dashboard-premium.dashboard-debtors #statusFilter option,
+.dashboard-premium.dashboard-debtors #sortBy option {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.dashboard-premium.dashboard-debtors #clearFiltersBtn {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 14px !important;
+  border: 1px solid var(--clients-border) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  color: var(--clients-text-secondary) !important;
+  box-shadow: none !important;
+  transition: border-color 160ms cubic-bezier(.2, .8, .2, 1), color 160ms cubic-bezier(.2, .8, .2, 1), background-color 160ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.dashboard-premium.dashboard-debtors #clearFiltersBtn:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--clients-text-primary) !important;
+}
