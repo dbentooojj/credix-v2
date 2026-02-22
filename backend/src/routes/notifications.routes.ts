@@ -86,6 +86,11 @@ router.post("/whatsapp/batch", validateBody(whatsappBatchSchema), async (req, re
 });
 
 async function handleDueEmail(req: Request, res: Response) {
+  const ownerUserId = Number(req.user?.sub);
+  if (!Number.isFinite(ownerUserId) || ownerUserId <= 0) {
+    throw new AppError("Sessao invalida para envio de notificacao", 401);
+  }
+
   const targetDateRaw = typeof req.body?.targetDate === "string" ? req.body.targetDate.trim() : undefined;
   if (targetDateRaw && !/^\d{4}-\d{2}-\d{2}$/.test(targetDateRaw)) {
     throw new AppError("targetDate invalido. Use YYYY-MM-DD", 400);
@@ -94,6 +99,7 @@ async function handleDueEmail(req: Request, res: Response) {
   const result = await sendDueTodayInstallmentsEmail({
     force: true,
     targetDateIso: targetDateRaw,
+    ownerUserId,
   });
 
   if (!result.ok) {

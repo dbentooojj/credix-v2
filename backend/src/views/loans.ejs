@@ -109,6 +109,14 @@
             color: #111827;
             width: 100%;
         }
+        #loanModal select.filter-control option,
+        #loanModal select.filter-control optgroup {
+            background: #f8fafc;
+            color: #111827;
+        }
+        #loanModal select.filter-control option:disabled {
+            color: #64748b;
+        }
         #loanModal .filter-control:focus,
         #loanModal button:focus,
         #loanSearch:focus,
@@ -239,11 +247,13 @@
             font-size: 12px;
         }
         .loan-preview-date-input {
-            position: absolute;
-            width: 1px;
-            height: 1px;
+            width: 0;
+            height: 0;
             opacity: 0;
             pointer-events: none;
+            border: 0;
+            padding: 0;
+            margin: 0;
         }
         .flatpickr-calendar {
             border-radius: 12px !important;
@@ -375,6 +385,14 @@
             background: rgba(15, 23, 42, 0.72);
             color: #e2e8f0;
             border-color: rgba(148, 163, 184, 0.25);
+        }
+        .dark #loanModal select.filter-control option,
+        .dark #loanModal select.filter-control optgroup {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        .dark #loanModal select.filter-control option:disabled {
+            color: #94a3b8;
         }
         /* Premium DS v1 - light skin */
         :root {
@@ -735,6 +753,17 @@
 
                         <div class="rounded-xl border border-gray-200 p-4">
                             <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Condições</h4>
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 px-3 py-2">
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-blue-900">Modo de calculo</p>
+                                    <p class="text-xs text-blue-800">Escolha entre definir parcelas manualmente ou por valor da parcela.</p>
+                                </div>
+                                <label class="inline-flex cursor-pointer items-center gap-2">
+                                    <input id="loanUseMaxInstallment" type="checkbox" class="peer sr-only">
+                                    <span class="relative h-6 w-11 rounded-full bg-slate-300 transition-colors duration-200 peer-checked:bg-blue-600 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 peer-checked:after:translate-x-5"></span>
+                                    <span class="text-sm font-medium text-gray-700">Por valor da parcela</span>
+                                </label>
+                            </div>
                             <div class="grid grid-cols-1 gap-4 md:[grid-template-columns:minmax(0,1.25fr)_minmax(0,1.1fr)_minmax(0,1fr)]">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Tipo de juros</label>
@@ -755,11 +784,20 @@
                                     <input id="loanFixedAddition" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="0" step="0.01" value="">
                                     <p id="loanFixedAdditionError" class="field-error" aria-live="polite"></p>
                                 </div>
-                                <div>
+                                <div id="loanInstallmentsWrap">
                                     <label class="mb-1 block text-sm text-gray-600">Parcelas*</label>
                                     <input id="loanInstallments" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="number" min="1" max="96" step="1" value="" required>
                                     <p id="loanInstallmentsError" class="field-error" aria-live="polite"></p>
                                 </div>
+                                <div id="loanMaxInstallmentWrap" class="hidden">
+                                    <label class="mb-1 block text-sm text-gray-600">Valor da parcela (R$)</label>
+                                    <input id="loanMaxInstallment" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex: 750,00" disabled>
+                                    <p id="loanMaxInstallmentError" class="field-error" aria-live="polite"></p>
+                                </div>
+                            </div>
+                            <div id="loanAutoModeHint" class="mt-3 hidden rounded-lg border border-blue-200/70 bg-blue-50/50 px-3 py-2">
+                                <p class="text-xs text-blue-800">Parcelas calculadas automaticamente.</p>
+                                <p class="text-sm font-semibold text-blue-950">Quantidade atual: <span id="loanAutoInstallmentsValue">-</span></p>
                             </div>
                         </div>
 
@@ -1115,6 +1153,8 @@
             simulation: null,
             firstDueTouched: false
         };
+        const MAX_AUTO_INSTALLMENTS = 96;
+        const MAX_INSTALLMENT_TOLERANCE = 1;
 
         const loanFieldElements = {
             debtorId: document.getElementById('loanDebtor'),
@@ -1123,6 +1163,7 @@
             interestRate: document.getElementById('loanInterestRate'),
             fixedAddition: document.getElementById('loanFixedAddition'),
             installments: document.getElementById('loanInstallments'),
+            maxInstallment: document.getElementById('loanMaxInstallment'),
             startDate: document.getElementById('loanStartDate'),
             firstDueDate: document.getElementById('loanFirstDueDate')
         };
@@ -1134,6 +1175,7 @@
             interestRate: 'loanInterestRateError',
             fixedAddition: 'loanFixedAdditionError',
             installments: 'loanInstallmentsError',
+            maxInstallment: 'loanMaxInstallmentError',
             startDate: 'loanStartDateError',
             firstDueDate: 'loanFirstDueDateError'
         };
@@ -1149,6 +1191,10 @@
 
         function round2(value) {
             return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
+        }
+
+        function ceil2(value) {
+            return Math.ceil((toNumber(value) - Number.EPSILON) * 100) / 100;
         }
 
         function formatCurrency(value) {
@@ -1346,6 +1392,9 @@
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 },
             };
+            if (options.positionElement instanceof HTMLElement) {
+                config.positionElement = options.positionElement;
+            }
 
             const instance = window.flatpickr(input, config);
             if (normalized) {
@@ -1385,10 +1434,15 @@
             if (typeof window.flatpickr !== 'function') return;
             const inputs = installmentsPreviewList?.querySelectorAll('input[data-action="preview-due-input"]') || [];
             inputs.forEach((input) => {
+                const index = input.getAttribute('data-index');
+                const anchorBtn = index
+                    ? installmentsPreviewList.querySelector(`button[data-action="edit-preview-due"][data-index="${index}"]`)
+                    : null;
                 createDatePicker(input, {
                     altInput: false,
                     clickOpens: false,
                     position: 'auto right',
+                    positionElement: anchorBtn instanceof HTMLElement ? anchorBtn : undefined,
                 });
             });
         }
@@ -1601,6 +1655,7 @@
                 fixedAddition: interestMode === 'fixo'
                     ? round2(parsed.meta?.fixedAddition ?? interestRate)
                     : 0,
+                maxInstallment: round2(parsed.meta?.maxInstallment ?? 0),
             };
 
             return {
@@ -1873,6 +1928,227 @@
                 },
                 plan,
             };
+        }
+
+        function getPlanPeakInstallmentAmount(plan) {
+            if (!Array.isArray(plan) || !plan.length) return 0;
+            return round2(plan.reduce((maxValue, row) => {
+                const amount = toNumber(row?.amount);
+                return amount > maxValue ? amount : maxValue;
+            }, 0));
+        }
+
+        function evaluateInstallmentByCount(values, installmentsCount) {
+            const installments = Math.max(1, Math.trunc(toNumber(installmentsCount)));
+            const candidateValues = { ...values, installments };
+
+            if (candidateValues.interestType === 'fixo') {
+                const totalAmount = round2(candidateValues.principal + candidateValues.fixedAddition);
+                const totalCents = Math.round(totalAmount * 100);
+                const baseCents = Math.floor(totalCents / installments);
+                const remainderCents = totalCents - (baseCents * installments);
+                const peakInstallment = round2((baseCents + remainderCents) / 100);
+                return {
+                    installmentAmount: peakInstallment,
+                    installments,
+                };
+            }
+
+            if (candidateValues.interestType === 'simples') {
+                const calcResult = calculateLoanValues(
+                    candidateValues.principal,
+                    candidateValues.interestRate,
+                    installments,
+                    candidateValues.interestType
+                );
+                if (!calcResult) return null;
+
+                const plan = buildInstallmentPlan(candidateValues, calcResult, []);
+                return {
+                    installmentAmount: getPlanPeakInstallmentAmount(plan),
+                    installments,
+                };
+            }
+
+            const compound = calculateCompoundLoanByPeriods(candidateValues, []);
+            if (!compound?.calcResult || !Array.isArray(compound.plan) || !compound.plan.length) {
+                return null;
+            }
+
+            return {
+                installmentAmount: getPlanPeakInstallmentAmount(compound.plan),
+                installments,
+            };
+        }
+
+        function findInstallmentsByMaxInstallment(values, options = {}) {
+            const maxInstallment = round2(values.maxInstallment);
+            const maxInstallments = Math.max(1, Math.trunc(toNumber(options.maxInstallments ?? MAX_AUTO_INSTALLMENTS)));
+            const tolerance = Math.max(0, round2(options.tolerance ?? MAX_INSTALLMENT_TOLERANCE));
+
+            if (maxInstallment <= 0) {
+                return {
+                    installments: Math.max(0, Math.trunc(toNumber(values.installments))),
+                    fromMaxInstallment: false,
+                    matchedInstallment: 0,
+                    tolerance,
+                };
+            }
+
+            for (let installments = 1; installments <= maxInstallments; installments += 1) {
+                const evaluated = evaluateInstallmentByCount(values, installments);
+                const installmentAmount = ceil2(evaluated?.installmentAmount ?? 0);
+                if (!evaluated || installmentAmount <= 0) continue;
+                if (installmentAmount <= (maxInstallment + tolerance + 0.000001)) {
+                    return {
+                        installments,
+                        fromMaxInstallment: true,
+                        matchedInstallment: installmentAmount,
+                        tolerance,
+                    };
+                }
+            }
+
+            return {
+                installments: 0,
+                fromMaxInstallment: true,
+                matchedInstallment: 0,
+                tolerance,
+            };
+        }
+
+        function resolveLoanValuesForCalculation(rawValues) {
+            const values = {
+                ...rawValues,
+                installments: Math.max(0, Math.trunc(toNumber(rawValues?.installments))),
+                maxInstallment: round2(rawValues?.maxInstallment),
+                useMaxInstallment: Boolean(rawValues?.useMaxInstallment),
+            };
+            const maxInstallment = round2(values.maxInstallment);
+
+            if (!values.useMaxInstallment) {
+                return {
+                    values,
+                    fromMaxInstallment: false,
+                    matchedInstallment: 0,
+                    tolerance: 0,
+                    pending: false,
+                    error: null,
+                };
+            }
+
+            if (maxInstallment <= 0) {
+                values.installments = 0;
+                return {
+                    values,
+                    fromMaxInstallment: true,
+                    matchedInstallment: 0,
+                    tolerance: MAX_INSTALLMENT_TOLERANCE,
+                    pending: true,
+                    error: null,
+                };
+            }
+
+            const hasRequiredBaseData = values.principal > 0
+                && Boolean(normalizeIsoDateOnly(values.startDate))
+                && Boolean(normalizeIsoDateOnly(values.firstDueDate))
+                && (values.interestType === 'fixo'
+                    ? values.fixedAddition >= 0
+                    : values.interestRate > 0);
+
+            if (!hasRequiredBaseData) {
+                return {
+                    values,
+                    fromMaxInstallment: true,
+                    matchedInstallment: 0,
+                    tolerance: MAX_INSTALLMENT_TOLERANCE,
+                    pending: true,
+                    error: null,
+                };
+            }
+
+            const resolved = findInstallmentsByMaxInstallment(values, {
+                maxInstallments: MAX_AUTO_INSTALLMENTS,
+                tolerance: MAX_INSTALLMENT_TOLERANCE,
+            });
+
+            if (!resolved.installments) {
+                values.installments = 0;
+                const installmentsInput = document.getElementById('loanInstallments');
+                if (installmentsInput instanceof HTMLInputElement) {
+                    installmentsInput.value = '';
+                }
+                updateAutoInstallmentsIndicator();
+                return {
+                    values,
+                    fromMaxInstallment: true,
+                    matchedInstallment: 0,
+                    tolerance: resolved.tolerance,
+                    pending: false,
+                    error: `Nao foi possivel encaixar a parcela maxima em ate ${MAX_AUTO_INSTALLMENTS} parcelas.`,
+                };
+            }
+
+            values.installments = resolved.installments;
+            const installmentsInput = document.getElementById('loanInstallments');
+            if (installmentsInput && toNumber(installmentsInput.value) !== values.installments) {
+                installmentsInput.value = String(values.installments);
+            }
+            updateAutoInstallmentsIndicator();
+
+            return {
+                values,
+                fromMaxInstallment: true,
+                matchedInstallment: resolved.matchedInstallment,
+                tolerance: resolved.tolerance,
+                pending: false,
+                error: null,
+            };
+        }
+
+        function updateAutoInstallmentsIndicator() {
+            const indicator = document.getElementById('loanAutoInstallmentsValue');
+            const installmentsInput = document.getElementById('loanInstallments');
+            if (!indicator || !(installmentsInput instanceof HTMLInputElement)) return;
+            const installments = Math.max(0, Math.trunc(toNumber(installmentsInput.value)));
+            indicator.textContent = installments > 0 ? String(installments) : '-';
+        }
+
+        function syncInstallmentsInputMode() {
+            const installmentsWrap = document.getElementById('loanInstallmentsWrap');
+            const installmentsInput = document.getElementById('loanInstallments');
+            if (!(installmentsInput instanceof HTMLInputElement)) return;
+            const maxInstallmentWrap = document.getElementById('loanMaxInstallmentWrap');
+            const maxInstallmentInput = document.getElementById('loanMaxInstallment');
+            const autoModeHint = document.getElementById('loanAutoModeHint');
+            const useMaxInstallment = Boolean(document.getElementById('loanUseMaxInstallment')?.checked);
+
+            if (installmentsWrap) {
+                installmentsWrap.classList.toggle('hidden', useMaxInstallment);
+            }
+            if (maxInstallmentWrap) {
+                maxInstallmentWrap.classList.toggle('hidden', !useMaxInstallment);
+            }
+            if (autoModeHint) {
+                autoModeHint.classList.toggle('hidden', !useMaxInstallment);
+            }
+            if (maxInstallmentInput instanceof HTMLInputElement) {
+                maxInstallmentInput.disabled = !useMaxInstallment;
+                maxInstallmentInput.required = useMaxInstallment;
+            }
+
+            installmentsInput.readOnly = useMaxInstallment;
+            installmentsInput.required = !useMaxInstallment;
+            installmentsInput.classList.toggle('bg-slate-100', useMaxInstallment);
+            installmentsInput.classList.toggle('cursor-not-allowed', useMaxInstallment);
+
+            if (useMaxInstallment) {
+                installmentsInput.title = 'Campo preenchido automaticamente pelo valor maximo da parcela.';
+            } else {
+                installmentsInput.removeAttribute('title');
+            }
+
+            updateAutoInstallmentsIndicator();
         }
 
         function deriveLoanStatus(plan) {
@@ -2347,7 +2623,10 @@
             if (!values || typeof values !== 'object') return false;
 
             const principalOk = toNumber(values.principal) > 0;
-            const installmentsOk = Math.trunc(toNumber(values.installments)) > 0;
+            const useMaxInstallment = Boolean(values.useMaxInstallment);
+            const installmentsOk = useMaxInstallment
+                ? toNumber(values.maxInstallment) > 0
+                : Math.trunc(toNumber(values.installments)) > 0;
             const startDateOk = Boolean(normalizeIsoDateOnly(values.startDate));
             const firstDueDateOk = Boolean(normalizeIsoDateOnly(values.firstDueDate));
             const rateOk = values.interestType === 'fixo'
@@ -2360,6 +2639,7 @@
         function runReactiveLoanRecalculation() {
             if (loanModal.classList.contains('hidden')) return;
             const values = getLoanFormValues();
+            syncInstallmentsInputMode();
             if (!hasMinimumFieldsForAutoCalculation(values)) {
                 clearFieldErrors();
                 resetSimulationState();
@@ -2430,7 +2710,10 @@
         }
 
         function refreshSchedule(forceGenerate) {
-            const values = getLoanFormValues();
+            const rawValues = getLoanFormValues();
+            syncInstallmentsInputMode();
+            const resolved = resolveLoanValuesForCalculation(rawValues);
+            const values = resolved.values;
             if (!values.installments || values.installments <= 0 || !values.startDate || !values.firstDueDate) {
                 loanFormState.schedule = [];
                 renderScheduleTable([]);
@@ -2458,14 +2741,20 @@
             document.getElementById('loanCalculatedTotal').textContent = formatCurrency(calcResult.totalAmount);
             document.getElementById('loanCalculatedInstallment').textContent = formatCurrency(calcResult.installmentAmount);
             document.getElementById('loanCalculatedInterestType').textContent = formatInterestTypeLabel(values.interestType);
+            let rateInfo = '';
             if (values.interestType === 'fixo') {
-                document.getElementById('loanCalculatedRateInfo').textContent = `Acrescimo fixo: ${formatCurrency(values.fixedAddition)}`;
+                rateInfo = `Acrescimo fixo: ${formatCurrency(values.fixedAddition)}`;
             } else if (values.interestType === 'composto') {
                 const dailyRatePercent = round2((toNumber(values.interestRate) / 30));
-                document.getElementById('loanCalculatedRateInfo').textContent = `Taxa mensal: ${values.interestRate}% | Taxa diaria base: ${dailyRatePercent}%`;
+                rateInfo = `Taxa mensal: ${values.interestRate}% | Taxa diaria base: ${dailyRatePercent}%`;
             } else {
-                document.getElementById('loanCalculatedRateInfo').textContent = `Taxa mensal: ${values.interestRate}%`;
+                rateInfo = `Taxa mensal: ${values.interestRate}%`;
             }
+            if (values.maxInstallment > 0) {
+                const maxAllowed = round2(values.maxInstallment + MAX_INSTALLMENT_TOLERANCE);
+                rateInfo += ` | Parcela maxima: ${formatCurrency(values.maxInstallment)} (aceita ate ${formatCurrency(maxAllowed)})`;
+            }
+            document.getElementById('loanCalculatedRateInfo').textContent = rateInfo;
             loanCalculationCard.classList.remove('hidden');
         }
 
@@ -2513,6 +2802,8 @@
             document.getElementById('loanInterestRate').value = '';
             document.getElementById('loanInterestType').value = 'composto';
             document.getElementById('loanInstallments').value = '';
+            document.getElementById('loanUseMaxInstallment').checked = false;
+            document.getElementById('loanMaxInstallment').value = '';
             document.getElementById('loanEditingId').value = '';
             loanFormState.schedule = [];
 
@@ -2548,6 +2839,9 @@
                     document.getElementById('loanInterestRate').value = loan.interest_rate;
                     document.getElementById('loanFixedAddition').value = 0;
                 }
+                const parsedMaxInstallment = round2(loan.loan_meta?.maxInstallment ?? 0);
+                document.getElementById('loanUseMaxInstallment').checked = parsedMaxInstallment > 0;
+                document.getElementById('loanMaxInstallment').value = formatCurrencyInput(parsedMaxInstallment);
 
                 loanFormState.firstDueTouched = true;
                 loanFormState.schedule = buildScheduleRows({
@@ -2565,6 +2859,7 @@
             }
 
             updateInterestTypeVisibility();
+            syncInstallmentsInputMode();
             const scheduleReady = refreshSchedule(mode !== 'edit');
             if (mode === 'edit' && scheduleReady) {
                 calculateLoanFromForm(false);
@@ -2585,6 +2880,7 @@
             loanFormState.schedule = [];
             loanFormState.simulation = null;
             loanFormState.firstDueTouched = false;
+            syncInstallmentsInputMode();
         }
 
         function closeLoanDetailsModal() {
@@ -2597,10 +2893,14 @@
         function getLoanFormValues() {
             const interestType = normalizeInterestType(document.getElementById('loanInterestType').value);
             const installmentsRaw = Math.trunc(toNumber(document.getElementById('loanInstallments').value));
+            const useMaxInstallment = Boolean(document.getElementById('loanUseMaxInstallment')?.checked);
+            const maxInstallmentValue = round2(parseCurrencyInput(document.getElementById('loanMaxInstallment').value));
 
             return {
                 debtorId: document.getElementById('loanDebtor').value,
                 principal: round2(parseCurrencyInput(document.getElementById('loanPrincipal').value)),
+                maxInstallment: useMaxInstallment ? maxInstallmentValue : 0,
+                useMaxInstallment,
                 interestRate: round2(document.getElementById('loanInterestRate').value),
                 fixedAddition: round2(document.getElementById('loanFixedAddition').value),
                 interestType,
@@ -2619,7 +2919,15 @@
 
             if (requireDebtor && !values.debtorId) errors.debtorId = 'Selecione um cliente.';
             if (values.principal <= 0) errors.principal = 'Informe um valor principal maior que zero.';
-            if (values.installments <= 0) errors.installments = 'Informe ao menos uma parcela.';
+            if (values.useMaxInstallment && values.maxInstallment <= 0) {
+                errors.maxInstallment = 'Informe o valor da parcela para calcular automaticamente.';
+            } else if (values.maxInstallment > 0) {
+                if (values.installments <= 0) {
+                    errors.maxInstallment = `Nao foi possivel encontrar parcelas para o limite informado em ate ${MAX_AUTO_INSTALLMENTS} parcelas.`;
+                }
+            } else if (!values.useMaxInstallment && values.installments <= 0) {
+                errors.installments = 'Informe ao menos uma parcela.';
+            }
 
             if (values.interestType === 'fixo') {
                 if (values.fixedAddition < 0) errors.fixedAddition = 'O acrescimo fixo nao pode ser negativo.';
@@ -2816,10 +3124,16 @@
         function calculateLoanFromForm(showErrors) {
             captureScheduleFromTable();
             refreshSchedule(false);
-            const values = getLoanFormValues();
+            const rawValues = getLoanFormValues();
+            syncInstallmentsInputMode();
+            const resolution = resolveLoanValuesForCalculation(rawValues);
+            const values = resolution.values;
             const errors = validateLoanFormValues(values, {
                 requireDebtor: Boolean(showErrors),
             });
+            if (resolution.error) {
+                errors.maxInstallment = resolution.error;
+            }
             applyFieldErrors(errors);
 
             if (Object.keys(errors).length > 0) {
@@ -3149,10 +3463,25 @@
 
         document.getElementById('loanInterestType').addEventListener('change', function () {
             updateInterestTypeVisibility();
+            syncInstallmentsInputMode();
             refreshSchedule(false);
             clearFieldErrors();
             triggerReactiveLoanRecalculation();
         });
+
+        const loanUseMaxInstallmentInput = document.getElementById('loanUseMaxInstallment');
+        if (loanUseMaxInstallmentInput instanceof HTMLInputElement) {
+            loanUseMaxInstallmentInput.addEventListener('change', function () {
+                syncInstallmentsInputMode();
+                refreshSchedule(false);
+                clearFieldErrors();
+                triggerReactiveLoanRecalculation();
+
+                if (loanUseMaxInstallmentInput.checked) {
+                    document.getElementById('loanMaxInstallment')?.focus();
+                }
+            });
+        }
 
         document.getElementById('loanDebtor').addEventListener('change', function () {
             clearFieldErrors();
@@ -3231,7 +3560,28 @@
             });
         }
 
+        const loanMaxInstallmentInput = document.getElementById('loanMaxInstallment');
+        if (loanMaxInstallmentInput instanceof HTMLInputElement) {
+            loanMaxInstallmentInput.addEventListener('input', function () {
+                const sanitized = String(loanMaxInstallmentInput.value || '').replace(/[^\d,.\sR$]/gi, '');
+                if (sanitized !== loanMaxInstallmentInput.value) {
+                    loanMaxInstallmentInput.value = sanitized;
+                }
+                syncInstallmentsInputMode();
+                clearFieldErrors();
+                triggerReactiveLoanRecalculation();
+            });
+
+            loanMaxInstallmentInput.addEventListener('blur', function () {
+                loanMaxInstallmentInput.value = formatCurrencyInput(loanMaxInstallmentInput.value);
+                syncInstallmentsInputMode();
+                refreshSchedule(true);
+                triggerReactiveLoanRecalculation();
+            });
+        }
+
         document.getElementById('loanInstallments').addEventListener('input', function () {
+            updateAutoInstallmentsIndicator();
             refreshSchedule(true);
             clearFieldErrors();
             triggerReactiveLoanRecalculation();
@@ -3297,6 +3647,7 @@
             if (!(dateInput instanceof HTMLInputElement)) return;
 
             if (dateInput._flatpickr) {
+                dateInput._flatpickr.set('positionElement', editBtn);
                 dateInput._flatpickr.open();
                 return;
             }
@@ -3333,7 +3684,8 @@
             const lastScheduleDueDate = plan[plan.length - 1]?.due_date || values.firstDueDate;
             const loanMeta = {
                 interestMode: values.interestType,
-                fixedAddition: values.interestType === 'fixo' ? round2(values.fixedAddition) : 0
+                fixedAddition: values.interestType === 'fixo' ? round2(values.fixedAddition) : 0,
+                maxInstallment: values.maxInstallment > 0 ? round2(values.maxInstallment) : 0
             };
             // TODO: persistir frequency/interestMode em colunas próprias quando o backend expor esses campos.
 

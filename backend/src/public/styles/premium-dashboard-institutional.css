@@ -212,20 +212,6 @@
   color: var(--clients-text-secondary) !important;
 }
 
-.dashboard-premium.dashboard-debtors #newDebtorBtn {
-  border: 1px solid rgba(129, 140, 248, 0.52) !important;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.92), rgba(139, 92, 246, 0.86)) !important;
-  color: #eef2ff !important;
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.24);
-  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1), filter 160ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.dashboard-premium.dashboard-debtors #newDebtorBtn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
-  box-shadow: 0 14px 28px rgba(99, 102, 241, 0.3);
-}
-
 .dashboard-premium.dashboard-debtors .clients-kpi-grid > div {
   background: var(--clients-surface) !important;
   border: 1px solid var(--clients-border) !important;
@@ -324,32 +310,32 @@
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell {
-  border-radius: 16px !important;
-  border: 1px solid var(--clients-border) !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  box-shadow: var(--clients-shadow) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.62) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th {
-  background: rgba(255, 255, 255, 0.03) !important;
-  color: var(--clients-text-secondary) !important;
+  background: rgba(30, 41, 59, 0.92) !important;
+  color: #94a3b8 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   padding: 12px 14px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th.sortable-th:hover {
-  background: rgba(255, 255, 255, 0.045) !important;
+  background: rgba(51, 65, 85, 0.92) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell td {
-  padding: 13px 14px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 16px 14px !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
   background: transparent !important;
-  color: var(--clients-text-primary) !important;
+  color: #e2e8f0 !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-table-row,
@@ -362,22 +348,27 @@
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-table-row:hover td,
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row:hover td,
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row:hover td {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: rgba(51, 65, 85, 0.34) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row {
-  box-shadow: inset 2px 0 0 rgba(244, 63, 94, 0.42) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row {
-  background: rgba(99, 102, 241, 0.07) !important;
-  box-shadow: inset 2px 0 0 rgba(99, 102, 241, 0.42) !important;
+  background: rgba(51, 65, 85, 0.24) !important;
+  box-shadow: none !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row > td:first-child,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-detail-row > td {
+  border-left: 3px solid rgba(245, 158, 11, 0.86) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-detail-card {
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.62) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors .badge {
@@ -455,39 +446,57 @@
 .dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"],
 .dashboard-premium.dashboard-debtors button[data-action="edit-debtor"],
 .dashboard-premium.dashboard-debtors button[data-action="delete-debtor"] {
-  border: 1px solid var(--clients-border) !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  color: var(--clients-text-secondary) !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.26) !important;
+  background: transparent !important;
+  color: #cbd5e1 !important;
   box-shadow: none !important;
-  transition: border-color 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1), color 160ms cubic-bezier(.2, .8, .2, 1), background-color 160ms cubic-bezier(.2, .8, .2, 1), transform 160ms cubic-bezier(.2, .8, .2, 1);
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out !important;
 }
 
 .dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"] i,
 .dashboard-premium.dashboard-debtors button[data-action="edit-debtor"] i,
 .dashboard-premium.dashboard-debtors button[data-action="delete-debtor"] i {
-  opacity: 0.8;
-  transition: opacity 160ms cubic-bezier(.2, .8, .2, 1);
+  opacity: 1;
+  transition: none;
+}
+
+.dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"] {
+  color: #93c5fd !important;
+}
+
+.dashboard-premium.dashboard-debtors button[data-action="edit-debtor"] {
+  color: #6ee7b7 !important;
+}
+
+.dashboard-premium.dashboard-debtors button[data-action="delete-debtor"] {
+  color: #fca5a5 !important;
+  border-color: rgba(244, 63, 94, 0.24) !important;
+}
+
+.dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"].is-expanded {
+  background: rgba(59, 130, 246, 0.16) !important;
+  border-color: rgba(96, 165, 250, 0.4) !important;
+  color: #bfdbfe !important;
 }
 
 .dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"]:hover,
 .dashboard-premium.dashboard-debtors button[data-action="edit-debtor"]:hover {
-  transform: translateY(-1px);
-  border-color: rgba(99, 102, 241, 0.35) !important;
-  color: #C7D2FE !important;
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 8px 18px rgba(0, 0, 0, 0.35) !important;
-}
-
-.dashboard-premium.dashboard-debtors button[data-action="delete-debtor"] {
-  color: #E5C8CF !important;
-  border-color: rgba(244, 63, 94, 0.16) !important;
+  transform: none;
+  border-color: rgba(148, 163, 184, 0.42) !important;
+  color: #e2e8f0 !important;
+  background: rgba(148, 163, 184, 0.12) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors button[data-action="delete-debtor"]:hover {
-  transform: translateY(-1px);
-  border-color: rgba(244, 63, 94, 0.32) !important;
-  color: #FDA4AF !important;
-  background: rgba(244, 63, 94, 0.08) !important;
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.2), 0 8px 18px rgba(0, 0, 0, 0.35) !important;
+  transform: none;
+  border-color: rgba(244, 63, 94, 0.34) !important;
+  color: #fecdd3 !important;
+  background: rgba(244, 63, 94, 0.12) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors button[data-action="toggle-debtor-details"]:hover i,

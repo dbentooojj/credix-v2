@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -121,6 +121,145 @@
             width: 100%;
         }
 
+        #debtorModal {
+            background:
+                radial-gradient(1200px circle at 12% 10%, rgba(30, 64, 175, 0.2), transparent 42%),
+                rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(2px);
+        }
+
+        .debtor-modal-panel {
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: linear-gradient(165deg, rgba(8, 15, 34, 0.96) 0%, rgba(11, 22, 46, 0.94) 55%, rgba(8, 28, 62, 0.9) 100%);
+            box-shadow: 0 28px 70px -34px rgba(2, 6, 23, 0.85), inset 0 1px 0 rgba(148, 163, 184, 0.18);
+        }
+
+        .debtor-modal-header {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+            padding-bottom: 0.9rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .debtor-modal-kicker {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: #93c5fd;
+        }
+
+        .debtor-modal-title {
+            margin-top: 0.25rem;
+            color: #f8fafc;
+            font-size: 1.75rem;
+            line-height: 1.1;
+            font-weight: 700;
+        }
+
+        .debtor-modal-subtitle {
+            margin-top: 0.3rem;
+            font-size: 0.88rem;
+            color: #9fb0c9;
+        }
+
+        .debtor-modal-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.58);
+            color: #cbd5e1;
+            transition: background-color 140ms ease-out, color 140ms ease-out, border-color 140ms ease-out;
+        }
+
+        .debtor-modal-close:hover {
+            background: rgba(30, 41, 59, 0.8);
+            color: #f8fafc;
+            border-color: rgba(96, 165, 250, 0.42);
+        }
+
+        .debtor-form-card {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.42) 100%);
+            padding: 1rem;
+        }
+
+        .debtor-form-card h4 {
+            color: #dbeafe;
+        }
+
+        #debtorModal .debtor-form-card label {
+            color: #9fb0c9;
+            font-weight: 500;
+        }
+
+        #debtorModal .filter-control.input-shell {
+            background: rgba(15, 23, 42, 0.62);
+            border-color: rgba(148, 163, 184, 0.3);
+            color: #e2e8f0;
+        }
+
+        #debtorModal .filter-control.input-shell::placeholder {
+            color: #8ea0ba;
+        }
+
+        #debtorModal .filter-control.input-shell:focus,
+        #debtorModal .filter-control.input-shell:focus-visible {
+            border-color: rgba(96, 165, 250, 0.65);
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        #debtorModal button:focus,
+        #debtorModal button:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        #debtorModal select.filter-control.input-shell option {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .debtor-action-row {
+            margin-top: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .debtor-btn-secondary {
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: rgba(51, 65, 85, 0.52);
+            color: #e2e8f0;
+            min-width: 120px;
+            transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out;
+        }
+
+        .debtor-btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.64);
+            border-color: rgba(148, 163, 184, 0.62);
+            color: #f8fafc;
+        }
+
+        .debtor-btn-primary {
+            border: 1px solid rgba(96, 165, 250, 0.6);
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.96) 0%, rgba(37, 99, 235, 0.95) 100%);
+            color: #eff6ff;
+            min-width: 140px;
+            box-shadow: 0 10px 24px -14px rgba(37, 99, 235, 0.8);
+            transition: filter 140ms ease-out, box-shadow 140ms ease-out;
+        }
+
+        .debtor-btn-primary:hover {
+            filter: brightness(1.06);
+            box-shadow: 0 12px 28px -14px rgba(37, 99, 235, 0.9);
+        }
+
         .clients-data-panel {
             background: #f8fafc;
             border: 1px solid rgba(226, 232, 240, 0.95);
@@ -151,48 +290,149 @@
         }
 
         .table-shell {
-            overflow-x: auto;
-            overflow-y: auto;
+            overflow: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 14px;
             border: 1px solid #e2e8f0;
             background: #f8fafc;
-            box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.4);
             scrollbar-gutter: stable both-edges;
         }
 
-        .table-shell table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-shell table { width: 100%; border-collapse: collapse; }
         .table-shell th {
-            position: sticky;
-            top: 0;
-            z-index: 20;
             text-align: left;
             background: #f8fafc;
-            color: #0f172a;
-            font-size: 14px;
+            color: #64748b;
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 0.02em;
-            padding: 10px 12px;
-            box-shadow: inset 0 -1px 0 rgba(203, 213, 225, 0.65);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
         }
         .table-shell td {
-            padding: 9px 12px;
-            border-top: 1px solid #e5e7eb;
+            padding: 16px 14px;
+            border-top: 1px solid #f1f5f9;
             color: #1f2937;
-            font-size: 0.875rem;
+            font-size: 0.95rem;
+        }
+        .table-shell tbody tr[data-expandable-row="true"] td {
+            vertical-align: top;
+        }
+        .debtor-row-name {
+            color: #111827;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .debtor-row-meta {
+            color: #64748b;
+            font-size: 0.86rem;
+        }
+        .debtor-score-risk {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .debtor-overdue-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-width: 0;
+            border: 0;
+            padding: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.2;
+            background: transparent;
+        }
+        .debtor-overdue-note {
+            display: none;
+        }
+        .debtor-open-total {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .debtor-open-sub {
+            display: none;
+        }
+        .debtor-action-set {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.35rem;
+        }
+        .debtor-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #475569;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+        }
+        .debtor-action-btn:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            transform: none;
+            box-shadow: none;
+        }
+        .debtor-action-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+        .debtor-action-btn[data-variant="details"] {
+            color: #2563eb;
+        }
+        .debtor-action-btn[data-variant="details"]:hover {
+            background: #eff6ff;
+            border-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .debtor-action-btn[data-variant="details"].is-expanded {
+            background: #eff6ff;
+            border-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .debtor-action-btn[data-variant="edit"] {
+            color: #059669;
+        }
+        .debtor-action-btn[data-variant="edit"]:hover {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #047857;
+        }
+        .debtor-action-btn[data-variant="delete"] {
+            color: #dc2626;
+        }
+        .debtor-action-btn[data-variant="delete"]:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #b91c1c;
+        }
+        .debtor-action-btn::after {
+            display: none;
+        }
+        .debtor-action-btn:hover::after,
+        .debtor-action-btn:focus-visible::after {
+            display: none;
         }
         .debtor-focus-row { background: #eff6ff; box-shadow: inset 3px 0 0 #2563eb; }
         .debtor-table-row { transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
         .debtor-table-row:hover { background: #f8fafc; }
-        .debtor-expanded-row {
-            background: #f1f5f9;
-            box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.45);
-        }
-        .debtor-expanded-row:hover { background: #ecf2ff; }
-        .debtor-overdue-row {
-            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
-        }
+        .debtor-expanded-row { background: #f8fafc; box-shadow: none; }
+        .debtor-expanded-row:hover { background: #f8fafc; }
+        .debtor-overdue-row { box-shadow: none; }
         .debtor-overdue-row:hover { background: #f8fafc; }
+        .debtor-expanded-row > td:first-child {
+            border-left: 3px solid rgba(245, 158, 11, 0.82);
+        }
 
         .debtor-overdue-mobile {
             box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
@@ -201,13 +441,126 @@
         .debtor-detail-row > td {
             border-top: 0;
             padding-top: 0;
+            border-left: 3px solid rgba(245, 158, 11, 0.82);
         }
 
         .debtor-detail-card {
             border-radius: 14px;
-            border: 1px solid #dbeafe;
-            background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.58);
+            box-shadow: none;
+        }
+        .debtor-detail-topline {
+            margin-bottom: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.65rem;
+        }
+        .debtor-detail-tags {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .debtor-detail-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.9rem;
+        }
+        .debtor-detail-section {
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.44) 0%, rgba(30, 41, 59, 0.3) 100%);
+            padding: 0.9rem 1rem;
+        }
+        .debtor-detail-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #dbe4f3;
+            margin-bottom: 0.6rem;
+        }
+        .debtor-detail-item + .debtor-detail-item {
+            margin-top: 0.7rem;
+        }
+        .debtor-detail-header {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.65rem;
+        }
+        .debtor-detail-kicker {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #c7d7f5;
+        }
+        .debtor-detail-kicker-secondary {
+            font-size: 0.84rem;
+            color: #9fb0c9;
+        }
+        .debtor-detail-grid-desktop {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1rem 1.35rem;
+        }
+        .debtor-detail-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #a9b9d2;
+            line-height: 1.2;
+        }
+        .debtor-detail-value {
+            margin-top: 0.38rem;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #edf2fb;
+            line-height: 1.32;
+            word-break: break-word;
+        }
+        .debtor-detail-value-sm {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.34;
+        }
+        .debtor-detail-hint {
+            margin-top: 0.36rem;
+            font-size: 0.88rem;
+            color: #9fb0c9;
+            line-height: 1.35;
+        }
+        .debtor-detail-card .debtor-detail-value[class*="text-red-"] {
+            color: #fda4af !important;
+        }
+        .debtor-detail-card .debtor-detail-value[class*="text-orange-"],
+        .debtor-detail-card .debtor-detail-value[class*="text-yellow-"],
+        .debtor-detail-card .debtor-detail-value[class*="text-amber-"] {
+            color: #fdba74 !important;
+        }
+        .debtor-detail-card .debtor-detail-value[class*="text-emerald-"] {
+            color: #86efac !important;
+        }
+        .debtor-detail-card .text-gray-800,
+        .debtor-detail-card .text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+        .debtor-detail-card .text-gray-600,
+        .debtor-detail-card .text-gray-500 {
+            color: #9fb0c9 !important;
+        }
+        .debtor-detail-card a.text-blue-600,
+        .debtor-detail-card a.text-blue-600:hover,
+        .debtor-detail-card a.text-blue-500,
+        .debtor-detail-card a.text-blue-500:hover {
+            color: #93c5fd !important;
         }
 
         .debtor-row-enter {
@@ -226,7 +579,7 @@
         }
 
         .table-shell th.sortable-th { cursor: pointer; user-select: none; }
-        .table-shell th.sortable-th:hover { background: #eef2ff; }
+        .table-shell th.sortable-th:hover { background: #f1f5f9; }
         .table-shell th.sortable-th > button.sort-btn {
             display: flex;
             align-items: center;
@@ -363,6 +716,42 @@
             .table-shell td {
                 padding: 8px 10px;
             }
+            .debtor-action-btn {
+                width: 32px;
+                height: 32px;
+            }
+            .debtor-action-btn::after {
+                display: none;
+            }
+            .debtor-detail-section {
+                padding: 0.78rem 0.84rem;
+            }
+            .debtor-detail-value {
+                font-size: 0.9rem;
+            }
+
+            .debtor-modal-panel {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+
+            .debtor-modal-title {
+                font-size: 1.4rem;
+            }
+
+            .debtor-modal-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .debtor-action-row {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .debtor-btn-secondary,
+            .debtor-btn-primary {
+                width: 100%;
+            }
         }
 
         /* Evita "tabela esmagada" em viewports estreitos (ex: modo desktop no celular).
@@ -375,6 +764,25 @@
                 right: 1.5rem;
             }
         }
+        @media (min-width: 768px) {
+            .debtor-detail-grid-desktop,
+            .debtor-detail-layout {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (min-width: 1024px) {
+            .debtor-detail-grid-desktop {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        @media (min-width: 1280px) {
+            .debtor-detail-grid-desktop {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            .debtor-detail-layout {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
 
         .dark .glass-card {
             background: rgba(15, 23, 42, 0.82);
@@ -382,56 +790,56 @@
             color: #e2e8f0;
         }
 
-        .dark .kpi-value { color: #0f172a; }
+        .dark .kpi-value { color: #f8fafc; }
         .dark .filter-control,
         .dark .table-shell,
-        .dark .table-shell th,
-        .dark .table-shell td { background: #f8fafc; color: #1f2937; border-color: #e2e8f0; }
-        .dark .table-shell th { background: #f8fafc; color: #0f172a; }
-        .dark .table-shell th.sortable-th:hover { background: #eef2ff; }
-        .dark .debtor-focus-row { background: rgba(30, 64, 175, 0.25); }
-        .dark .debtor-table-row:hover { background: #f8fafc; }
-        .dark .debtor-expanded-row {
-            background: #eef2ff;
-            box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.45);
+        .dark .table-shell td {
+            background: rgba(15, 23, 42, 0.72);
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.22);
         }
-        .dark .debtor-expanded-row:hover { background: #e9efff; }
-        .dark .debtor-overdue-row {
-            box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55);
+        .dark .table-shell th {
+            background: rgba(30, 41, 59, 0.95);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.22);
         }
-        .dark .debtor-overdue-row:hover { background: #f8fafc; }
+        .dark .table-shell th.sortable-th:hover { background: rgba(51, 65, 85, 0.9); }
+        .dark .debtor-focus-row {
+            background: rgba(30, 64, 175, 0.2);
+            box-shadow: inset 2px 0 0 rgba(96, 165, 250, 0.5);
+        }
+        .dark .debtor-table-row:hover,
+        .dark .debtor-expanded-row,
+        .dark .debtor-expanded-row:hover {
+            background: rgba(51, 65, 85, 0.28);
+            box-shadow: none;
+        }
+        .dark .debtor-expanded-row > td:first-child,
+        .dark .debtor-detail-row > td {
+            border-left-color: rgba(245, 158, 11, 0.88);
+        }
+        .dark .debtor-overdue-row { box-shadow: none; }
+        .dark .debtor-overdue-row:hover { background: rgba(51, 65, 85, 0.28); }
         .dark .debtor-detail-card {
-            border-color: #dbeafe;
-            background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+            border-color: rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.62);
         }
-
-        .table-shell .text-slate-100,
-        .table-shell .text-slate-50,
-        #debtorsMobileList .text-slate-100,
-        #debtorsMobileList .text-slate-50 {
-            color: #0f172a !important;
+        .dark .debtor-row-name { color: #f8fafc; }
+        .dark .debtor-row-meta { color: #a1afc2; }
+        .dark .debtor-overdue-pill,
+        .dark .debtor-open-total { color: #e2e8f0; }
+        .dark .debtor-action-btn {
+            border-color: rgba(148, 163, 184, 0.24);
+            color: #cbd5e1;
+            background: transparent;
         }
-
-        .table-shell .text-slate-500,
-        .table-shell .text-slate-400,
-        .table-shell .text-slate-400\/90,
-        .table-shell .text-slate-300,
-        #debtorsMobileList .text-slate-500,
-        #debtorsMobileList .text-slate-400,
-        #debtorsMobileList .text-slate-400\/90,
-        #debtorsMobileList .text-slate-300 {
-            color: #64748b !important;
+        .dark .debtor-action-btn:hover {
+            background: rgba(51, 65, 85, 0.52);
+            border-color: rgba(148, 163, 184, 0.38);
         }
-
-        #debtorsMobileList [data-debtor-id] {
-            background: #f8fafc !important;
-            border: 1px solid #e5e7eb !important;
-        }
-
-        #debtorsMobileList [data-debtor-id][class*="border-amber-500"] {
-            background: #fffbeb !important;
-            border-color: #fcd34d !important;
-        }
+        .dark .debtor-action-btn[data-variant="details"] { color: #93c5fd; }
+        .dark .debtor-action-btn[data-variant="edit"] { color: #6ee7b7; }
+        .dark .debtor-action-btn[data-variant="delete"] { color: #fca5a5; }
 </style>
     <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
     <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css">
@@ -496,7 +904,7 @@
                     <h2 class="page-title text-3xl font-bold">Clientes</h2>
                     <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situação de cada cliente.</p>
                 </div>
-                <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-blue-500">
                     <i class="fas fa-user-plus mr-2"></i>Novo cliente
                 </button>
             </div>
@@ -507,7 +915,7 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
-                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">—</p>
+                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">&mdash;</p>
                             <p id="totalDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
@@ -520,7 +928,7 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
-                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">—</p>
+                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">&mdash;</p>
                             <p id="activeDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
@@ -533,7 +941,7 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
-                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">—</p>
+                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">&mdash;</p>
                             <p id="inactiveDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
@@ -546,7 +954,7 @@
                     <div class="relative flex items-start justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
-                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">—</p>
+                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">&mdash;</p>
                             <p id="overdueDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
                         </div>
                         <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
@@ -664,48 +1072,55 @@
             </div>
 
             <div id="debtorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
-                    <div class="mb-5 flex items-center justify-between">
-                        <h3 id="debtorModalTitle" class="text-xl font-bold text-gray-800">Novo cliente</h3>
-                        <button id="closeDebtorModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
+                <div class="debtor-modal-panel w-full max-w-2xl p-6">
+                    <div class="debtor-modal-header mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <p class="debtor-modal-kicker">Cadastro</p>
+                            <h3 id="debtorModalTitle" class="debtor-modal-title">Novo cliente</h3>
+                            <p class="debtor-modal-subtitle">Preencha os dados para cadastrar o cliente e acompanhar os empréstimos.</p>
+                        </div>
+                        <button id="closeDebtorModalBtn" class="debtor-modal-close" type="button"><i class="fas fa-times"></i></button>
                     </div>
                     <form id="newDebtorForm" class="space-y-4" novalidate>
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div class="md:col-span-2">
-                                <label class="mb-1 block text-sm text-gray-600">Nome*</label>
-                                <input id="newDebtorName" class="filter-control input-shell" type="text" autocomplete="name" placeholder="Nome completo" required>
-                                <p id="newDebtorNameError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-sm text-gray-600">Telefone/WhatsApp*</label>
-                                <input id="newDebtorPhone" class="filter-control input-shell" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
-                                <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-sm text-gray-600">CPF (opcional)</label>
-                                <input id="newDebtorCpf" class="filter-control input-shell" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
-                                <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-sm text-gray-600">E-mail (opcional)</label>
-                                <input id="newDebtorEmail" class="filter-control input-shell" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
-                                <p id="newDebtorEmailError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-sm text-gray-600">Status</label>
-                                <select id="newDebtorStatus" class="filter-control input-shell">
-                                    <option value="Ativo">Ativo</option>
-                                    <option value="Inativo">Inativo</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="mb-1 block text-sm text-gray-600">Endereço (opcional)</label>
-                                <input id="newDebtorAddress" class="filter-control input-shell" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+                        <div class="debtor-form-card">
+                            <h4 class="mb-3 text-sm font-semibold uppercase tracking-wide">Informações do cliente</h4>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div class="md:col-span-2">
+                                    <label class="mb-1 block text-sm text-gray-600">Nome*</label>
+                                    <input id="newDebtorName" class="filter-control input-shell" type="text" autocomplete="name" placeholder="Nome completo" required>
+                                    <p id="newDebtorNameError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Telefone/WhatsApp*</label>
+                                    <input id="newDebtorPhone" class="filter-control input-shell" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
+                                    <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">CPF (opcional)</label>
+                                    <input id="newDebtorCpf" class="filter-control input-shell" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
+                                    <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">E-mail (opcional)</label>
+                                    <input id="newDebtorEmail" class="filter-control input-shell" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
+                                    <p id="newDebtorEmailError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm text-gray-600">Status</label>
+                                    <select id="newDebtorStatus" class="filter-control input-shell">
+                                        <option value="Ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="mb-1 block text-sm text-gray-600">Endereço (opcional)</label>
+                                    <input id="newDebtorAddress" class="filter-control input-shell" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center justify-end gap-3 pt-2">
-                            <button id="cancelDebtorModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Salvar cliente</button>
+                        <div class="debtor-action-row flex items-center justify-end gap-3 pt-2">
+                            <button id="cancelDebtorModalBtn" type="button" class="debtor-btn-secondary rounded-xl px-4 py-2 text-sm font-semibold">Cancelar</button>
+                            <button type="submit" class="debtor-btn-primary rounded-xl px-4 py-2 text-sm font-semibold">Salvar cliente</button>
                         </div>
                     </form>
                 </div>
@@ -2019,6 +2434,44 @@
             };
         }
 
+        function getDebtorRiskBadgeModel(scoreData) {
+            const score = Number.isFinite(Number(scoreData?.score)) ? Number(scoreData.score) : 0;
+            const totalDueCount = Number.isFinite(Number(scoreData?.totalDueCount)) ? Number(scoreData.totalDueCount) : 0;
+
+            if (totalDueCount <= 0) {
+                return {
+                    label: 'Sem historico',
+                    textClass: 'text-slate-500',
+                };
+            }
+
+            if (score >= 850) {
+                return {
+                    label: 'Risco baixo',
+                    textClass: 'text-emerald-700',
+                };
+            }
+
+            if (score >= 700) {
+                return {
+                    label: 'Risco moderado',
+                    textClass: 'text-yellow-700',
+                };
+            }
+
+            if (score >= 550) {
+                return {
+                    label: 'Risco medio',
+                    textClass: 'text-orange-700',
+                };
+            }
+
+            return {
+                label: 'Risco alto',
+                textClass: 'text-red-700',
+            };
+        }
+
         function setRefreshLoadingState(isLoading) {
             if (!refreshBtn) return;
             const icon = refreshBtn.querySelector('i');
@@ -2279,12 +2732,15 @@
 
             mainNodes.forEach((node) => {
                 node.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                node.classList.toggle('debtor-expanded-row', expanded);
             });
 
             toggleButtons.forEach((button) => {
                 button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
                 button.setAttribute('title', expanded ? 'Fechar detalhes' : 'Ver detalhes');
                 button.setAttribute('aria-label', expanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente');
+                button.setAttribute('data-tooltip', expanded ? 'Fechar detalhes' : 'Ver detalhes');
+                button.classList.toggle('is-expanded', expanded);
                 const icon = button.querySelector('i');
                 if (icon) {
                     icon.classList.toggle('fa-eye', !expanded);
@@ -2326,6 +2782,14 @@
                 const scoreBadgeTitle = scoreBadge.noHistory
                     ? `Sem histórico de crédito (índice base ${scoreBadge.score} de 1000)`
                     : `Índice Credix ${scoreBadge.score} de 1000`;
+                const maxOverdueDaysCount = Number(maxOverdueDays || 0);
+                const overdueNoteText = hasOverdue
+                    ? `${maxOverdueDaysCount > 0 ? `max ${maxOverdueDaysCount}d` : 'em atraso'}`
+                    : 'sem atraso';
+                const openTotalSubText = nextDue ? `Prox. venc: ${formatDate(nextDue.dueDate)}` : 'Sem vencimento futuro';
+                const trendTextShort = String(insightSnapshot.trendText || '').replace(/^.*?:\s*/, '');
+                const punctualityTextShort = String(insightSnapshot.punctualityText || '').replace(/^.*?:\s*/, '');
+                const lastPaymentTextShort = String(insightSnapshot.lastPaymentText || '').replace(/^.*?:\s*/, '');
 
                 return `
                     <div class="debtor-row-enter rounded-2xl border ${hasOverdue ? 'border-gray-200 bg-slate-50 debtor-overdue-mobile' : 'border-gray-200 bg-slate-50'} p-4 shadow-sm" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
@@ -2333,10 +2797,12 @@
                             <div class="min-w-0">
                                 <div class="truncate text-base font-semibold text-gray-900">${debtor.name || '-'}</div>
                                 <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
+                                <div class="mt-1 text-xs text-gray-500" aria-label="Documento: ${documentValue}">Doc: ${documentValue}</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-[11px] uppercase tracking-wide text-gray-500">Total em aberto</div>
                                 <div class="mt-1 text-base font-extrabold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</div>
+                                <div class="debtor-open-sub">${openTotalSubText}</div>
                                 <div class="mt-2 inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold ${scoreBadge.badgeClass}" title="${scoreBadgeTitle}" aria-label="${scoreBadgeTitle}">
                                     <span class="h-1.5 w-1.5 rounded-full ${scoreBadge.dotClass}"></span>
                                     ${scoreBadgeText}
@@ -2347,26 +2813,33 @@
                         <div class="mt-3 flex flex-wrap items-center gap-2">
                             <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
                             <span class="${financialSituationBadge}" aria-label="Situação financeira: ${financialSituation}">${financialSituation}</span>
-                            <span class="inline-flex min-w-[1.5rem] justify-center rounded-full border px-2 py-1 text-xs font-semibold ${overdueCount > 0 ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
+                            <span class="debtor-overdue-pill ${overdueCount > 0 ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">
+                                ${overdueCount}
+                            </span>
+                            <span class="debtor-overdue-note">${overdueNoteText}</span>
                         </div>
 
-                        <div class="mt-3 flex items-center justify-end gap-2">
-                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                        <div class="debtor-action-set mt-3">
+                            <button type="button" class="debtor-action-btn ${isExpanded ? 'is-expanded' : ''}" data-variant="details" data-action="toggle-debtor-details" data-id="${debtor.id}" data-tooltip="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
                                 <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
-                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                            <button type="button" class="debtor-action-btn" data-variant="edit" data-action="edit-debtor" data-id="${debtor.id}" data-tooltip="Editar cliente" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
                                 <i class="fas fa-pen-to-square"></i>
                             </button>
-                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                            <button type="button" class="debtor-action-btn" data-variant="delete" data-action="delete-debtor" data-id="${debtor.id}" data-tooltip="Excluir cliente" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
 
-                        <div class="mt-3 ${isExpanded ? '' : 'hidden'} rounded-xl border border-gray-200 bg-slate-50 p-3" data-debtor-detail-for="${debtor.id}">
+                        <div class="mt-3 ${isExpanded ? '' : 'hidden'} debtor-detail-card p-3" data-debtor-detail-for="${debtor.id}">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Detalhes do cliente</div>
+                                <div class="text-[11px] text-slate-400">Visualização expandida</div>
+                            </div>
                             <div class="grid grid-cols-1 gap-2 text-xs text-gray-700">
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Documento:</span> <span class="font-semibold text-gray-800">${documentValue}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">E-mail:</span> <span class="font-semibold text-gray-800">${debtor.email || '&mdash;'}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.):</span> <span class="font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.):</span> <span class="font-semibold ${maxOverdueDaysCount > 0 ? 'text-amber-700' : 'text-gray-600'}">${maxOverdueDaysCount > 0 ? maxOverdueDaysCount : '&mdash;'}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela:</span> <span class="font-semibold text-gray-800">${detailNextDue}</span></div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos:</span> <span class="font-semibold text-gray-800">${loansCount}</span></div>
                                 <div>
@@ -2374,9 +2847,9 @@
                                     <div class="mt-1 text-[11px] text-gray-500">Índice calculado com base no histórico de pagamentos</div>
                                 </div>
                                 <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Comportamento:</span> <span class="font-semibold ${insightSnapshot.behaviorClass}">${insightSnapshot.behaviorText}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Pontualidade:</span> <span class="font-semibold ${insightSnapshot.punctualityClass}">${insightSnapshot.punctualityText.replace('Pontualidade 90d: ', '')}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Último pagamento:</span> <span class="font-semibold ${insightSnapshot.lastPaymentClass}">${insightSnapshot.lastPaymentText.replace('Último pagamento: ', '')}</span></div>
-                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Tendência:</span> <span class="font-semibold ${insightSnapshot.trendClass}">${insightSnapshot.trendText.replace('Tendência 3M: ', '')}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Pontualidade:</span> <span class="font-semibold ${insightSnapshot.punctualityClass}">${punctualityTextShort}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Último pagamento:</span> <span class="font-semibold ${insightSnapshot.lastPaymentClass}">${lastPaymentTextShort}</span></div>
+                                <div><span class="text-[11px] uppercase tracking-wide text-gray-500">Tendência:</span> <span class="font-semibold ${insightSnapshot.trendClass}">${trendTextShort}</span></div>
                             </div>
                         </div>
                     </div>
@@ -2432,12 +2905,16 @@
                 const scoreBadgeTitle = scoreBadge.noHistory
                     ? `Sem histórico de crédito (índice base ${scoreBadge.score} de 1000)`
                     : `Índice Credix ${scoreBadge.score} de 1000`;
+                const maxOverdueDaysCount = Number(maxOverdueDays || 0);
+                const trendTextShort = String(insightSnapshot.trendText || '').replace(/^.*?:\s*/, '');
+                const punctualityTextShort = String(insightSnapshot.punctualityText || '').replace(/^.*?:\s*/, '');
+                const lastPaymentTextShort = String(insightSnapshot.lastPaymentText || '').replace(/^.*?:\s*/, '');
 
                 return `
                     <tr class="debtor-table-row debtor-row-enter ${hasOverdue ? 'debtor-overdue-row' : ''} ${isExpanded ? 'debtor-expanded-row' : ''}" data-debtor-id="${debtor.id}" data-expandable-row="true" aria-expanded="${isExpanded ? 'true' : 'false'}" style="animation-delay:${Math.min(index * 35, 180)}ms">
                         <td>
-                            <div class="text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
-                                <div class="mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
+                            <div class="debtor-row-name text-base font-semibold tracking-tight text-gray-900">${debtor.name || '-'}</div>
+                                <div class="debtor-row-meta mt-1 text-sm font-medium text-gray-600" aria-label="Telefone: ${phoneDigits ? phoneValue : 'não informado'}">${phoneHtml}</div>
                         </td>
                         <td>
                             <span class="${badgeForStatus(statusLabel)}" aria-label="Status cadastral: ${statusLabel}">${statusLabel}</span>
@@ -2452,73 +2929,77 @@
                             </span>
                         </td>
                         <td class="whitespace-nowrap text-right">
-                            <span class="inline-flex min-w-[1.5rem] justify-end text-base ${overdueCount > 0 ? 'font-semibold text-amber-700' : 'font-medium text-gray-600'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">${overdueCount}</span>
+                            <span class="debtor-overdue-pill ${overdueCount > 0 ? 'text-amber-500' : 'text-slate-500'}" title="Parcelas em atraso" aria-label="Parcelas em atraso: ${overdueCount}">
+                                ${overdueCount}
+                            </span>
                         </td>
-                        <td class="whitespace-nowrap text-right text-base font-semibold ${hasOverdue ? 'text-amber-700' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</td>
+                        <td class="whitespace-nowrap text-right">
+                            <div class="debtor-open-total ${hasOverdue ? 'text-amber-500' : 'text-gray-900'}" aria-label="Total em aberto: ${formatCurrency(openTotal)}">${formatCurrency(openTotal)}</div>
+                        </td>
                         <td class="whitespace-nowrap w-[1%]">
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100" data-action="toggle-debtor-details" data-id="${debtor.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
+                            <div class="debtor-action-set">
+                                <button type="button" class="debtor-action-btn ${isExpanded ? 'is-expanded' : ''}" data-variant="details" data-action="toggle-debtor-details" data-id="${debtor.id}" data-tooltip="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}" aria-label="${isExpanded ? 'Fechar detalhes do cliente' : 'Ver detalhes do cliente'} ${debtor.name || ''}">
                                     <i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i>
                                 </button>
-                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-blue-700 transition-colors hover:bg-blue-50" data-action="edit-debtor" data-id="${debtor.id}" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
+                                <button type="button" class="debtor-action-btn" data-variant="edit" data-action="edit-debtor" data-id="${debtor.id}" data-tooltip="Editar cliente" title="Editar cliente" aria-label="Editar cliente ${debtor.name || ''}">
                                     <i class="fas fa-pen-to-square"></i>
                                 </button>
-                                <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-red-700 transition-colors hover:bg-red-50" data-action="delete-debtor" data-id="${debtor.id}" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
+                                <button type="button" class="debtor-action-btn" data-variant="delete" data-action="delete-debtor" data-id="${debtor.id}" data-tooltip="Excluir cliente" title="Excluir cliente" aria-label="Excluir cliente ${debtor.name || ''}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
                     <tr class="debtor-detail-row ${isExpanded ? '' : 'hidden'}" data-debtor-detail-for="${debtor.id}">
-                        <td colspan="7" class="bg-slate-50 px-4 pb-3 pt-0">
-                            <div class="debtor-detail-card px-4 py-4">
-                                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                    <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Detalhes do cliente</div>
-                                    <div class="text-[11px] text-slate-500">Visualização expandida</div>
+                        <td colspan="7" class="px-4 pb-3 pt-0">
+                            <div class="debtor-detail-card px-5 py-5">
+                                <div class="debtor-detail-header">
+                                    <div class="debtor-detail-kicker">Detalhes do cliente</div>
+                                    <div class="debtor-detail-kicker-secondary">Visualização expandida</div>
                                 </div>
-                                <div class="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2 xl:grid-cols-4">
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Documento</div>
-                                    <div class="mt-1 font-semibold text-gray-800">${documentValue}</div>
+                                <div class="debtor-detail-grid-desktop">
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Documento</div>
+                                        <div class="debtor-detail-value">${documentValue}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">E-mail</div>
+                                        <div class="debtor-detail-value debtor-detail-value-sm">${debtor.email || '&mdash;'}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Dias em atraso (máx.)</div>
+                                        <div class="debtor-detail-value ${maxOverdueDaysCount > 0 ? 'text-amber-700' : 'text-gray-600'}">${maxOverdueDaysCount > 0 ? maxOverdueDaysCount : '&mdash;'}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Próx. venc. | Parcela</div>
+                                        <div class="debtor-detail-value debtor-detail-value-sm text-gray-800">${detailNextDue}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Empréstimos</div>
+                                        <div class="debtor-detail-value text-gray-800">${loansCount}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Índice Credix</div>
+                                        <div class="debtor-detail-value ${insightSnapshot.scoreClass}">${insightSnapshot.scoreText}</div>
+                                        <div class="debtor-detail-hint">Índice calculado com base no histórico de pagamentos</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Comportamento</div>
+                                        <div class="debtor-detail-value debtor-detail-value-sm ${insightSnapshot.behaviorClass}">${insightSnapshot.behaviorText}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Pontualidade 90d</div>
+                                        <div class="debtor-detail-value ${insightSnapshot.punctualityClass}">${punctualityTextShort}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Último pagamento</div>
+                                        <div class="debtor-detail-value debtor-detail-value-sm ${insightSnapshot.lastPaymentClass}">${lastPaymentTextShort}</div>
+                                    </div>
+                                    <div class="debtor-detail-item">
+                                        <div class="debtor-detail-label">Tendência 3M</div>
+                                        <div class="debtor-detail-value ${insightSnapshot.trendClass}">${trendTextShort}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">E-mail</div>
-                                    <div class="mt-1 font-semibold text-gray-800">${debtor.email || '&mdash;'}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Dias em atraso (máx.)</div>
-                                    <div class="mt-1 font-semibold ${Number(maxOverdueDays || 0) > 0 ? 'text-amber-700' : 'text-gray-600'}">${Number(maxOverdueDays || 0) > 0 ? maxOverdueDays : '&mdash;'}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Próx. venc. | Parcela</div>
-                                    <div class="mt-1 font-semibold text-gray-800">${detailNextDue}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Empréstimos</div>
-                                    <div class="mt-1 font-semibold text-gray-800">${loansCount}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Índice Credix</div>
-                                    <div class="mt-1 font-semibold ${insightSnapshot.scoreClass}">${insightSnapshot.scoreText}</div>
-                                    <div class="mt-1 text-[11px] text-gray-500">Índice calculado com base no histórico de pagamentos</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Comportamento</div>
-                                    <div class="mt-1 font-semibold ${insightSnapshot.behaviorClass}">${insightSnapshot.behaviorText}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Pontualidade 90d</div>
-                                    <div class="mt-1 font-semibold ${insightSnapshot.punctualityClass}">${insightSnapshot.punctualityText.replace('Pontualidade 90d: ', '')}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Último pagamento</div>
-                                    <div class="mt-1 font-semibold ${insightSnapshot.lastPaymentClass}">${insightSnapshot.lastPaymentText.replace('Último pagamento: ', '')}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-wide text-gray-500">Tendência 3M</div>
-                                    <div class="mt-1 font-semibold ${insightSnapshot.trendClass}">${insightSnapshot.trendText.replace('Tendência 3M: ', '')}</div>
-                                </div>
-                            </div>
                             </div>
                         </td>
                     </tr>

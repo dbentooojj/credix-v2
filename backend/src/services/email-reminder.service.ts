@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma";
 import { getSmtpConfigError, sendEmail } from "./email.service";
 
 type DueInstallment = {
+  ownerUserId: number;
   installmentId: number;
   installmentNumber: number;
   loanId: number;
@@ -32,6 +33,7 @@ type SendDueTodayEmailOptions = {
   recipients?: string[];
   timeZone?: string;
   daysAhead?: number;
+  ownerUserId?: number;
 };
 
 export type SendDueTodayEmailResult = {
@@ -129,30 +131,34 @@ function getDueReference(daysAhead: number): { title: string; sentence: string }
   return { title: "na data selecionada", sentence: "na data selecionada" };
 }
 
-type RecipientSource = "override" | "env" | "internal-users";
+type RecipientSource = "override" | "owner-user";
 
 type RecipientResolution = {
   recipients: string[];
   source: RecipientSource;
+  message?: string;
 };
 
-async function getInternalUserRecipients(): Promise<string[]> {
-  const rows = await prisma.$queryRaw<Array<{ email: string | null }>>`
-    SELECT "email"
-    FROM "User"
-    WHERE UPPER(TRIM(("role")::text)) IN ('ADMIN', 'OWNER')
-    ORDER BY "id" ASC
-  `;
+async function getOwnerEmailsById(ownerUserIds: number[]): Promise<Map<number, string>> {
+  if (ownerUserIds.length === 0) return new Map<number, string>();
 
-  return parseRecipients(
-    rows
-      .map((row) => String(row.email || "").trim().toLowerCase())
-      .filter(Boolean)
-      .join(","),
-  );
+  const rows = await prisma.user.findMany({
+    where: { id: { in: ownerUserIds } },
+    select: { id: true, email: true },
+  });
+
+  const map = new Map<number, string>();
+  for (const row of rows) {
+    map.set(row.id, String(row.email || "").trim().toLowerCase());
+  }
+  return map;
 }
 
-async function getEmailRecipients(override?: string[]): Promise<RecipientResolution> {
+function resolveRecipientsForOwner(
+  ownerUserId: number,
+  ownerEmailsById: Map<number, string>,
+  override?: string[],
+): RecipientResolution {
   if (override && override.length > 0) {
     return {
       recipients: parseRecipients(override.join(",")),
@@ -160,26 +166,30 @@ async function getEmailRecipients(override?: string[]): Promise<RecipientResolut
     };
   }
 
-  if (env.EMAIL_NOTIFY_TO) {
+  const ownerEmail = ownerEmailsById.get(ownerUserId) ?? "";
+  const recipients = parseRecipients(ownerEmail);
+  if (recipients.length > 0) {
     return {
-      recipients: parseRecipients(env.EMAIL_NOTIFY_TO),
-      source: "env",
+      recipients,
+      source: "owner-user",
     };
   }
 
   return {
-    recipients: await getInternalUserRecipients(),
-    source: "internal-users",
+    recipients: [],
+    source: "owner-user",
+    message: `Usuario ${ownerUserId} sem e-mail valido para notificacao`,
   };
 }
 
-async function fetchDueInstallments(targetDateIso: string): Promise<DueInstallment[]> {
+async function fetchDueInstallments(targetDateIso: string, ownerUserId?: number): Promise<DueInstallment[]> {
   const dueDate = new Date(`${targetDateIso}T00:00:00Z`);
 
   const rows = await prisma.installment.findMany({
     where: {
       dueDate,
       status: { not: InstallmentStatus.PAGO },
+      ...(Number.isFinite(ownerUserId) ? { ownerUserId } : {}),
     },
     orderBy: [
       { client: { name: "asc" } },
@@ -188,6 +198,7 @@ async function fetchDueInstallments(targetDateIso: string): Promise<DueInstallme
     ],
     select: {
       id: true,
+      ownerUserId: true,
       loanId: true,
       installmentNumber: true,
       dueDate: true,
@@ -204,6 +215,7 @@ async function fetchDueInstallments(targetDateIso: string): Promise<DueInstallme
   });
 
   return rows.map((row) => ({
+    ownerUserId: row.ownerUserId,
     installmentId: row.id,
     installmentNumber: row.installmentNumber,
     loanId: row.loanId,
@@ -239,6 +251,19 @@ function groupByClient(items: DueInstallment[]): DueInstallmentGroup[] {
   }
 
   return [...map.values()];
+}
+
+function groupByOwner(items: DueInstallment[]): Map<number, DueInstallment[]> {
+  const map = new Map<number, DueInstallment[]>();
+  for (const item of items) {
+    const current = map.get(item.ownerUserId);
+    if (!current) {
+      map.set(item.ownerUserId, [item]);
+      continue;
+    }
+    current.push(item);
+  }
+  return map;
 }
 
 function buildSubject(targetDateIso: string, dueCount: number, totalAmount: number): string {
@@ -429,7 +454,12 @@ export async function sendDueTodayInstallmentsEmail(
     ? getIsoDateDiff(todayIso, targetDateIso)
     : configuredDaysAhead;
 
-  const dueItems = await fetchDueInstallments(targetDateIso);
+  const parsedOwnerUserId = Number(options.ownerUserId);
+  const scopeOwnerUserId = Number.isFinite(parsedOwnerUserId) && parsedOwnerUserId > 0
+    ? Math.trunc(parsedOwnerUserId)
+    : undefined;
+
+  const dueItems = await fetchDueInstallments(targetDateIso, scopeOwnerUserId);
   const dueGroups = groupByClient(dueItems);
   const dueCount = dueItems.length;
   const clientCount = dueGroups.length;
@@ -449,29 +479,6 @@ export async function sendDueTodayInstallmentsEmail(
     };
   }
 
-  const recipientResolution = await getEmailRecipients(options.recipients);
-  const recipients = recipientResolution.recipients;
-
-  if (recipients.length === 0) {
-    const noRecipientsMessageBySource: Record<RecipientSource, string> = {
-      override: "Nenhum destinatario valido no override de recipients",
-      env: "EMAIL_NOTIFY_TO definido, mas sem destinatarios validos",
-      "internal-users": "Nenhum usuario interno (ADMIN/OWNER) com e-mail valido encontrado",
-    };
-
-    return {
-      ok: false,
-      skipped: true,
-      message: noRecipientsMessageBySource[recipientResolution.source],
-      targetDateIso,
-      recipients,
-      dueCount,
-      clientCount,
-      totalAmount,
-      daysAhead: effectiveDaysAhead,
-    };
-  }
-
   const smtpError = getSmtpConfigError();
   if (smtpError) {
     return {
@@ -479,6 +486,69 @@ export async function sendDueTodayInstallmentsEmail(
       skipped: true,
       message: smtpError,
       targetDateIso,
+      recipients: [],
+      dueCount,
+      clientCount,
+      totalAmount,
+      daysAhead: effectiveDaysAhead,
+    };
+  }
+
+  const itemsByOwner = groupByOwner(dueItems);
+  const ownerIds = [...itemsByOwner.keys()];
+  const ownerEmailsById = await getOwnerEmailsById(ownerIds);
+  const recipientsSet = new Set<string>();
+  let sentEmails = 0;
+  const skippedOwners: string[] = [];
+  const failedOwners: string[] = [];
+
+  for (const [ownerId, ownerItems] of itemsByOwner.entries()) {
+    const recipientResolution = resolveRecipientsForOwner(ownerId, ownerEmailsById, options.recipients);
+    const recipients = recipientResolution.recipients;
+
+    if (recipients.length === 0) {
+      skippedOwners.push(
+        recipientResolution.message
+          || `Usuario ${ownerId} sem destinatarios validos (${recipientResolution.source})`,
+      );
+      continue;
+    }
+
+    const ownerGroups = groupByClient(ownerItems);
+    const ownerDueCount = ownerItems.length;
+    const ownerTotalAmount = ownerItems.reduce((sum, item) => sum + item.amount, 0);
+
+    try {
+      await sendEmail({
+        to: recipients,
+        subject: buildSubject(targetDateIso, ownerDueCount, ownerTotalAmount),
+        text: buildTextBody(ownerGroups, targetDateIso, ownerTotalAmount, effectiveDaysAhead),
+        html: buildHtmlBody(ownerGroups, targetDateIso, ownerTotalAmount, effectiveDaysAhead),
+      });
+      sentEmails += 1;
+      recipients.forEach((recipient) => recipientsSet.add(recipient));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failedOwners.push(`Usuario ${ownerId}: ${message}`);
+    }
+  }
+
+  const recipients = [...recipientsSet];
+
+  if (sentEmails === 0) {
+    const reasonParts: string[] = [];
+    if (skippedOwners.length > 0) {
+      reasonParts.push(`Sem destinatario: ${skippedOwners.join(" | ")}`);
+    }
+    if (failedOwners.length > 0) {
+      reasonParts.push(`Falha no envio: ${failedOwners.join(" | ")}`);
+    }
+
+    return {
+      ok: false,
+      skipped: true,
+      message: reasonParts.join(" | ") || "Nenhum e-mail enviado para os usuarios com parcelas pendentes",
+      targetDateIso,
       recipients,
       dueCount,
       clientCount,
@@ -487,17 +557,28 @@ export async function sendDueTodayInstallmentsEmail(
     };
   }
 
-  await sendEmail({
-    to: recipients,
-    subject: buildSubject(targetDateIso, dueCount, totalAmount),
-    text: buildTextBody(dueGroups, targetDateIso, totalAmount, effectiveDaysAhead),
-    html: buildHtmlBody(dueGroups, targetDateIso, totalAmount, effectiveDaysAhead),
-  });
+  if (skippedOwners.length > 0 || failedOwners.length > 0) {
+    const details: string[] = [`Envio parcial: ${sentEmails} e-mail(s) enviado(s)`];
+    if (skippedOwners.length > 0) details.push(`Ignorados: ${skippedOwners.join(" | ")}`);
+    if (failedOwners.length > 0) details.push(`Erros: ${failedOwners.join(" | ")}`);
+
+    return {
+      ok: true,
+      skipped: false,
+      message: details.join(" | "),
+      targetDateIso,
+      recipients,
+      dueCount,
+      clientCount,
+      totalAmount,
+      daysAhead: effectiveDaysAhead,
+    };
+  }
 
   return {
     ok: true,
     skipped: false,
-    message: `E-mail enviado para ${recipients.length} destinatario(s) com ${dueCount} parcela(s) em ${clientCount} cliente(s)`,
+    message: `E-mail enviado para ${sentEmails} usuario(s) com ${dueCount} parcela(s) em ${clientCount} cliente(s)`,
     targetDateIso,
     recipients,
     dueCount,

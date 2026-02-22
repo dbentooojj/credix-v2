@@ -11,6 +11,7 @@
 
         let lastActivityWriteAt = 0;
         let logoutInProgress = false;
+        let inMemoryLastActivityAt = nowMs();
 
         function nowMs() {
             return Date.now();
@@ -34,13 +35,14 @@
             const current = nowMs();
             if (!force && (current - lastActivityWriteAt) < ACTIVITY_WRITE_THROTTLE_MS) return;
             lastActivityWriteAt = current;
+            inMemoryLastActivityAt = current;
             safeSetLocalStorage(LAST_ACTIVITY_KEY, String(current));
         }
 
         function getLastActivity() {
             const raw = safeGetLocalStorage(LAST_ACTIVITY_KEY);
             const parsed = Number(raw);
-            if (!Number.isFinite(parsed) || parsed <= 0) return 0;
+            if (!Number.isFinite(parsed) || parsed <= 0) return inMemoryLastActivityAt;
             return parsed;
         }
 
@@ -79,15 +81,31 @@
             window.addEventListener(eventName, () => markActivity(false), { passive: true });
         });
 
-        window.addEventListener('focus', () => markActivity(true));
+        function handleResumeFromBackground() {
+            checkInactivity();
+            if (logoutInProgress) return;
+            const lastActivity = getLastActivity();
+            if ((nowMs() - lastActivity) < IDLE_MS) {
+                markActivity(true);
+            }
+        }
+
+        window.addEventListener('focus', handleResumeFromBackground);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                handleResumeFromBackground();
+            }
+        });
         window.addEventListener('storage', (event) => {
             if (event.key === FORCE_LOGOUT_KEY && event.newValue) {
                 void logoutAndRedirect('timeout', false);
             }
         });
 
-        markActivity(true);
+        checkInactivity();
+        if (!logoutInProgress) {
+            markActivity(true);
+        }
         window.setInterval(checkInactivity, CHECK_INTERVAL_MS);
     })();
 </script>
-
