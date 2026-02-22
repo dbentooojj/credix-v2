@@ -757,7 +757,7 @@
 
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <div class="glass-card premium-card rounded-2xl p-5 h-full">
+                    <div class="glass-card premium-card overdue-panel rounded-2xl p-5 h-full">
                         <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
                         <p class="mb-4 mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
                         <div id="upcomingList" class="space-y-3 fixed-scroll-panel">
@@ -1668,8 +1668,8 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn bg-amber-500 text-white"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>
-                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white"><i class="fas fa-check mr-1"></i>Pagar</button>
+                            <button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn overdue-charge-btn"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>
+                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn overdue-pay-btn"><i class="fas fa-check mr-1"></i>Pagar</button>
                         </div>
                     </article>
                 `;

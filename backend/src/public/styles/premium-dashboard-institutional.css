@@ -99,3 +99,52 @@
 .dashboard-premium.dashboard-financial .glass-card.p-4 {
   padding: 20px !important;
 }
+
+.dashboard-premium.dashboard-financial .overdue-panel {
+  background: rgba(255, 255, 255, 0.042) !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+.dashboard-premium.dashboard-financial #overdueList {
+  padding: 4px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dashboard-premium.dashboard-financial #overdueList .overdue-item {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 14px !important;
+}
+
+.dashboard-premium.dashboard-financial #overdueList .status-pill.status-red {
+  background: rgba(244, 63, 94, 0.15) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(244, 63, 94, 0.30) !important;
+}
+
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn {
+  border-radius: 12px !important;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
+}
+
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn.overdue-charge-btn {
+  border: 1px solid rgba(245, 158, 11, 0.32) !important;
+  background: linear-gradient(135deg, rgba(88, 56, 29, 0.84), rgba(74, 31, 43, 0.84)) !important;
+  color: #f5d9bf !important;
+}
+
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn.overdue-pay-btn {
+  border: 1px solid rgba(16, 185, 129, 0.32) !important;
+  background: linear-gradient(135deg, rgba(24, 88, 78, 0.86), rgba(23, 74, 88, 0.82)) !important;
+  color: #d3f3eb !important;
+}
+
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn:hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(1.03);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+}
