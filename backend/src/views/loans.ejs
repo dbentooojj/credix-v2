@@ -27,6 +27,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <style>
         html { font-size: 16px; }
         body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
@@ -218,6 +219,47 @@
             border-color: #8ea8d0;
             color: #122f55;
         }
+        .loan-date-alt-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 10px 12px;
+            color: #111827;
+            line-height: 1.3;
+        }
+        .loan-date-alt-input:focus {
+            outline: none;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.2);
+        }
+        .loan-date-alt-input--compact {
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+        .loan-preview-date-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .flatpickr-calendar {
+            border-radius: 12px !important;
+            border: 1px solid rgba(148, 163, 184, 0.25) !important;
+            box-shadow: 0 12px 28px rgba(2, 6, 23, 0.45) !important;
+        }
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+        }
+        .flatpickr-day:hover {
+            background: rgba(59, 130, 246, 0.2) !important;
+            border-color: rgba(59, 130, 246, 0.25) !important;
+        }
         .installment-preview {
             border-radius: 12px;
             border: 1px solid #e5e7eb;
@@ -328,6 +370,11 @@
             background: rgba(37, 99, 235, 0.44);
             border-color: rgba(147, 197, 253, 0.55);
             color: #eff6ff;
+        }
+        .dark .loan-date-alt-input {
+            background: rgba(15, 23, 42, 0.72);
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.25);
         }
         /* Premium DS v1 - light skin */
         :root {
@@ -721,12 +768,12 @@
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">Data de início</label>
-                                    <input id="loanStartDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="date" required>
+                                    <input id="loanStartDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="text" required>
                                     <p id="loanStartDateError" class="field-error" aria-live="polite"></p>
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm text-gray-600">1º vencimento</label>
-                                    <input id="loanFirstDueDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="date" required>
+                                    <input id="loanFirstDueDate" class="filter-control focus:ring-2 focus:ring-blue-500/40" type="text" required>
                                     <p id="loanFirstDueDateError" class="field-error" aria-live="polite"></p>
                                 </div>
                             </div>
@@ -794,7 +841,6 @@
 
                         <div class="loan-action-row">
                                 <button id="cancelLoanModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                                <button id="calculateLoanBtn" type="button" class="loan-btn-secondary rounded-xl border px-4 py-2 text-sm font-semibold">Simular parcelas</button>
                                 <button id="saveLoanBtn" type="submit" class="loan-btn-primary rounded-xl px-4 py-2 text-sm font-semibold">Salvar empréstimo</button>
                         </div>
                     </form>
@@ -832,6 +878,8 @@
     </div>
 
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script>
         const currentUser = window.__AUTH_USER__;
         if (!currentUser) {
@@ -1146,16 +1194,203 @@
         }
 
         function formatDate(value) {
-            if (!value) return '-';
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) return '-';
-            return date.toLocaleDateString('pt-BR');
+            const iso = normalizeIsoDateOnly(value);
+            if (!iso) return '-';
+            const [year, month, day] = iso.split('-');
+            return `${day}/${month}/${year}`;
         }
 
         function toIsoDate(value) {
+            return normalizeIsoDateOnly(value);
+        }
+
+        const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+        function pad2(value) {
+            return String(value).padStart(2, '0');
+        }
+
+        function toLocalIsoDate(value = new Date()) {
             const date = new Date(value);
             if (Number.isNaN(date.getTime())) return '';
-            return date.toISOString().slice(0, 10);
+            return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+        }
+
+        function normalizeIsoDateOnly(value) {
+            if (value === null || value === undefined) return '';
+
+            if (value instanceof Date) {
+                if (Number.isNaN(value.getTime())) return '';
+                return `${value.getUTCFullYear()}-${pad2(value.getUTCMonth() + 1)}-${pad2(value.getUTCDate())}`;
+            }
+
+            const raw = String(value).trim();
+            if (!raw) return '';
+
+            const directMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (directMatch) {
+                const year = Number(directMatch[1]);
+                const month = Number(directMatch[2]);
+                const day = Number(directMatch[3]);
+                const utcMs = Date.UTC(year, month - 1, day);
+                const parsed = new Date(utcMs);
+                const isValid = parsed.getUTCFullYear() === year
+                    && parsed.getUTCMonth() === month - 1
+                    && parsed.getUTCDate() === day;
+                return isValid ? `${year}-${pad2(month)}-${pad2(day)}` : '';
+            }
+
+            const parsed = new Date(raw);
+            if (Number.isNaN(parsed.getTime())) return '';
+            return `${parsed.getUTCFullYear()}-${pad2(parsed.getUTCMonth() + 1)}-${pad2(parsed.getUTCDate())}`;
+        }
+
+        function isoDateToUtcMillis(value) {
+            const iso = normalizeIsoDateOnly(value);
+            if (!iso) return Number.NaN;
+            const [year, month, day] = iso.split('-').map((part) => Number(part));
+            return Date.UTC(year, month - 1, day);
+        }
+
+        function diffDaysDateOnly(fromDate, toDate) {
+            const startMs = isoDateToUtcMillis(fromDate);
+            const endMs = isoDateToUtcMillis(toDate);
+            if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) return Number.NaN;
+            return Math.round((endMs - startMs) / MS_PER_DAY);
+        }
+
+        function addMonthsIsoDate(baseIsoDate, count) {
+            const safeIso = normalizeIsoDateOnly(baseIsoDate);
+            if (!safeIso) return '';
+
+            const [year, month, day] = safeIso.split('-').map((part) => Number(part));
+            const totalMonths = (year * 12) + (month - 1) + Math.trunc(toNumber(count));
+            const targetYear = Math.floor(totalMonths / 12);
+            const targetMonth = (totalMonths % 12) + 1;
+            const lastDay = new Date(Date.UTC(targetYear, targetMonth, 0)).getUTCDate();
+            const targetDay = Math.min(day, lastDay);
+
+            return `${targetYear}-${pad2(targetMonth)}-${pad2(targetDay)}`;
+        }
+
+        function sanitizeMoney(value) {
+            const amount = round2(value);
+            return Math.abs(amount) < 0.005 ? 0 : amount;
+        }
+
+        function isDateBeforeDateOnly(dateIso, referenceIso) {
+            const diff = diffDaysDateOnly(dateIso, referenceIso);
+            return Number.isFinite(diff) ? diff > 0 : false;
+        }
+
+        function debounce(callback, waitMs = 150) {
+            let timeoutId = null;
+            return (...args) => {
+                if (timeoutId !== null) {
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(() => {
+                    timeoutId = null;
+                    callback(...args);
+                }, waitMs);
+            };
+        }
+
+        function setDateInputValue(input, value, triggerChange = false) {
+            if (!(input instanceof HTMLInputElement)) return;
+            const normalized = normalizeIsoDateOnly(value);
+            input.dataset.fpLastValue = normalized;
+
+            if (input._flatpickr) {
+                if (normalized) input._flatpickr.setDate(normalized, triggerChange, 'Y-m-d');
+                else input._flatpickr.clear(triggerChange);
+                input.value = normalized;
+                return;
+            }
+
+            input.value = normalized;
+            if (triggerChange) {
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function createDatePicker(input, options = {}) {
+            if (!(input instanceof HTMLInputElement)) return null;
+            if (typeof window.flatpickr !== 'function') return null;
+
+            if (input._flatpickr) {
+                input._flatpickr.destroy();
+            }
+
+            const normalized = normalizeIsoDateOnly(input.value);
+            if (normalized) input.value = normalized;
+            input.dataset.fpLastValue = normalized;
+
+            const config = {
+                dateFormat: 'Y-m-d',
+                altInput: options.altInput !== false,
+                altFormat: 'd/m/Y',
+                altInputClass: options.altInputClass || 'filter-control loan-date-alt-input',
+                allowInput: false,
+                clickOpens: options.clickOpens !== false,
+                disableMobile: true,
+                locale: 'pt',
+                position: options.position || 'auto',
+                onClose: (_selectedDates, dateStr) => {
+                    const nextValue = normalizeIsoDateOnly(dateStr || input.value);
+                    if (!nextValue) return;
+                    input.value = nextValue;
+                    const previousValue = input.dataset.fpLastValue || '';
+                    input.dataset.fpLastValue = nextValue;
+                    if (nextValue === previousValue) return;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                },
+            };
+
+            const instance = window.flatpickr(input, config);
+            if (normalized) {
+                instance.setDate(normalized, false, 'Y-m-d');
+            }
+            return instance;
+        }
+
+        function initializeStaticDatePickers() {
+            if (typeof window.flatpickr !== 'function') return;
+            if (window.flatpickr.l10ns?.pt) {
+                window.flatpickr.localize(window.flatpickr.l10ns.pt);
+            }
+
+            createDatePicker(document.getElementById('loanStartDate'), {
+                altInput: true,
+                altInputClass: 'filter-control loan-date-alt-input',
+            });
+            createDatePicker(document.getElementById('loanFirstDueDate'), {
+                altInput: true,
+                altInputClass: 'filter-control loan-date-alt-input',
+            });
+        }
+
+        function initializeScheduleDatePickers() {
+            if (typeof window.flatpickr !== 'function') return;
+            const inputs = loanScheduleBody?.querySelectorAll('input[data-schedule-index]') || [];
+            inputs.forEach((input) => {
+                createDatePicker(input, {
+                    altInput: true,
+                    altInputClass: 'filter-control loan-date-alt-input loan-date-alt-input--compact',
+                });
+            });
+        }
+
+        function initializePreviewDatePickers() {
+            if (typeof window.flatpickr !== 'function') return;
+            const inputs = installmentsPreviewList?.querySelectorAll('input[data-action="preview-due-input"]') || [];
+            inputs.forEach((input) => {
+                createDatePicker(input, {
+                    altInput: false,
+                    clickOpens: false,
+                    position: 'auto right',
+                });
+            });
         }
 
         function startOfDay(value) {
@@ -1398,26 +1633,158 @@
             return debtor?.name || debtor?.full_name || 'Cliente não identificado';
         }
 
-        function addMonths(date, count) {
-            const copy = new Date(date.getTime());
-            copy.setMonth(copy.getMonth() + count);
-            return copy;
-        }
-
         function getTodayIsoDate() {
-            return new Date().toISOString().slice(0, 10);
+            return toLocalIsoDate(new Date());
         }
 
         function splitAmount(total, parts) {
             const safeParts = Math.max(1, toNumber(parts));
             const cents = Math.round(round2(total) * 100);
             const base = Math.floor(cents / safeParts);
-            const remainder = cents - base * safeParts;
+            const remainder = cents - (base * safeParts);
 
             return Array.from({ length: safeParts }, (_, index) => {
                 const current = base + (index === safeParts - 1 ? remainder : 0);
                 return round2(current / 100);
             });
+        }
+
+        function generateDueDates({ primeiroVencimento, N }) {
+            const firstDueDateIso = normalizeIsoDateOnly(primeiroVencimento);
+            const total = Math.max(0, Math.trunc(toNumber(N)));
+            if (!firstDueDateIso || total <= 0) return [];
+
+            return Array.from({ length: total }, (_, index) => addMonthsIsoDate(firstDueDateIso, index));
+        }
+
+        function resolveDueDates(values, scheduleRows) {
+            const n = Math.max(1, Math.trunc(toNumber(values.installments)));
+            const generatedDates = generateDueDates({
+                primeiroVencimento: values.firstDueDate,
+                N: n
+            });
+
+            return Array.from({ length: n }, (_, index) => {
+                const currentIso = normalizeIsoDateOnly(scheduleRows?.[index]?.due_date);
+                if (currentIso) return currentIso;
+                return generatedDates[index] || '';
+            });
+        }
+
+        function effectiveFactor(dias, taxaDiaria) {
+            const safeDays = Math.max(0, Math.trunc(toNumber(dias)));
+            const safeDailyRate = toNumber(taxaDiaria);
+            return Math.pow(1 + safeDailyRate, safeDays);
+        }
+
+        function simulateEndingBalance(P, capital, taxaDiaria, dataContratacao, vencimentos) {
+            const dueDates = Array.isArray(vencimentos) ? vencimentos : [];
+            const startDateIso = normalizeIsoDateOnly(dataContratacao);
+            const payment = toNumber(P);
+            if (!startDateIso || dueDates.length === 0) return Number.NaN;
+
+            let saldo = toNumber(capital);
+            let dataAnterior = startDateIso;
+
+            for (let index = 0; index < dueDates.length; index += 1) {
+                const dueDateIso = normalizeIsoDateOnly(dueDates[index]);
+                if (!dueDateIso) return Number.NaN;
+
+                const dias = diffDaysDateOnly(dataAnterior, dueDateIso);
+                if (!Number.isFinite(dias) || dias < 0) return Number.NaN;
+
+                saldo = (saldo * effectiveFactor(dias, taxaDiaria)) - payment;
+                dataAnterior = dueDateIso;
+            }
+
+            return saldo;
+        }
+
+        function solvePaymentBinarySearch(capital, taxaDiaria, dataContratacao, vencimentos, maxIterations = 60) {
+            const principal = toNumber(capital);
+            const dueDates = Array.isArray(vencimentos) ? vencimentos : [];
+            if (!Number.isFinite(principal) || principal <= 0 || dueDates.length === 0) return 0;
+
+            let low = 0;
+            let high = Math.max(principal * 10, 1);
+            let balanceAtHigh = simulateEndingBalance(high, principal, taxaDiaria, dataContratacao, dueDates);
+
+            let guard = 0;
+            while (Number.isFinite(balanceAtHigh) && balanceAtHigh > 0 && guard < 60) {
+                high *= 2;
+                balanceAtHigh = simulateEndingBalance(high, principal, taxaDiaria, dataContratacao, dueDates);
+                guard += 1;
+            }
+
+            if (!Number.isFinite(balanceAtHigh)) return Number.NaN;
+
+            for (let iteration = 0; iteration < Math.max(1, Math.trunc(toNumber(maxIterations))); iteration += 1) {
+                const mid = (low + high) / 2;
+                const balance = simulateEndingBalance(mid, principal, taxaDiaria, dataContratacao, dueDates);
+                if (!Number.isFinite(balance)) return Number.NaN;
+
+                if (balance > 0) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+
+            return round2(high);
+        }
+
+        function buildSchedule(capital, taxaDiaria, dataContratacao, vencimentos, basePayment) {
+            const dueDates = Array.isArray(vencimentos) ? vencimentos.map((date) => normalizeIsoDateOnly(date)).filter(Boolean) : [];
+            const startDateIso = normalizeIsoDateOnly(dataContratacao);
+            if (!startDateIso || dueDates.length === 0) return [];
+
+            const payment = Number.isFinite(toNumber(basePayment))
+                ? round2(basePayment)
+                : solvePaymentBinarySearch(capital, taxaDiaria, startDateIso, dueDates);
+
+            let saldo = round2(capital);
+            let dataAnterior = startDateIso;
+            const schedule = [];
+
+            for (let index = 0; index < dueDates.length; index += 1) {
+                const dueDateIso = dueDates[index];
+                const dias = diffDaysDateOnly(dataAnterior, dueDateIso);
+                const fator = effectiveFactor(dias, taxaDiaria);
+                const saldoAntes = saldo;
+                const saldoAposJuros = saldoAntes * fator;
+                const jurosPeriodo = saldoAposJuros - saldoAntes;
+
+                let pagamento = payment;
+                let saldoDepois = saldoAposJuros - pagamento;
+
+                if (index === dueDates.length - 1) {
+                    pagamento = round2(saldoAposJuros);
+                    saldoDepois = 0;
+                }
+
+                const jurosRounded = sanitizeMoney(jurosPeriodo);
+                const principalPeriodo = sanitizeMoney(pagamento - jurosRounded);
+                const saldoRounded = sanitizeMoney(saldoDepois);
+
+                schedule.push({
+                    data: dueDateIso,
+                    dias,
+                    fator,
+                    pagamento: round2(pagamento),
+                    jurosPeriodo: jurosRounded,
+                    principalPeriodo,
+                    saldo: saldoRounded,
+                });
+
+                saldo = saldoRounded;
+                dataAnterior = dueDateIso;
+            }
+
+            if (schedule.length > 0) {
+                schedule[schedule.length - 1].saldo = 0;
+            }
+
+            return schedule;
         }
 
         function calculateLoanValues(principal, ratePercent, installmentsCount, interestType) {
@@ -1426,95 +1793,86 @@
             const n = Math.max(1, Math.trunc(toNumber(installmentsCount)));
 
             if (p <= 0 || n <= 0 || r < 0) return null;
+            if (interestType !== 'simples') return null;
 
-            if (interestType === 'simples') {
-                const totalInterest = round2(p * r * n);
-                const totalAmount = round2(p + totalInterest);
-                const installmentAmount = round2(totalAmount / n);
-                return { totalAmount, installmentAmount, totalInterest };
-            }
-
-            if (r === 0) {
-                const totalAmount = p;
-                const installmentAmount = round2(p / n);
-                return { totalAmount, installmentAmount, totalInterest: 0 };
-            }
-
-            const factor = Math.pow(1 + r, n);
-            const installmentAmount = round2((p * r * factor) / (factor - 1));
-            const totalAmount = round2(installmentAmount * n);
-            const totalInterest = round2(totalAmount - p);
+            const totalInterest = round2(p * r * n);
+            const totalAmount = round2(p + totalInterest);
+            const installmentAmount = round2(totalAmount / n);
             return { totalAmount, installmentAmount, totalInterest };
         }
 
         function buildInstallmentPlan(values, calcResult, scheduleRows) {
-            const n = values.installments;
-            const monthlyRate = values.interestRate / 100;
-            const today = new Date(getTodayIsoDate());
+            const n = Math.max(1, Math.trunc(toNumber(values.installments)));
+            const dueDates = resolveDueDates(values, scheduleRows);
             const plan = [];
-            const dueDates = (Array.isArray(scheduleRows) ? scheduleRows : []).map((item, index) => {
-                const parsed = new Date(item?.due_date);
-                if (!Number.isNaN(parsed.getTime())) return parsed;
-                const fallback = getDueDateByFrequency(values.firstDueDate, index);
-                return fallback || new Date(values.firstDueDate);
-            });
-
-            while (dueDates.length < n) {
-                const index = dueDates.length;
-                const fallback = getDueDateByFrequency(values.firstDueDate, index);
-                dueDates.push(fallback || new Date(values.firstDueDate));
-            }
-
-            if (values.interestType === 'simples') {
-                const principalParts = splitAmount(values.principal, n);
-                const interestParts = splitAmount(calcResult.totalInterest, n);
-
-                for (let index = 0; index < n; index += 1) {
-                    const due = dueDates[index];
-                    const amount = round2(principalParts[index] + interestParts[index]);
-                    plan.push({
-                        installment_number: index + 1,
-                        amount,
-                        principal_amount: principalParts[index],
-                        interest_amount: interestParts[index],
-                        due_date: toIsoDate(due),
-                        status: due < today ? 'Atrasado' : 'Pendente',
-                        payment_date: null
-                    });
-                }
-                return plan;
-            }
-
-            const amounts = splitAmount(calcResult.totalAmount, n);
-            let remainingPrincipal = round2(values.principal);
+            const principalParts = splitAmount(values.principal, n);
+            const interestParts = splitAmount(calcResult.totalInterest, n);
 
             for (let index = 0; index < n; index += 1) {
-                const due = dueDates[index];
-                const amount = amounts[index];
-
-                let interestAmount = values.interestRate === 0 ? 0 : round2(remainingPrincipal * monthlyRate);
-                let principalAmount = round2(amount - interestAmount);
-
-                if (index === n - 1) {
-                    principalAmount = round2(remainingPrincipal);
-                    interestAmount = round2(amount - principalAmount);
-                }
-
-                remainingPrincipal = round2(remainingPrincipal - principalAmount);
-                if (remainingPrincipal < 0) remainingPrincipal = 0;
+                const dueDateIso = dueDates[index];
+                const amount = round2(principalParts[index] + interestParts[index]);
 
                 plan.push({
                     installment_number: index + 1,
                     amount,
-                    principal_amount: principalAmount,
-                    interest_amount: interestAmount,
-                    due_date: toIsoDate(due),
-                    status: due < today ? 'Atrasado' : 'Pendente',
+                    principal_amount: principalParts[index],
+                    interest_amount: interestParts[index],
+                    due_date: dueDateIso,
+                    status: isDateBeforeDateOnly(dueDateIso, getTodayIsoDate()) ? 'Atrasado' : 'Pendente',
                     payment_date: null
                 });
             }
 
             return plan;
+        }
+
+        function calculateCompoundLoanByPeriods(values, scheduleRows) {
+            const dueDates = resolveDueDates(values, scheduleRows);
+            const startDateIso = normalizeIsoDateOnly(values.startDate);
+            if (!startDateIso || dueDates.length === 0 || dueDates.some((date) => !date)) {
+                return null;
+            }
+
+            let previousDateIso = startDateIso;
+            for (let index = 0; index < dueDates.length; index += 1) {
+                const days = diffDaysDateOnly(previousDateIso, dueDates[index]);
+                if (!Number.isFinite(days) || days <= 0) return null;
+                previousDateIso = dueDates[index];
+            }
+
+            const taxaDiaria = (toNumber(values.interestRate) / 100) / 30;
+            const payment = solvePaymentBinarySearch(values.principal, taxaDiaria, startDateIso, dueDates);
+
+            if (!Number.isFinite(payment) || payment <= 0) {
+                return null;
+            }
+
+            const schedule = buildSchedule(values.principal, taxaDiaria, startDateIso, dueDates, payment);
+            if (!schedule.length) return null;
+
+            const plan = schedule.map((item, index) => ({
+                installment_number: index + 1,
+                amount: round2(item.pagamento),
+                principal_amount: round2(item.principalPeriodo),
+                interest_amount: round2(item.jurosPeriodo),
+                due_date: item.data,
+                status: isDateBeforeDateOnly(item.data, getTodayIsoDate()) ? 'Atrasado' : 'Pendente',
+                payment_date: null,
+                balance: round2(item.saldo),
+                days_interval: item.dias,
+            }));
+
+            const totalAmount = round2(plan.reduce((sum, row) => sum + toNumber(row.amount), 0));
+            const totalInterest = round2(totalAmount - toNumber(values.principal));
+
+            return {
+                calcResult: {
+                    totalAmount,
+                    installmentAmount: payment,
+                    totalInterest,
+                },
+                plan,
+            };
         }
 
         function deriveLoanStatus(plan) {
@@ -1904,22 +2262,20 @@
             }
         }
 
-        function addDays(date, days) {
-            const copy = new Date(date.getTime());
-            copy.setDate(copy.getDate() + days);
-            return copy;
-        }
-
         function suggestFirstDueDate(startDateIso) {
-            const start = new Date(startDateIso);
-            if (Number.isNaN(start.getTime())) return '';
-            return toIsoDate(addDays(start, 30));
+            const safeStartIso = normalizeIsoDateOnly(startDateIso);
+            if (!safeStartIso) return '';
+            const startMs = isoDateToUtcMillis(safeStartIso);
+            if (!Number.isFinite(startMs)) return '';
+            return normalizeIsoDateOnly(new Date(startMs + (30 * MS_PER_DAY)));
         }
 
         function getDueDateByFrequency(firstDueDateIso, index) {
-            const firstDue = new Date(firstDueDateIso);
-            if (Number.isNaN(firstDue.getTime())) return null;
-            return addMonths(firstDue, index);
+            const dueDates = generateDueDates({
+                primeiroVencimento: firstDueDateIso,
+                N: Math.max(1, Math.trunc(toNumber(index)) + 1)
+            });
+            return dueDates[Math.max(0, Math.trunc(toNumber(index)))] || '';
         }
 
         function clearFieldErrors() {
@@ -1987,6 +2343,35 @@
             document.getElementById('loanCalculatedRateInfo').textContent = 'Taxa: 0%';
         }
 
+        function hasMinimumFieldsForAutoCalculation(values) {
+            if (!values || typeof values !== 'object') return false;
+
+            const principalOk = toNumber(values.principal) > 0;
+            const installmentsOk = Math.trunc(toNumber(values.installments)) > 0;
+            const startDateOk = Boolean(normalizeIsoDateOnly(values.startDate));
+            const firstDueDateOk = Boolean(normalizeIsoDateOnly(values.firstDueDate));
+            const rateOk = values.interestType === 'fixo'
+                ? String(document.getElementById('loanFixedAddition')?.value || '').trim() !== ''
+                : toNumber(values.interestRate) > 0;
+
+            return principalOk && installmentsOk && rateOk && startDateOk && firstDueDateOk;
+        }
+
+        function runReactiveLoanRecalculation() {
+            if (loanModal.classList.contains('hidden')) return;
+            const values = getLoanFormValues();
+            if (!hasMinimumFieldsForAutoCalculation(values)) {
+                clearFieldErrors();
+                resetSimulationState();
+                renderScheduleTable([]);
+                return;
+            }
+
+            calculateLoanFromForm(false);
+        }
+
+        const triggerReactiveLoanRecalculation = debounce(runReactiveLoanRecalculation, 150);
+
         function buildScheduleRows(values, existingSchedule, forceGenerate) {
             const total = Math.max(1, Math.trunc(toNumber(values.installments)));
             const current = Array.isArray(existingSchedule) ? existingSchedule : [];
@@ -1996,7 +2381,7 @@
                 let dueDate = current[index]?.due_date || '';
                 if (forceGenerate || !dueDate) {
                     const calculated = getDueDateByFrequency(values.firstDueDate, index);
-                    dueDate = calculated ? toIsoDate(calculated) : '';
+                    dueDate = normalizeIsoDateOnly(calculated);
                 }
 
                 rows.push({
@@ -2026,7 +2411,7 @@
                         <td class="px-3 py-2 font-semibold text-slate-700">#${row.installment_number}</td>
                         <td class="px-3 py-2">
                             <input
-                                type="date"
+                                type="text"
                                 class="filter-control !px-2 !py-1.5 text-xs focus:ring-2 focus:ring-blue-500/40"
                                 data-schedule-index="${index}"
                                 value="${row.due_date || ''}">
@@ -2038,8 +2423,10 @@
 
             const hint = document.getElementById('loanScheduleHint');
             if (hint) {
-                hint.textContent = 'Datas mensais sugeridas: você pode editar as datas e regerar quando precisar.';
+                hint.textContent = 'Datas mensais sugeridas: voce pode editar as datas e regerar quando precisar.';
             }
+
+            initializeScheduleDatePickers();
         }
 
         function refreshSchedule(forceGenerate) {
@@ -2071,16 +2458,21 @@
             document.getElementById('loanCalculatedTotal').textContent = formatCurrency(calcResult.totalAmount);
             document.getElementById('loanCalculatedInstallment').textContent = formatCurrency(calcResult.installmentAmount);
             document.getElementById('loanCalculatedInterestType').textContent = formatInterestTypeLabel(values.interestType);
-            document.getElementById('loanCalculatedRateInfo').textContent = values.interestType === 'fixo'
-                ? `Acréscimo fixo: ${formatCurrency(values.fixedAddition)}`
-                : `Taxa mensal: ${values.interestRate}%`;
+            if (values.interestType === 'fixo') {
+                document.getElementById('loanCalculatedRateInfo').textContent = `Acrescimo fixo: ${formatCurrency(values.fixedAddition)}`;
+            } else if (values.interestType === 'composto') {
+                const dailyRatePercent = round2((toNumber(values.interestRate) / 30));
+                document.getElementById('loanCalculatedRateInfo').textContent = `Taxa mensal: ${values.interestRate}% | Taxa diaria base: ${dailyRatePercent}%`;
+            } else {
+                document.getElementById('loanCalculatedRateInfo').textContent = `Taxa mensal: ${values.interestRate}%`;
+            }
             loanCalculationCard.classList.remove('hidden');
         }
 
         function setDefaultLoanDates() {
             const todayIso = getTodayIsoDate();
-            document.getElementById('loanStartDate').value = todayIso;
-            document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(todayIso);
+            setDateInputValue(document.getElementById('loanStartDate'), todayIso);
+            setDateInputValue(document.getElementById('loanFirstDueDate'), suggestFirstDueDate(todayIso));
             loanFormState.firstDueTouched = false;
         }
 
@@ -2133,8 +2525,8 @@
                     return;
                 }
                 const interestType = normalizeInterestType(loan.loan_meta?.interestMode || loan.interest_type);
-                const startDateValue = toIsoDate(loan.start_date) || getTodayIsoDate();
-                const firstDueValue = toIsoDate(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue);
+                const startDateValue = normalizeIsoDateOnly(loan.start_date) || getTodayIsoDate();
+                const firstDueValue = normalizeIsoDateOnly(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue);
 
                 document.getElementById('loanModalTitle').textContent = `Editar empréstimo #${loan.id}`;
                 document.getElementById('saveLoanBtn').textContent = 'Salvar alterações';
@@ -2144,8 +2536,8 @@
                 document.getElementById('loanDebtor').value = String(loan.debtor_id);
                 document.getElementById('loanPrincipal').value = formatCurrencyInput(loan.principal_amount);
                 document.getElementById('loanInstallments').value = loan.installments_count;
-                document.getElementById('loanStartDate').value = startDateValue;
-                document.getElementById('loanFirstDueDate').value = firstDueValue;
+                setDateInputValue(document.getElementById('loanStartDate'), startDateValue);
+                setDateInputValue(document.getElementById('loanFirstDueDate'), firstDueValue);
                 document.getElementById('loanObservations').value = loan.observations || '';
 
                 document.getElementById('loanInterestType').value = interestType;
@@ -2163,7 +2555,7 @@
                     installments: Math.max(1, Math.trunc(toNumber(loan.installments_count)))
                 }, installments.map((item, idx) => ({
                     installment_number: idx + 1,
-                    due_date: toIsoDate(item.due_date)
+                    due_date: normalizeIsoDateOnly(item.due_date)
                 })), false);
             } else {
                 document.getElementById('loanModalTitle').textContent = 'Novo empréstimo';
@@ -2213,56 +2605,104 @@
                 fixedAddition: round2(document.getElementById('loanFixedAddition').value),
                 interestType,
                 installments: installmentsRaw > 0 ? installmentsRaw : 0,
-                startDate: document.getElementById('loanStartDate').value,
-                firstDueDate: document.getElementById('loanFirstDueDate').value,
+                startDate: normalizeIsoDateOnly(document.getElementById('loanStartDate').value),
+                firstDueDate: normalizeIsoDateOnly(document.getElementById('loanFirstDueDate').value),
                 observations: document.getElementById('loanObservations').value.trim()
             };
         }
 
-        function validateLoanFormValues(values) {
+        function validateLoanFormValues(values, options = {}) {
+            const {
+                requireDebtor = true,
+            } = options;
             const errors = {};
 
-            if (!values.debtorId) errors.debtorId = 'Selecione um cliente.';
+            if (requireDebtor && !values.debtorId) errors.debtorId = 'Selecione um cliente.';
             if (values.principal <= 0) errors.principal = 'Informe um valor principal maior que zero.';
             if (values.installments <= 0) errors.installments = 'Informe ao menos uma parcela.';
 
             if (values.interestType === 'fixo') {
-                if (values.fixedAddition < 0) errors.fixedAddition = 'O acréscimo fixo não pode ser negativo.';
+                if (values.fixedAddition < 0) errors.fixedAddition = 'O acrescimo fixo nao pode ser negativo.';
             } else if (values.interestRate <= 0) {
                 errors.interestRate = 'Informe uma taxa mensal maior que zero.';
             }
 
-            if (!values.startDate) errors.startDate = 'Informe a data de início.';
+            if (!values.startDate) errors.startDate = 'Informe a data de inicio.';
             if (!values.firstDueDate) errors.firstDueDate = 'Informe o primeiro vencimento.';
 
-            const startDate = new Date(values.startDate);
-            const firstDueDate = new Date(values.firstDueDate);
-            if (!errors.startDate && Number.isNaN(startDate.getTime())) errors.startDate = 'Data de início inválida.';
-            if (!errors.firstDueDate && Number.isNaN(firstDueDate.getTime())) errors.firstDueDate = 'Primeiro vencimento inválido.';
-            if (!errors.startDate && !errors.firstDueDate && firstDueDate < startDate) {
-                errors.firstDueDate = 'O 1º vencimento deve ser igual ou posterior à data de início.';
+            const startDateIso = normalizeIsoDateOnly(values.startDate);
+            const firstDueDateIso = normalizeIsoDateOnly(values.firstDueDate);
+            if (!errors.startDate && !startDateIso) errors.startDate = 'Data de inicio invalida.';
+            if (!errors.firstDueDate && !firstDueDateIso) errors.firstDueDate = 'Primeiro vencimento invalido.';
+            if (!errors.startDate && !errors.firstDueDate) {
+                const firstDiff = diffDaysDateOnly(startDateIso, firstDueDateIso);
+                if (!Number.isFinite(firstDiff) || firstDiff <= 0) {
+                    errors.firstDueDate = 'O 1o vencimento deve ser maior que a data de inicio.';
+                }
+            }
+
+            if (errors.startDate || errors.firstDueDate) {
+                return errors;
             }
 
             const hasSchedule = loanFormState.schedule.length === values.installments;
             if (!hasSchedule) {
                 errors.schedule = 'Gere a agenda das parcelas antes de simular/salvar.';
             } else {
+                let previousDueDateIso = '';
                 for (let index = 0; index < loanFormState.schedule.length; index += 1) {
-                    const dueDate = loanFormState.schedule[index]?.due_date;
-                    if (!dueDate) {
+                    const dueDateIso = normalizeIsoDateOnly(loanFormState.schedule[index]?.due_date);
+                    if (!dueDateIso) {
                         errors.schedule = 'Revise as datas da agenda antes de continuar.';
                         break;
                     }
 
-                    const due = new Date(dueDate);
-                    if (Number.isNaN(due.getTime()) || due < startDate) {
-                        errors.schedule = 'Todas as datas de parcela devem ser válidas e iguais ou após a data de início.';
+                    const diffFromStart = diffDaysDateOnly(startDateIso, dueDateIso);
+                    if (!Number.isFinite(diffFromStart) || diffFromStart <= 0) {
+                        errors.schedule = 'Todos os vencimentos devem ser maiores que a data de inicio.';
                         break;
                     }
+
+                    if (previousDueDateIso) {
+                        const diffFromPrevious = diffDaysDateOnly(previousDueDateIso, dueDateIso);
+                        if (!Number.isFinite(diffFromPrevious) || diffFromPrevious <= 0) {
+                            errors.schedule = 'Os vencimentos devem estar em ordem crescente.';
+                            break;
+                        }
+                    }
+
+                    if (values.interestType === 'composto' && index > 0) {
+                        const periodDays = diffDaysDateOnly(previousDueDateIso, dueDateIso);
+                        if (!Number.isFinite(periodDays) || periodDays <= 0) {
+                            errors.schedule = 'Cada periodo deve ter ao menos 1 dia entre vencimentos.';
+                            break;
+                        }
+                    }
+
+                    previousDueDateIso = dueDateIso;
                 }
             }
 
             return errors;
+        }
+
+        function isManualDueDateOrderValid(index, dueDateIso) {
+            const parsedIndex = Math.trunc(toNumber(index));
+            if (!Number.isFinite(parsedIndex) || parsedIndex < 0) return false;
+            const previousIso = normalizeIsoDateOnly(loanFormState.schedule[parsedIndex - 1]?.due_date);
+            const nextIso = normalizeIsoDateOnly(loanFormState.schedule[parsedIndex + 1]?.due_date);
+
+            if (previousIso) {
+                const diffFromPrevious = diffDaysDateOnly(previousIso, dueDateIso);
+                if (!Number.isFinite(diffFromPrevious) || diffFromPrevious <= 0) return false;
+            }
+
+            if (nextIso) {
+                const diffToNext = diffDaysDateOnly(dueDateIso, nextIso);
+                if (!Number.isFinite(diffToNext) || diffToNext <= 0) return false;
+            }
+
+            return true;
         }
 
         function renderInstallmentPreview(plan) {
@@ -2274,7 +2714,7 @@
                 const isOverdue = !isPaid && (normalizedStatus === 'atrasado' || normalizedStatus === 'overdue');
                 const statusClass = isPaid ? 'paid' : (isOverdue ? 'overdue' : 'pending');
                 const index = Math.max(0, toNumber(item.installment_number) - 1);
-                const dueIso = toIsoDate(item.due_date);
+                const dueIso = normalizeIsoDateOnly(item.due_date);
                 const dueEditorHtml = isPaid
                     ? `
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-md p-1 text-slate-400" title="Parcela paga nao pode ser editada" aria-hidden="true">
@@ -2301,8 +2741,8 @@
                                 <p class="text-xs text-gray-600">Vencimento: <span class="font-medium text-gray-700">${formatDate(item.due_date)}</span></p>
                                 ${dueEditorHtml}
                                 <input
-                                    type="date"
-                                    class="sr-only"
+                                    type="text"
+                                    class="loan-preview-date-input"
                                     data-action="preview-due-input"
                                     data-index="${index}"
                                     value="${dueIso}">
@@ -2318,12 +2758,14 @@
             });
 
             installmentsPreviewCard.classList.remove('hidden');
+            initializePreviewDatePickers();
         }
 
         function updateInstallmentDueDate(index, dueDateIso, showFeedback) {
             const parsedIndex = Math.trunc(toNumber(index));
-            const due = new Date(dueDateIso);
-            const startDate = new Date(document.getElementById('loanStartDate').value);
+            if (!Number.isFinite(parsedIndex) || parsedIndex < 0) return false;
+            const normalizedDueDateIso = normalizeIsoDateOnly(dueDateIso);
+            const startDateIso = normalizeIsoDateOnly(document.getElementById('loanStartDate').value);
             const previewItem = loanFormState.simulation?.plan?.[parsedIndex];
 
             if (previewItem && isPaidInstallmentStatus(previewItem.status)) {
@@ -2331,28 +2773,34 @@
                 return false;
             }
 
-            if (!dueDateIso || Number.isNaN(due.getTime())) {
-                if (showFeedback) showMessage('Data de vencimento inválida.', 'error');
+            if (!normalizedDueDateIso) {
+                if (showFeedback) showMessage('Data de vencimento invalida.', 'error');
                 return false;
             }
 
-            if (!Number.isNaN(startDate.getTime()) && due < startDate) {
-                if (showFeedback) showMessage('Vencimento deve ser igual ou após a data de início.', 'error');
+            const diffFromStart = diffDaysDateOnly(startDateIso, normalizedDueDateIso);
+            if (!Number.isFinite(diffFromStart) || diffFromStart <= 0) {
+                if (showFeedback) showMessage('Vencimento deve ser maior que a data de inicio.', 'error');
+                return false;
+            }
+
+            if (!isManualDueDateOrderValid(parsedIndex, normalizedDueDateIso)) {
+                if (showFeedback) showMessage('Vencimentos devem permanecer em ordem crescente.', 'error');
                 return false;
             }
 
             if (!loanFormState.schedule[parsedIndex]) {
                 loanFormState.schedule[parsedIndex] = {
                     installment_number: parsedIndex + 1,
-                    due_date: dueDateIso
+                    due_date: normalizedDueDateIso
                 };
             } else {
-                loanFormState.schedule[parsedIndex].due_date = dueDateIso;
+                loanFormState.schedule[parsedIndex].due_date = normalizedDueDateIso;
             }
 
             if (loanFormState.simulation?.plan?.[parsedIndex]) {
-                loanFormState.simulation.plan[parsedIndex].due_date = dueDateIso;
-                loanFormState.simulation.plan[parsedIndex].status = due < new Date(getTodayIsoDate()) ? 'Atrasado' : 'Pendente';
+                loanFormState.simulation.plan[parsedIndex].due_date = normalizedDueDateIso;
+                loanFormState.simulation.plan[parsedIndex].status = isDateBeforeDateOnly(normalizedDueDateIso, getTodayIsoDate()) ? 'Atrasado' : 'Pendente';
                 renderScheduleTable(loanFormState.simulation.plan);
                 renderInstallmentPreview(loanFormState.simulation.plan);
             } else {
@@ -2361,6 +2809,7 @@
 
             clearFieldErrors();
             if (showFeedback) showMessage(`Vencimento da parcela #${parsedIndex + 1} atualizado.`, 'success');
+            triggerReactiveLoanRecalculation();
             return true;
         }
 
@@ -2368,9 +2817,14 @@
             captureScheduleFromTable();
             refreshSchedule(false);
             const values = getLoanFormValues();
-            const errors = validateLoanFormValues(values);
+            const errors = validateLoanFormValues(values, {
+                requireDebtor: Boolean(showErrors),
+            });
             applyFieldErrors(errors);
+
             if (Object.keys(errors).length > 0) {
+                resetSimulationState();
+                renderScheduleTable([]);
                 if (showErrors) showMessage('Revise os campos destacados antes de continuar.', 'error');
                 return null;
             }
@@ -2386,38 +2840,47 @@
                 const diferencaCents = totalCents - (baseCents * parcelas);
                 const principalParts = splitAmount(values.principal, parcelas);
                 const fixedParts = splitAmount(values.fixedAddition, parcelas);
-                const today = new Date(getTodayIsoDate());
 
                 const parcelasCents = Array.from({ length: parcelas }, (_, index) => baseCents + (index === parcelas - 1 ? diferencaCents : 0));
                 plan = parcelasCents.map((amountCents, index) => {
-                    const dueDate = loanFormState.schedule[index]?.due_date;
-                    const due = new Date(dueDate);
-                    const safeDue = Number.isNaN(due.getTime())
-                        ? (getDueDateByFrequency(values.firstDueDate, index) || new Date(values.firstDueDate))
-                        : due;
+                    const dueDate = normalizeIsoDateOnly(loanFormState.schedule[index]?.due_date);
+                    const safeDueDate = dueDate || getDueDateByFrequency(values.firstDueDate, index) || values.firstDueDate;
 
                     return {
                         installment_number: index + 1,
                         amount: round2(amountCents / 100),
                         principal_amount: principalParts[index],
                         interest_amount: fixedParts[index],
-                        due_date: toIsoDate(safeDue),
-                        status: safeDue < today ? 'Atrasado' : 'Pendente',
+                        due_date: safeDueDate,
+                        status: isDateBeforeDateOnly(safeDueDate, getTodayIsoDate()) ? 'Atrasado' : 'Pendente',
                         payment_date: null
                     };
                 });
+
                 calcResult = {
                     totalAmount,
                     installmentAmount: round2(totalAmount / parcelas),
                     totalInterest: round2(values.fixedAddition)
                 };
-            } else {
+            } else if (values.interestType === 'simples') {
                 calcResult = calculateLoanValues(values.principal, values.interestRate, values.installments, values.interestType);
                 if (!calcResult) {
-                    if (showErrors) showMessage('Não foi possível calcular o empréstimo.', 'error');
+                    resetSimulationState();
+                    renderScheduleTable([]);
+                    if (showErrors) showMessage('Nao foi possivel calcular o emprestimo.', 'error');
                     return null;
                 }
                 plan = buildInstallmentPlan(values, calcResult, loanFormState.schedule);
+            } else {
+                const compound = calculateCompoundLoanByPeriods(values, loanFormState.schedule);
+                if (!compound?.calcResult || !Array.isArray(compound?.plan) || !compound.plan.length) {
+                    resetSimulationState();
+                    renderScheduleTable([]);
+                    if (showErrors) showMessage('Nao foi possivel calcular o emprestimo composto.', 'error');
+                    return null;
+                }
+                calcResult = compound.calcResult;
+                plan = compound.plan;
             }
 
             loanFormState.simulation = { values, calcResult, plan };
@@ -2647,6 +3110,8 @@
             }
         }
 
+        initializeStaticDatePickers();
+
         document.getElementById('loanSearch').addEventListener('input', function () {
             applyLoansFilters(true);
         });
@@ -2684,24 +3149,30 @@
 
         document.getElementById('loanInterestType').addEventListener('change', function () {
             updateInterestTypeVisibility();
+            refreshSchedule(false);
             clearFieldErrors();
-            resetSimulationState();
+            triggerReactiveLoanRecalculation();
+        });
+
+        document.getElementById('loanDebtor').addEventListener('change', function () {
+            clearFieldErrors();
+            triggerReactiveLoanRecalculation();
         });
 
         document.getElementById('loanStartDate').addEventListener('change', function () {
             if (!loanFormState.firstDueTouched || !document.getElementById('loanFirstDueDate').value) {
-                document.getElementById('loanFirstDueDate').value = suggestFirstDueDate(this.value);
+                setDateInputValue(document.getElementById('loanFirstDueDate'), suggestFirstDueDate(this.value));
             }
             refreshSchedule(true);
             clearFieldErrors();
-            resetSimulationState();
+            triggerReactiveLoanRecalculation();
         });
 
         document.getElementById('loanFirstDueDate').addEventListener('change', function () {
             loanFormState.firstDueTouched = true;
             refreshSchedule(true);
             clearFieldErrors();
-            resetSimulationState();
+            triggerReactiveLoanRecalculation();
         });
 
         ['loanPrincipal', 'loanInterestRate', 'loanFixedAddition', 'loanInstallments'].forEach((fieldId) => {
@@ -2756,13 +3227,14 @@
 
             loanPrincipalInput.addEventListener('blur', function () {
                 loanPrincipalInput.value = formatCurrencyInput(loanPrincipalInput.value);
+                triggerReactiveLoanRecalculation();
             });
         }
 
         document.getElementById('loanInstallments').addEventListener('input', function () {
             refreshSchedule(true);
             clearFieldErrors();
-            resetSimulationState();
+            triggerReactiveLoanRecalculation();
         });
 
         ['loanPrincipal', 'loanInterestRate', 'loanFixedAddition'].forEach((fieldId) => {
@@ -2770,8 +3242,7 @@
             if (!element) return;
             element.addEventListener('input', function () {
                 clearFieldErrors();
-                resetSimulationState();
-                renderScheduleTable([]);
+                triggerReactiveLoanRecalculation();
             });
         });
 
@@ -2782,6 +3253,7 @@
                 return;
             }
             clearFieldErrors();
+            triggerReactiveLoanRecalculation();
             showMessage('Agenda gerada com sucesso.', 'success');
         });
 
@@ -2792,7 +3264,7 @@
                 return;
             }
             clearFieldErrors();
-            resetSimulationState();
+            triggerReactiveLoanRecalculation();
             showMessage('Agenda regerada com sucesso.', 'success');
         });
 
@@ -2802,6 +3274,16 @@
             if (!target.matches('input[data-schedule-index]')) return;
             captureScheduleFromTable();
             clearFieldErrors();
+            triggerReactiveLoanRecalculation();
+        });
+
+        loanScheduleBody.addEventListener('change', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            if (!target.matches('input[data-schedule-index]')) return;
+            captureScheduleFromTable();
+            clearFieldErrors();
+            triggerReactiveLoanRecalculation();
         });
 
         installmentsPreviewList.addEventListener('click', function (event) {
@@ -2814,12 +3296,13 @@
             const dateInput = installmentsPreviewList.querySelector(`input[data-action="preview-due-input"][data-index="${index}"]`);
             if (!(dateInput instanceof HTMLInputElement)) return;
 
-            dateInput.focus();
-            if (typeof dateInput.showPicker === 'function') {
-                dateInput.showPicker();
-            } else {
-                dateInput.click();
+            if (dateInput._flatpickr) {
+                dateInput._flatpickr.open();
+                return;
             }
+
+            dateInput.focus();
+            dateInput.click();
         });
 
         installmentsPreviewList.addEventListener('change', function (event) {
@@ -2828,10 +3311,6 @@
             if (target.getAttribute('data-action') !== 'preview-due-input') return;
             const index = Math.trunc(toNumber(target.getAttribute('data-index')));
             updateInstallmentDueDate(index, target.value, true);
-        });
-
-        document.getElementById('calculateLoanBtn').addEventListener('click', function () {
-            calculateLoanFromForm(true);
         });
 
         loanForm.addEventListener('submit', async function (event) {
@@ -2966,5 +3445,7 @@
     </script>
 </body>
 </html>
+
+
 
 
