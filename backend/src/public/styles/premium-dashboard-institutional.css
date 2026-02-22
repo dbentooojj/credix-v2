@@ -322,3 +322,60 @@
   background: rgba(255, 255, 255, 0.05) !important;
   color: var(--clients-text-primary) !important;
 }
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell {
+  border-radius: 16px !important;
+  border: 1px solid var(--clients-border) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  box-shadow: var(--clients-shadow) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--clients-text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th.sortable-th:hover {
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell td {
+  padding: 13px 14px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: transparent !important;
+  color: var(--clients-text-primary) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-table-row,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row {
+  transition: background-color 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell tbody tr:hover td,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-table-row:hover td,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row:hover td,
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row:hover td {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row {
+  box-shadow: inset 2px 0 0 rgba(244, 63, 94, 0.42) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row {
+  background: rgba(99, 102, 241, 0.07) !important;
+  box-shadow: inset 2px 0 0 rgba(99, 102, 241, 0.42) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .debtor-detail-card {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+}
