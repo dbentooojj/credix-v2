@@ -201,12 +201,6 @@
             display: block;
             transition: background-color 120ms ease-out, border-color 120ms ease-out;
         }
-
-        .summary-link:hover {
-            background: #d3ddea;
-            border-color: #becbdd;
-        }
-
         .summary-title {
             font-size: 0.76rem;
             color: #64748b;
@@ -347,15 +341,7 @@
             opacity: 0;
             transition: none;
         }
-
-        .metric-card:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .metric-card:hover::before { opacity: 1; }
-
-        .metric-value {
+.metric-value {
             font-size: 2.35rem;
             font-weight: 700;
             line-height: 1;
@@ -525,8 +511,7 @@
             background: rgba(15, 23, 42, 0.65);
             border-color: rgba(148, 163, 184, 0.24);
         }
-        .dark .summary-link:hover { background: rgba(30, 41, 59, 0.8); }
-        .dark .chart-empty { background: rgba(15, 23, 42, 0.75); color: #94a3b8; }
+.dark .chart-empty { background: rgba(15, 23, 42, 0.75); color: #94a3b8; }
         .dark .bg-white { background: rgba(15, 23, 42, 0.65) !important; }
         .dark .border-gray-100,
         .dark .border-gray-300 { border-color: rgba(148, 163, 184, 0.25) !important; }
@@ -634,9 +619,10 @@
         html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
         html:not(.dark) main .hover\:bg-gray-50:hover,
         html:not(.dark) main .hover\:bg-slate-50:hover { background-color: #d3ddea !important; }
-</style>
+        </style>
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
 </head>
-<body class="primary-gradient min-h-screen">
+<body class="dashboard-premium primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -704,39 +690,39 @@
             </div>
 
             <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-5">
-                <article class="kpi-card glass-card">
+                <article class="kpi-card glass-card premium-card kpi-primary-brand">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total a receber</span><i class="fas fa-circle-info kpi-info" title="Valor previsto para entrar no caixa."></i></div>
                     <div class="kpi-value" id="kpiTotalToReceive">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiTotalToReceiveInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiTotalToReceiveSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
-                <article class="kpi-card glass-card kpi-danger">
+                <article class="kpi-card glass-card premium-card kpi-danger kpi-primary-alert">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige ação."></i></div>
                     <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiTotalOverdueInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiTotalOverdueSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                     <p class="kpi-note" id="kpiOverdueRate">Inadimplência: --</p>
                 </article>
-                <article class="kpi-card glass-card">
+                <article class="kpi-card glass-card premium-card kpi-primary-positive">
                     <div class="flex items-start justify-between"><span class="kpi-label">Recebido no mês</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mês."></i></div>
                     <div class="kpi-value" id="kpiReceivedThisMonth">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiReceivedThisMonthInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiReceivedThisMonthSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
-                <article class="kpi-card glass-card">
+                <article class="kpi-card glass-card premium-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total emprestado</span><i class="fas fa-circle-info kpi-info" title="Capital ja colocado na rua."></i></div>
                     <div class="kpi-value" id="kpiTotalLoaned">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiTotalLoanedInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiTotalLoanedSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
-                <article class="kpi-card glass-card">
+                <article class="kpi-card glass-card premium-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Lucro total</span><i class="fas fa-circle-info kpi-info" title="Retorno acumulado da carteira."></i></div>
                     <div class="kpi-value" id="kpiProfitTotal">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiProfitTotalInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiProfitTotalSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                     <p class="kpi-note" id="kpiRoiRate">ROI: 0,00%</p>
                 </article>
-                <article class="kpi-card glass-card">
+                <article class="kpi-card glass-card premium-card">
                     <div class="flex items-start justify-between"><span class="kpi-label">Total recebido</span><i class="fas fa-circle-info kpi-info" title="Tudo o que ja voltou para o caixa."></i></div>
                     <div class="kpi-value" id="kpiTotalReceived">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiTotalReceivedInsight">--</p>
@@ -744,7 +730,7 @@
                 </article>
             </section>
 
-            <section class="glass-card rounded-2xl p-4 mb-6">
+            <section class="glass-card premium-card rounded-2xl p-4 mb-6">
                 <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h3 class="text-lg font-bold text-gray-800">Resumo do dia</h3>
                     <span class="text-xs text-gray-500">Clique para abrir Parcelas com filtro</span>
@@ -770,7 +756,7 @@
 
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <div class="glass-card rounded-2xl p-5">
+                    <div class="glass-card premium-card rounded-2xl p-5 h-full">
                         <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
                         <p class="mb-4 mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
                         <div id="upcomingList" class="space-y-3 fixed-scroll-panel">
@@ -784,7 +770,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="glass-card rounded-2xl p-5">
+                    <div class="glass-card premium-card rounded-2xl p-5 h-full">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Pagamentos atrasados</h3>
                         <div id="overdueList" class="space-y-3 fixed-scroll-panel"><p class="text-sm text-gray-500">Sem pagamentos atrasados.</p></div>
                         <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
@@ -797,7 +783,7 @@
             </section>
 
             <section class="mb-6">
-                <div class="glass-card rounded-2xl p-5">
+                <div class="glass-card premium-card rounded-2xl p-5">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                         <div>
                             <h3 class="text-xl font-bold text-gray-800">Vis&atilde;o mensal da carteira</h3>
@@ -805,8 +791,8 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="inline-flex rounded-xl border border-gray-300 bg-slate-50 p-1">
-                                <button id="chartTypeLineBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold bg-blue-600 text-white shadow-sm">Linha</button>
-                                <button id="chartTypeStackedBtn" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Barras empilhadas</button>
+                                <button id="chartTypeLineBtn" type="button" class="chart-toggle is-active rounded-lg px-3 py-2 text-sm font-semibold" aria-pressed="true">Linha</button>
+                                <button id="chartTypeStackedBtn" type="button" class="chart-toggle rounded-lg px-3 py-2 text-sm font-semibold" aria-pressed="false">Barras empilhadas</button>
                             </div>
                             <select id="periodSelect" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none">
                                 <option value="3m">3 meses</option>
@@ -827,7 +813,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="chart-shell">
+                    <div class="chart-shell chart-container">
                         <canvas id="monthlyChart" height="300"></canvas>
                         <div id="chartEmptyState" class="chart-empty">
                             <div><i class="fas fa-chart-line text-3xl mb-2 opacity-60"></i><p class="font-semibold">Sem dados no periodo.</p></div>
@@ -875,6 +861,10 @@
             </div>
             <div id="paymentConfirmInfo" class="rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm text-gray-700"></div>
             <div class="mt-4">
+                <label for="paymentDateInput" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
+                <input id="paymentDateInput" type="date" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
+            </div>
+            <div class="mt-4">
                 <label for="paymentMethodSelect" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
                 <select id="paymentMethodSelect" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
                     <option value="PIX">PIX</option>
@@ -910,6 +900,7 @@
         const collectionModal = document.getElementById('collectionModal');
         const paymentConfirmModal = document.getElementById('paymentConfirmModal');
         const paymentConfirmInfo = document.getElementById('paymentConfirmInfo');
+        const paymentDateInput = document.getElementById('paymentDateInput');
         const paymentMethodSelect = document.getElementById('paymentMethodSelect');
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
         const collectionMessageInput = document.getElementById('collectionMessage');
@@ -1055,12 +1046,12 @@
                 return;
             }
 
-            const color = tone === 'positive' ? '#16a34a' : tone === 'negative' ? '#dc2626' : '#64748b';
+            const color = tone === 'positive' ? '#06B6D4' : tone === 'negative' ? '#F43F5E' : '#A7B0C0';
             const fillColor = tone === 'positive'
-                ? 'rgba(22, 163, 74, 0.12)'
+                ? 'rgba(6, 182, 212, 0.16)'
                 : tone === 'negative'
-                    ? 'rgba(220, 38, 38, 0.12)'
-                    : 'rgba(100, 116, 139, 0.10)';
+                    ? 'rgba(244, 63, 94, 0.16)'
+                    : 'rgba(123, 134, 155, 0.12)';
 
             const width = 100;
             const height = 34;
@@ -1156,6 +1147,12 @@
                 year: 'numeric',
                 timeZone: 'UTC',
             }).format(date);
+        }
+
+        function getLocalTodayDateInputValue() {
+            const now = new Date();
+            const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+            return local.toISOString().slice(0, 10);
         }
 
         function normalizePaymentMethod(value) {
@@ -1380,18 +1377,14 @@
 
         function updateChartTypeButtons() {
             if (chartTypeLineBtn) {
-                chartTypeLineBtn.classList.toggle('bg-blue-600', dashboardState.chartView === 'line');
-                chartTypeLineBtn.classList.toggle('text-white', dashboardState.chartView === 'line');
-                chartTypeLineBtn.classList.toggle('shadow-sm', dashboardState.chartView === 'line');
-                chartTypeLineBtn.classList.toggle('text-gray-700', dashboardState.chartView !== 'line');
-                chartTypeLineBtn.classList.toggle('hover:bg-gray-50', dashboardState.chartView !== 'line');
+                const isLine = dashboardState.chartView === 'line';
+                chartTypeLineBtn.classList.toggle('is-active', isLine);
+                chartTypeLineBtn.setAttribute('aria-pressed', isLine ? 'true' : 'false');
             }
             if (chartTypeStackedBtn) {
-                chartTypeStackedBtn.classList.toggle('bg-blue-600', dashboardState.chartView === 'stacked');
-                chartTypeStackedBtn.classList.toggle('text-white', dashboardState.chartView === 'stacked');
-                chartTypeStackedBtn.classList.toggle('shadow-sm', dashboardState.chartView === 'stacked');
-                chartTypeStackedBtn.classList.toggle('text-gray-700', dashboardState.chartView !== 'stacked');
-                chartTypeStackedBtn.classList.toggle('hover:bg-gray-50', dashboardState.chartView !== 'stacked');
+                const isStacked = dashboardState.chartView === 'stacked';
+                chartTypeStackedBtn.classList.toggle('is-active', isStacked);
+                chartTypeStackedBtn.setAttribute('aria-pressed', isStacked ? 'true' : 'false');
             }
         }
 
@@ -1409,8 +1402,8 @@
 
             if (!chartReceivedMoMValue) return;
 
-            chartReceivedMoMValue.classList.remove('text-emerald-600', 'text-red-600', 'text-slate-700');
-            chartReceivedMoMValue.classList.add('text-slate-700');
+            chartReceivedMoMValue.classList.remove('chart-delta-positive', 'chart-delta-negative', 'chart-delta-neutral');
+            chartReceivedMoMValue.classList.add('chart-delta-neutral');
 
             if (prevPoint === null) {
                 chartReceivedMoMValue.textContent = '--';
@@ -1427,11 +1420,11 @@
             chartReceivedMoMValue.textContent = pctText;
 
             if (pct > 0.05) {
-                chartReceivedMoMValue.classList.remove('text-slate-700');
-                chartReceivedMoMValue.classList.add('text-emerald-600');
+                chartReceivedMoMValue.classList.remove('chart-delta-neutral');
+                chartReceivedMoMValue.classList.add('chart-delta-positive');
             } else if (pct < -0.05) {
-                chartReceivedMoMValue.classList.remove('text-slate-700');
-                chartReceivedMoMValue.classList.add('text-red-600');
+                chartReceivedMoMValue.classList.remove('chart-delta-neutral');
+                chartReceivedMoMValue.classList.add('chart-delta-negative');
             }
         }
 
@@ -1475,8 +1468,8 @@
                     {
                         label: 'Recebido',
                         data: receivedValues,
-                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
-                        borderColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.78)',
+                        borderColor: 'rgba(129, 140, 248, 1)',
                         borderWidth: 1,
                         borderRadius: 8,
                         borderSkipped: false,
@@ -1484,8 +1477,8 @@
                     {
                         label: 'Em aberto',
                         data: openValues,
-                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                        borderColor: 'rgba(245, 158, 11, 1)',
+                        backgroundColor: 'rgba(6, 182, 212, 0.76)',
+                        borderColor: 'rgba(34, 211, 238, 1)',
                         borderWidth: 1,
                         borderRadius: 8,
                         borderSkipped: false,
@@ -1493,8 +1486,8 @@
                     {
                         label: 'Atraso',
                         data: overdueValues,
-                        backgroundColor: 'rgba(239, 68, 68, 0.85)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
+                        backgroundColor: 'rgba(244, 63, 94, 0.78)',
+                        borderColor: 'rgba(251, 113, 133, 1)',
                         borderWidth: 1,
                         borderRadius: 8,
                         borderSkipped: false,
@@ -1504,32 +1497,32 @@
                     {
                         label: 'Atraso',
                         data: overdueValues,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                        borderColor: '#F43F5E',
+                        backgroundColor: 'rgba(244, 63, 94, 0.16)',
                         borderWidth: 2,
                         fill: false,
                         pointRadius: 3,
-                        tension: 0.25,
+                        tension: 0.3,
                     },
                     {
                         label: 'Recebido',
                         data: receivedValues,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.14)',
                         borderWidth: 2,
                         fill: false,
                         pointRadius: 3,
-                        tension: 0.25,
+                        tension: 0.3,
                     },
                     {
                         label: 'Em aberto',
                         data: openValues,
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        borderColor: '#06B6D4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.14)',
                         borderWidth: 2,
                         fill: false,
                         pointRadius: 3,
-                        tension: 0.25,
+                        tension: 0.3,
                     },
                 ];
 
@@ -1542,21 +1535,54 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: false,
+                    animation: {
+                        duration: 170,
+                        easing: 'easeOutCubic',
+                    },
                     plugins: {
-                        legend: { display: true },
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#A7B0C0',
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                            },
+                        },
                         tooltip: {
+                            backgroundColor: 'rgba(11, 18, 32, 0.96)',
+                            titleColor: '#E5E7EB',
+                            bodyColor: '#E5E7EB',
+                            borderColor: 'rgba(255, 255, 255, 0.14)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true,
                             callbacks: {
                                 label: (context) => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`,
                             },
                         },
                     },
                     scales: {
-                        x: { stacked: isStacked },
+                        x: {
+                            stacked: isStacked,
+                            ticks: { color: '#A7B0C0' },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.07)',
+                                drawBorder: false,
+                            },
+                        },
                         y: {
                             beginAtZero: true,
                             stacked: isStacked,
-                            ticks: { callback: (value) => formatCurrency(Number(value)) },
+                            ticks: {
+                                color: '#A7B0C0',
+                                callback: (value) => formatCurrency(Number(value)),
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.07)',
+                                drawBorder: false,
+                            },
                         },
                     },
                 },
@@ -1569,6 +1595,9 @@
             dashboardState.upcomingItems = Array.isArray(upcomingDue) ? upcomingDue : [];
 
             if (!dashboardState.upcomingItems.length) {
+                container.style.height = 'auto';
+                container.style.maxHeight = 'none';
+                container.style.overflowY = 'hidden';
                 container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-calendar-check text-4xl mb-3 opacity-50"></i><p>Nenhum vencimento em dia.</p></div>';
                 dashboardState.upcomingPage = 1;
                 updatePaginationControls('upcoming', 1, 1, false);
@@ -1589,13 +1618,13 @@
                                 <p class="font-semibold text-gray-800">${item.debtorName}</p>
                                 <p class="text-xs text-gray-500">Venc.: ${formatDate(item.dueDate)} (${item.dueRelative})</p>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-800">${formatCurrency(item.amount)}</p>
-                                <span class="status-pill ${statusClass}">${item.statusLabel}</span>
+                            <div class="flex items-center justify-end gap-2 shrink-0">
+                                <div class="flex flex-col items-end text-right leading-tight">
+                                    <p class="font-semibold text-gray-800">${formatCurrency(item.amount)}</p>
+                                    <span class="status-pill mt-1 inline-flex ${statusClass}">${item.statusLabel}</span>
+                                </div>
+                                <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white self-center"><i class="fas fa-check mr-1"></i>Pagar</button>
                             </div>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white"><i class="fas fa-check mr-1"></i>Marcar como pago</button>
                         </div>
                     </article>
                 `;
@@ -1610,7 +1639,10 @@
             dashboardState.overdueItems = Array.isArray(overduePayments) ? overduePayments : [];
 
             if (!dashboardState.overdueItems.length) {
-                container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-check text-4xl mb-3 opacity-50"></i><p>Sem pagamentos atrasados.</p></div>';
+                container.style.height = 'auto';
+                container.style.maxHeight = 'none';
+                container.style.overflowY = 'hidden';
+                container.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-circle-check text-4xl mb-3 opacity-50"></i><p>Sem pagamentos atrasados.</p></div>';
                 dashboardState.overduePage = 1;
                 updatePaginationControls('overdue', 1, 1, false);
                 return;
@@ -1636,7 +1668,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn bg-amber-500 text-white"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>
-                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white"><i class="fas fa-check mr-1"></i>Marcar como pago</button>
+                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white"><i class="fas fa-check mr-1"></i>Pagar</button>
                         </div>
                     </article>
                 `;
@@ -1702,6 +1734,7 @@
             dashboardState.paymentSubmitting = loading;
             confirmPaymentBtn.disabled = loading;
             if (paymentMethodSelect) paymentMethodSelect.disabled = loading;
+            if (paymentDateInput) paymentDateInput.disabled = loading;
             confirmPaymentBtn.classList.toggle('opacity-70', loading);
             confirmPaymentBtn.classList.toggle('cursor-not-allowed', loading);
             confirmPaymentBtn.innerHTML = loading
@@ -1714,6 +1747,7 @@
             dashboardState.selectedPayment = item;
             const method = normalizePaymentMethod(item.paymentMethod || 'PIX');
             if (paymentMethodSelect) paymentMethodSelect.value = method;
+            if (paymentDateInput) paymentDateInput.value = getLocalTodayDateInputValue();
             const statusCode = String(item.status || '').toUpperCase();
             const dueRelative = String(item.dueRelative || '').toLowerCase();
             const fallbackStatus = dueRelative.startsWith('ha ') ? 'ATRASADA' : 'EM_DIA';
@@ -1748,6 +1782,7 @@
             paymentConfirmModal.classList.remove('flex');
             unlockBodyScrollForModal(paymentConfirmModal);
             dashboardState.selectedPayment = null;
+            if (paymentDateInput) paymentDateInput.value = '';
             setPaymentConfirmLoading(false);
         }
 
@@ -1771,9 +1806,12 @@
             }
         }
 
-        async function markInstallmentAsPaid(item, paymentMethod = 'PIX') {
+        async function markInstallmentAsPaid(item, paymentMethod = 'PIX', paymentDateValue = '') {
             try {
-                const paymentDate = new Date().toISOString().slice(0, 10);
+                const candidateDate = String(paymentDateValue || '').trim();
+                const paymentDate = /^\d{4}-\d{2}-\d{2}$/.test(candidateDate)
+                    ? candidateDate
+                    : getLocalTodayDateInputValue();
                 const response = await fetch('/api/payments', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1809,9 +1847,14 @@
             const item = dashboardState.selectedPayment;
             if (!item) return;
             const method = normalizePaymentMethod(paymentMethodSelect?.value || item.paymentMethod || 'PIX');
+            const paymentDate = String(paymentDateInput?.value || '').trim() || getLocalTodayDateInputValue();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)) {
+                showMessage('Informe uma data de pagamento valida.', 'error');
+                return;
+            }
 
             setPaymentConfirmLoading(true);
-            const success = await markInstallmentAsPaid(item, method);
+            const success = await markInstallmentAsPaid(item, method, paymentDate);
             setPaymentConfirmLoading(false);
             if (success) closePaymentConfirmModal(true);
         }
@@ -1975,11 +2018,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
