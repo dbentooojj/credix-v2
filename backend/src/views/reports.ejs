@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -325,6 +325,131 @@
 
         @keyframes sparkline-draw {
             to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes insight-modal-enter {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes insight-fade-in {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes insight-bar-rise {
+            from { transform: scaleX(0.25); opacity: 0.35; }
+            to { transform: scaleX(1); opacity: 1; }
+        }
+
+        #insightDetailModal.flex .insight-detail-dialog {
+            animation: insight-modal-enter 170ms cubic-bezier(.2,.8,.2,1);
+        }
+
+        .insight-detail-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .insight-detail-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.34);
+            background: rgba(15, 23, 42, 0.58);
+            color: #dbe7ff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .insight-detail-chip-positive {
+            color: #a7f3d0;
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(5, 88, 71, 0.35);
+        }
+
+        .insight-detail-chip-neutral {
+            color: #cbd5e1;
+        }
+
+        .insight-detail-chart-shell {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(160deg, rgba(10, 22, 45, 0.9), rgba(8, 18, 38, 0.94));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .insight-detail-mini-line {
+            height: 38px;
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.2));
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+        }
+
+        .insight-detail-bars {
+            display: grid;
+            gap: 8px;
+        }
+
+        .insight-detail-bar-row {
+            display: grid;
+            grid-template-columns: minmax(118px, 1fr) minmax(0, 2fr) auto;
+            align-items: center;
+            gap: 10px;
+            animation: insight-fade-in 170ms cubic-bezier(.2,.8,.2,1);
+        }
+
+        .insight-detail-bar-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #a7b5cf;
+        }
+
+        .insight-detail-bar-track {
+            position: relative;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+        }
+
+        .insight-detail-bar-fill {
+            height: 100%;
+            transform-origin: left center;
+            animation: insight-bar-rise 180ms cubic-bezier(.2,.8,.2,1);
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.9), rgba(6, 182, 212, 0.86));
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.36);
+        }
+
+        .insight-detail-bar-fill.secondary {
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.85), rgba(99, 102, 241, 0.66));
+            box-shadow: none;
+        }
+
+        .insight-detail-bar-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: #e5e7eb;
         }
 
         .report-chart-label {
@@ -1516,12 +1641,6 @@
             gap: 2px;
             transition: border-color 140ms ease-out, background-color 140ms ease-out;
         }
-
-        .report-kpi-card:hover {
-            background: #f8fafc;
-            border-color: #bfdbfe;
-        }
-
         .risk-panel-summary {
             width: 100%;
             align-items: stretch;
@@ -2128,9 +2247,10 @@
                 transition: none !important;
             }
         }
-</style>
+        </style>
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
 </head>
-<body class="primary-gradient min-h-screen">
+<body class="dashboard-premium primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -2437,7 +2557,7 @@
             <section class="mb-6">
                 <div class="glass-card rounded-2xl p-5">
                     <div class="intel-section-head mb-3">
-                        <h3 class="intel-section-title">Seção D: Insights Estratégicos</h3>
+                        <h3 class="intel-section-title">Seção D: Diagnóstico da Carteira</h3>
                     </div>
                     <ul id="reportInsightsList" class="space-y-2 text-sm text-gray-700" aria-live="polite">
                         <li class="insight-item"><i class="fas fa-bolt"></i><span>Carregando insights...</span></li>
@@ -2467,7 +2587,6 @@
                     <div class="report-operational-col">
                         <div class="intel-section-head mb-3">
                             <h3 class="intel-section-title">Top clientes (risco/concentração)</h3>
-                            <button id="topDebtorsMoreBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs">Ver mais</button>
                         </div>
                         <div class="report-operational-table-shell table-shell">
                             <table class="operational-table" aria-label="Tabela de clientes em maior risco">
@@ -2486,11 +2605,15 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <button id="topDebtorsPrevBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50">Anterior</button>
+                            <span id="topDebtorsPageInfo">Pagina 1 de 1</span>
+                            <button id="topDebtorsNextBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50">Proxima</button>
+                        </div>
                     </div>
                     <div class="report-operational-col">
                         <div class="intel-section-head mb-3">
                             <h3 class="intel-section-title">Últimas parcelas pagas</h3>
-                            <button id="recentPaidMoreBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs">Ver mais</button>
                         </div>
                         <div class="report-operational-table-shell table-shell">
                             <table class="operational-table" aria-label="Tabela de pagamentos recentes">
@@ -2507,10 +2630,38 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <button id="recentPaidPrevBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50">Anterior</button>
+                            <span id="recentPaidPageInfo">Pagina 1 de 1</span>
+                            <button id="recentPaidNextBtn" type="button" class="action-btn action-btn-soft py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50">Proxima</button>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
+    </div>
+
+    <div id="insightDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="insightDetailModalTitle">
+        <div class="insight-detail-dialog w-full max-w-2xl rounded-2xl border border-gray-200 bg-slate-50 p-5 shadow-2xl sm:p-6">
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div>
+                    <h3 id="insightDetailModalTitle" class="text-xl font-bold text-gray-900">Detalhes do insight</h3>
+                    <p id="insightDetailModalSummary" class="mt-1 text-sm text-gray-600">Resumo do insight selecionado.</p>
+                </div>
+                <button id="closeInsightDetailModalBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" aria-label="Fechar detalhes do insight">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="insightDetailModalChips" class="insight-detail-chip-row mb-3"></div>
+            <div id="insightDetailModalChart" class="insight-detail-chart-shell hidden" aria-label="Comparativo do insight"></div>
+            <div id="insightDetailModalRows" class="mt-4 space-y-2"></div>
+            <p id="insightDetailModalHint" class="mt-4 text-xs text-gray-500"></p>
+            <div class="mt-5 flex items-center justify-end gap-2">
+                <a id="insightDetailModalLink" href="#reportChart" class="inline-flex items-center rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Ir para secao</a>
+                <button id="insightDetailModalCloseAction" type="button" class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">Fechar</button>
+            </div>
+        </div>
     </div>
 
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
@@ -2534,6 +2685,17 @@
         const userMenuDropdown = document.getElementById('userMenuDropdown');
         const filterAccordionToggle = document.getElementById('filterAccordionToggle');
         const filterAccordionBody = document.getElementById('filterAccordionBody');
+        const insightDetailModal = document.getElementById('insightDetailModal');
+        const insightDetailModalTitle = document.getElementById('insightDetailModalTitle');
+        const insightDetailModalSummary = document.getElementById('insightDetailModalSummary');
+        const insightDetailModalChips = document.getElementById('insightDetailModalChips');
+        const insightDetailModalChart = document.getElementById('insightDetailModalChart');
+        const insightDetailModalRows = document.getElementById('insightDetailModalRows');
+        const insightDetailModalHint = document.getElementById('insightDetailModalHint');
+        const insightDetailModalLink = document.getElementById('insightDetailModalLink');
+        const closeInsightDetailModalBtn = document.getElementById('closeInsightDetailModalBtn');
+        const insightDetailModalCloseAction = document.getElementById('insightDetailModalCloseAction');
+        let insightDetailPreviousBodyOverflow = '';
 
         const tableCache = {};
         function getDemoTable(tableName) {
@@ -2688,13 +2850,17 @@
             sparkInstallments: [],
             loanFrequencyById: new Map(),
             activeDueTab: 'next7',
-            topDebtorsLimit: 8,
-            recentPaidLimit: 8,
+            topDebtorsPage: 1,
+            recentPaidPage: 1,
+            topDebtorsPageSize: 8,
+            recentPaidPageSize: 8,
             topDebtorsRows: [],
             recentPaidRows: [],
             currentMetrics: null,
             previousMetrics: null,
             isLoading: true,
+            insightDetailById: new Map(),
+            activeInsightDetailId: '',
         };
 
         const reportKpiDefinitions = [
@@ -2751,6 +2917,8 @@
 
         const reportComponents = {
             insightList(items = [], emptyMessage = 'Sem insights para o filtro atual.') {
+                reportsState.insightDetailById.clear();
+
                 if (!items.length) {
                     return `<li class="insight-item"><i class="fas fa-circle-info" aria-hidden="true"></i><span>${escapeHtml(emptyMessage)}</span></li>`;
                 }
@@ -2768,16 +2936,25 @@
                             text: item?.text || '',
                             href: item?.href || '#reportKpiSection',
                             detailLabel: item?.detailLabel || 'Ver detalhes',
+                            detail: item?.detail || null,
                         };
                     const iconClass = sanitizeFaIcon(insight.icon);
                     const href = sanitizeInsightHref(insight.href);
                     const detailLabel = String(insight.detailLabel || 'Ver detalhes');
+                    const detailPayload = normalizeInsightDetailPayload(insight);
+                    const detailId = detailPayload ? `insight-detail-${index}` : '';
+                    if (detailPayload && detailId) {
+                        reportsState.insightDetailById.set(detailId, detailPayload);
+                    }
+                    const detailAction = detailPayload
+                        ? `<button type="button" data-action="open-insight-detail" data-detail-id="${escapeHtml(detailId)}" class="inline-flex shrink-0 items-center rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">${escapeHtml(detailLabel)}</button>`
+                        : `<a href="${href}" class="inline-flex shrink-0 items-center rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">${escapeHtml(detailLabel)}</a>`;
                     return `
                         <li class="insight-item">
                             <i class="fas ${iconClass}" aria-hidden="true"></i>
                             <div class="flex min-w-0 flex-1 items-start justify-between gap-3">
                                 <span class="leading-relaxed">${escapeHtml(insight.text)}</span>
-                                <a href="${href}" class="inline-flex shrink-0 items-center rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">${escapeHtml(detailLabel)}</a>
+                                ${detailAction}
                             </div>
                         </li>
                     `;
@@ -2923,6 +3100,12 @@
             })}%`;
         }
 
+        function formatSignedCurrency(value) {
+            const numeric = toNumber(value);
+            const sign = numeric > 0 ? '+' : numeric < 0 ? '-' : '';
+            return `${sign}${formatCurrency(Math.abs(numeric))}`;
+        }
+
         function clamp(value, min, max) {
             return Math.min(max, Math.max(min, value));
         }
@@ -2935,6 +3118,45 @@
         function sanitizeFaIcon(iconClass) {
             const raw = String(iconClass || '').trim().toLowerCase();
             return /^fa-[a-z0-9-]+$/.test(raw) ? raw : 'fa-circle-info';
+        }
+
+        function normalizeInsightDetailPayload(insight) {
+            if (!insight || typeof insight !== 'object' || !insight.detail || typeof insight.detail !== 'object') {
+                return null;
+            }
+
+            const detail = insight.detail;
+            const rows = Array.isArray(detail.rows)
+                ? detail.rows
+                    .filter((row) => row && (row.label || row.value))
+                    .map((row) => ({
+                        label: String(row.label || '').trim(),
+                        value: String(row.value || '').trim(),
+                    }))
+                : [];
+
+            let chart = null;
+            if (detail.chart && typeof detail.chart === 'object') {
+                const currentValue = Number(detail.chart.currentValue);
+                const previousValue = Number(detail.chart.previousValue);
+                const rawChangePct = Number(detail.chart.changePct);
+                if (Number.isFinite(currentValue) && Number.isFinite(previousValue)) {
+                    chart = {
+                        currentValue: Math.max(0, currentValue),
+                        previousValue: Math.max(0, previousValue),
+                        changePct: Number.isFinite(rawChangePct) ? rawChangePct : null,
+                    };
+                }
+            }
+
+            return {
+                title: String(detail.title || 'Detalhes do insight').trim(),
+                summary: String(detail.summary || insight.text || '').trim(),
+                hint: String(detail.hint || '').trim(),
+                href: sanitizeInsightHref(detail.href || insight.href || '#reportKpiSection'),
+                rows,
+                chart,
+            };
         }
 
         function formatDate(value) {
@@ -3091,6 +3313,7 @@
                         scoreCliente,
                     };
                 })
+                .filter((row) => row.overdueAmount > 0 || row.openAmount > 0 || row.avgOverdueDays > 0)
                 .sort((a, b) => (b.scoreCliente - a.scoreCliente) || (b.overdueAmount - a.overdueAmount));
         }
 
@@ -3158,9 +3381,9 @@
             }
 
             const rows = [
-                { key: 'Pago', color: '#22c55e', badge: 'badge-success' },
-                { key: 'Pendente', color: '#f59e0b', badge: 'badge-warn' },
-                { key: 'Atrasado', color: '#ef4444', badge: 'badge-danger' }
+                { key: 'Pago', tone: 'paid', badge: 'badge-success' },
+                { key: 'Pendente', tone: 'pending', badge: 'badge-warn' },
+                { key: 'Atrasado', tone: 'overdue', badge: 'badge-danger' }
             ];
             const amounts = installments.reduce((acc, installment) => {
                 const status = normalizeInstallmentStatus(installment);
@@ -3172,7 +3395,7 @@
             const paidPct = ((statusCounts.Pago || 0) / totalInstallments) * 100;
             const pendingPct = ((statusCounts.Pendente || 0) / totalInstallments) * 100;
             const overduePct = ((statusCounts.Atrasado || 0) / totalInstallments) * 100;
-            const gradient = `conic-gradient(#22c55e 0% ${paidPct}%, #f59e0b ${paidPct}% ${paidPct + pendingPct}%, #ef4444 ${paidPct + pendingPct}% 100%)`;
+            const gradient = `conic-gradient(rgba(16,185,129,0.78) 0% ${paidPct}%, rgba(245,158,11,0.78) ${paidPct}% ${paidPct + pendingPct}%, rgba(244,63,94,0.76) ${paidPct + pendingPct}% 100%)`;
             const openCount = (statusCounts.Pendente || 0) + (statusCounts.Atrasado || 0);
             const riskRows = buildRiskClientRows(installments);
             const concentrationBase = Math.max(toNumber(safeMetrics.totalExpected), 0) || Math.max(riskRows.reduce((sum, row) => sum + row.openAmount, 0), 1);
@@ -3195,10 +3418,10 @@
                     <section class="risk-block">
                         <p class="risk-block-title">Distribuição de status</p>
                         <div class="risk-distribution-grid">
-                            <div class="relative mx-auto h-40 w-40 rounded-full" style="background:${gradient};">
-                                <div class="absolute inset-[14px] flex flex-col items-center justify-center rounded-full bg-white text-center text-slate-700">
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Atraso</p>
-                                    <p class="text-xl font-bold text-red-600">${formatPercentAbsolute(overduePct)}</p>
+                            <div class="risk-status-ring relative mx-auto h-40 w-40 rounded-full" style="background:${gradient};">
+                                <div class="risk-status-ring-inner absolute inset-[14px] flex flex-col items-center justify-center rounded-full text-center">
+                                    <p class="risk-status-ring-label text-[11px] font-semibold uppercase tracking-wide">Atraso</p>
+                                    <p class="risk-status-ring-value text-xl font-bold">${formatPercentAbsolute(overduePct)}</p>
                                 </div>
                             </div>
                             <div class="space-y-3">
@@ -3209,10 +3432,10 @@
                                         <div>
                                             <div class="mb-1 flex items-center justify-between">
                                                 <span class="badge ${row.badge}">${row.key}</span>
-                                                <span class="text-sm text-slate-600">${count} (${formatPercentAbsolute(percentage)})</span>
+                                                <span class="risk-status-meta text-sm">${count} (${formatPercentAbsolute(percentage)})</span>
                                             </div>
                                             <div class="progress-track" role="progressbar" aria-valuenow="${percentage.toFixed(2)}" aria-valuemin="0" aria-valuemax="100" aria-label="${row.key}">
-                                                <div class="progress-fill" style="width:${percentage}%; background:${row.color};"></div>
+                                                <div class="progress-fill progress-fill-${row.tone}" style="width:${percentage}%;"></div>
                                             </div>
                                         </div>
                                     `;
@@ -3324,17 +3547,36 @@
                 .sort((a, b) => (b.overdueAmount - a.overdueAmount) || (b.openAmount - a.openAmount));
         }
 
+        function updateOperationalPaginationControls(prefix, currentPage, totalPages, hasRows) {
+            const prevBtn = document.getElementById(`${prefix}PrevBtn`);
+            const nextBtn = document.getElementById(`${prefix}NextBtn`);
+            const pageInfo = document.getElementById(`${prefix}PageInfo`);
+            if (!prevBtn || !nextBtn || !pageInfo) return;
+
+            const canGoPrev = hasRows && currentPage > 1;
+            const canGoNext = hasRows && currentPage < totalPages;
+
+            prevBtn.disabled = !canGoPrev;
+            nextBtn.disabled = !canGoNext;
+            pageInfo.textContent = hasRows ? `Pagina ${currentPage} de ${totalPages}` : 'Sem registros';
+        }
+
         function renderTopDebtors(installments) {
             const tbody = document.getElementById('topDebtorsTable');
-            const moreButton = document.getElementById('topDebtorsMoreBtn');
             if (!tbody) return;
 
             reportsState.topDebtorsRows = buildTopDebtorsRows(installments);
-            const rows = reportsState.topDebtorsRows.slice(0, reportsState.topDebtorsLimit);
+            const pageSize = Math.max(1, toNumber(reportsState.topDebtorsPageSize) || 8);
+            const totalRows = reportsState.topDebtorsRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            reportsState.topDebtorsPage = Math.min(Math.max(1, toNumber(reportsState.topDebtorsPage) || 1), totalPages);
+
+            const startIndex = (reportsState.topDebtorsPage - 1) * pageSize;
+            const rows = reportsState.topDebtorsRows.slice(startIndex, startIndex + pageSize);
 
             if (!rows.length) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Sem clientes em atraso para o filtro atual.</td></tr>';
-                if (moreButton) moreButton.classList.add('hidden');
+                updateOperationalPaginationControls('topDebtors', 1, 1, false);
                 return;
             }
 
@@ -3350,11 +3592,7 @@
                     </td>
                 </tr>
             `).join('');
-
-            if (moreButton) {
-                const hasMore = reportsState.topDebtorsRows.length > reportsState.topDebtorsLimit;
-                moreButton.classList.toggle('hidden', !hasMore);
-            }
+            updateOperationalPaginationControls('topDebtors', reportsState.topDebtorsPage, totalPages, true);
         }
 
         function renderNextDueDates(installments, metrics = null) {
@@ -3519,15 +3757,20 @@
 
         function renderRecentPaid(installments) {
             const tbody = document.getElementById('recentPaidTable');
-            const moreButton = document.getElementById('recentPaidMoreBtn');
             if (!tbody) return;
 
             reportsState.recentPaidRows = buildRecentPaidRows(installments);
-            const rows = reportsState.recentPaidRows.slice(0, reportsState.recentPaidLimit);
+            const pageSize = Math.max(1, toNumber(reportsState.recentPaidPageSize) || 8);
+            const totalRows = reportsState.recentPaidRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            reportsState.recentPaidPage = Math.min(Math.max(1, toNumber(reportsState.recentPaidPage) || 1), totalPages);
+
+            const startIndex = (reportsState.recentPaidPage - 1) * pageSize;
+            const rows = reportsState.recentPaidRows.slice(startIndex, startIndex + pageSize);
 
             if (!rows.length) {
                 tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-slate-500">Nenhuma parcela paga no filtro atual.</td></tr>';
-                if (moreButton) moreButton.classList.add('hidden');
+                updateOperationalPaginationControls('recentPaid', 1, 1, false);
                 return;
             }
 
@@ -3539,11 +3782,7 @@
                     <td>${formatCurrency(row.value)}</td>
                 </tr>
             `).join('');
-
-            if (moreButton) {
-                const hasMore = reportsState.recentPaidRows.length > reportsState.recentPaidLimit;
-                moreButton.classList.toggle('hidden', !hasMore);
-            }
+            updateOperationalPaginationControls('recentPaid', reportsState.recentPaidPage, totalPages, true);
         }
 
         function getPeriodBounds(periodValue) {
@@ -3995,8 +4234,8 @@
                 })
                 : [];
 
-            reportsState.topDebtorsLimit = 8;
-            reportsState.recentPaidLimit = 8;
+            reportsState.topDebtorsPage = 1;
+            reportsState.recentPaidPage = 1;
             showReportFeedback('');
             renderReports();
             document.getElementById('reportUpdatedAt').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -4461,7 +4700,7 @@
                         ul.insights { margin: 0; padding-left: 16px; color: #334155; }
                         ul.insights li { margin: 4px 0; line-height: 1.35; }
                         .page-break { break-before: page; page-break-before: always; }
-                    </style>
+                                                </style>
                 </head>
                 <body>
                     <section class="section">
@@ -5315,16 +5554,51 @@
                 && safePreviousInstallments.length >= 3;
             if (hasGrowthBase) {
                 const growthPct = previousReceived !== 0 ? ((currentReceived - previousReceived) / Math.abs(previousReceived)) : 0;
+                const growthAmount = currentReceived - previousReceived;
                 insights.push({
                     icon: 'fa-chart-line',
                     text: `Crescimento: recebido variou ${formatSignedPercent(growthPct)} vs período anterior.`,
                     href: '#reportChart',
+                    detail: {
+                        title: 'Detalhes do crescimento',
+                        summary: 'Comparativo de recebimento do período atual versus o período anterior do filtro.',
+                        rows: [
+                            { label: 'Recebido no período atual', value: formatCurrency(currentReceived) },
+                            { label: 'Recebido no período anterior', value: formatCurrency(previousReceived) },
+                            { label: 'Variação percentual', value: formatSignedPercent(growthPct) },
+                            { label: 'Variação em valor', value: formatSignedCurrency(growthAmount) },
+                            { label: 'Base do período anterior', value: `${safePreviousInstallments.length} parcela(s)` },
+                        ],
+                        chart: {
+                            currentValue: currentReceived,
+                            previousValue: previousReceived,
+                            changePct: growthPct,
+                        },
+                        hint: 'Teste inicial: somente este insight abre modal por enquanto.',
+                        href: '#reportChart',
+                    },
                 });
             } else {
                 insights.push({
                     icon: 'fa-chart-line',
                     text: 'Crescimento: base insuficiente para comparar recebido vs período anterior.',
                     href: '#reportChart',
+                    detail: {
+                        title: 'Detalhes do crescimento',
+                        summary: 'Não foi possível comparar por falta de base robusta no período anterior.',
+                        rows: [
+                            { label: 'Recebido no período atual', value: formatCurrency(currentReceived) },
+                            { label: 'Recebido no período anterior', value: Number.isFinite(previousReceived) ? formatCurrency(previousReceived) : 'Sem base valida' },
+                            { label: 'Parcelas no período anterior', value: `${safePreviousInstallments.length}` },
+                        ],
+                        chart: {
+                            currentValue: currentReceived,
+                            previousValue: Number.isFinite(previousReceived) ? previousReceived : 0,
+                            changePct: null,
+                        },
+                        hint: 'Para comparação robusta, o período anterior precisa ter volume mínimo de dados.',
+                        href: '#reportChart',
+                    },
                 });
             }
 
@@ -5471,6 +5745,129 @@
 
             const insights = buildPeriodInsights(installments, metrics, previousMetrics, previousInstallments);
             list.innerHTML = reportComponents.insightList(insights);
+            if (reportsState.activeInsightDetailId && !reportsState.insightDetailById.has(reportsState.activeInsightDetailId)) {
+                closeInsightDetailModal();
+            }
+        }
+
+        function renderInsightDetailEnhancements(payload) {
+            const chartPayload = payload?.chart && typeof payload.chart === 'object' ? payload.chart : null;
+            const changePct = chartPayload && Number.isFinite(Number(chartPayload.changePct))
+                ? Number(chartPayload.changePct)
+                : null;
+            const changeToneClass = changePct !== null && changePct > 0
+                ? 'insight-detail-chip insight-detail-chip-positive'
+                : 'insight-detail-chip insight-detail-chip-neutral';
+            const changeLabel = changePct !== null
+                ? `${changePct > 0 ? 'Alta' : changePct < 0 ? 'Queda' : 'Estavel'} ${formatSignedPercent(changePct)}`
+                : 'Variacao sem base robusta';
+
+            if (insightDetailModalChips) {
+                const chips = [`<span class="${changeToneClass}"><i class="fas fa-chart-line"></i>${escapeHtml(changeLabel)}</span>`];
+                if (chartPayload) {
+                    chips.push(`<span class="insight-detail-chip"><i class="fas fa-scale-balanced"></i>Atual x Anterior</span>`);
+                }
+                insightDetailModalChips.innerHTML = chips.join('');
+            }
+
+            if (!insightDetailModalChart) return;
+            if (!chartPayload) {
+                insightDetailModalChart.classList.add('hidden');
+                insightDetailModalChart.innerHTML = '';
+                return;
+            }
+
+            const previousValue = Math.max(0, Number(chartPayload.previousValue) || 0);
+            const currentValue = Math.max(0, Number(chartPayload.currentValue) || 0);
+            const maxValue = Math.max(previousValue, currentValue, 1);
+            const previousWidth = Math.max(8, (previousValue / maxValue) * 100);
+            const currentWidth = Math.max(8, (currentValue / maxValue) * 100);
+            const minValue = Math.min(previousValue, currentValue);
+            const range = Math.max(1, maxValue - minValue);
+            const yPrev = 28 - (((previousValue - minValue) / range) * 22);
+            const yCurrent = 28 - (((currentValue - minValue) / range) * 22);
+            const linePath = `M 10 ${yPrev.toFixed(2)} L 90 ${yCurrent.toFixed(2)}`;
+            const areaPath = `${linePath} L 90 30 L 10 30 Z`;
+
+            insightDetailModalChart.innerHTML = `
+                <div class="insight-detail-mini-line">
+                    <svg viewBox="0 0 100 32" class="h-full w-full" preserveAspectRatio="none" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="insightGrowthLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="rgba(148,163,184,0.85)"></stop>
+                                <stop offset="100%" stop-color="rgba(6,182,212,0.92)"></stop>
+                            </linearGradient>
+                            <linearGradient id="insightGrowthArea" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="rgba(99,102,241,0.28)"></stop>
+                                <stop offset="100%" stop-color="rgba(15,23,42,0)"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="${areaPath}" fill="url(#insightGrowthArea)"></path>
+                        <path d="${linePath}" stroke="url(#insightGrowthLine)" stroke-width="2.3" stroke-linecap="round" fill="none"></path>
+                        <circle cx="10" cy="${yPrev.toFixed(2)}" r="2.4" fill="#94a3b8"></circle>
+                        <circle cx="90" cy="${yCurrent.toFixed(2)}" r="2.8" fill="#06b6d4"></circle>
+                    </svg>
+                </div>
+                <div class="insight-detail-bars">
+                    <div class="insight-detail-bar-row" style="animation-delay:40ms">
+                        <span class="insight-detail-bar-label">Anterior</span>
+                        <div class="insight-detail-bar-track">
+                            <div class="insight-detail-bar-fill secondary" style="width:${previousWidth.toFixed(2)}%"></div>
+                        </div>
+                        <span class="insight-detail-bar-value">${escapeHtml(formatCompactCurrency(previousValue))}</span>
+                    </div>
+                    <div class="insight-detail-bar-row" style="animation-delay:80ms">
+                        <span class="insight-detail-bar-label">Atual</span>
+                        <div class="insight-detail-bar-track">
+                            <div class="insight-detail-bar-fill" style="width:${currentWidth.toFixed(2)}%"></div>
+                        </div>
+                        <span class="insight-detail-bar-value">${escapeHtml(formatCompactCurrency(currentValue))}</span>
+                    </div>
+                </div>
+            `;
+            insightDetailModalChart.classList.remove('hidden');
+        }
+
+        function closeInsightDetailModal() {
+            if (!insightDetailModal) return;
+            insightDetailModal.classList.add('hidden');
+            insightDetailModal.classList.remove('flex');
+            reportsState.activeInsightDetailId = '';
+            document.body.style.overflow = insightDetailPreviousBodyOverflow;
+            insightDetailPreviousBodyOverflow = '';
+        }
+
+        function openInsightDetailModal(detailId) {
+            if (!insightDetailModal) return;
+            const payload = reportsState.insightDetailById.get(String(detailId || ''));
+            if (!payload) return;
+
+            if (insightDetailModalTitle) insightDetailModalTitle.textContent = payload.title || 'Detalhes do insight';
+            if (insightDetailModalSummary) insightDetailModalSummary.textContent = payload.summary || '';
+            if (insightDetailModalHint) insightDetailModalHint.textContent = payload.hint || '';
+            if (insightDetailModalLink) insightDetailModalLink.setAttribute('href', sanitizeInsightHref(payload.href || '#reportKpiSection'));
+            renderInsightDetailEnhancements(payload);
+
+            if (insightDetailModalRows) {
+                if (Array.isArray(payload.rows) && payload.rows.length) {
+                    insightDetailModalRows.innerHTML = payload.rows.map((row, index) => `
+                        <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-slate-50 px-3 py-2" style="animation:insight-fade-in 170ms cubic-bezier(.2,.8,.2,1);animation-delay:${Math.min(index * 24, 140)}ms;animation-fill-mode:both;">
+                            <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">${escapeHtml(row.label || '')}</span>
+                            <strong class="text-sm font-semibold text-gray-800">${escapeHtml(row.value || '')}</strong>
+                        </div>
+                    `).join('');
+                } else {
+                    insightDetailModalRows.innerHTML = '<p class="text-sm text-gray-500">Sem detalhes adicionais para este insight.</p>';
+                }
+            }
+
+            if (insightDetailModal.classList.contains('hidden')) {
+                insightDetailPreviousBodyOverflow = document.body.style.overflow || '';
+            }
+            document.body.style.overflow = 'hidden';
+            reportsState.activeInsightDetailId = String(detailId || '');
+            insightDetailModal.classList.remove('hidden');
+            insightDetailModal.classList.add('flex');
         }
 
         function renderPeriodDetails(metrics) {
@@ -5701,14 +6098,77 @@
                 });
             }
 
-            document.getElementById('topDebtorsMoreBtn').addEventListener('click', () => {
-                reportsState.topDebtorsLimit += 8;
-                renderTopDebtors(reportsState.filteredInstallments);
+            const insightsList = document.getElementById('reportInsightsList');
+            if (insightsList) {
+                insightsList.addEventListener('click', (event) => {
+                    const target = event.target;
+                    if (!(target instanceof Element)) return;
+                    const actionButton = target.closest('[data-action="open-insight-detail"]');
+                    if (!(actionButton instanceof HTMLElement)) return;
+                    const detailId = actionButton.getAttribute('data-detail-id');
+                    if (!detailId) return;
+                    event.preventDefault();
+                    openInsightDetailModal(detailId);
+                });
+            }
+
+            if (closeInsightDetailModalBtn) {
+                closeInsightDetailModalBtn.addEventListener('click', closeInsightDetailModal);
+            }
+            if (insightDetailModalCloseAction) {
+                insightDetailModalCloseAction.addEventListener('click', closeInsightDetailModal);
+            }
+            if (insightDetailModal) {
+                insightDetailModal.addEventListener('click', (event) => {
+                    if (event.target === insightDetailModal) {
+                        closeInsightDetailModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && insightDetailModal && !insightDetailModal.classList.contains('hidden')) {
+                    closeInsightDetailModal();
+                }
             });
-            document.getElementById('recentPaidMoreBtn').addEventListener('click', () => {
-                reportsState.recentPaidLimit += 8;
-                renderRecentPaid(reportsState.filteredInstallments);
-            });
+
+            const topDebtorsPrevBtn = document.getElementById('topDebtorsPrevBtn');
+            const topDebtorsNextBtn = document.getElementById('topDebtorsNextBtn');
+            if (topDebtorsPrevBtn) {
+                topDebtorsPrevBtn.addEventListener('click', () => {
+                    if (reportsState.topDebtorsPage <= 1) return;
+                    reportsState.topDebtorsPage -= 1;
+                    renderTopDebtors(reportsState.filteredInstallments);
+                });
+            }
+            if (topDebtorsNextBtn) {
+                topDebtorsNextBtn.addEventListener('click', () => {
+                    const pageSize = Math.max(1, toNumber(reportsState.topDebtorsPageSize) || 8);
+                    const totalPages = Math.max(1, Math.ceil(reportsState.topDebtorsRows.length / pageSize));
+                    if (reportsState.topDebtorsPage >= totalPages) return;
+                    reportsState.topDebtorsPage += 1;
+                    renderTopDebtors(reportsState.filteredInstallments);
+                });
+            }
+
+            const recentPaidPrevBtn = document.getElementById('recentPaidPrevBtn');
+            const recentPaidNextBtn = document.getElementById('recentPaidNextBtn');
+            if (recentPaidPrevBtn) {
+                recentPaidPrevBtn.addEventListener('click', () => {
+                    if (reportsState.recentPaidPage <= 1) return;
+                    reportsState.recentPaidPage -= 1;
+                    renderRecentPaid(reportsState.filteredInstallments);
+                });
+            }
+            if (recentPaidNextBtn) {
+                recentPaidNextBtn.addEventListener('click', () => {
+                    const pageSize = Math.max(1, toNumber(reportsState.recentPaidPageSize) || 8);
+                    const totalPages = Math.max(1, Math.ceil(reportsState.recentPaidRows.length / pageSize));
+                    if (reportsState.recentPaidPage >= totalPages) return;
+                    reportsState.recentPaidPage += 1;
+                    renderRecentPaid(reportsState.filteredInstallments);
+                });
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -5718,3 +6178,4 @@
     </script>
 </body>
 </html>
+

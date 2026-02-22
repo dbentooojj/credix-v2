@@ -323,10 +323,169 @@ body.dashboard-premium {
   color: var(--text-dim) !important;
 }
 
+.dashboard-premium .filter-control,
+.dashboard-premium .input-shell {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-soft) !important;
+  color: var(--text-main) !important;
+  border-radius: 12px;
+  transition: border-color var(--fx-fast) var(--fx-ease), box-shadow var(--fx-fast) var(--fx-ease), background-color var(--fx-fast) var(--fx-ease);
+}
+
+.dashboard-premium .filter-control::placeholder {
+  color: var(--text-dim) !important;
+}
+
+.dashboard-premium .filter-control:focus {
+  border-color: rgba(129, 140, 248, 0.56) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+.dashboard-premium .surface,
+.dashboard-premium .card,
+.dashboard-premium .clients-data-panel,
+.dashboard-premium .calc-card,
+.dashboard-premium .debtor-detail-card,
+.dashboard-premium .details-item,
+.dashboard-premium .installment-preview,
+.dashboard-premium .empty-state,
+.dashboard-premium .placeholder-box,
+.dashboard-premium .report-chart-shell,
+.dashboard-premium .report-kpi-card,
+.dashboard-premium .report-feedback {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-premium .report-feedback.info {
+  border-color: rgba(6, 182, 212, 0.36) !important;
+  background: rgba(6, 182, 212, 0.16) !important;
+}
+
+.dashboard-premium .report-feedback.error {
+  border-color: rgba(244, 63, 94, 0.42) !important;
+  background: rgba(244, 63, 94, 0.14) !important;
+}
+
+.dashboard-premium .badge,
+.dashboard-premium .tag-pill {
+  border: 1px solid transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.dashboard-premium .badge-success {
+  color: #7ff6d4 !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(16, 185, 129, 0.42) !important;
+}
+
+.dashboard-premium .badge-danger {
+  color: #fda4af !important;
+  background: rgba(244, 63, 94, 0.2) !important;
+  border-color: rgba(244, 63, 94, 0.42) !important;
+}
+
+.dashboard-premium .badge-warn {
+  color: #fcd38d !important;
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+.dashboard-premium .badge-neutral {
+  color: #e2e8f0 !important;
+  background: rgba(71, 85, 105, 0.4) !important;
+  border-color: rgba(148, 163, 184, 0.38) !important;
+}
+
+.dashboard-premium .action-btn,
+.dashboard-premium .table-action,
+.dashboard-premium .loan-btn-secondary,
+.dashboard-premium .loan-btn-primary,
+.dashboard-premium .tab-btn,
+.dashboard-premium .action-btn-soft {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-soft) !important;
+  color: var(--text-main) !important;
+  transition: transform var(--fx-fast) var(--fx-ease), border-color var(--fx-fast) var(--fx-ease), background-color var(--fx-fast) var(--fx-ease), box-shadow var(--fx-fast) var(--fx-ease);
+}
+
+.dashboard-premium .action-btn:hover,
+.dashboard-premium .table-action:hover,
+.dashboard-premium .loan-btn-secondary:hover,
+.dashboard-premium .loan-btn-primary:hover,
+.dashboard-premium .tab-btn:hover,
+.dashboard-premium .action-btn-soft:hover {
+  transform: translateY(-1px);
+  background: var(--surface-1) !important;
+  border-color: var(--border-strong) !important;
+}
+
+.dashboard-premium .tab-btn.active,
+.dashboard-premium .action-btn-primary,
+.dashboard-premium .btn-primary,
+.dashboard-premium .action-primary,
+.dashboard-premium .notification-badge {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.82)) !important;
+  border-color: rgba(129, 140, 248, 0.52) !important;
+  color: #eef2ff !important;
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.26);
+}
+
+.dashboard-premium .table-row:hover,
+.dashboard-premium .debtor-table-row:hover,
+.dashboard-premium .debtor-expanded-row:hover,
+.dashboard-premium .debtor-overdue-row:hover,
+.dashboard-premium .debtor-overdue-mobile:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dashboard-premium .debtor-focus-row {
+  background: rgba(99, 102, 241, 0.16) !important;
+  box-shadow: inset 3px 0 0 rgba(129, 140, 248, 0.95) !important;
+}
+
+.dashboard-premium .debtor-detail-row > td {
+  background: transparent !important;
+}
+
+.dashboard-premium .debtor-detail-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.dashboard-premium .progress-track {
+  background: rgba(148, 163, 184, 0.2) !important;
+}
+
+.dashboard-premium .progress-fill {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.95), rgba(139, 92, 246, 0.84)) !important;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.3);
+}
+
+.dashboard-premium .chart-bar-loaned {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.95), rgba(139, 92, 246, 0.75)) !important;
+}
+
+.dashboard-premium .chart-bar-received {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.95), rgba(6, 182, 212, 0.72)) !important;
+}
+
+.dashboard-premium .chart-bar-overdue {
+  background: linear-gradient(180deg, rgba(244, 63, 94, 0.95), rgba(245, 158, 11, 0.76)) !important;
+}
+
+.dashboard-premium .chart-bar-profit {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.95), rgba(99, 102, 241, 0.76)) !important;
+}
+
 .dashboard-premium .table-shell {
   background: var(--surface-0);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
 }
 
 .dashboard-premium .table-shell th {
@@ -335,6 +494,26 @@ body.dashboard-premium {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 11px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+.dashboard-premium .table-shell th.sortable-th > .sort-btn {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.dashboard-premium .table-shell th.sortable-th:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dashboard-premium .table-shell td {
+  color: var(--text-main) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
+  background: transparent !important;
+}
+
+.dashboard-premium .report-chart-label {
+  color: var(--text-muted) !important;
 }
 
 .dashboard-premium .table-shell tbody tr:hover td {
@@ -344,6 +523,21 @@ body.dashboard-premium {
 .dashboard-premium .bg-white,
 .dashboard-premium .bg-slate-50,
 .dashboard-premium .bg-blue-50 {
+  background: var(--surface-0) !important;
+}
+
+.dashboard-premium .bg-gray-50,
+.dashboard-premium .bg-slate-100,
+.dashboard-premium .bg-white\/55 {
+  background: var(--surface-0) !important;
+}
+
+html:not(.dark) body.dashboard-premium main .bg-white,
+html:not(.dark) body.dashboard-premium main .bg-slate-50,
+html:not(.dark) body.dashboard-premium main .bg-blue-50,
+html:not(.dark) body.dashboard-premium main .bg-gray-50,
+html:not(.dark) body.dashboard-premium main .bg-slate-100,
+html:not(.dark) body.dashboard-premium main .bg-white\/55 {
   background: var(--surface-0) !important;
 }
 
@@ -375,6 +569,161 @@ html:not(.dark) body.dashboard-premium main .chart-summary-strip.bg-slate-50 {
   border-color: var(--border-soft) !important;
 }
 
+html:not(.dark) body.dashboard-premium main .border-gray-100,
+html:not(.dark) body.dashboard-premium main .border-gray-200,
+html:not(.dark) body.dashboard-premium main .border-gray-300,
+html:not(.dark) body.dashboard-premium main .border-slate-200,
+html:not(.dark) body.dashboard-premium main .border-slate-300,
+html:not(.dark) body.dashboard-premium main .border-blue-200 {
+  border-color: var(--border-soft) !important;
+}
+
+html:not(.dark) body.dashboard-premium main .hover\:bg-gray-50:hover,
+html:not(.dark) body.dashboard-premium main .hover\:bg-slate-50:hover,
+html:not(.dark) body.dashboard-premium main .hover\:bg-slate-100:hover,
+html:not(.dark) body.dashboard-premium main .hover\:bg-blue-50:hover {
+  background: var(--surface-0) !important;
+}
+
+.dashboard-premium .card,
+.dashboard-premium .clients-data-panel,
+.dashboard-premium .calc-card,
+.dashboard-premium .details-item,
+.dashboard-premium .installment-preview,
+.dashboard-premium .debtor-detail-card,
+.dashboard-premium .deck-panel,
+.dashboard-premium .deck-metric,
+.dashboard-premium .portfolio-score-card,
+.dashboard-premium .risk-chip,
+.dashboard-premium .risk-block,
+.dashboard-premium .risk-concentration-item,
+.dashboard-premium .critical-item,
+.dashboard-premium .due-summary-item,
+.dashboard-premium .score-factor,
+.dashboard-premium .period-details,
+.dashboard-premium .period-metric,
+.dashboard-premium .report-chart-shell,
+.dashboard-premium .report-chart-highlight,
+.dashboard-premium .report-chart-stage,
+.dashboard-premium .report-empty-state,
+.dashboard-premium .insight-item,
+.dashboard-premium .report-projection-card,
+.dashboard-premium .report-projection-week-card,
+.dashboard-premium .report-operational-table-shell,
+.dashboard-premium #reportKpiGrid > div {
+  background: var(--surface-0) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.dashboard-premium .table-shell,
+.dashboard-premium .report-operational-table-shell {
+  background: rgba(255, 255, 255, 0.025) !important;
+  border-color: var(--border-soft) !important;
+}
+
+.dashboard-premium .table-shell th,
+.dashboard-premium .report-operational-table-shell th {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--text-dim) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+.dashboard-premium .table-shell td,
+.dashboard-premium .report-operational-table-shell td {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
+}
+
+.dashboard-premium .table-shell tbody tr:hover td,
+.dashboard-premium .report-operational-table-shell tbody tr:hover td,
+.dashboard-premium .debtor-table-row:hover,
+.dashboard-premium .debtor-expanded-row:hover,
+.dashboard-premium .debtor-overdue-row:hover {
+  background: transparent !important;
+}
+
+.dashboard-premium .debtor-expanded-row,
+.dashboard-premium .debtor-focus-row {
+  background: rgba(99, 102, 241, 0.12) !important;
+  box-shadow: inset 3px 0 0 rgba(129, 140, 248, 0.55) !important;
+}
+
+.dashboard-premium .debtor-overdue-row,
+.dashboard-premium .debtor-overdue-mobile {
+  box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.55) !important;
+}
+
+.dashboard-premium .table-shell .text-slate-100,
+.dashboard-premium .table-shell .text-slate-50,
+.dashboard-premium .table-shell .text-slate-300,
+.dashboard-premium .table-shell .text-slate-400,
+.dashboard-premium .table-shell .text-slate-500,
+.dashboard-premium #debtorsMobileList .text-slate-100,
+.dashboard-premium #debtorsMobileList .text-slate-50,
+.dashboard-premium #debtorsMobileList .text-slate-300,
+.dashboard-premium #debtorsMobileList .text-slate-400,
+.dashboard-premium #debtorsMobileList .text-slate-500 {
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium .table-shell .text-slate-400\/90,
+.dashboard-premium .table-shell .text-gray-500,
+.dashboard-premium .table-shell .text-gray-600,
+.dashboard-premium #debtorsMobileList .text-slate-400\/90,
+.dashboard-premium #debtorsMobileList .text-gray-500,
+.dashboard-premium #debtorsMobileList .text-gray-600 {
+  color: var(--text-muted) !important;
+}
+
+.dashboard-premium #debtorsMobileList [data-debtor-id] {
+  background: var(--surface-0) !important;
+  border-color: var(--border-soft) !important;
+}
+
+.dashboard-premium #debtorsMobileList [data-debtor-id][class*="border-amber-500"] {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.dashboard-premium .deck-title,
+.dashboard-premium .deck-metric-value,
+.dashboard-premium .report-ring-value strong,
+.dashboard-premium .report-chart-highlight strong,
+.dashboard-premium .risk-chip-value,
+.dashboard-premium .risk-concentration-value,
+.dashboard-premium .critical-name,
+.dashboard-premium .due-summary-value,
+.dashboard-premium .score-value,
+.dashboard-premium .period-metric-value,
+.dashboard-premium .intel-section-title {
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium .deck-summary,
+.dashboard-premium .deck-metric-label,
+.dashboard-premium .deck-metric-note,
+.dashboard-premium .report-panel-title,
+.dashboard-premium .report-ring-value span,
+.dashboard-premium .report-chart-highlight p,
+.dashboard-premium .report-chart-axis span,
+.dashboard-premium .report-empty-state,
+.dashboard-premium .risk-chip-label,
+.dashboard-premium .risk-chip-note,
+.dashboard-premium .risk-concentration-label,
+.dashboard-premium .risk-concentration-meta,
+.dashboard-premium .critical-meta,
+.dashboard-premium .due-summary-label,
+.dashboard-premium .due-summary-note,
+.dashboard-premium .score-title,
+.dashboard-premium .score-factor-label,
+.dashboard-premium .score-factor-meta,
+.dashboard-premium .period-metric-label,
+.dashboard-premium .intel-section-subtitle {
+  color: var(--text-muted) !important;
+}
+
 .dashboard-premium .text-blue-700,
 .dashboard-premium .text-blue-600 {
   color: #93c5fd !important;
@@ -389,6 +738,312 @@ html:not(.dark) body.dashboard-premium main .chart-summary-strip.bg-slate-50 {
 .dashboard-premium .modal-panel {
   background: rgba(11, 18, 32, 0.9);
   border: 1px solid var(--border-soft);
+}
+
+/* Modal system hardening across legacy views (debtors/loans/installments/dashboard). */
+.dashboard-premium [id$="Modal"].fixed.inset-0,
+.dashboard-premium .modal-backdrop.fixed.inset-0 {
+  z-index: 80 !important;
+  background: rgba(3, 8, 20, 0.82) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.dashboard-premium [id$="Modal"].fixed.inset-0 > div,
+.dashboard-premium .modal-backdrop.fixed.inset-0 > .modal-panel {
+  background: rgba(11, 18, 32, 0.94) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium [id$="Modal"] h2,
+.dashboard-premium [id$="Modal"] h3,
+.dashboard-premium [id$="Modal"] h4,
+.dashboard-premium [id$="Modal"] .text-gray-900,
+.dashboard-premium [id$="Modal"] .text-gray-800,
+.dashboard-premium [id$="Modal"] .text-slate-900,
+.dashboard-premium [id$="Modal"] .text-slate-800 {
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium [id$="Modal"] .text-gray-700,
+.dashboard-premium [id$="Modal"] .text-gray-600,
+.dashboard-premium [id$="Modal"] .text-gray-500,
+.dashboard-premium [id$="Modal"] .text-slate-700,
+.dashboard-premium [id$="Modal"] .text-slate-600,
+.dashboard-premium [id$="Modal"] .text-slate-500,
+.dashboard-premium [id$="Modal"] label,
+.dashboard-premium [id$="Modal"] p {
+  color: var(--text-muted) !important;
+}
+
+.dashboard-premium [id$="Modal"] input,
+.dashboard-premium [id$="Modal"] select,
+.dashboard-premium [id$="Modal"] textarea,
+.dashboard-premium [id$="Modal"] .filter-control,
+.dashboard-premium [id$="Modal"] .input-shell {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid var(--border-soft) !important;
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium [id$="Modal"] input::placeholder,
+.dashboard-premium [id$="Modal"] textarea::placeholder {
+  color: var(--text-dim) !important;
+}
+
+.dashboard-premium [id$="Modal"] input:focus,
+.dashboard-premium [id$="Modal"] select:focus,
+.dashboard-premium [id$="Modal"] textarea:focus {
+  border-color: rgba(129, 140, 248, 0.56) !important;
+  box-shadow: var(--focus-ring) !important;
+  outline: none !important;
+}
+
+.dashboard-premium [id$="Modal"] .bg-white,
+.dashboard-premium [id$="Modal"] .bg-slate-50,
+.dashboard-premium [id$="Modal"] .bg-blue-50,
+.dashboard-premium [id$="Modal"] .bg-gray-50 {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: var(--border-soft) !important;
+}
+
+.dashboard-premium [id$="Modal"] .border-gray-200,
+.dashboard-premium [id$="Modal"] .border-gray-300,
+.dashboard-premium [id$="Modal"] .border-slate-200,
+.dashboard-premium [id$="Modal"] .border-slate-300,
+.dashboard-premium [id$="Modal"] .border-blue-200 {
+  border-color: var(--border-soft) !important;
+}
+
+.dashboard-premium [id$="Modal"] button:not(.quick-action-btn):not(#confirmPaymentBtn):not(#copyCollectionBtn):not(.bg-red-600):not(.bg-blue-600):not(.bg-emerald-600) {
+  border-color: var(--border-soft) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium [id$="Modal"] button:not(.quick-action-btn):not(#confirmPaymentBtn):not(#copyCollectionBtn):not(.bg-red-600):not(.bg-blue-600):not(.bg-emerald-600):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--border-strong) !important;
+}
+
+.dashboard-premium [id$="Modal"] .bg-blue-600,
+.dashboard-premium [id$="Modal"] #copyCollectionBtn {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.92), rgba(139, 92, 246, 0.86)) !important;
+  border: 1px solid rgba(129, 140, 248, 0.5) !important;
+  color: #eef2ff !important;
+}
+
+.dashboard-premium [id$="Modal"] .bg-emerald-600,
+.dashboard-premium [id$="Modal"] #confirmPaymentBtn {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(6, 182, 212, 0.82)) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  color: #ecfeff !important;
+}
+
+.dashboard-premium [id$="Modal"] .bg-red-600 {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.88), rgba(225, 29, 72, 0.82)) !important;
+  border: 1px solid rgba(244, 63, 94, 0.5) !important;
+  color: #ffe4e6 !important;
+}
+
+/* Hover minimization policy: keep hover feedback only on sidebar navigation. */
+.dashboard-premium .icon-btn:hover {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-premium .premium-card:hover,
+.dashboard-premium .glass-card:hover,
+.dashboard-premium .kpi-card:hover,
+.dashboard-premium .summary-link:hover,
+.dashboard-premium .upcoming-item:hover {
+  transform: none !important;
+  background: var(--surface-0) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.dashboard-premium .quick-action-btn:hover,
+.dashboard-premium #confirmPaymentBtn:hover {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: 0 10px 24px rgba(6, 182, 212, 0.24) !important;
+}
+
+.dashboard-premium #copyCollectionBtn:hover {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.26) !important;
+}
+
+.dashboard-premium .action-btn:hover,
+.dashboard-premium .table-action:hover,
+.dashboard-premium .loan-btn-secondary:hover,
+.dashboard-premium .loan-btn-primary:hover,
+.dashboard-premium .tab-btn:hover,
+.dashboard-premium .action-btn-soft:hover,
+.dashboard-premium [id$="Modal"] button:not(.bg-blue-600):not(.bg-emerald-600):not(.bg-red-600):hover {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: none !important;
+}
+
+.dashboard-premium .table-row:hover,
+.dashboard-premium .debtor-table-row:hover,
+.dashboard-premium .debtor-expanded-row:hover,
+.dashboard-premium .debtor-overdue-row:hover,
+.dashboard-premium .debtor-overdue-mobile:hover,
+.dashboard-premium .table-shell th.sortable-th:hover,
+.dashboard-premium .table-shell tbody tr:hover td,
+.dashboard-premium .report-operational-table-shell tbody tr:hover td,
+.dashboard-premium .chart-bar:hover {
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+.dashboard-premium .hover\:bg-gray-50:hover,
+.dashboard-premium .hover\:bg-slate-50:hover,
+.dashboard-premium .hover\:bg-slate-100:hover,
+.dashboard-premium .hover\:bg-blue-50:hover,
+.dashboard-premium .hover\:bg-red-50:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dashboard-premium .hover\:bg-blue-500:hover {
+  background-color: #2563eb !important;
+}
+
+.dashboard-premium .hover\:bg-emerald-500:hover {
+  background-color: #059669 !important;
+}
+
+.dashboard-premium .hover\:bg-red-500:hover {
+  background-color: #dc2626 !important;
+}
+
+.dashboard-premium .hover\:text-gray-600:hover,
+.dashboard-premium .hover\:text-gray-700:hover {
+  color: var(--text-muted) !important;
+}
+
+/* Reports visual normalization */
+.dashboard-premium #reportFilterBar,
+.dashboard-premium #reportPortfolioScoreCard,
+.dashboard-premium #reportProjectionSection,
+.dashboard-premium #reportKpiGrid > div,
+.dashboard-premium .report-kpi-card,
+.dashboard-premium .report-risk-card,
+.dashboard-premium .report-chart-shell,
+.dashboard-premium .report-chart-highlight,
+.dashboard-premium .report-chart-stage,
+.dashboard-premium .report-operational-table-shell,
+.dashboard-premium .due-summary-item,
+.dashboard-premium .risk-concentration-item,
+.dashboard-premium .critical-item,
+.dashboard-premium .score-factor,
+.dashboard-premium .period-details,
+.dashboard-premium .period-metric {
+  background: var(--surface-0) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.dashboard-premium #reportKpiGrid > div::before {
+  opacity: 0.42 !important;
+}
+
+.dashboard-premium #reportFilterBar .filter-control,
+.dashboard-premium #reportFilterBar .action-btn-soft,
+.dashboard-premium #reportFilterBar .report-filter-footer > label,
+.dashboard-premium .due-tabs,
+.dashboard-premium .due-tabs button {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: var(--border-soft) !important;
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium .report-feedback.info {
+  background: rgba(99, 102, 241, 0.14) !important;
+  border-color: rgba(129, 140, 248, 0.38) !important;
+  color: #c7d2fe !important;
+}
+
+.dashboard-premium .report-feedback.error {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  color: #fecdd3 !important;
+}
+
+.dashboard-premium #reportInsightsList .insight-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-soft) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--text-main) !important;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.dashboard-premium #reportInsightsList .insight-item > div > span,
+.dashboard-premium #reportInsightsList .insight-item .leading-relaxed {
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium #reportInsightsList .insight-item i {
+  color: #93c5fd !important;
+}
+
+.dashboard-premium #reportInsightsList .insight-item a {
+  border-color: var(--border-soft) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #cbd5e1 !important;
+}
+
+.dashboard-premium #reportInsightsList .insight-item a:hover {
+  border-color: var(--border-soft) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #cbd5e1 !important;
+}
+
+.dashboard-premium #statusDistribution .risk-status-ring {
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.35);
+}
+
+.dashboard-premium #statusDistribution .risk-status-ring-inner {
+  background: rgba(11, 18, 32, 0.9) !important;
+  border: 1px solid var(--border-soft) !important;
+  color: var(--text-main) !important;
+}
+
+.dashboard-premium #statusDistribution .risk-status-ring-label {
+  color: var(--text-muted) !important;
+}
+
+.dashboard-premium #statusDistribution .risk-status-ring-value {
+  color: #fda4af !important;
+}
+
+.dashboard-premium #statusDistribution .risk-status-meta {
+  color: var(--text-muted) !important;
+}
+
+.dashboard-premium #statusDistribution .progress-fill.progress-fill-paid {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.78), rgba(6, 182, 212, 0.72)) !important;
+}
+
+.dashboard-premium #statusDistribution .progress-fill.progress-fill-pending {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.78), rgba(217, 119, 6, 0.72)) !important;
+}
+
+.dashboard-premium #statusDistribution .progress-fill.progress-fill-overdue {
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.76), rgba(225, 29, 72, 0.7)) !important;
 }
 
 .dashboard-premium .chart-empty {

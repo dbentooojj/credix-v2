@@ -26,6 +26,19 @@ function toDateOnly(input: string) {
   return parsed;
 }
 
+function readUserId(req: { user?: { sub?: string } }): number {
+  const parsed = Number(req.user?.sub);
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
+}
+
+function readInstallmentId(raw: unknown): number {
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new AppError("Parcela invalida", 400);
+  }
+  return Math.trunc(parsed);
+}
+
 async function refreshLoanStatus(loanId: number, ownerUserId: number) {
   const installments = await prisma.installment.findMany({
     where: { loanId, ownerUserId },
@@ -78,7 +91,7 @@ async function syncPaymentIdSequence(db: { $executeRawUnsafe: (query: string, ..
 router.use(requireAuthApi);
 
 router.get("/", async (req, res) => {
-  const userId = Number(req.user?.sub);
+  const userId = readUserId(req);
   if (!Number.isFinite(userId)) {
     return res.status(401).json({ message: "Nao autenticado" });
   }
@@ -116,7 +129,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const userId = Number(req.user?.sub);
+  const userId = readUserId(req);
   if (!Number.isFinite(userId)) {
     return res.status(401).json({ message: "Nao autenticado" });
   }
@@ -221,6 +234,181 @@ router.post("/", async (req, res) => {
       method: result.method,
       notes: result.notes,
     },
+  });
+});
+
+router.post("/installments/:installmentId/revert", async (req, res) => {
+  const userId = readUserId(req);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
+  const installmentId = readInstallmentId(req.params.installmentId);
+
+  const result = await prisma.$transaction(async (tx) => {
+    const installment = await tx.installment.findFirst({
+      where: {
+        id: installmentId,
+        ownerUserId: userId,
+      },
+      select: {
+        id: true,
+        loanId: true,
+        dueDate: true,
+      },
+    });
+
+    if (!installment) {
+      throw new AppError("Parcela nao encontrada", 404);
+    }
+
+    await tx.payment.deleteMany({
+      where: {
+        ownerUserId: userId,
+        installmentId,
+      },
+    });
+
+    const today = new Date();
+    const revertedStatus = installment.dueDate < today
+      ? InstallmentStatus.ATRASADO
+      : InstallmentStatus.PENDENTE;
+
+    await tx.installment.update({
+      where: { id: installmentId },
+      data: {
+        status: revertedStatus,
+        paymentDate: null,
+        paymentMethod: null,
+        notes: null,
+      },
+    });
+
+    return {
+      installmentId,
+      loanId: installment.loanId,
+      status: revertedStatus,
+    };
+  });
+
+  await refreshLoanStatus(result.loanId, userId);
+
+  return res.json({
+    message: "Pagamento estornado",
+    data: {
+      installmentId: result.installmentId,
+      loanId: result.loanId,
+      status: result.status,
+    },
+  });
+});
+
+router.delete("/installments/:installmentId", async (req, res) => {
+  const userId = readUserId(req);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
+  const installmentId = readInstallmentId(req.params.installmentId);
+
+  const result = await prisma.$transaction(async (tx) => {
+    const installment = await tx.installment.findFirst({
+      where: {
+        id: installmentId,
+        ownerUserId: userId,
+      },
+      select: {
+        id: true,
+        loanId: true,
+        status: true,
+      },
+    });
+
+    if (!installment) {
+      throw new AppError("Parcela nao encontrada", 404);
+    }
+
+    if (installment.status === InstallmentStatus.PAGO) {
+      throw new AppError("Nao e possivel excluir uma parcela paga. Estorne o pagamento antes de excluir.", 400);
+    }
+
+    const loanInstallments = await tx.installment.findMany({
+      where: {
+        ownerUserId: userId,
+        loanId: installment.loanId,
+      },
+      select: {
+        id: true,
+        dueDate: true,
+        amount: true,
+        installmentNumber: true,
+      },
+      orderBy: [
+        { dueDate: "asc" },
+        { installmentNumber: "asc" },
+      ],
+    });
+
+    if (loanInstallments.length <= 1) {
+      throw new AppError("Este emprestimo possui apenas uma parcela. Exclua o emprestimo inteiro na tela de emprestimos.", 400);
+    }
+
+    await tx.payment.deleteMany({
+      where: {
+        ownerUserId: userId,
+        installmentId,
+      },
+    });
+
+    await tx.installment.delete({
+      where: {
+        id: installmentId,
+      },
+    });
+
+    const remainingInstallments = loanInstallments.filter((item) => item.id !== installmentId);
+
+    if (remainingInstallments.length === 0) {
+      throw new AppError("Nao e possivel remover todas as parcelas do emprestimo.", 400);
+    }
+
+    const firstDueDate = remainingInstallments[0].dueDate;
+    const dueDate = remainingInstallments[remainingInstallments.length - 1].dueDate;
+    const totalAmount = remainingInstallments.reduce((sum, item) => sum + Number(item.amount), 0);
+    const averageInstallment = totalAmount / remainingInstallments.length;
+    const preservedSequenceTotal = remainingInstallments.reduce((max, item) => {
+      const next = Number.isFinite(item.installmentNumber) ? item.installmentNumber : 0;
+      return next > max ? next : max;
+    }, 0);
+
+    await tx.loan.updateMany({
+      where: {
+        id: installment.loanId,
+        ownerUserId: userId,
+      },
+      data: {
+        // Estrategia A: mantem numeracao original das parcelas (nao renumera).
+        installmentsCount: Math.max(preservedSequenceTotal, 1),
+        totalAmount,
+        installmentAmount: averageInstallment,
+        firstDueDate,
+        dueDate,
+      },
+    });
+
+    return {
+      installmentId,
+      loanId: installment.loanId,
+      remainingInstallmentsCount: remainingInstallments.length,
+      newLoanTotalAmount: totalAmount,
+    };
+  });
+
+  await refreshLoanStatus(result.loanId, userId);
+
+  return res.json({
+    message: "Parcela excluida",
+    data: result,
   });
 });
 

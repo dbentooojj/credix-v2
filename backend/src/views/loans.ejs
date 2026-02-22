@@ -223,11 +223,9 @@
             border: 1px solid #e5e7eb;
             background: #f8fafc;
         }
+        .installment-preview.paid { background: #dcfce7; border-color: #86efac; }
         .installment-preview.overdue { background: #fee2e2; border-color: #fecaca; }
         .installment-preview.pending { background: #fef3c7; border-color: #fde68a; }
-        .installment-preview.overdue:hover { background: #fecaca; }
-        .installment-preview.pending:hover { background: #fde68a; }
-
         .details-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -505,9 +503,10 @@
                 width: 100%;
             }
         }
-</style>
+        </style>
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
 </head>
-<body class="primary-gradient min-h-screen">
+<body class="dashboard-premium primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -1389,9 +1388,9 @@
         }
 
         function badgeForStatus(status) {
-            if (status === 'Ativo') return 'badge bg-emerald-100 text-emerald-700';
-            if (status === 'Inativo') return 'badge bg-slate-200 text-slate-700';
-            return 'badge bg-emerald-100 text-emerald-700';
+            if (status === 'Ativo') return 'badge badge-success';
+            if (status === 'Inativo') return 'badge badge-neutral';
+            return 'badge badge-neutral';
         }
 
         function getDebtorName(debtorId) {
@@ -1528,6 +1527,10 @@
             return loansState.installments
                 .filter(item => sameId(item.loan_id, loanId))
                 .sort((a, b) => toNumber(a.installment_number) - toNumber(b.installment_number));
+        }
+
+        function loanHasPaidInstallments(loanId) {
+            return getLoanInstallments(loanId).some(item => isPaidInstallmentStatus(item.status));
         }
 
         function getLoanInstallmentsSummary(loan) {
@@ -1722,6 +1725,12 @@
                 const totalInstallments = toNumber(loan.installments_count || installments.length);
                 const paidInstallments = installments.filter(item => isPaidInstallmentStatus(item.status)).length;
                 const pendingInstallments = Math.max(0, totalInstallments - paidInstallments);
+                const canEditLoan = paidInstallments === 0;
+                const editLoanTitle = canEditLoan
+                    ? 'Editar'
+                    : 'Nao e possivel editar: emprestimo possui parcela paga';
+                const editLoanDisabledAttrs = canEditLoan ? '' : 'disabled aria-disabled="true"';
+                const editLoanDisabledClass = canEditLoan ? '' : ' opacity-50 cursor-not-allowed';
                 const nextOpenInstallment = installments.find(item => !isPaidInstallmentStatus(item.status));
                 const nextDueLabel = nextOpenInstallment
                     ? `${formatDate(nextOpenInstallment.due_date)} | ${formatCurrency(nextOpenInstallment.amount)}`
@@ -1755,7 +1764,7 @@
 
                         <div class="mt-3 flex items-center justify-end gap-1">
                             <button type="button" class="action-btn action-btn-view rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="view-loan" data-id="${loan.id}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Fechar detalhes' : 'Ver detalhes'}"><i class="fas ${isExpanded ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
-                            <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
+                            <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100${editLoanDisabledClass}" data-action="edit-loan" data-id="${loan.id}" title="${editLoanTitle}" ${editLoanDisabledAttrs}><i class="fas fa-pen-to-square"></i></button>
                             <button type="button" class="action-btn action-btn-delete rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                         </div>
 
@@ -1802,6 +1811,13 @@
                 const status = normalizeLoanStatus(loan.status);
                 const interestType = normalizeInterestType(loan.interest_type);
                 const installmentsInfo = getLoanInstallmentsSummary(loan);
+                const hasPaidInstallments = loanHasPaidInstallments(loan.id);
+                const canEditLoan = !hasPaidInstallments;
+                const editLoanTitle = canEditLoan
+                    ? 'Editar'
+                    : 'Nao e possivel editar: emprestimo possui parcela paga';
+                const editLoanDisabledAttrs = canEditLoan ? '' : 'disabled aria-disabled="true"';
+                const editLoanDisabledClass = canEditLoan ? '' : ' opacity-50 cursor-not-allowed';
                 const interestPrimary = interestType === 'fixo'
                     ? formatCurrency(loan.interest_rate)
                     : `${loan.interest_rate}%`;
@@ -1824,7 +1840,7 @@
                         <td>
                             <div class="flex items-center gap-1">
                                 <button type="button" class="action-btn action-btn-view rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="view-loan" data-id="${loan.id}" title="Detalhes"><i class="fas fa-eye"></i></button>
-                                <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="edit-loan" data-id="${loan.id}" title="Editar"><i class="fas fa-pen-to-square"></i></button>
+                                <button type="button" class="action-btn action-btn-edit rounded-md p-2 transition-colors duration-150 hover:bg-slate-100${editLoanDisabledClass}" data-action="edit-loan" data-id="${loan.id}" title="${editLoanTitle}" ${editLoanDisabledAttrs}><i class="fas fa-pen-to-square"></i></button>
                                 <button type="button" class="action-btn action-btn-delete rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" data-action="delete-loan" data-id="${loan.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
@@ -2110,6 +2126,12 @@
 
             if (mode === 'edit' && loan) {
                 const installments = getLoanInstallments(loan.id);
+                const hasPaidInstallments = installments.some(item => isPaidInstallmentStatus(item.status));
+                if (hasPaidInstallments) {
+                    loansState.editingLoanId = null;
+                    showMessage('Nao e permitido editar emprestimo com parcela paga. Estorne os pagamentos antes de editar.', 'error');
+                    return;
+                }
                 const interestType = normalizeInterestType(loan.loan_meta?.interestMode || loan.interest_type);
                 const startDateValue = toIsoDate(loan.start_date) || getTodayIsoDate();
                 const firstDueValue = toIsoDate(loan.first_due_date) || installments[0]?.due_date || suggestFirstDueDate(startDateValue);
@@ -2247,9 +2269,28 @@
             installmentsPreviewList.innerHTML = '';
 
             plan.forEach(item => {
-                const statusClass = item.status === 'Atrasado' ? 'overdue' : 'pending';
+                const isPaid = isPaidInstallmentStatus(item.status);
+                const normalizedStatus = String(item.status || '').trim().toLowerCase();
+                const isOverdue = !isPaid && (normalizedStatus === 'atrasado' || normalizedStatus === 'overdue');
+                const statusClass = isPaid ? 'paid' : (isOverdue ? 'overdue' : 'pending');
                 const index = Math.max(0, toNumber(item.installment_number) - 1);
                 const dueIso = toIsoDate(item.due_date);
+                const dueEditorHtml = isPaid
+                    ? `
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-md p-1 text-slate-400" title="Parcela paga nao pode ser editada" aria-hidden="true">
+                            <i class="fas fa-lock text-[11px]"></i>
+                        </span>
+                    `
+                    : `
+                        <button
+                            type="button"
+                            class="inline-flex h-7 w-7 items-center justify-center rounded-md p-1 text-slate-600 transition-colors duration-150 hover:bg-slate-100"
+                            data-action="edit-preview-due"
+                            data-index="${index}"
+                            aria-label="Editar data de vencimento da parcela #${item.installment_number}">
+                            <i class="fas fa-pen text-[11px]"></i>
+                        </button>
+                    `;
                 const div = document.createElement('div');
                 div.className = `installment-preview ${statusClass} p-3 transition-colors duration-150 hover:bg-slate-50`;
                 div.innerHTML = `
@@ -2258,14 +2299,7 @@
                             <p class="font-semibold text-sm">Parcela #${item.installment_number}</p>
                             <div class="mt-0.5 flex flex-wrap items-center gap-2">
                                 <p class="text-xs text-gray-600">Vencimento: <span class="font-medium text-gray-700">${formatDate(item.due_date)}</span></p>
-                                <button
-                                    type="button"
-                                    class="inline-flex h-7 w-7 items-center justify-center rounded-md p-1 text-slate-600 transition-colors duration-150 hover:bg-slate-100"
-                                    data-action="edit-preview-due"
-                                    data-index="${index}"
-                                    aria-label="Editar data de vencimento da parcela #${item.installment_number}">
-                                    <i class="fas fa-pen text-[11px]"></i>
-                                </button>
+                                ${dueEditorHtml}
                                 <input
                                     type="date"
                                     class="sr-only"
@@ -2290,6 +2324,12 @@
             const parsedIndex = Math.trunc(toNumber(index));
             const due = new Date(dueDateIso);
             const startDate = new Date(document.getElementById('loanStartDate').value);
+            const previewItem = loanFormState.simulation?.plan?.[parsedIndex];
+
+            if (previewItem && isPaidInstallmentStatus(previewItem.status)) {
+                if (showFeedback) showMessage('Parcela paga nao pode ter vencimento editado.', 'error');
+                return false;
+            }
 
             if (!dueDateIso || Number.isNaN(due.getTime())) {
                 if (showFeedback) showMessage('Data de vencimento inválida.', 'error');
@@ -2540,7 +2580,7 @@
                     const installmentClass = normalizedStatus === 'atrasado'
                         ? 'installment-preview overdue p-3'
                         : normalizedStatus === 'pago'
-                            ? 'installment-preview p-3'
+                            ? 'installment-preview paid p-3'
                             : 'installment-preview pending p-3';
 
                     return `
@@ -2803,14 +2843,9 @@
             const { values, calcResult, plan } = result;
             const isEditing = Boolean(loansState.editingLoanId);
 
-            if (isEditing) {
-                const hasPaidInstallments = getLoanInstallments(loansState.editingLoanId)
-                    .some(item => String(item.status || '').toLowerCase() === 'pago');
-
-                if (hasPaidInstallments) {
-                    const confirmed = confirm('Este empréstimo possui parcelas pagas. Ao salvar, as parcelas serão recriadas. Deseja continuar?');
-                    if (!confirmed) return;
-                }
+            if (isEditing && loanHasPaidInstallments(loansState.editingLoanId)) {
+                showMessage('Nao e permitido editar emprestimo com parcela paga. Estorne os pagamentos antes de editar.', 'error');
+                return;
             }
 
             const loanId = isEditing ? loansState.editingLoanId : null;
@@ -2931,9 +2966,5 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 

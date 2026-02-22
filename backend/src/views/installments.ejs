@@ -69,12 +69,6 @@
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
             transition: background-color 120ms ease-out, border-color 120ms ease-out;
         }
-        .kpi-card:hover {
-            background: #d9e1ec;
-            border-color: #c6d0df;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-            transform: none;
-        }
         .kpi-card.is-active {
             background: #d3ddea;
             border-color: #94a3b8;
@@ -115,6 +109,11 @@
         .kpi-tone-overdue .kpi-value, .kpi-tone-overdue .kpi-icon { color: #b91c1c; }
         .kpi-tone-due-soon .kpi-value, .kpi-tone-due-soon .kpi-icon { color: #1d4ed8; }
         .filter-control { background: #f8fafc; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px 12px; color: #111827; width: 100%; }
+        .filter-control:focus {
+            outline: none;
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
+        }
         .table-shell { overflow: auto; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; }
         .table-shell table { width: 100%; border-collapse: collapse; min-width: 1020px; }
         .table-shell th {
@@ -216,11 +215,7 @@
         .dark .kpi-card {
             box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
         }
-        .dark .kpi-card:hover {
-            border-color: rgba(148, 163, 184, 0.3);
-            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
-        }
-        .dark .kpi-card.is-active {
+.dark .kpi-card.is-active {
             border-color: rgba(148, 163, 184, 0.45);
             box-shadow: 0 1px 2px rgba(2, 6, 23, 0.45);
         }
@@ -336,9 +331,10 @@
         html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
         html:not(.dark) main .hover\\:bg-gray-50:hover,
         html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
-</style>
+        </style>
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
 </head>
-<body class="primary-gradient min-h-screen">
+<body class="dashboard-premium primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -555,43 +551,6 @@
         </main>
     </div>
 
-    <div id="paymentModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-md p-6">
-            <div class="mb-4 flex items-center justify-between">
-                <h3 class="text-xl font-semibold text-gray-800">Marcar como pago</h3>
-                <button id="closePaymentModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <form id="paymentForm" class="space-y-4">
-                <input type="hidden" id="paymentInstallmentId">
-                <div id="paymentInstallmentInfo" class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                    Selecione uma parcela para registrar o pagamento.
-                </div>
-                <div>
-                    <label for="paymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
-                    <input id="paymentDate" type="date" class="filter-control" required>
-                </div>
-                <div>
-                    <label for="paymentMethod" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
-                    <select id="paymentMethod" class="filter-control" required>
-                        <option value="Pix">Pix</option>
-                        <option value="Dinheiro">Dinheiro</option>
-                            <option value="Transferência">Transferência</option>
-                            <option value="Cartão">Cartão</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="paymentNotes" class="mb-1 block text-sm text-gray-600">Observação (opcional)</label>
-                    <textarea id="paymentNotes" rows="2" class="filter-control" placeholder="Observações sobre o pagamento"></textarea>
-                </div>
-                <div class="pt-2 flex justify-end gap-3">
-                    <button id="cancelPaymentBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                    <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Confirmar pagamento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div id="notificationModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
         <div class="modal-panel w-full max-w-xl p-6">
             <div class="mb-4 flex items-center justify-between">
@@ -624,29 +583,15 @@
         </div>
     </div>
 
-    <div id="actionConfirmModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-md p-6">
-            <div class="mb-4 flex items-center justify-between">
-                <h3 id="actionConfirmTitle" class="text-xl font-semibold text-gray-800">Confirmar ação</h3>
-                <button id="actionConfirmCloseBtn" type="button" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <p id="actionConfirmMessage" class="text-sm text-gray-700">Deseja continuar?</p>
-            <div class="mt-6 flex justify-end gap-3">
-                <button id="actionConfirmCancelBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button id="actionConfirmBtn" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="installmentDetailsDrawer" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5">
+    <div id="installmentModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle">
+        <div class="modal-panel relative z-[60] w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5">
             <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
-                <h3 class="text-lg font-semibold text-gray-800">Detalhes da parcela</h3>
-                <button id="closeInstallmentDetailsBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
+                <h3 id="installmentModalTitle" class="text-lg font-semibold text-gray-800">Detalhes da parcela</h3>
+                <button id="closeInstallmentModalBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" aria-label="Fechar modal de parcela">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="installmentDetailsContent"></div>
+            <div id="installmentModalContent"></div>
         </div>
     </div>
 
@@ -670,15 +615,11 @@
         const userMenuBtn = document.getElementById('userMenuBtn');
         const userMenuDropdown = document.getElementById('userMenuDropdown');
 
-        const paymentModal = document.getElementById('paymentModal');
         const notificationModal = document.getElementById('notificationModal');
-        const actionConfirmModal = document.getElementById('actionConfirmModal');
-        const installmentDetailsDrawer = document.getElementById('installmentDetailsDrawer');
-        const actionConfirmTitle = document.getElementById('actionConfirmTitle');
-        const actionConfirmMessage = document.getElementById('actionConfirmMessage');
-        const actionConfirmBtn = document.getElementById('actionConfirmBtn');
-
-        let actionConfirmResolver = null;
+        const installmentModal = document.getElementById('installmentModal');
+        const installmentModalTitle = document.getElementById('installmentModalTitle');
+        const installmentModalContent = document.getElementById('installmentModalContent');
+        const closeInstallmentModalBtn = document.getElementById('closeInstallmentModalBtn');
 
         const installmentsState = {
             installments: [],
@@ -688,8 +629,25 @@
             currentPage: 1,
             pageSize: 10,
             isLoading: true,
-            kpiFilter: '',
-            detailsInstallmentId: null
+            kpiFilter: ''
+        };
+
+        const installmentModalState = {
+            isOpen: false,
+            mode: 'details',
+            selectedInstallmentId: null,
+            isSubmitting: false,
+            lastFocusedElement: null,
+            form: {
+                paymentDate: '',
+                paymentMethod: 'Pix',
+                paymentNotes: '',
+                refundReason: '',
+            },
+        };
+
+        const modalFocusState = {
+            activeModal: null,
         };
 
         const tableCache = {};
@@ -1087,6 +1045,26 @@
             return '';
         }
 
+        function toApiPaymentMethod(value) {
+            const source = normalizeAscii(value);
+            if (source.includes('dinheiro')) return 'DINHEIRO';
+            if (source.includes('transfer')) return 'TRANSFERENCIA';
+            if (source.includes('cartao')) return 'CARTAO';
+            return 'PIX';
+        }
+
+        async function extractApiErrorMessage(response, fallback) {
+            try {
+                const payload = await response.json();
+                if (payload && typeof payload.message === 'string' && payload.message.trim()) {
+                    return payload.message.trim();
+                }
+            } catch (_error) {
+                // usa fallback quando nao houver JSON valido
+            }
+            return fallback;
+        }
+
         function normalizeLoanRow(row) {
             return {
                 ...row,
@@ -1191,13 +1169,14 @@
         function getStatusBadge(status) {
             if (status === 'Pago') return { className: 'badge badge-success', text: 'Pago' };
             if (status === 'Atrasado') return { className: 'badge badge-danger', text: 'Em atraso' };
-            return { className: 'badge badge-neutral', text: 'Pendente' };
+            return { className: 'badge badge-neutral', text: 'Em dia' };
         }
 
         function getInstallmentLabel(installment, loan) {
-            const number = installment.installment_number || '-';
-            const total = loan?.installments_count || null;
-            return total ? `${number}/${total}` : `${number}`;
+            const number = Math.max(1, Math.trunc(toNumber(installment.installment_number, 1)));
+            const totalFromLoan = Math.max(0, Math.trunc(toNumber(loan?.installments_count, 0)));
+            const total = Math.max(number, totalFromLoan);
+            return total > 0 ? `${number}/${total}` : `${number}`;
         }
 
         function getLoanSummary(loan) {
@@ -1368,7 +1347,6 @@
                 const loan = getLoanById(installment.loan_id);
                 const installmentNumber = getInstallmentLabel(installment, loan);
                 const phone = getDebtorPhone(installment.debtor_id);
-                const canRegisterPayment = status !== 'Pago';
                 const dueHint = getDueHint(installment, status);
 
                 return `
@@ -1393,10 +1371,9 @@
                         <td><span class="${badge.className}">${badge.text}</span></td>
                         <td>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action text-slate-700" title="Ver detalhes">
-                                    <i class="fas fa-eye"></i>
+                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action border border-slate-300 px-2 text-slate-700 hover:bg-slate-100" title="Mais detalhes">
+                                    <span>Mais detalhes</span>
                                 </button>
-                                ${canRegisterPayment ? `<button type="button" data-action="quick-pay-installment" data-id="${installment.id}" class="table-action border border-emerald-600 bg-emerald-600 px-2 text-white hover:border-emerald-500 hover:bg-emerald-500" title="Marcar como pago agora"><i class="fas fa-check mr-1"></i><span class="hidden sm:inline">Pago hoje</span></button>` : ''}
                             </div>
                         </td>
                     </tr>
@@ -1410,7 +1387,6 @@
                     const loan = getLoanById(installment.loan_id);
                     const installmentNumber = getInstallmentLabel(installment, loan);
                     const phone = getDebtorPhone(installment.debtor_id);
-                    const canRegisterPayment = status !== 'Pago';
                     const dueHint = getDueHint(installment, status);
 
                     return `
@@ -1445,10 +1421,9 @@
                                 </div>
                             </div>
                             <div class="mt-3 flex flex-wrap items-center justify-end gap-2">
-                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action text-slate-700" title="Ver detalhes">
-                                    <i class="fas fa-eye"></i>
+                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action border border-slate-300 px-2 text-slate-700 hover:bg-slate-100" title="Mais detalhes">
+                                    Mais detalhes
                                 </button>
-                                ${canRegisterPayment ? `<button type="button" data-action="quick-pay-installment" data-id="${installment.id}" class="table-action border border-emerald-600 bg-emerald-600 px-2 text-white hover:border-emerald-500 hover:bg-emerald-500" title="Marcar como pago agora"><i class="fas fa-check mr-1"></i>Pago hoje</button>` : ''}
                             </div>
                         </article>
                     `;
@@ -1577,318 +1552,6 @@
             if (resetPage) installmentsState.currentPage = 1;
             renderInstallmentsTable();
         }
-        async function updateLoanStatusFromInstallments(loanId) {
-            const loans = getDemoTable('loans');
-            const loanIndex = loans.findIndex(loan => sameId(loan.id, loanId));
-            if (loanIndex < 0) return;
-
-            const related = installmentsState.installments.filter(installment => sameId(installment.loan_id, loanId));
-            if (!related.length) return;
-
-            const allPaid = related.every(installment => normalizeInstallmentStatus(installment) === 'Pago');
-            const hasOverdue = related.some(installment => normalizeInstallmentStatus(installment) === 'Atrasado');
-            loans[loanIndex].status = allPaid ? 'Finalizado' : hasOverdue ? 'Atrasado' : 'Ativo';
-            await saveTableData('loans', loans);
-        }
-
-        function openModal(modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            if (
-                installmentDetailsDrawer.classList.contains('hidden')
-                && paymentModal.classList.contains('hidden')
-                && notificationModal.classList.contains('hidden')
-                && actionConfirmModal.classList.contains('hidden')
-            ) {
-                document.body.style.overflow = '';
-            }
-        }
-
-        function openActionConfirm(options = {}) {
-            if (!actionConfirmModal || !actionConfirmBtn) return Promise.resolve(false);
-
-            const {
-                title = 'Confirmar ação',
-                message = 'Deseja continuar?',
-                confirmLabel = 'Confirmar',
-                tone = 'primary',
-            } = options;
-
-            if (actionConfirmTitle) actionConfirmTitle.textContent = String(title);
-            if (actionConfirmMessage) actionConfirmMessage.textContent = String(message);
-            actionConfirmBtn.textContent = String(confirmLabel);
-
-            actionConfirmBtn.className = 'rounded-xl px-4 py-2 text-sm font-semibold text-white';
-            if (tone === 'danger') {
-                actionConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-500');
-            } else if (tone === 'success') {
-                actionConfirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
-            } else {
-                actionConfirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-500');
-            }
-
-            return new Promise((resolve) => {
-                actionConfirmResolver = resolve;
-                openModal(actionConfirmModal);
-            });
-        }
-
-        function closeActionConfirm(confirmed = false) {
-            if (!actionConfirmModal) return;
-            closeModal(actionConfirmModal);
-            if (typeof actionConfirmResolver === 'function') {
-                const resolver = actionConfirmResolver;
-                actionConfirmResolver = null;
-                resolver(Boolean(confirmed));
-            }
-        }
-
-        function openInstallmentDetails(installmentId) {
-            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
-            if (!installment) return;
-
-            installmentsState.detailsInstallmentId = installment.id;
-            const status = normalizeInstallmentStatus(installment);
-            const badge = getStatusBadge(status);
-            const loan = getLoanById(installment.loan_id);
-            const paymentMethod = getInstallmentPaymentMethod(installment) || '-';
-            const phone = getDebtorPhone(installment.debtor_id);
-
-            document.getElementById('installmentDetailsContent').innerHTML = `
-                <div class="space-y-4">
-                    <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</p>
-                        <p class="mt-1 text-base font-semibold text-slate-800">${getDebtorName(installment.debtor_id)}</p>
-                        <p class="mt-0.5 text-sm text-slate-600">${phone || 'Sem telefone cadastrado'}</p>
-                    </section>
-                    <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Empréstimo</p>
-                        <p class="mt-1 text-base font-semibold text-slate-800">#${installment.loan_id ?? '-'}</p>
-                        <p class="mt-1 text-sm text-slate-600">Principal: ${loan ? formatCurrency(loan.principal_amount) : '-'}</p>
-                        <p class="text-sm text-slate-600">Total: ${loan ? formatCurrency(loan.total_amount) : '-'}</p>
-                        <p class="text-sm text-slate-600">Status: ${loan?.status || '-'}</p>
-                    </section>
-                    <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Parcela</p>
-                        <p class="mt-1 text-base font-semibold text-slate-800">#${getInstallmentLabel(installment, loan)}</p>
-                        <p class="mt-1 text-sm text-slate-600">Vencimento: ${formatDate(installment.due_date)} ${getDueHint(installment, status)}</p>
-                        <p class="text-sm text-slate-600">Valor: ${formatCurrency(installment.amount)}</p>
-                        <p class="text-sm text-slate-600">Status: <span class="${badge.className}">${badge.text}</span></p>
-                    </section>
-                    <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Histórico</p>
-                        ${status === 'Pago'
-                            ? `<p class="mt-1 text-sm text-slate-600">Data: ${formatDate(installment.payment_date)}</p><p class="text-sm text-slate-600">Forma: ${paymentMethod}</p><p class="text-sm text-slate-600">Observação: ${installment.notes || '-'}</p>`
-                            : '<p class="mt-1 text-sm text-slate-600">Pagamento ainda não registrado.</p>'}
-                    </section>
-                    <section class="pt-1">
-                        <div class="flex flex-wrap justify-end gap-2">
-                            ${status !== 'Pago'
-                                ? `<button type="button" data-action="drawer-quick-pay-installment" data-id="${installment.id}" class="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Pago rápido</button><button type="button" data-action="drawer-pay-installment" data-id="${installment.id}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Registrar pagamento</button>`
-                                : ''}
-                        </div>
-                    </section>
-                </div>
-            `;
-
-            installmentDetailsDrawer.classList.remove('hidden');
-            installmentDetailsDrawer.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeInstallmentDetails() {
-            installmentsState.detailsInstallmentId = null;
-            installmentDetailsDrawer.classList.add('hidden');
-            installmentDetailsDrawer.classList.remove('flex');
-            if (
-                paymentModal.classList.contains('hidden')
-                && notificationModal.classList.contains('hidden')
-                && actionConfirmModal.classList.contains('hidden')
-            ) {
-                document.body.style.overflow = '';
-            }
-        }
-
-        function openPaymentModal(installmentId) {
-            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
-            if (!installment) return;
-
-            if (normalizeInstallmentStatus(installment) === 'Pago') {
-                showMessage('Essa parcela já está paga.', 'error');
-                return;
-            }
-
-            const loan = getLoanById(installment.loan_id);
-            const defaultMethod = getInstallmentPaymentMethod(installment) || normalizePaymentMethod(loan?.payment_method) || 'Pix';
-            document.getElementById('paymentInstallmentId').value = String(installment.id);
-            document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
-            document.getElementById('paymentMethod').value = defaultMethod;
-            document.getElementById('paymentNotes').value = '';
-
-            document.getElementById('paymentInstallmentInfo').innerHTML = `
-                <p><strong>Cliente:</strong> ${getDebtorName(installment.debtor_id)}</p>
-                <p><strong>Empréstimo:</strong> #${installment.loan_id ?? '-'}</p>
-                <p><strong>Parcela:</strong> #${getInstallmentLabel(installment, loan)}</p>
-                <p><strong>Valor:</strong> ${formatCurrency(installment.amount)}</p>
-                <p><strong>Vencimento:</strong> ${formatDate(installment.due_date)} ${getDueHint(installment, normalizeInstallmentStatus(installment))}</p>
-            `;
-
-            openModal(paymentModal);
-        }
-
-        async function registerInstallmentPayment(event) {
-            event.preventDefault();
-
-            const installmentId = document.getElementById('paymentInstallmentId').value;
-            const paymentDate = document.getElementById('paymentDate').value;
-            const selectedMethod = document.getElementById('paymentMethod').value;
-            const paymentNotes = document.getElementById('paymentNotes').value.trim();
-
-            if (!installmentId || !paymentDate || !selectedMethod) {
-                showMessage('Preencha os campos obrigatórios do pagamento.', 'error');
-                return;
-            }
-
-            await saveInstallmentPayment({
-                installmentId,
-                paymentDate,
-                selectedMethod,
-                paymentNotes,
-                successMessage: 'Parcela marcada como paga.',
-                closePaymentModalAfterSave: true,
-            });
-        }
-
-        async function saveInstallmentPayment(options) {
-            const {
-                installmentId,
-                paymentDate,
-                selectedMethod,
-                paymentNotes = '',
-                successMessage = 'Parcela marcada como paga.',
-                closePaymentModalAfterSave = false,
-            } = options;
-
-            const index = installmentsState.installments.findIndex(item => sameId(item.id, installmentId));
-            if (index < 0) {
-                showMessage('Parcela não encontrada.', 'error');
-                return false;
-            }
-
-            const current = installmentsState.installments[index];
-            const methodToPersist = selectedMethod === 'Outro' ? 'Pix' : selectedMethod;
-            const notesWithMethod = selectedMethod === 'Outro'
-                ? `Forma informada: Outro${paymentNotes ? ` | ${paymentNotes.trim()}` : ''}`
-                : paymentNotes;
-            const previous = { ...current };
-
-            installmentsState.installments[index] = {
-                ...current,
-                status: 'Pago',
-                payment_date: paymentDate,
-                paid_amount: round2(current.amount),
-                payment_method: methodToPersist,
-                notes: notesWithMethod
-            };
-
-            applyInstallmentsFilters({ resetPage: false, source: 'internal' });
-
-            try {
-                await saveTableData('installments', installmentsState.installments);
-                await updateLoanStatusFromInstallments(current.loan_id);
-                if (closePaymentModalAfterSave) closeModal(paymentModal);
-                closeInstallmentDetails();
-                showMessage(successMessage, 'success');
-                await loadInstallmentsData({ silent: true, preservePage: true });
-                return true;
-            } catch (error) {
-                console.error('Erro ao registrar pagamento:', error);
-                installmentsState.installments[index] = previous;
-                applyInstallmentsFilters({ resetPage: false, source: 'internal' });
-                showMessage('Não foi possível registrar o pagamento.', 'error');
-                return false;
-            }
-        }
-
-        async function quickMarkInstallmentAsPaid(installmentId) {
-            const installment = installmentsState.installments.find(item => sameId(item.id, installmentId));
-            if (!installment) {
-                showMessage('Parcela não encontrada.', 'error');
-                return;
-            }
-
-            if (normalizeInstallmentStatus(installment) === 'Pago') {
-                showMessage('Essa parcela já está paga.', 'error');
-                return;
-            }
-
-            const confirmed = await openActionConfirm({
-                title: 'Confirmar pagamento rápido',
-                message: `Marcar a parcela #${installment.installment_number ?? '-'} do cliente ${getDebtorName(installment.debtor_id)} como paga hoje?`,
-                confirmLabel: 'Confirmar pagamento',
-                tone: 'success',
-            });
-            if (!confirmed) return;
-
-            const loan = getLoanById(installment.loan_id);
-            const selectedMethod = getInstallmentPaymentMethod(installment) || normalizePaymentMethod(loan?.payment_method) || 'Pix';
-            const paymentDate = new Date().toISOString().slice(0, 10);
-
-            await saveInstallmentPayment({
-                installmentId,
-                paymentDate,
-                selectedMethod,
-                paymentNotes: 'Pagamento rapido registrado em Controle de Cobranca.',
-                successMessage: 'Parcela marcada como paga (rápido).',
-            });
-        }
-
-        async function undoInstallmentPayment(installmentId) {
-            const index = installmentsState.installments.findIndex(item => sameId(item.id, installmentId));
-            if (index < 0) {
-                showMessage('Parcela não encontrada.', 'error');
-                return;
-            }
-
-            const current = installmentsState.installments[index];
-            if (normalizeInstallmentStatus(current) !== 'Pago') {
-                showMessage('Somente parcelas pagas podem ser estornadas.', 'error');
-                return;
-            }
-
-            const confirmed = await openActionConfirm({
-                title: 'Estornar pagamento',
-                message: 'Deseja estornar este pagamento?',
-                confirmLabel: 'Estornar',
-                tone: 'danger',
-            });
-            if (!confirmed) return;
-
-            const dueDate = startOfDay(current.due_date);
-            const today = startOfDay(new Date());
-            const revertedStatus = dueDate && today && dueDate < today ? 'Atrasado' : 'Pendente';
-
-            installmentsState.installments[index] = {
-                ...current,
-                status: revertedStatus,
-                payment_date: null,
-                paid_amount: null,
-                payment_method: null,
-                notes: ''
-            };
-
-            await saveTableData('installments', installmentsState.installments);
-            await updateLoanStatusFromInstallments(current.loan_id);
-            applyInstallmentsFilters({ resetPage: false, source: 'internal' });
-            showMessage('Pagamento estornado com sucesso!', 'success');
-        }
-
         function normalizePhoneForWhatsApp(phoneRaw) {
             const digits = String(phoneRaw || '').replace(/\D/g, '');
             if (!digits) return '';
@@ -2177,6 +1840,643 @@
             main.style.flex = '0 1 calc(100% - 16rem)';
         }
 
+        function isModalVisible(modal) {
+            return Boolean(modal) && !modal.classList.contains('hidden');
+        }
+
+        function syncBodyScrollLock() {
+            const shouldLock = installmentModalState.isOpen || isModalVisible(notificationModal);
+            document.body.style.overflow = shouldLock ? 'hidden' : '';
+        }
+
+        function getFocusableElements(container) {
+            if (!container) return [];
+            return Array.from(container.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+        }
+
+        function focusInstallmentModalInitial() {
+            if (!installmentModalState.isOpen || !installmentModal) return;
+            const focusable = getFocusableElements(installmentModal);
+            if (focusable.length > 0) {
+                focusable[0].focus();
+                return;
+            }
+            installmentModal.focus();
+        }
+
+        function trapFocusWithinInstallmentModal(event) {
+            if (!installmentModalState.isOpen || !installmentModal || event.key !== 'Tab') return;
+
+            const focusable = getFocusableElements(installmentModal);
+            if (!focusable.length) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+
+            if (event.shiftKey && active === first) {
+                event.preventDefault();
+                last.focus();
+                return;
+            }
+
+            if (!event.shiftKey && active === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function openModal(modal) {
+            if (!modal) return;
+            if (installmentModalState.isOpen) closeInstallmentModal({ restoreFocus: false });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modalFocusState.activeModal = modal;
+            syncBodyScrollLock();
+        }
+
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (modalFocusState.activeModal === modal) {
+                modalFocusState.activeModal = null;
+            }
+            syncBodyScrollLock();
+        }
+
+        function getLocalTodayDateInputValue() {
+            const now = new Date();
+            const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+            return local.toISOString().slice(0, 10);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getSelectedInstallment() {
+            return installmentsState.installments.find((item) => sameId(item.id, installmentModalState.selectedInstallmentId));
+        }
+
+        function getInstallmentsByLoan(loanId) {
+            return installmentsState.installments
+                .filter((item) => sameId(item.loan_id, loanId))
+                .sort((a, b) => {
+                    const numberDiff = toNumber(a.installment_number) - toNumber(b.installment_number);
+                    if (numberDiff !== 0) return numberDiff;
+                    const dueA = startOfDay(a.due_date)?.getTime() ?? 0;
+                    const dueB = startOfDay(b.due_date)?.getTime() ?? 0;
+                    if (dueA !== dueB) return dueA - dueB;
+                    return toNumber(a.id) - toNumber(b.id);
+                });
+        }
+
+        function getDeleteImpact(installment) {
+            const loanInstallments = getInstallmentsByLoan(installment.loan_id);
+            const remaining = loanInstallments.filter((item) => !sameId(item.id, installment.id));
+            const newTotalAmount = remaining.reduce((sum, item) => sum + toNumber(item.amount), 0);
+            const preservedSequenceTotal = remaining.reduce((max, item) => {
+                const value = Math.max(0, Math.trunc(toNumber(item.installment_number, 0)));
+                return value > max ? value : max;
+            }, 0);
+
+            return {
+                currentCount: loanInstallments.length,
+                remainingCount: remaining.length,
+                newTotalAmount,
+                preservedSequenceTotal,
+                isOnlyInstallment: loanInstallments.length <= 1,
+            };
+        }
+
+        function buildPaymentMethodOptions(selectedMethod) {
+            const normalizedSelected = normalizeAscii(selectedMethod);
+            const options = [
+                { value: 'Pix', label: 'Pix' },
+                { value: 'Dinheiro', label: 'Dinheiro' },
+                { value: 'Transferencia', label: 'Transferencia' },
+                { value: 'Cartao', label: 'Cartao' },
+                { value: 'Outro', label: 'Outro' },
+            ];
+
+            return options
+                .map((option) => {
+                    const selected = normalizeAscii(option.value) === normalizedSelected ? 'selected' : '';
+                    return `<option value="${option.value}" ${selected}>${option.label}</option>`;
+                })
+                .join('');
+        }
+
+        function openInstallmentModal(installmentId, mode = 'details') {
+            const installment = installmentsState.installments.find((item) => sameId(item.id, installmentId));
+            if (!installment || !installmentModal) return;
+
+            if (isModalVisible(notificationModal)) {
+                closeModal(notificationModal);
+            }
+
+            const loan = getLoanById(installment.loan_id);
+            installmentModalState.lastFocusedElement = document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+            installmentModalState.isOpen = true;
+            installmentModalState.selectedInstallmentId = installment.id;
+            installmentModalState.mode = 'details';
+            installmentModalState.isSubmitting = false;
+            installmentModalState.form.paymentDate = getLocalTodayDateInputValue();
+            installmentModalState.form.paymentMethod = getInstallmentPaymentMethod(installment) || normalizePaymentMethod(loan?.payment_method) || 'Pix';
+            installmentModalState.form.paymentNotes = '';
+            installmentModalState.form.refundReason = '';
+
+            installmentModal.classList.remove('hidden');
+            installmentModal.classList.add('flex');
+            modalFocusState.activeModal = installmentModal;
+
+            setInstallmentModalMode(mode);
+            syncBodyScrollLock();
+            window.requestAnimationFrame(focusInstallmentModalInitial);
+        }
+
+        function openInstallmentDetails(installmentId) {
+            openInstallmentModal(installmentId, 'details');
+        }
+
+        function closeInstallmentModal(options = {}) {
+            if (!installmentModal) return;
+
+            const { restoreFocus = true } = options;
+            installmentModalState.isOpen = false;
+            installmentModalState.mode = 'details';
+            installmentModalState.selectedInstallmentId = null;
+            installmentModalState.isSubmitting = false;
+
+            installmentModal.classList.add('hidden');
+            installmentModal.classList.remove('flex');
+            if (modalFocusState.activeModal === installmentModal) {
+                modalFocusState.activeModal = null;
+            }
+
+            syncBodyScrollLock();
+
+            if (restoreFocus && installmentModalState.lastFocusedElement) {
+                installmentModalState.lastFocusedElement.focus();
+            }
+            installmentModalState.lastFocusedElement = null;
+        }
+
+        function readInstallmentModalFormValues() {
+            const paymentDateInput = document.getElementById('installmentModalPaymentDate');
+            const paymentMethodInput = document.getElementById('installmentModalPaymentMethod');
+            const paymentNotesInput = document.getElementById('installmentModalPaymentNotes');
+            const refundReasonInput = document.getElementById('installmentModalRefundReason');
+
+            if (paymentDateInput) installmentModalState.form.paymentDate = String(paymentDateInput.value || '').trim();
+            if (paymentMethodInput) installmentModalState.form.paymentMethod = String(paymentMethodInput.value || '').trim() || 'Pix';
+            if (paymentNotesInput) installmentModalState.form.paymentNotes = String(paymentNotesInput.value || '').trim();
+            if (refundReasonInput) installmentModalState.form.refundReason = String(refundReasonInput.value || '').trim();
+        }
+
+        function setInstallmentModalMode(mode) {
+            if (!installmentModalState.isOpen) return;
+
+            readInstallmentModalFormValues();
+
+            const installment = getSelectedInstallment();
+            if (!installment) {
+                closeInstallmentModal();
+                return;
+            }
+
+            const status = normalizeInstallmentStatus(installment);
+            if (mode === 'payment' && status === 'Pago') {
+                showMessage('Essa parcela ja esta paga.', 'error');
+                installmentModalState.mode = 'details';
+            } else if (mode === 'refund' && status !== 'Pago') {
+                showMessage('Somente parcelas pagas podem ser estornadas.', 'error');
+                installmentModalState.mode = 'details';
+            } else {
+                installmentModalState.mode = mode;
+            }
+
+            renderInstallmentModal();
+            window.requestAnimationFrame(focusInstallmentModalInitial);
+        }
+
+        function renderInstallmentModal() {
+            if (!installmentModalContent || !installmentModalTitle) return;
+
+            const installment = getSelectedInstallment();
+            if (!installment) {
+                closeInstallmentModal();
+                return;
+            }
+
+            const loan = getLoanById(installment.loan_id);
+            const status = normalizeInstallmentStatus(installment);
+            const badge = getStatusBadge(status);
+            const installmentLabel = getInstallmentLabel(installment, loan);
+            const dueHint = getDueHint(installment, status);
+            const paymentMethod = getInstallmentPaymentMethod(installment) || '-';
+            const summaryLine = `${getDebtorName(installment.debtor_id)} | Parcela #${installmentLabel} | ${formatCurrency(installment.amount)} | Venc.: ${formatDate(installment.due_date)}`;
+            const loadingIcon = '<i class="fas fa-circle-notch fa-spin mr-2"></i>';
+
+            if (installmentModalState.mode === 'details') {
+                installmentModalTitle.textContent = 'Detalhes da parcela';
+
+                const historyText = status === 'Pago'
+                    ? `Pago em ${formatDate(installment.payment_date)} via ${paymentMethod}`
+                    : 'Pagamento nao registrado.';
+                const historyNotes = status === 'Pago' && installment.notes
+                    ? `<p class="mt-1 text-sm text-slate-600">Obs.: ${escapeHtml(installment.notes)}</p>`
+                    : '';
+
+                installmentModalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="text-lg font-semibold text-slate-800">Parcela #${installmentLabel}</h4>
+                                <span class="${badge.className}">${badge.text}</span>
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600">Emprestimo #${installment.loan_id ?? '-'} | Cliente: ${getDebtorName(installment.debtor_id)}</p>
+                        </section>
+
+                        <section class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor da parcela</p>
+                                <p class="mt-1 text-lg font-semibold text-slate-800">${formatCurrency(installment.amount)}</p>
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</p>
+                                <p class="mt-1 text-base font-semibold ${status === 'Atrasado' ? 'text-red-600' : 'text-slate-800'}">${formatDate(installment.due_date)}</p>
+                                <p class="text-xs ${status === 'Atrasado' ? 'text-red-600' : 'text-slate-500'}">${dueHint || '-'}</p>
+                            </div>
+                            ${loan ? `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Principal</p><p class="mt-1 text-sm font-semibold text-slate-800">${formatCurrency(loan.principal_amount)}</p></div>` : ''}
+                            ${loan ? `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total do emprestimo</p><p class="mt-1 text-sm font-semibold text-slate-800">${formatCurrency(loan.total_amount)}</p></div>` : ''}
+                        </section>
+
+                        <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Historico</p>
+                            <p class="mt-1 text-sm text-slate-700">${historyText}</p>
+                            ${historyNotes}
+                        </section>
+
+                        <section class="pt-1">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                                ${status !== 'Pago'
+                                    ? '<button type="button" data-action="modal-go-payment" class="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 sm:w-auto">Registrar pagamento</button>'
+                                    : ''}
+                                ${status === 'Pago'
+                                    ? '<button type="button" data-action="modal-go-refund" class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:w-auto">Estorno</button>'
+                                    : ''}
+                                <button type="button" data-action="modal-go-delete" class="w-full rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto">Excluir</button>
+                                <button type="button" data-action="modal-close" class="w-full rounded-xl border border-emerald-300 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 sm:w-auto">Concluir</button>
+                            </div>
+                        </section>
+                    </div>
+                `;
+                return;
+            }
+
+            if (installmentModalState.mode === 'payment') {
+                installmentModalTitle.textContent = 'Registrar pagamento';
+
+                installmentModalContent.innerHTML = `
+                    <form id="installmentPaymentForm" class="space-y-4">
+                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+
+                        <div>
+                            <label for="installmentModalPaymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
+                            <input id="installmentModalPaymentDate" type="date" class="filter-control" required value="${escapeHtml(installmentModalState.form.paymentDate || getLocalTodayDateInputValue())}">
+                        </div>
+
+                        <div>
+                            <label for="installmentModalPaymentMethod" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
+                            <select id="installmentModalPaymentMethod" class="filter-control" required>
+                                ${buildPaymentMethodOptions(installmentModalState.form.paymentMethod)}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="installmentModalPaymentNotes" class="mb-1 block text-sm text-gray-600">Observação (opcional)</label>
+                            <textarea id="installmentModalPaymentNotes" rows="2" class="filter-control" placeholder="Observações sobre o pagamento">${escapeHtml(installmentModalState.form.paymentNotes)}</textarea>
+                        </div>
+
+                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
+                            <button type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar pagamento'}</button>
+                        </div>
+                    </form>
+                `;
+                return;
+            }
+
+            if (installmentModalState.mode === 'refund') {
+                installmentModalTitle.textContent = 'Estorno';
+
+                installmentModalContent.innerHTML = `
+                    <form id="installmentRefundForm" class="space-y-4">
+                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+
+                        <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                            Estornar este pagamento ira voltar a parcela para "Em aberto/Em atraso" e remover a data de pagamento.
+                        </div>
+
+                        <div>
+                            <label for="installmentModalRefundReason" class="mb-1 block text-sm text-gray-600">Motivo do estorno (opcional)</label>
+                            <textarea id="installmentModalRefundReason" rows="2" class="filter-control" placeholder="Motivo do estorno">${escapeHtml(installmentModalState.form.refundReason)}</textarea>
+                        </div>
+
+                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
+                            <button type="submit" class="w-full rounded-xl border border-amber-300 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar estorno'}</button>
+                        </div>
+                    </form>
+                `;
+                return;
+            }
+
+            installmentModalTitle.textContent = 'Excluir parcela';
+
+            const impact = getDeleteImpact(installment);
+            const isPaid = status === 'Pago';
+
+            if (isPaid) {
+                installmentModalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+                        <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                            Esta parcela esta paga. Para excluir, use Estorno primeiro.
+                        </div>
+                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
+                            <button type="button" data-action="modal-go-refund" class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:w-auto">Ir para estorno</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (impact.isOnlyInstallment) {
+                installmentModalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+                        <div class="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                            Este emprestimo possui apenas uma parcela. Exclua o emprestimo inteiro na tela de emprestimos.
+                        </div>
+                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
+                            <a href="/admin/loans.html" class="w-full rounded-xl border border-red-300 px-4 py-2 text-center text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto">Ir para emprestimos</a>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            installmentModalContent.innerHTML = `
+                <form id="installmentDeleteForm" class="space-y-4">
+                    <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+
+                    <div class="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                        Tem certeza que deseja excluir esta parcela? Isso pode alterar o total do emprestimo e relatorios.
+                    </div>
+
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                        <p>Parcelas restantes: <strong>${impact.remainingCount}</strong></p>
+                        <p class="mt-1">Novo total do emprestimo apos exclusao: <strong>${formatCurrency(impact.newTotalAmount)}</strong></p>
+                    </div>
+
+                    <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                        <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Cancelar</button>
+                        <button type="submit" class="w-full rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Excluindo...` : 'Excluir parcela'}</button>
+                    </div>
+                </form>
+            `;
+        }
+
+        async function saveInstallmentPayment(options) {
+            const {
+                installmentId,
+                paymentDate,
+                selectedMethod,
+                paymentNotes = '',
+                successMessage = 'Parcela marcada como paga.',
+            } = options;
+
+            const installment = installmentsState.installments.find((item) => sameId(item.id, installmentId));
+            if (!installment) {
+                showMessage('Parcela nao encontrada.', 'error');
+                return false;
+            }
+
+            const methodToPersist = selectedMethod === 'Outro' ? 'Pix' : selectedMethod;
+            const apiMethod = toApiPaymentMethod(methodToPersist);
+            const notesWithMethod = selectedMethod === 'Outro'
+                ? `Forma informada: Outro${paymentNotes ? ` | ${paymentNotes.trim()}` : ''}`
+                : paymentNotes;
+            const numericLoanId = toNumber(installment.loan_id);
+            const numericInstallmentId = toNumber(installment.id);
+
+            if (numericLoanId <= 0 || numericInstallmentId <= 0) {
+                showMessage('Parcela invalida para registro de pagamento.', 'error');
+                return false;
+            }
+
+            try {
+                const response = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        loanId: numericLoanId,
+                        installmentId: numericInstallmentId,
+                        amount: round2(installment.amount),
+                        paymentDate,
+                        method: apiMethod,
+                        notes: notesWithMethod || undefined,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const apiMessage = await extractApiErrorMessage(response, 'Nao foi possivel registrar o pagamento.');
+                    showMessage(apiMessage, 'error');
+                    return false;
+                }
+
+                showMessage(successMessage, 'success');
+                await loadInstallmentsData({ silent: true, preservePage: true });
+                return true;
+            } catch (error) {
+                console.error('Erro ao registrar pagamento:', error);
+                showMessage('Erro de conexao ao registrar pagamento.', 'error');
+                return false;
+            }
+        }
+
+        async function submitInstallmentPaymentFromModal() {
+            readInstallmentModalFormValues();
+
+            const installment = getSelectedInstallment();
+            if (!installment) {
+                showMessage('Parcela nao encontrada.', 'error');
+                closeInstallmentModal();
+                return;
+            }
+
+            if (!installmentModalState.form.paymentDate || !installmentModalState.form.paymentMethod) {
+                showMessage('Preencha os campos obrigatorios do pagamento.', 'error');
+                return;
+            }
+
+            installmentModalState.isSubmitting = true;
+            renderInstallmentModal();
+
+            const success = await saveInstallmentPayment({
+                installmentId: installment.id,
+                paymentDate: installmentModalState.form.paymentDate,
+                selectedMethod: installmentModalState.form.paymentMethod,
+                paymentNotes: installmentModalState.form.paymentNotes,
+                successMessage: 'Pagamento registrado com sucesso.',
+            });
+
+            installmentModalState.isSubmitting = false;
+            if (!success) {
+                renderInstallmentModal();
+                return;
+            }
+
+            if (!getSelectedInstallment()) {
+                closeInstallmentModal();
+                return;
+            }
+
+            installmentModalState.mode = 'details';
+            renderInstallmentModal();
+        }
+
+        async function submitInstallmentRefundFromModal() {
+            readInstallmentModalFormValues();
+
+            const installment = getSelectedInstallment();
+            if (!installment) {
+                showMessage('Parcela nao encontrada.', 'error');
+                closeInstallmentModal();
+                return;
+            }
+
+            if (normalizeInstallmentStatus(installment) !== 'Pago') {
+                showMessage('Somente parcelas pagas podem ser estornadas.', 'error');
+                setInstallmentModalMode('details');
+                return;
+            }
+
+            const numericInstallmentId = toNumber(installment.id);
+            if (numericInstallmentId <= 0) {
+                showMessage('Parcela invalida para estorno.', 'error');
+                return;
+            }
+
+            installmentModalState.isSubmitting = true;
+            renderInstallmentModal();
+
+            try {
+                const response = await fetch(`/api/payments/installments/${numericInstallmentId}/revert`, {
+                    method: 'POST',
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const apiMessage = await extractApiErrorMessage(response, 'Nao foi possivel estornar o pagamento.');
+                    showMessage(apiMessage, 'error');
+                    installmentModalState.isSubmitting = false;
+                    renderInstallmentModal();
+                    return;
+                }
+
+                showMessage('Pagamento estornado com sucesso!', 'success');
+                await loadInstallmentsData({ silent: true, preservePage: true });
+
+                installmentModalState.isSubmitting = false;
+                if (!getSelectedInstallment()) {
+                    closeInstallmentModal();
+                    return;
+                }
+
+                installmentModalState.mode = 'details';
+                renderInstallmentModal();
+            } catch (error) {
+                console.error('Erro ao estornar pagamento:', error);
+                showMessage('Erro de conexao ao estornar pagamento.', 'error');
+                installmentModalState.isSubmitting = false;
+                renderInstallmentModal();
+            }
+        }
+
+        async function submitInstallmentDeleteFromModal() {
+            const installment = getSelectedInstallment();
+            if (!installment) {
+                showMessage('Parcela nao encontrada.', 'error');
+                closeInstallmentModal();
+                return;
+            }
+
+            const status = normalizeInstallmentStatus(installment);
+            if (status === 'Pago') {
+                showMessage('Parcela paga deve ser estornada antes da exclusao.', 'error');
+                setInstallmentModalMode('refund');
+                return;
+            }
+
+            const impact = getDeleteImpact(installment);
+            if (impact.isOnlyInstallment) {
+                showMessage('Este emprestimo possui apenas uma parcela. Exclua o emprestimo inteiro.', 'error');
+                return;
+            }
+
+            const numericInstallmentId = toNumber(installment.id);
+            if (numericInstallmentId <= 0) {
+                showMessage('Parcela invalida para exclusao.', 'error');
+                return;
+            }
+
+            installmentModalState.isSubmitting = true;
+            renderInstallmentModal();
+
+            try {
+                const response = await fetch(`/api/payments/installments/${numericInstallmentId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const apiMessage = await extractApiErrorMessage(response, 'Nao foi possivel excluir a parcela.');
+                    showMessage(apiMessage, 'error');
+                    installmentModalState.isSubmitting = false;
+                    renderInstallmentModal();
+                    return;
+                }
+
+                showMessage('Parcela excluida com sucesso!', 'success');
+                await loadInstallmentsData({ silent: true, preservePage: true });
+                closeInstallmentModal();
+            } catch (error) {
+                console.error('Erro ao excluir parcela:', error);
+                showMessage('Erro de conexao ao excluir parcela.', 'error');
+                installmentModalState.isSubmitting = false;
+                renderInstallmentModal();
+            }
+        }
+
+        async function deleteInstallment(installmentId) {
+            openInstallmentModal(installmentId, 'confirmDelete');
+        }
+
         sidebarToggle.addEventListener('click', function() {
             if (isMobileViewport()) {
                 sidebar.classList.toggle('mobile-open');
@@ -2270,13 +2570,6 @@
         document.getElementById('closeNotificationModalBtn').addEventListener('click', () => closeModal(notificationModal));
         document.getElementById('cancelNotificationBtn').addEventListener('click', () => closeModal(notificationModal));
 
-        document.getElementById('paymentForm').addEventListener('submit', registerInstallmentPayment);
-        document.getElementById('closePaymentModalBtn').addEventListener('click', () => closeModal(paymentModal));
-        document.getElementById('cancelPaymentBtn').addEventListener('click', () => closeModal(paymentModal));
-        document.getElementById('actionConfirmCloseBtn').addEventListener('click', () => closeActionConfirm(false));
-        document.getElementById('actionConfirmCancelBtn').addEventListener('click', () => closeActionConfirm(false));
-        if (actionConfirmBtn) actionConfirmBtn.addEventListener('click', () => closeActionConfirm(true));
-
         function handleInstallmentsListClick(event) {
             const target = event.target;
             if (!(target instanceof Element)) return;
@@ -2293,20 +2586,6 @@
                     openInstallmentDetails(installmentId);
                     return;
                 }
-
-                if (action === 'pay-installment') {
-                    openPaymentModal(installmentId);
-                    return;
-                }
-
-                if (action === 'quick-pay-installment') {
-                    quickMarkInstallmentAsPaid(installmentId);
-                    return;
-                }
-
-                if (action === 'undo-payment') {
-                    undoInstallmentPayment(installmentId);
-                }
                 return;
             }
 
@@ -2319,25 +2598,61 @@
         if (installmentsTableBody) installmentsTableBody.addEventListener('click', handleInstallmentsListClick);
         if (installmentsMobileList) installmentsMobileList.addEventListener('click', handleInstallmentsListClick);
 
-        document.getElementById('installmentDetailsContent').addEventListener('click', function(event) {
-            const target = event.target;
-            if (!(target instanceof Element)) return;
-            const actionBtn = target.closest('button[data-action]');
-            if (!actionBtn) return;
+        if (installmentModalContent) {
+            installmentModalContent.addEventListener('click', function(event) {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const actionBtn = target.closest('button[data-action]');
+                if (!actionBtn) return;
 
-            const action = actionBtn.getAttribute('data-action');
-            const installmentId = actionBtn.getAttribute('data-id');
+                const action = actionBtn.getAttribute('data-action');
 
-            if (action === 'drawer-pay-installment') {
-                openPaymentModal(installmentId);
-                return;
-            }
+                if (action === 'modal-go-payment') {
+                    setInstallmentModalMode('payment');
+                    return;
+                }
 
-            if (action === 'drawer-quick-pay-installment') {
-                quickMarkInstallmentAsPaid(installmentId);
-                return;
-            }
-        });
+                if (action === 'modal-go-refund') {
+                    setInstallmentModalMode('refund');
+                    return;
+                }
+
+                if (action === 'modal-go-delete') {
+                    setInstallmentModalMode('confirmDelete');
+                    return;
+                }
+
+                if (action === 'modal-back-details') {
+                    setInstallmentModalMode('details');
+                    return;
+                }
+
+                if (action === 'modal-close') {
+                    closeInstallmentModal();
+                    return;
+                }
+            });
+
+            installmentModalContent.addEventListener('submit', async function(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLFormElement)) return;
+                event.preventDefault();
+
+                if (target.id === 'installmentPaymentForm') {
+                    await submitInstallmentPaymentFromModal();
+                    return;
+                }
+
+                if (target.id === 'installmentRefundForm') {
+                    await submitInstallmentRefundFromModal();
+                    return;
+                }
+
+                if (target.id === 'installmentDeleteForm') {
+                    await submitInstallmentDeleteFromModal();
+                }
+            });
+        }
 
         document.getElementById('prevPageBtn').addEventListener('click', function () {
             if (installmentsState.currentPage <= 1) return;
@@ -2352,28 +2667,29 @@
             renderInstallmentsTable();
         });
 
-        [paymentModal, notificationModal].forEach(modal => {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) closeModal(modal);
-            });
-        });
-        if (actionConfirmModal) {
-            actionConfirmModal.addEventListener('click', function(event) {
-                if (event.target === actionConfirmModal) closeActionConfirm(false);
+        if (notificationModal) {
+            notificationModal.addEventListener('click', function(event) {
+                if (event.target === notificationModal) closeModal(notificationModal);
             });
         }
 
-        installmentDetailsDrawer.addEventListener('click', function(event) {
-            if (event.target === installmentDetailsDrawer) closeInstallmentDetails();
-        });
-        document.getElementById('closeInstallmentDetailsBtn').addEventListener('click', closeInstallmentDetails);
+        if (installmentModal) {
+            installmentModal.addEventListener('click', function(event) {
+                if (event.target === installmentModal) closeInstallmentModal();
+            });
+        }
+
+        if (closeInstallmentModalBtn) {
+            closeInstallmentModalBtn.addEventListener('click', function() {
+                closeInstallmentModal();
+            });
+        }
 
         document.addEventListener('keydown', function(event) {
+            trapFocusWithinInstallmentModal(event);
             if (event.key !== 'Escape') return;
-            if (!actionConfirmModal.classList.contains('hidden')) closeActionConfirm(false);
-            if (!paymentModal.classList.contains('hidden')) closeModal(paymentModal);
-            if (!notificationModal.classList.contains('hidden')) closeModal(notificationModal);
-            if (!installmentDetailsDrawer.classList.contains('hidden')) closeInstallmentDetails();
+            if (isModalVisible(notificationModal)) closeModal(notificationModal);
+            if (installmentModalState.isOpen) closeInstallmentModal();
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -2386,11 +2702,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
 
 
 

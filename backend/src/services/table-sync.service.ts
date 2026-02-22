@@ -73,6 +73,21 @@ function toIsoDate(value: Date | string | null | undefined): string | null {
   return date.toISOString().slice(0, 10);
 }
 
+function sameDateOnly(left: Date | string | null | undefined, right: Date | string | null | undefined): boolean {
+  return toIsoDate(left) === toIsoDate(right);
+}
+
+function sameMoney(left: unknown, right: unknown): boolean {
+  return Math.abs(toSafeNumber(left) - toSafeNumber(right)) <= 0.01;
+}
+
+function sameNullableMoney(left: unknown, right: unknown): boolean {
+  const leftEmpty = left === null || left === undefined || left === "";
+  const rightEmpty = right === null || right === undefined || right === "";
+  if (leftEmpty || rightEmpty) return leftEmpty === rightEmpty;
+  return sameMoney(left, right);
+}
+
 function asRows(rows: unknown[]): RawRow[] {
   return rows.filter((row): row is RawRow => Boolean(row && typeof row === "object"));
 }
@@ -478,6 +493,67 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
 
       const ids = normalized.map((row) => row.id);
       await ensureRowsOwnedByUser(tx, "loans", ids, ownerUserId);
+
+      const paidLoanRows = await tx.installment.findMany({
+        where: {
+          ownerUserId,
+          status: InstallmentStatus.PAGO,
+        },
+        select: { loanId: true },
+        distinct: ["loanId"],
+      });
+      const paidLoanIds = [...new Set(paidLoanRows.map((item) => item.loanId))];
+
+      if (paidLoanIds.length > 0) {
+        const normalizedById = new Map(normalized.map((row) => [row.id, row]));
+        const missingPaidLoan = paidLoanIds.find((loanId) => !normalizedById.has(loanId));
+        if (missingPaidLoan) {
+          throw new AppError("Nao e permitido excluir emprestimo com parcela paga. Estorne os pagamentos antes de editar ou excluir.", 400);
+        }
+
+        const persistedPaidLoans = await tx.loan.findMany({
+          where: {
+            ownerUserId,
+            id: { in: paidLoanIds },
+          },
+          select: {
+            id: true,
+            clientId: true,
+            principalAmount: true,
+            totalAmount: true,
+            installmentsCount: true,
+            interestRate: true,
+            interestType: true,
+            installmentAmount: true,
+            paymentMethod: true,
+            startDate: true,
+            firstDueDate: true,
+            dueDate: true,
+          },
+        });
+
+        for (const persistedLoan of persistedPaidLoans) {
+          const nextLoan = normalizedById.get(persistedLoan.id);
+          if (!nextLoan) continue;
+
+          const unchanged = nextLoan.clientId === persistedLoan.clientId
+            && sameMoney(nextLoan.principalAmount, persistedLoan.principalAmount)
+            && sameMoney(nextLoan.totalAmount, persistedLoan.totalAmount)
+            && nextLoan.installmentsCount === persistedLoan.installmentsCount
+            && sameMoney(nextLoan.interestRate, persistedLoan.interestRate)
+            && nextLoan.interestType === persistedLoan.interestType
+            && sameNullableMoney(nextLoan.installmentAmount, persistedLoan.installmentAmount)
+            && nextLoan.paymentMethod === persistedLoan.paymentMethod
+            && sameDateOnly(nextLoan.startDate, persistedLoan.startDate)
+            && sameDateOnly(nextLoan.firstDueDate, persistedLoan.firstDueDate)
+            && sameDateOnly(nextLoan.dueDate, persistedLoan.dueDate);
+
+          if (!unchanged) {
+            throw new AppError("Nao e permitido editar emprestimo com parcela paga. Estorne os pagamentos antes de editar.", 400);
+          }
+        }
+      }
+
       if (ids.length > 0) {
         await tx.loan.deleteMany({
           where: {
@@ -587,6 +663,55 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
 
     const ids = normalized.map((row) => row.id);
     await ensureRowsOwnedByUser(tx, "installments", ids, ownerUserId);
+
+    const persistedPaidInstallments = await tx.installment.findMany({
+      where: {
+        ownerUserId,
+        status: InstallmentStatus.PAGO,
+      },
+      select: {
+        id: true,
+        loanId: true,
+        clientId: true,
+        installmentNumber: true,
+        dueDate: true,
+        paymentDate: true,
+        amount: true,
+        principalAmount: true,
+        interestAmount: true,
+        status: true,
+        paymentMethod: true,
+        notes: true,
+      },
+    });
+
+    if (persistedPaidInstallments.length > 0) {
+      const normalizedById = new Map(normalized.map((row) => [row.id, row]));
+
+      for (const persistedInstallment of persistedPaidInstallments) {
+        const nextInstallment = normalizedById.get(persistedInstallment.id);
+        if (!nextInstallment) {
+          throw new AppError("Nao e permitido excluir parcela paga. Estorne o pagamento antes de editar ou excluir.", 400);
+        }
+
+        const unchanged = nextInstallment.loanId === persistedInstallment.loanId
+          && nextInstallment.clientId === persistedInstallment.clientId
+          && nextInstallment.installmentNumber === persistedInstallment.installmentNumber
+          && sameDateOnly(nextInstallment.dueDate, persistedInstallment.dueDate)
+          && sameDateOnly(nextInstallment.paymentDate, persistedInstallment.paymentDate)
+          && sameMoney(nextInstallment.amount, persistedInstallment.amount)
+          && sameNullableMoney(nextInstallment.principalAmount, persistedInstallment.principalAmount)
+          && sameNullableMoney(nextInstallment.interestAmount, persistedInstallment.interestAmount)
+          && nextInstallment.status === persistedInstallment.status
+          && (nextInstallment.paymentMethod ?? null) === (persistedInstallment.paymentMethod ?? null)
+          && normalizeText(nextInstallment.notes) === normalizeText(persistedInstallment.notes);
+
+        if (!unchanged) {
+          throw new AppError("Nao e permitido editar parcela paga. Estorne o pagamento antes de alterar o emprestimo.", 400);
+        }
+      }
+    }
+
     if (ids.length > 0) {
       await tx.installment.deleteMany({
         where: {
