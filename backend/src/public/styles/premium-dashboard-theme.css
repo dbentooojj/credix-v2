@@ -347,6 +347,25 @@ body.dashboard-premium {
   background: var(--surface-0) !important;
 }
 
+html:not(.dark) body.dashboard-premium main .chart-controls.bg-slate-50 {
+  background: rgba(17, 24, 39, 0.62) !important;
+  border-color: var(--border-soft) !important;
+}
+
+html:not(.dark) body.dashboard-premium main .chart-summary-strip.bg-slate-50 {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.12) 100%) !important;
+  border-color: rgba(129, 140, 248, 0.36) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-premium .chart-summary-strip #chartReceivedMonthValue {
+  color: #f8fafc !important;
+}
+
+.dashboard-premium .chart-summary-strip #chartReceivedMoMValue.chart-delta-neutral {
+  color: #e2e8f0 !important;
+}
+
 .dashboard-premium .border-gray-100,
 .dashboard-premium .border-gray-200,
 .dashboard-premium .border-gray-300,
