@@ -1469,22 +1469,22 @@
             const view = dashboardState.chartView === 'stacked' ? 'stacked' : 'line';
             const isStacked = view === 'stacked';
             const toGlowColor = (color) => {
-                if (typeof color !== 'string') return 'rgba(99, 102, 241, 0.35)';
+                if (typeof color !== 'string') return 'rgba(99, 102, 241, 0.24)';
                 if (color.startsWith('#')) {
                     const hex = color.replace('#', '');
                     const fullHex = hex.length === 3 ? hex.split('').map((part) => `${part}${part}`).join('') : hex;
                     const r = Number.parseInt(fullHex.slice(0, 2), 16);
                     const g = Number.parseInt(fullHex.slice(2, 4), 16);
                     const b = Number.parseInt(fullHex.slice(4, 6), 16);
-                    if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) return `rgba(${r}, ${g}, ${b}, 0.35)`;
-                    return 'rgba(99, 102, 241, 0.35)';
+                    if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) return `rgba(${r}, ${g}, ${b}, 0.24)`;
+                    return 'rgba(99, 102, 241, 0.24)';
                 }
-                if (color.startsWith('rgb(')) return color.replace('rgb(', 'rgba(').replace(')', ', 0.35)');
+                if (color.startsWith('rgb(')) return color.replace('rgb(', 'rgba(').replace(')', ', 0.24)');
                 if (color.startsWith('rgba(')) {
                     const parts = color.slice(5, -1).split(',').map((part) => part.trim());
-                    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, 0.35)`;
+                    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, 0.24)`;
                 }
-                return 'rgba(99, 102, 241, 0.35)';
+                return 'rgba(99, 102, 241, 0.24)';
             };
             const chartLineGlowPlugin = {
                 id: 'chartLineGlowPlugin',
@@ -1493,7 +1493,7 @@
                     const dataset = chart.data.datasets?.[args.index];
                     if (!dataset) return;
                     chart.ctx.save();
-                    chart.ctx.shadowBlur = 8;
+                    chart.ctx.shadowBlur = 5;
                     chart.ctx.shadowOffsetX = 0;
                     chart.ctx.shadowOffsetY = 0;
                     chart.ctx.shadowColor = toGlowColor(dataset.borderColor);
@@ -1539,7 +1539,7 @@
                         label: 'Atraso',
                         data: overdueValues,
                         borderColor: '#F87171',
-                        backgroundColor: 'rgba(248, 113, 113, 0.16)',
+                        backgroundColor: 'rgba(248, 113, 113, 0.14)',
                         borderWidth: 2,
                         fill: true,
                         pointRadius: 2.5,
@@ -1550,7 +1550,7 @@
                         label: 'Recebido',
                         data: receivedValues,
                         borderColor: '#6366F1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.16)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
                         borderWidth: 2,
                         fill: true,
                         pointRadius: 2.5,
@@ -1561,7 +1561,7 @@
                         label: 'Em aberto',
                         data: openValues,
                         borderColor: '#06B6D4',
-                        backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                        backgroundColor: 'rgba(6, 182, 212, 0.14)',
                         borderWidth: 2,
                         fill: true,
                         pointRadius: 2.5,
@@ -1596,10 +1596,10 @@
                             },
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(8, 12, 22, 0.96)',
+                            backgroundColor: 'rgba(9, 14, 26, 0.96)',
                             titleColor: '#E5E7EB',
-                            bodyColor: '#D1D5DB',
-                            borderColor: 'rgba(255, 255, 255, 0.10)',
+                            bodyColor: '#C7D2E0',
+                            borderColor: 'rgba(255, 255, 255, 0.14)',
                             borderWidth: 1,
                             padding: 10,
                             displayColors: true,
@@ -1611,9 +1611,9 @@
                     scales: {
                         x: {
                             stacked: isStacked,
-                            ticks: { color: '#9CA3AF' },
+                            ticks: { color: '#A3AEC0' },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
+                                color: 'rgba(255, 255, 255, 0.06)',
                                 drawBorder: false,
                             },
                         },
@@ -1621,11 +1621,11 @@
                             beginAtZero: true,
                             stacked: isStacked,
                             ticks: {
-                                color: '#9CA3AF',
+                                color: '#A3AEC0',
                                 callback: (value) => formatCurrency(Number(value)),
                             },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
+                                color: 'rgba(255, 255, 255, 0.06)',
                                 drawBorder: false,
                             },
                         },
@@ -1668,7 +1668,7 @@
                                     <p class="font-semibold text-gray-800">${formatCurrency(item.amount)}</p>
                                     <span class="status-pill mt-1 inline-flex ${statusClass}">${item.statusLabel}</span>
                                 </div>
-                                <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn bg-emerald-600 text-white self-center"><i class="fas fa-check mr-1"></i>Pagar</button>
+                                <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn overdue-pay-btn self-center">Pagar<i class="fas fa-check ml-1"></i></button>
                             </div>
                         </div>
                     </article>
@@ -1713,7 +1713,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn overdue-charge-btn"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>
-                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn overdue-pay-btn"><i class="fas fa-check mr-1"></i>Pagar</button>
+                            <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn overdue-pay-btn">Pagar<i class="fas fa-check ml-1"></i></button>
                         </div>
                     </article>
                 `;

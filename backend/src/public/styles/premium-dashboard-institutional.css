@@ -1,7 +1,7 @@
 .dashboard-premium.dashboard-financial {
   --inst-text-primary: #E5E7EB;
-  --inst-text-secondary: #A7B0C0;
-  --inst-text-muted: #7B869B;
+  --inst-text-secondary: #AFB9C8;
+  --inst-text-muted: #8792A6;
 }
 
 .dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert {
@@ -30,7 +30,9 @@
 .dashboard-premium.dashboard-financial .muted-on-dark,
 .dashboard-premium.dashboard-financial .text-xs.text-gray-500,
 .dashboard-premium.dashboard-financial .text-xs.text-slate-500,
-.dashboard-premium.dashboard-financial .text-sm.text-gray-500 {
+.dashboard-premium.dashboard-financial .text-sm.text-gray-500,
+.dashboard-premium.dashboard-financial .text-xs.text-slate-400,
+.dashboard-premium.dashboard-financial .text-xs.text-gray-400 {
   color: var(--inst-text-secondary) !important;
 }
 
@@ -42,9 +44,7 @@
 
 .dashboard-premium.dashboard-financial {
   --inst-surface-base: rgba(255, 255, 255, 0.045);
-  --inst-surface-hover: rgba(255, 255, 255, 0.065);
   --inst-border: rgba(255, 255, 255, 0.10);
-  --inst-border-hover: rgba(255, 255, 255, 0.18);
   --inst-shadow-card: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -57,18 +57,39 @@
   border-radius: 17px !important;
   border-color: var(--inst-border) !important;
   box-shadow: var(--inst-shadow-card) !important;
-  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), border-color 160ms cubic-bezier(.2, .8, .2, 1), background-color 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1) !important;
+  transition: none !important;
 }
 
-.dashboard-premium.dashboard-financial .premium-card:hover,
-.dashboard-premium.dashboard-financial .glass-card:hover,
-.dashboard-premium.dashboard-financial .kpi-card:hover,
+.dashboard-premium.dashboard-financial .premium-card:not(.kpi-card):hover,
+.dashboard-premium.dashboard-financial .glass-card:not(.kpi-card):hover,
 .dashboard-premium.dashboard-financial .summary-link:hover,
-.dashboard-premium.dashboard-financial .upcoming-item:hover {
-  transform: translateY(-2px) !important;
-  background: var(--inst-surface-hover) !important;
-  border-color: var(--inst-border-hover) !important;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+.dashboard-premium.dashboard-financial .upcoming-item:hover,
+.dashboard-premium.dashboard-financial .kpi-card:not(.kpi-primary-brand):not(.kpi-primary-alert):not(.kpi-primary-positive):hover {
+  transform: none !important;
+  background: var(--inst-surface-base) !important;
+  border-color: var(--inst-border) !important;
+  box-shadow: var(--inst-shadow-card) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-brand:hover {
+  transform: none !important;
+  background: linear-gradient(135deg, rgba(74, 78, 151, 0.56), rgba(92, 76, 152, 0.46)) !important;
+  border-color: rgba(129, 140, 248, 0.32) !important;
+  box-shadow: var(--inst-shadow-card) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-positive:hover {
+  transform: none !important;
+  background: linear-gradient(135deg, rgba(22, 112, 103, 0.5), rgba(12, 100, 117, 0.36)) !important;
+  border-color: rgba(6, 182, 212, 0.24) !important;
+  box-shadow: var(--inst-shadow-card) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-alert:hover {
+  transform: none !important;
+  background: linear-gradient(135deg, #3B0F19, #2A0D14) !important;
+  border-color: rgba(244, 63, 94, 0.30) !important;
+  box-shadow: var(--inst-shadow-card) !important;
 }
 
 .dashboard-premium.dashboard-financial .kpi-card {
@@ -82,8 +103,8 @@
 }
 
 .dashboard-premium.dashboard-financial .kpi-card.kpi-primary-positive {
-  background: linear-gradient(135deg, rgba(22, 124, 113, 0.54), rgba(7, 124, 146, 0.4)) !important;
-  border-color: rgba(6, 182, 212, 0.28) !important;
+  background: linear-gradient(135deg, rgba(22, 112, 103, 0.5), rgba(12, 100, 117, 0.36)) !important;
+  border-color: rgba(6, 182, 212, 0.24) !important;
 }
 
 .dashboard-premium.dashboard-financial .kpi-card:not(.kpi-primary-brand):not(.kpi-primary-alert):not(.kpi-primary-positive) {
@@ -119,13 +140,20 @@
   border-radius: 14px !important;
 }
 
+.dashboard-premium.dashboard-financial #overdueList .overdue-item:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: none !important;
+}
+
 .dashboard-premium.dashboard-financial #overdueList .status-pill.status-red {
   background: rgba(244, 63, 94, 0.15) !important;
   color: #F87171 !important;
   border: 1px solid rgba(244, 63, 94, 0.30) !important;
 }
 
-.dashboard-premium.dashboard-financial #overdueList .quick-action-btn {
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn,
+.dashboard-premium.dashboard-financial #upcomingList .quick-action-btn.overdue-pay-btn {
   border-radius: 12px !important;
   font-weight: 600;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
@@ -137,16 +165,26 @@
   color: #f5d9bf !important;
 }
 
-.dashboard-premium.dashboard-financial #overdueList .quick-action-btn.overdue-pay-btn {
+.dashboard-premium.dashboard-financial #overdueList .quick-action-btn.overdue-pay-btn,
+.dashboard-premium.dashboard-financial #upcomingList .quick-action-btn.overdue-pay-btn {
   border: 1px solid rgba(16, 185, 129, 0.32) !important;
   background: linear-gradient(135deg, rgba(24, 88, 78, 0.86), rgba(23, 74, 88, 0.82)) !important;
   color: #d3f3eb !important;
 }
 
+.dashboard-premium.dashboard-financial .quick-action-btn:hover,
+.dashboard-premium.dashboard-financial #confirmPaymentBtn:hover,
 .dashboard-premium.dashboard-financial #overdueList .quick-action-btn:hover {
-  transform: translateY(-1px) !important;
-  filter: brightness(1.03);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+  transform: none !important;
+  filter: none !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32) !important;
+}
+
+.dashboard-premium.dashboard-financial #chartTypeLineBtn.is-active,
+.dashboard-premium.dashboard-financial #chartTypeStackedBtn.is-active {
+  border-color: rgba(129, 140, 248, 0.44) !important;
+  background: linear-gradient(135deg, rgba(88, 95, 196, 0.8), rgba(110, 88, 198, 0.72)) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.18) !important;
 }
 
 .dashboard-premium.dashboard-financial .text-sm.text-slate-400,
