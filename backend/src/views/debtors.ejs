@@ -259,7 +259,7 @@
         .badge-success { background: #d1fae5; color: #065f46; border: 1px solid #86efac; }
         .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .badge-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-neutral { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; font-weight: 600; }
 
         .app-toast {
             position: fixed;
@@ -432,102 +432,11 @@
             background: #fffbeb !important;
             border-color: #fcd34d !important;
         }
-        /* Premium DS v1 - light skin */
-        :root {
-            --premium-bg: #121b2a;
-            --premium-sidebar: #13203a;
-            --premium-card: #E3E9F2;
-            --premium-positive: #16A34A;
-            --premium-negative: #DC2626;
-            --premium-accent: #1E40AF;
-            --premium-radius: 16px;
-            --premium-shadow-soft: 0 4px 12px rgba(2, 12, 27, 0.08);
-        }
-
-        html, body {
-            background-color: var(--premium-bg);
-        }
-
-        .primary-gradient {
-            background:
-                radial-gradient(900px 320px at -10% -10%, rgba(30, 64, 175, 0.18), transparent 60%),
-                var(--premium-bg);
-        }
-
-        .premium-header {
-            background: rgba(18, 27, 42, 0.88);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.24);
-            backdrop-filter: blur(8px);
-        }
-
-        .modern-sidebar {
-            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
-            border-right: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .sidebar-item.active {
-            background: linear-gradient(135deg, #1B3D8F 0%, #234EA8 100%);
-        }
-
-        .glass-card,
-        .kpi-card,
-        .summary-link,
-        .modal-panel,
-        .modal-content {
-            background: var(--premium-card);
-            border-radius: var(--premium-radius);
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            box-shadow: var(--premium-shadow-soft);
-        }
-
-        .rounded-2xl {
-            border-radius: var(--premium-radius);
-        }
-
-        .badge,
-        .status-pill {
-            border-radius: 999px;
-            font-weight: 700;
-            border: 1px solid transparent;
-        }
-
-        .badge-success,
-        .status-green {
-            background: rgba(22, 163, 74, 0.14);
-            color: var(--premium-positive);
-            border-color: rgba(22, 163, 74, 0.34);
-        }
-
-        .badge-danger,
-        .status-red {
-            background: rgba(220, 38, 38, 0.12);
-            color: var(--premium-negative);
-            border-color: rgba(220, 38, 38, 0.36);
-        }
-
-        .badge-warn,
-        .status-yellow {
-            background: rgba(245, 158, 11, 0.16);
-            color: #b45309;
-            border-color: rgba(245, 158, 11, 0.35);
-        }
-
-        .notification-badge,
-        .btn-primary,
-        .action-primary {
-            background: var(--premium-accent);
-        }
-        html:not(.dark) main .bg-white { background-color: #e3e9f2 !important; }
-        html:not(.dark) main .bg-slate-50 { background-color: #d9e1ec !important; }
-        html:not(.dark) main .border-gray-200,
-        html:not(.dark) main .border-gray-300,
-        html:not(.dark) main .border-slate-200,
-        html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
-        html:not(.dark) main .hover\\:bg-gray-50:hover,
-        html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
 </style>
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
+    <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css">
 </head>
-<body class="primary-gradient min-h-screen">
+<body class="dashboard-premium dashboard-debtors primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -592,8 +501,8 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+            <div class="clients-kpi-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
                     <div class="relative flex items-start justify-between">
                         <div>
@@ -606,7 +515,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
                     <div class="relative flex items-start justify-between">
                         <div>
@@ -619,7 +528,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
                     <div class="relative flex items-start justify-between">
                         <div>
@@ -632,7 +541,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
+                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
                     <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
                     <div class="relative flex items-start justify-between">
                         <div>
@@ -647,15 +556,15 @@
                 </div>
             </div>
 
-            <div class="clients-data-panel rounded-2xl p-4 sm:p-5 lg:p-6">
+            <div class="clients-data-panel surface rounded-2xl p-4 sm:p-5 lg:p-6">
                 <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
                     <div class="md:col-span-4">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Buscar</label>
-                        <input id="debtorSearch" type="text" class="filter-control text-sm" placeholder="Nome, telefone ou documento">
+                        <input id="debtorSearch" type="text" class="filter-control input-shell text-sm" placeholder="Nome, telefone ou documento">
                     </div>
                     <div class="md:col-span-3">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Status</label>
-                        <select id="statusFilter" class="filter-control text-sm">
+                        <select id="statusFilter" class="filter-control input-shell text-sm">
                             <option value="Todos">Todos</option>
                             <option value="Ativo">Ativo</option>
                             <option value="Inativo">Inativo</option>
@@ -665,7 +574,7 @@
                     </div>
                     <div class="md:col-span-3">
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Ordenar por</label>
-                        <select id="sortBy" class="filter-control text-sm">
+                        <select id="sortBy" class="filter-control input-shell text-sm">
                             <option value="name">Nome</option>
                             <option value="document">Documento</option>
                             <option value="phone">Telefone</option>
@@ -764,34 +673,34 @@
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div class="md:col-span-2">
                                 <label class="mb-1 block text-sm text-gray-600">Nome*</label>
-                                <input id="newDebtorName" class="filter-control" type="text" autocomplete="name" placeholder="Nome completo" required>
+                                <input id="newDebtorName" class="filter-control input-shell" type="text" autocomplete="name" placeholder="Nome completo" required>
                                 <p id="newDebtorNameError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm text-gray-600">Telefone/WhatsApp*</label>
-                                <input id="newDebtorPhone" class="filter-control" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
+                                <input id="newDebtorPhone" class="filter-control input-shell" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
                                 <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm text-gray-600">CPF (opcional)</label>
-                                <input id="newDebtorCpf" class="filter-control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
+                                <input id="newDebtorCpf" class="filter-control input-shell" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
                                 <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm text-gray-600">E-mail (opcional)</label>
-                                <input id="newDebtorEmail" class="filter-control" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
+                                <input id="newDebtorEmail" class="filter-control input-shell" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
                                 <p id="newDebtorEmailError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm text-gray-600">Status</label>
-                                <select id="newDebtorStatus" class="filter-control">
+                                <select id="newDebtorStatus" class="filter-control input-shell">
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo">Inativo</option>
                                 </select>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="mb-1 block text-sm text-gray-600">Endereço (opcional)</label>
-                                <input id="newDebtorAddress" class="filter-control" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+                                <input id="newDebtorAddress" class="filter-control input-shell" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-3 pt-2">
@@ -829,16 +738,16 @@
                     <form id="registerPaymentForm" class="space-y-4">
                         <div>
                             <label for="registerPaymentAmount" class="mb-1 block text-sm text-gray-600">Valor (R$)</label>
-                            <input id="registerPaymentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control" required placeholder="0,00">
+                            <input id="registerPaymentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control input-shell" required placeholder="0,00">
                         </div>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label for="registerPaymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
-                                <input id="registerPaymentDate" type="date" class="filter-control" required>
+                                <input id="registerPaymentDate" type="date" class="filter-control input-shell" required>
                             </div>
                             <div>
                                 <label for="registerPaymentMethod" class="mb-1 block text-sm text-gray-600">Forma</label>
-                                <select id="registerPaymentMethod" class="filter-control" required>
+                                <select id="registerPaymentMethod" class="filter-control input-shell" required>
                                     <option value="PIX">PIX</option>
                                     <option value="DINHEIRO">Dinheiro</option>
                                     <option value="TRANSFERENCIA">Transferência</option>
@@ -1488,8 +1397,10 @@
         }
 
         function getDebtorRegistrationStatus(debtor) {
-            const base = normalizeEditableClientStatus(debtor?.status);
-            return base === 'Inativo' ? 'Inativo' : 'Ativo';
+            const base = String(normalizeEditableClientStatus(debtor?.status) || '').trim().toLowerCase();
+            if (base === 'inativo') return 'Inativo';
+            if (base === 'ativo') return 'Ativo';
+            return 'Inativo';
         }
 
         function getDebtorFinancialSituation(debtor) {
@@ -2088,11 +1999,12 @@
         }
 
         function badgeForStatus(status) {
-            if (status === 'Ativo') return 'badge badge-success';
-            if (status === 'Atrasado') return 'badge badge-danger';
-            if (status === 'Quitado') return 'badge badge-success';
-            if (status === 'Inativo') return 'badge badge-neutral';
-            return 'badge badge-warn';
+            const normalized = String(status || '').trim().toLowerCase();
+            if (normalized === 'ativo') return 'badge badge-success';
+            if (normalized === 'atrasado') return 'badge badge-danger';
+            if (normalized === 'quitado') return 'badge badge-success';
+            if (normalized === 'inativo') return 'badge badge-neutral';
+            return 'badge badge-neutral';
         }
 
         function getDebtorScoreBadgeModel(scoreData) {

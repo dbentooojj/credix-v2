@@ -191,3 +191,76 @@
 .dashboard-premium.dashboard-financial #lastRefresh {
   color: var(--inst-text-muted) !important;
 }
+
+/* Clients page - institutional alignment */
+.dashboard-premium.dashboard-debtors {
+  --clients-surface: rgba(255, 255, 255, 0.04);
+  --clients-surface-soft: rgba(255, 255, 255, 0.03);
+  --clients-border: rgba(255, 255, 255, 0.08);
+  --clients-border-strong: rgba(255, 255, 255, 0.14);
+  --clients-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --clients-text-primary: #E5E7EB;
+  --clients-text-secondary: #A7B0C0;
+  --clients-text-muted: #7B869B;
+}
+
+.dashboard-premium.dashboard-debtors .page-title {
+  color: var(--clients-text-primary) !important;
+}
+
+.dashboard-premium.dashboard-debtors .muted-on-dark {
+  color: var(--clients-text-secondary) !important;
+}
+
+.dashboard-premium.dashboard-debtors #newDebtorBtn {
+  border: 1px solid rgba(129, 140, 248, 0.52) !important;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.92), rgba(139, 92, 246, 0.86)) !important;
+  color: #eef2ff !important;
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.24);
+  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1), filter 160ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.dashboard-premium.dashboard-debtors #newDebtorBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 14px 28px rgba(99, 102, 241, 0.3);
+}
+
+.dashboard-premium.dashboard-debtors .clients-kpi-grid > div {
+  background: var(--clients-surface) !important;
+  border: 1px solid var(--clients-border) !important;
+  border-radius: 17px !important;
+  box-shadow: var(--clients-shadow) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-kpi-grid > div p.text-xs {
+  color: var(--clients-text-muted) !important;
+}
+
+.dashboard-premium.dashboard-debtors #totalDebtors,
+.dashboard-premium.dashboard-debtors #inactiveDebtors {
+  color: var(--clients-text-primary) !important;
+}
+
+.dashboard-premium.dashboard-debtors #activeDebtors {
+  color: #4AB89D !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-kpi-grid > div:nth-child(4) {
+  background: linear-gradient(135deg, rgba(78, 48, 24, 0.62), rgba(56, 36, 23, 0.54)) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+.dashboard-premium.dashboard-debtors #overdueDebtors {
+  color: #E5B07A !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-kpi-grid .kpi-insight-line {
+  color: var(--clients-text-secondary) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-kpi-grid > div .inline-flex.h-10.w-10 {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94A3B8 !important;
+}
