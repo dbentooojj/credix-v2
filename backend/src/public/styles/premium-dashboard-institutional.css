@@ -39,3 +39,63 @@
 .dashboard-premium.dashboard-financial .text-slate-900 {
   color: var(--inst-text-primary) !important;
 }
+
+.dashboard-premium.dashboard-financial {
+  --inst-surface-base: rgba(255, 255, 255, 0.045);
+  --inst-surface-hover: rgba(255, 255, 255, 0.065);
+  --inst-border: rgba(255, 255, 255, 0.10);
+  --inst-border-hover: rgba(255, 255, 255, 0.18);
+  --inst-shadow-card: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-premium.dashboard-financial .premium-card,
+.dashboard-premium.dashboard-financial .glass-card,
+.dashboard-premium.dashboard-financial .kpi-card,
+.dashboard-premium.dashboard-financial .summary-link,
+.dashboard-premium.dashboard-financial .upcoming-item,
+.dashboard-premium.dashboard-financial .chart-container {
+  border-radius: 17px !important;
+  border-color: var(--inst-border) !important;
+  box-shadow: var(--inst-shadow-card) !important;
+  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), border-color 160ms cubic-bezier(.2, .8, .2, 1), background-color 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms cubic-bezier(.2, .8, .2, 1) !important;
+}
+
+.dashboard-premium.dashboard-financial .premium-card:hover,
+.dashboard-premium.dashboard-financial .glass-card:hover,
+.dashboard-premium.dashboard-financial .kpi-card:hover,
+.dashboard-premium.dashboard-financial .summary-link:hover,
+.dashboard-premium.dashboard-financial .upcoming-item:hover {
+  transform: translateY(-2px) !important;
+  background: var(--inst-surface-hover) !important;
+  border-color: var(--inst-border-hover) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card {
+  padding: 22px !important;
+  background: var(--inst-surface-base) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-brand {
+  background: linear-gradient(135deg, rgba(74, 78, 151, 0.56), rgba(92, 76, 152, 0.46)) !important;
+  border-color: rgba(129, 140, 248, 0.32) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card.kpi-primary-positive {
+  background: linear-gradient(135deg, rgba(22, 124, 113, 0.54), rgba(7, 124, 146, 0.4)) !important;
+  border-color: rgba(6, 182, 212, 0.28) !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card:not(.kpi-primary-brand):not(.kpi-primary-alert):not(.kpi-primary-positive) {
+  background: var(--inst-surface-base) !important;
+}
+
+.dashboard-premium.dashboard-financial .premium-card.p-5,
+.dashboard-premium.dashboard-financial .glass-card.p-5 {
+  padding: 24px !important;
+}
+
+.dashboard-premium.dashboard-financial .premium-card.p-4,
+.dashboard-premium.dashboard-financial .glass-card.p-4 {
+  padding: 20px !important;
+}
