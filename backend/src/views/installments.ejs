@@ -127,13 +127,28 @@
             padding: 12px 14px;
             border-bottom: 1px solid #e2e8f0;
         }
-        .table-shell td { padding: 14px; border-top: 1px solid #f1f5f9; color: #1f2937; vertical-align: top; }
+        .table-shell td { padding: 16px 14px; border-top: 1px solid #f1f5f9; color: #1f2937; vertical-align: top; }
         .table-row { transition: background-color 120ms ease-out; cursor: pointer; }
         .table-row:hover { background: #f8fafc; }
         .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
         .badge-success { background: #dcfce7; color: #166534; }
         .badge-danger { background: #fee2e2; color: #991b1b; }
         .badge-neutral { background: #e2e8f0; color: #334155; }
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out;
+        }
+        .action-btn-view { color: #2563eb; }
+        .action-btn-view:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
         .table-action {
             height: 30px;
             min-width: 30px;
@@ -228,6 +243,8 @@
         .dark .kpi-insight-negative { color: #fca5a5 !important; }
         .dark .filter-control, .dark .table-shell, .dark .table-shell th, .dark .table-shell td { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.22); }
         .dark .table-shell th { background: rgba(30, 41, 59, 0.95); color: #cbd5e1; }
+        .dark .action-btn-view { color: #93c5fd; }
+        .dark .action-btn-view:hover { background: rgba(51, 65, 85, 0.9); border-color: rgba(148, 163, 184, 0.4); }
         .dark .text-gray-800 { color: #f8fafc !important; }
         .dark .text-gray-700 { color: #e2e8f0 !important; }
         .dark .text-gray-600 { color: #cbd5e1 !important; }
@@ -331,10 +348,283 @@
         html:not(.dark) main .border-slate-300 { border-color: #c6d0df !important; }
         html:not(.dark) main .hover\\:bg-gray-50:hover,
         html:not(.dark) main .hover\\:bg-slate-50:hover { background-color: #d3ddea !important; }
+
+        .installment-modal {
+            background:
+                radial-gradient(120% 130% at 90% -10%, rgba(56, 189, 248, 0.08), transparent 55%),
+                linear-gradient(150deg, rgba(7, 17, 34, 0.98) 0%, rgba(10, 23, 45, 0.98) 100%);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            box-shadow: 0 24px 60px rgba(2, 6, 23, 0.62);
+        }
+
+        .installment-modal-header {
+            border-bottom: 1px solid rgba(71, 85, 105, 0.38);
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        .installment-modal-title {
+            color: #f8fafc;
+            font-size: 1.42rem;
+            line-height: 1.15;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .installment-close-btn {
+            color: #94a3b8;
+            border: 1px solid rgba(71, 85, 105, 0.45);
+            background: rgba(15, 23, 42, 0.66);
+            transition: background-color 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
+        }
+
+        .installment-close-btn:hover {
+            color: #f8fafc;
+            border-color: rgba(56, 189, 248, 0.42);
+            background: rgba(15, 23, 42, 0.94);
+        }
+
+        .installment-surface {
+            border-radius: 14px;
+            border: 1px solid rgba(71, 85, 105, 0.44);
+            background: rgba(15, 23, 42, 0.68);
+            padding: 14px;
+        }
+
+        .installment-summary-top {
+            border-radius: 14px;
+            border: 1px solid rgba(71, 85, 105, 0.52);
+            background:
+                linear-gradient(135deg, rgba(15, 23, 42, 0.76) 0%, rgba(15, 23, 42, 0.58) 100%);
+            padding: 14px 16px;
+        }
+
+        .installment-kicker {
+            font-size: 0.72rem;
+            line-height: 1;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #93c5fd;
+        }
+
+        .installment-summary-title {
+            margin-top: 8px;
+            font-size: 1.62rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .installment-summary-subtitle {
+            margin-top: 6px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .installment-value-label {
+            font-size: 0.74rem;
+            line-height: 1;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #93c5fd;
+        }
+
+        .installment-value-main {
+            margin-top: 8px;
+            font-size: 1.7rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .installment-value-main-compact {
+            margin-top: 8px;
+            font-size: 1.32rem;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .installment-value-meta {
+            margin-top: 5px;
+            font-size: 0.88rem;
+            color: #94a3b8;
+        }
+
+        .installment-value-meta-warning {
+            color: #fca5a5;
+            font-weight: 600;
+        }
+
+        .installment-history-text {
+            margin-top: 8px;
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #e2e8f0;
+        }
+
+        .installment-history-note {
+            margin-top: 6px;
+            font-size: 0.88rem;
+            color: #94a3b8;
+        }
+
+        .installment-context-line {
+            margin-top: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .installment-alert {
+            border-radius: 12px;
+            border: 1px solid rgba(251, 191, 36, 0.44);
+            background: rgba(120, 53, 15, 0.24);
+            color: #fde68a;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            padding: 12px 14px;
+        }
+
+        .installment-alert-danger {
+            border-color: rgba(248, 113, 113, 0.5);
+            background: rgba(127, 29, 29, 0.24);
+            color: #fecaca;
+        }
+
+        .installment-btn-row {
+            padding-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .installment-btn {
+            min-height: 40px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            padding: 0.55rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+        }
+
+        .installment-btn-primary {
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            color: #e0f2fe;
+            border-color: rgba(34, 211, 238, 0.6);
+        }
+
+        .installment-btn-primary:hover {
+            background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
+            color: #ecfeff;
+        }
+
+        .installment-btn-success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ecfdf5;
+            border-color: rgba(52, 211, 153, 0.56);
+        }
+
+        .installment-btn-success:hover {
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+        }
+
+        .installment-btn-secondary {
+            border-color: rgba(148, 163, 184, 0.42);
+            background: rgba(30, 41, 59, 0.6);
+            color: #dbeafe;
+        }
+
+        .installment-btn-secondary:hover {
+            border-color: rgba(125, 211, 252, 0.42);
+            background: rgba(30, 41, 59, 0.88);
+            color: #f8fafc;
+        }
+
+        .installment-btn-danger {
+            border-color: rgba(248, 113, 113, 0.58);
+            background: rgba(127, 29, 29, 0.36);
+            color: #fecaca;
+        }
+
+        .installment-btn-danger:hover {
+            background: rgba(127, 29, 29, 0.58);
+            color: #fee2e2;
+        }
+
+        .installment-btn:disabled {
+            opacity: 0.62;
+            cursor: not-allowed;
+        }
+
+        .installment-field-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.84rem;
+            line-height: 1;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #bfdbfe;
+        }
+
+        .installment-modal .filter-control {
+            background: rgba(15, 23, 42, 0.62);
+            border-color: rgba(100, 116, 139, 0.54);
+            color: #e2e8f0;
+        }
+
+        .installment-modal .filter-control:focus {
+            border-color: rgba(56, 189, 248, 0.66);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.18);
+        }
+
+        .installment-modal .filter-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .installment-modal textarea.filter-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .installment-badge-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .installment-modal-title {
+                font-size: 1.26rem;
+            }
+
+            .installment-summary-title {
+                font-size: 1.34rem;
+            }
+
+            .installment-value-main {
+                font-size: 1.4rem;
+            }
+
+            .installment-btn-row {
+                gap: 8px;
+            }
+
+            .installment-btn {
+                width: 100%;
+            }
+        }
         </style>
     <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
 </head>
-<body class="dashboard-premium primary-gradient min-h-screen">
+<body class="dashboard-premium dashboard-installments primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
         <div class="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
             <div class="flex items-center">
@@ -516,7 +806,7 @@
                                 <th>Vencimento</th>
                                 <th>Valor</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th class="whitespace-nowrap w-[1%] text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="installmentsTableBody">
@@ -551,50 +841,68 @@
         </main>
     </div>
 
-    <div id="notificationModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-xl p-6">
-            <div class="mb-4 flex items-center justify-between">
-                <h3 class="text-xl font-semibold text-gray-800">Enviar Notificações</h3>
-                <button id="closeNotificationModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="messageTemplate" class="mb-1 block text-sm text-gray-600">Modelo</label>
-                    <select id="messageTemplate" class="filter-control">
-                        <option value="vencimento_proximo">Vencimento próximo (3 dias)</option>
-                        <option value="vencimento_hoje">Vence hoje</option>
-                        <option value="atraso">Atraso</option>
-                        <option value="personalizada">Personalizada</option>
-                    </select>
+    <div id="notificationModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle">
+        <div class="modal-base__panel modal-base__panel--md">
+            <div class="modal-base__header">
+                <div class="modal-base__title-wrap">
+                    <h3 id="notificationModalTitle" class="modal-base__title text-2xl">Enviar notificações</h3>
+                    <p class="modal-base__description">Dispare mensagens em lote com base nos filtros ativos.</p>
                 </div>
-                <div>
-                    <label for="customMessage" class="mb-1 block text-sm text-gray-600">Mensagem</label>
-                    <textarea id="customMessage" rows="4" class="filter-control"></textarea>
-                </div>
-                <div class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-                    <i class="fas fa-circle-info mr-1"></i>
-                    Envio considera apenas parcelas filtradas na tela.
-                </div>
-                <div class="pt-2 flex justify-end gap-3">
-                    <button id="cancelNotificationBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                    <button id="sendNotificationBtn" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"><i class="fas fa-paper-plane mr-2"></i>Enviar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="installmentModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle">
-        <div class="modal-panel relative z-[60] w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5">
-            <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
-                <h3 id="installmentModalTitle" class="text-lg font-semibold text-gray-800">Detalhes da parcela</h3>
-                <button id="closeInstallmentModalBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" aria-label="Fechar modal de parcela">
+                <button id="closeNotificationModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar modal de notificações">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="installmentModalContent"></div>
+            <div class="modal-base__body">
+                <section class="modal-base__section">
+                    <div class="modal-base__field">
+                        <label for="messageTemplate" class="modal-base__field-label">Modelo</label>
+                        <select id="messageTemplate" class="filter-control">
+                            <option value="vencimento_proximo">Vencimento próximo (3 dias)</option>
+                            <option value="vencimento_hoje">Vence hoje</option>
+                            <option value="atraso">Atraso</option>
+                            <option value="personalizada">Personalizada</option>
+                        </select>
+                    </div>
+                    <div class="modal-base__field mt-3">
+                        <label for="customMessage" class="modal-base__field-label">Mensagem</label>
+                        <textarea id="customMessage" rows="4" class="filter-control modal-base__textarea"></textarea>
+                    </div>
+                    <p class="modal-base__field-helper mt-3">
+                        <i class="fas fa-circle-info mr-1"></i>
+                        Envio considera apenas parcelas filtradas na tela.
+                    </p>
+                </section>
+            </div>
+            <div class="modal-base__footer">
+                <div class="modal-base__footer-secondary">
+                    <button id="cancelNotificationBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Cancelar</button>
+                </div>
+                <div class="modal-base__footer-actions">
+                    <button id="sendNotificationBtn" type="button" class="modal-btn modal-btn--primary"><i class="fas fa-paper-plane mr-2"></i>Enviar</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div id="installmentModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle" data-modal-base="true">
+        <div class="modal-base__panel modal-base__panel--lg installment-modal relative z-[60]">
+            <div class="modal-base__header installment-modal-header">
+                <h3 id="installmentModalTitle" class="modal-base__title installment-modal-title">Detalhes da parcela</h3>
+                <button id="closeInstallmentModalBtn" type="button" class="modal-base__close installment-close-btn inline-flex h-10 w-10 items-center justify-center rounded-xl" data-modal-close="primary" aria-label="Fechar modal de parcela">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-base__body">
+                <div id="installmentModalContent"></div>
+            </div>
+            <div id="installmentModalFooter" class="modal-base__footer hidden">
+                <div class="modal-base__footer-secondary"></div>
+                <div class="modal-base__footer-actions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/scripts/modal-system.js"> </script>
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
     <script>
         const currentUser = window.__AUTH_USER__;
@@ -619,6 +927,7 @@
         const installmentModal = document.getElementById('installmentModal');
         const installmentModalTitle = document.getElementById('installmentModalTitle');
         const installmentModalContent = document.getElementById('installmentModalContent');
+        const installmentModalFooter = document.getElementById('installmentModalFooter');
         const closeInstallmentModalBtn = document.getElementById('closeInstallmentModalBtn');
 
         const installmentsState = {
@@ -778,7 +1087,14 @@
                 periodFilter.value = 'today';
             } else if (dueParam === 'next7' || dueParam === '7dias' || dueParam === '7d') {
                 periodFilter.value = 'next7';
-            } else if (dueParam === 'month' || dueParam === 'mes') {
+            } else if (
+                dueParam === 'month'
+                || dueParam === 'mes'
+                || dueParam === 'month_current'
+                || dueParam === 'current_month'
+                || dueParam === 'thismonth'
+                || dueParam === 'mes_atual'
+            ) {
                 periodFilter.value = 'month_current';
             }
 
@@ -964,7 +1280,7 @@
             if (!Number.isFinite(percentValue) || Math.abs(percentValue) < 0.005) {
                 return `0,00% ${label}`;
             }
-            return `${percentValue > 0 ? '↑' : '↓'} ${formatPercentMagnitude(percentValue)}% ${label}`;
+            return `${percentValue > 0 ? '+' : '-'} ${formatPercentMagnitude(percentValue)}% ${label}`;
         }
 
         function formatSecondaryInsightText(percentValue, label) {
@@ -1183,7 +1499,7 @@
             if (!loan) return 'Sem resumo';
             const principal = formatCurrency(loan.principal_amount);
             const interest = loan.interest_type === 'simples' ? `Simples ${loan.interest_rate}%` : `Composto ${loan.interest_rate}%`;
-            return `Principal ${principal} • ${interest}`;
+            return `Principal ${principal} | ${interest}`;
         }
 
         function updateInstallmentsSummary() {
@@ -1369,10 +1685,10 @@
                         </td>
                         <td class="font-semibold text-slate-800">${formatCurrency(installment.amount)}</td>
                         <td><span class="${badge.className}">${badge.text}</span></td>
-                        <td>
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="table-action border border-slate-300 px-2 text-slate-700 hover:bg-slate-100" title="Mais detalhes">
-                                    <span>Mais detalhes</span>
+                        <td class="whitespace-nowrap w-[1%] text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button type="button" data-action="view-installment" data-id="${installment.id}" class="action-btn action-btn-view rounded-md p-2 transition-colors duration-150 hover:bg-slate-100" title="Detalhes">
+                                    <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                         </td>
@@ -2022,6 +2338,7 @@
             if (modalFocusState.activeModal === installmentModal) {
                 modalFocusState.activeModal = null;
             }
+            setInstallmentModalFooter('');
 
             syncBodyScrollLock();
 
@@ -2041,6 +2358,30 @@
             if (paymentMethodInput) installmentModalState.form.paymentMethod = String(paymentMethodInput.value || '').trim() || 'Pix';
             if (paymentNotesInput) installmentModalState.form.paymentNotes = String(paymentNotesInput.value || '').trim();
             if (refundReasonInput) installmentModalState.form.refundReason = String(refundReasonInput.value || '').trim();
+        }
+
+        function setInstallmentModalFooter(configOrActionsHtml, maybeActionsHtml) {
+            if (!installmentModalFooter) return;
+            const secondaryContainer = installmentModalFooter.querySelector('.modal-base__footer-secondary');
+            const actionsContainer = installmentModalFooter.querySelector('.modal-base__footer-actions');
+            if (!secondaryContainer || !actionsContainer) return;
+
+            let secondaryHtml = '';
+            let actionsHtml = '';
+
+            if (configOrActionsHtml && typeof configOrActionsHtml === 'object' && !Array.isArray(configOrActionsHtml)) {
+                secondaryHtml = String(configOrActionsHtml.secondary || '').trim();
+                actionsHtml = String(configOrActionsHtml.actions || '').trim();
+            } else if (typeof maybeActionsHtml === 'string') {
+                secondaryHtml = String(configOrActionsHtml || '').trim();
+                actionsHtml = maybeActionsHtml.trim();
+            } else {
+                actionsHtml = String(configOrActionsHtml || '').trim();
+            }
+
+            secondaryContainer.innerHTML = secondaryHtml;
+            actionsContainer.innerHTML = actionsHtml;
+            installmentModalFooter.classList.toggle('hidden', !secondaryHtml && !actionsHtml);
         }
 
         function setInstallmentModalMode(mode) {
@@ -2083,9 +2424,23 @@
             const badge = getStatusBadge(status);
             const installmentLabel = getInstallmentLabel(installment, loan);
             const dueHint = getDueHint(installment, status);
+            const dueHintText = dueHint ? dueHint.replace(/^\(/, '').replace(/\)$/, '') : '';
             const paymentMethod = getInstallmentPaymentMethod(installment) || '-';
-            const summaryLine = `${getDebtorName(installment.debtor_id)} | Parcela #${installmentLabel} | ${formatCurrency(installment.amount)} | Venc.: ${formatDate(installment.due_date)}`;
+            const debtorName = getDebtorName(installment.debtor_id);
+            const summaryLine = `${debtorName} | Parcela #${installmentLabel} | ${formatCurrency(installment.amount)} | Venc.: ${formatDate(installment.due_date)}`;
+            const summaryLineEscaped = escapeHtml(summaryLine);
+            const principalValue = loan ? formatCurrency(loan.principal_amount) : '-';
+            const totalLoanValue = loan ? formatCurrency(loan.total_amount) : '-';
+            const dueMetaClass = status === 'Atrasado'
+                ? 'installment-value-meta installment-value-meta-warning'
+                : 'installment-value-meta';
+            const dueBadgeClass = status === 'Atrasado'
+                ? 'badge badge-danger'
+                : status === 'Pago'
+                    ? 'badge badge-success'
+                    : 'badge badge-neutral';
             const loadingIcon = '<i class="fas fa-circle-notch fa-spin mr-2"></i>';
+            setInstallmentModalFooter('');
 
             if (installmentModalState.mode === 'details') {
                 installmentModalTitle.textContent = 'Detalhes da parcela';
@@ -2094,53 +2449,65 @@
                     ? `Pago em ${formatDate(installment.payment_date)} via ${paymentMethod}`
                     : 'Pagamento nao registrado.';
                 const historyNotes = status === 'Pago' && installment.notes
-                    ? `<p class="mt-1 text-sm text-slate-600">Obs.: ${escapeHtml(installment.notes)}</p>`
+                    ? `<p class="installment-history-note">Obs.: ${escapeHtml(installment.notes)}</p>`
                     : '';
 
                 installmentModalContent.innerHTML = `
                     <div class="space-y-4">
-                        <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <h4 class="text-lg font-semibold text-slate-800">Parcela #${installmentLabel}</h4>
-                                <span class="${badge.className}">${badge.text}</span>
+                        <section class="installment-summary-top">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="installment-kicker">Parcela selecionada</p>
+                                    <h4 class="installment-summary-title">#${escapeHtml(installmentLabel)}</h4>
+                                    <p class="installment-summary-subtitle">Emprestimo #${escapeHtml(installment.loan_id ?? '-')} | Cliente: ${escapeHtml(debtorName)}</p>
+                                </div>
+                                <div class="installment-badge-wrap">
+                                    <span class="${badge.className}">${badge.text}</span>
+                                    ${dueHintText ? `<span class="${dueBadgeClass}">${escapeHtml(dueHintText)}</span>` : ''}
+                                </div>
                             </div>
-                            <p class="mt-1 text-sm text-slate-600">Emprestimo #${installment.loan_id ?? '-'} | Cliente: ${getDebtorName(installment.debtor_id)}</p>
                         </section>
 
-                        <section class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor da parcela</p>
-                                <p class="mt-1 text-lg font-semibold text-slate-800">${formatCurrency(installment.amount)}</p>
+                        <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="installment-surface">
+                                <p class="installment-value-label">Valor da parcela</p>
+                                <p class="installment-value-main">${formatCurrency(installment.amount)}</p>
                             </div>
-                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</p>
-                                <p class="mt-1 text-base font-semibold ${status === 'Atrasado' ? 'text-red-600' : 'text-slate-800'}">${formatDate(installment.due_date)}</p>
-                                <p class="text-xs ${status === 'Atrasado' ? 'text-red-600' : 'text-slate-500'}">${dueHint || '-'}</p>
+                            <div class="installment-surface">
+                                <p class="installment-value-label">Vencimento</p>
+                                <p class="installment-value-main-compact">${formatDate(installment.due_date)}</p>
+                                <p class="${dueMetaClass}">${dueHintText || 'Sem observacao'}</p>
                             </div>
-                            ${loan ? `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Principal</p><p class="mt-1 text-sm font-semibold text-slate-800">${formatCurrency(loan.principal_amount)}</p></div>` : ''}
-                            ${loan ? `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total do emprestimo</p><p class="mt-1 text-sm font-semibold text-slate-800">${formatCurrency(loan.total_amount)}</p></div>` : ''}
+                            <div class="installment-surface">
+                                <p class="installment-value-label">Principal</p>
+                                <p class="installment-value-main-compact">${principalValue}</p>
+                                <p class="installment-value-meta">Valor original do emprestimo</p>
+                            </div>
+                            <div class="installment-surface">
+                                <p class="installment-value-label">Total do emprestimo</p>
+                                <p class="installment-value-main-compact">${totalLoanValue}</p>
+                                <p class="installment-value-meta">Inclui os juros aplicados</p>
+                            </div>
                         </section>
 
-                        <section class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Historico</p>
-                            <p class="mt-1 text-sm text-slate-700">${historyText}</p>
+                        <section class="installment-surface">
+                            <p class="installment-value-label">Historico</p>
+                            <p class="installment-history-text">${escapeHtml(historyText)}</p>
                             ${historyNotes}
-                        </section>
-
-                        <section class="pt-1">
-                            <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                                ${status !== 'Pago'
-                                    ? '<button type="button" data-action="modal-go-payment" class="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 sm:w-auto">Registrar pagamento</button>'
-                                    : ''}
-                                ${status === 'Pago'
-                                    ? '<button type="button" data-action="modal-go-refund" class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:w-auto">Estorno</button>'
-                                    : ''}
-                                <button type="button" data-action="modal-go-delete" class="w-full rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto">Excluir</button>
-                                <button type="button" data-action="modal-close" class="w-full rounded-xl border border-emerald-300 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 sm:w-auto">Concluir</button>
-                            </div>
                         </section>
                     </div>
                 `;
+
+                setInstallmentModalFooter(`
+                    ${status !== 'Pago'
+                        ? '<button type="button" data-action="modal-go-payment" class="modal-btn modal-btn--primary">Registrar pagamento</button>'
+                        : ''}
+                    ${status === 'Pago'
+                        ? '<button type="button" data-action="modal-go-refund" class="modal-btn modal-btn--secondary">Estorno</button>'
+                        : ''}
+                    <button type="button" data-action="modal-go-delete" class="modal-btn modal-btn--danger">Excluir</button>
+                    <button type="button" data-action="modal-close" class="modal-btn modal-btn--secondary">Concluir</button>
+                `);
                 return;
             }
 
@@ -2149,31 +2516,59 @@
 
                 installmentModalContent.innerHTML = `
                     <form id="installmentPaymentForm" class="space-y-4">
-                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+                        <section class="modal-base__section installment-summary-top">
+                            <h4 class="modal-base__section-title">Resumo da parcela</h4>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <p class="installment-field-label">Cliente</p>
+                                    <p class="installment-context-line">${escapeHtml(debtorName)}</p>
+                                </div>
+                                <div>
+                                    <p class="installment-field-label">Parcela</p>
+                                    <p class="installment-context-line">#${escapeHtml(installmentLabel)}</p>
+                                </div>
+                                <div>
+                                    <p class="installment-field-label">Valor</p>
+                                    <p class="installment-context-line">${formatCurrency(installment.amount)}</p>
+                                </div>
+                                <div>
+                                    <p class="installment-field-label">Vencimento</p>
+                                    <p class="installment-context-line">${formatDate(installment.due_date)}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="${badge.className}">${badge.text}</span>
+                            </div>
+                        </section>
 
-                        <div>
-                            <label for="installmentModalPaymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
-                            <input id="installmentModalPaymentDate" type="date" class="filter-control" required value="${escapeHtml(installmentModalState.form.paymentDate || getLocalTodayDateInputValue())}">
-                        </div>
+                        <section class="modal-base__section">
+                            <h4 class="modal-base__section-title">Informações financeiras</h4>
+                            <div class="modal-base__grid-2">
+                                <div class="modal-base__field">
+                                    <label for="installmentModalPaymentDate" class="modal-base__field-label">Data do pagamento</label>
+                                    <input id="installmentModalPaymentDate" type="date" class="filter-control" required value="${escapeHtml(installmentModalState.form.paymentDate || getLocalTodayDateInputValue())}" data-modal-autofocus>
+                                </div>
+                                <div class="modal-base__field">
+                                    <label for="installmentModalPaymentMethod" class="modal-base__field-label">Forma de pagamento</label>
+                                    <select id="installmentModalPaymentMethod" class="filter-control" required>
+                                        ${buildPaymentMethodOptions(installmentModalState.form.paymentMethod)}
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
 
-                        <div>
-                            <label for="installmentModalPaymentMethod" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
-                            <select id="installmentModalPaymentMethod" class="filter-control" required>
-                                ${buildPaymentMethodOptions(installmentModalState.form.paymentMethod)}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="installmentModalPaymentNotes" class="mb-1 block text-sm text-gray-600">Observação (opcional)</label>
-                            <textarea id="installmentModalPaymentNotes" rows="2" class="filter-control" placeholder="Observações sobre o pagamento">${escapeHtml(installmentModalState.form.paymentNotes)}</textarea>
-                        </div>
-
-                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
-                            <button type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar pagamento'}</button>
-                        </div>
+                        <section class="modal-base__section">
+                            <h4 class="modal-base__section-title">Observação</h4>
+                            <label for="installmentModalPaymentNotes" class="modal-base__field-label">Observação (opcional)</label>
+                            <textarea id="installmentModalPaymentNotes" rows="3" class="filter-control" placeholder="Observações sobre o pagamento">${escapeHtml(installmentModalState.form.paymentNotes)}</textarea>
+                        </section>
                     </form>
                 `;
+
+                setInstallmentModalFooter({
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    actions: `<button type="submit" form="installmentPaymentForm" class="modal-btn modal-btn--primary" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar pagamento'}</button>`,
+                });
                 return;
             }
 
@@ -2182,23 +2577,26 @@
 
                 installmentModalContent.innerHTML = `
                     <form id="installmentRefundForm" class="space-y-4">
-                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+                        <section class="installment-summary-top">
+                            <p class="installment-kicker">Parcela selecionada</p>
+                            <p class="installment-context-line">${summaryLineEscaped}</p>
+                        </section>
 
-                        <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                        <div class="installment-alert">
                             Estornar este pagamento ira voltar a parcela para "Em aberto/Em atraso" e remover a data de pagamento.
                         </div>
 
-                        <div>
-                            <label for="installmentModalRefundReason" class="mb-1 block text-sm text-gray-600">Motivo do estorno (opcional)</label>
-                            <textarea id="installmentModalRefundReason" rows="2" class="filter-control" placeholder="Motivo do estorno">${escapeHtml(installmentModalState.form.refundReason)}</textarea>
-                        </div>
-
-                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
-                            <button type="submit" class="w-full rounded-xl border border-amber-300 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar estorno'}</button>
-                        </div>
+                        <section class="installment-surface">
+                            <label for="installmentModalRefundReason" class="installment-field-label">Motivo do estorno (opcional)</label>
+                            <textarea id="installmentModalRefundReason" rows="3" class="filter-control" placeholder="Motivo do estorno">${escapeHtml(installmentModalState.form.refundReason)}</textarea>
+                        </section>
                     </form>
                 `;
+
+                setInstallmentModalFooter({
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    actions: `<button type="submit" form="installmentRefundForm" class="modal-btn modal-btn--primary" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar estorno'}</button>`,
+                });
                 return;
             }
 
@@ -2210,56 +2608,64 @@
             if (isPaid) {
                 installmentModalContent.innerHTML = `
                     <div class="space-y-4">
-                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
-                        <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                        <section class="installment-summary-top">
+                            <p class="installment-kicker">Parcela selecionada</p>
+                            <p class="installment-context-line">${summaryLineEscaped}</p>
+                        </section>
+                        <div class="installment-alert">
                             Esta parcela esta paga. Para excluir, use Estorno primeiro.
-                        </div>
-                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
-                            <button type="button" data-action="modal-go-refund" class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:w-auto">Ir para estorno</button>
                         </div>
                     </div>
                 `;
+                setInstallmentModalFooter({
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    actions: '<button type="button" data-action="modal-go-refund" class="modal-btn modal-btn--primary">Ir para estorno</button>',
+                });
                 return;
             }
 
             if (impact.isOnlyInstallment) {
                 installmentModalContent.innerHTML = `
                     <div class="space-y-4">
-                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
-                        <div class="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                        <section class="installment-summary-top">
+                            <p class="installment-kicker">Parcela selecionada</p>
+                            <p class="installment-context-line">${summaryLineEscaped}</p>
+                        </section>
+                        <div class="installment-alert installment-alert-danger">
                             Este emprestimo possui apenas uma parcela. Exclua o emprestimo inteiro na tela de emprestimos.
-                        </div>
-                        <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Voltar</button>
-                            <a href="/admin/loans.html" class="w-full rounded-xl border border-red-300 px-4 py-2 text-center text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto">Ir para emprestimos</a>
                         </div>
                     </div>
                 `;
+                setInstallmentModalFooter({
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    actions: '<a href="/admin/loans.html" class="modal-btn modal-btn--danger inline-flex items-center justify-center">Ir para empréstimos</a>',
+                });
                 return;
             }
 
             installmentModalContent.innerHTML = `
                 <form id="installmentDeleteForm" class="space-y-4">
-                    <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">${summaryLine}</p>
+                    <section class="installment-summary-top">
+                        <p class="installment-kicker">Parcela selecionada</p>
+                        <p class="installment-context-line">${summaryLineEscaped}</p>
+                    </section>
 
-                    <div class="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                    <div class="installment-alert installment-alert-danger">
                         Tem certeza que deseja excluir esta parcela? Isso pode alterar o total do emprestimo e relatorios.
                     </div>
 
-                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-                        <p>Parcelas restantes: <strong>${impact.remainingCount}</strong></p>
-                        <p class="mt-1">Novo total do emprestimo apos exclusao: <strong>${formatCurrency(impact.newTotalAmount)}</strong></p>
-                    </div>
-
-                    <div class="pt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                        <button type="button" data-action="modal-back-details" class="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">Cancelar</button>
-                        <button type="submit" class="w-full rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Excluindo...` : 'Excluir parcela'}</button>
+                    <div class="installment-surface">
+                        <p class="installment-value-label">Impacto da exclusao</p>
+                        <p class="installment-history-text">Parcelas restantes: <strong>${impact.remainingCount}</strong></p>
+                        <p class="installment-history-note">Novo total do emprestimo apos exclusao: <strong>${formatCurrency(impact.newTotalAmount)}</strong></p>
                     </div>
                 </form>
             `;
+            setInstallmentModalFooter({
+                secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Cancelar</button>',
+                actions: `<button type="submit" form="installmentDeleteForm" class="modal-btn modal-btn--danger" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Excluindo...` : 'Excluir parcela'}</button>`,
+            });
         }
-
         async function saveInstallmentPayment(options) {
             const {
                 installmentId,
@@ -2598,40 +3004,43 @@
         if (installmentsTableBody) installmentsTableBody.addEventListener('click', handleInstallmentsListClick);
         if (installmentsMobileList) installmentsMobileList.addEventListener('click', handleInstallmentsListClick);
 
+        function handleInstallmentModalAction(event) {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const actionBtn = target.closest('[data-action]');
+            if (!actionBtn) return;
+
+            const action = actionBtn.getAttribute('data-action');
+            if (!action) return;
+            event.preventDefault();
+
+            if (action === 'modal-go-payment') {
+                setInstallmentModalMode('payment');
+                return;
+            }
+
+            if (action === 'modal-go-refund') {
+                setInstallmentModalMode('refund');
+                return;
+            }
+
+            if (action === 'modal-go-delete') {
+                setInstallmentModalMode('confirmDelete');
+                return;
+            }
+
+            if (action === 'modal-back-details') {
+                setInstallmentModalMode('details');
+                return;
+            }
+
+            if (action === 'modal-close') {
+                closeInstallmentModal();
+            }
+        }
+
         if (installmentModalContent) {
-            installmentModalContent.addEventListener('click', function(event) {
-                const target = event.target;
-                if (!(target instanceof Element)) return;
-                const actionBtn = target.closest('button[data-action]');
-                if (!actionBtn) return;
-
-                const action = actionBtn.getAttribute('data-action');
-
-                if (action === 'modal-go-payment') {
-                    setInstallmentModalMode('payment');
-                    return;
-                }
-
-                if (action === 'modal-go-refund') {
-                    setInstallmentModalMode('refund');
-                    return;
-                }
-
-                if (action === 'modal-go-delete') {
-                    setInstallmentModalMode('confirmDelete');
-                    return;
-                }
-
-                if (action === 'modal-back-details') {
-                    setInstallmentModalMode('details');
-                    return;
-                }
-
-                if (action === 'modal-close') {
-                    closeInstallmentModal();
-                    return;
-                }
-            });
+            installmentModalContent.addEventListener('click', handleInstallmentModalAction);
 
             installmentModalContent.addEventListener('submit', async function(event) {
                 const target = event.target;
@@ -2652,6 +3061,10 @@
                     await submitInstallmentDeleteFromModal();
                 }
             });
+        }
+
+        if (installmentModalFooter) {
+            installmentModalFooter.addEventListener('click', handleInstallmentModalAction);
         }
 
         document.getElementById('prevPageBtn').addEventListener('click', function () {
@@ -2702,6 +3115,9 @@
     </script>
 </body>
 </html>
+
+
+
 
 
 

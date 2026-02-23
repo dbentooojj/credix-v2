@@ -688,7 +688,7 @@ router.get("/", async (req, res) => {
       overdue: {
         count: overdueCurrentMonthCount,
         totalValue: overdueCurrentMonthValue,
-        href: "/admin/installments.html?status=overdue",
+        href: "/admin/installments.html?status=overdue&due=month",
       },
       next7Days: {
         count: next7Count,

@@ -742,7 +742,7 @@
                         <p class="summary-count" id="dueTodayCount">0</p>
                         <p class="summary-value" id="dueTodayValue">R$ 0,00</p>
                     </a>
-                    <a id="summaryOverdue" class="summary-link" href="/admin/installments.html?status=overdue">
+                    <a id="summaryOverdue" class="summary-link" href="/admin/installments.html?status=overdue&due=month">
                         <p class="summary-title">Em atraso (mês)</p>
                         <p class="summary-count text-red-600" id="overdueCount">0</p>
                         <p class="summary-value text-red-600" id="overdueValue">R$ 0,00</p>
@@ -757,13 +757,15 @@
 
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <div class="glass-card premium-card overdue-panel rounded-2xl p-5 h-full">
-                        <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
-                        <p class="mb-4 mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
-                        <div id="upcomingList" class="space-y-3 fixed-scroll-panel">
+                    <div class="glass-card premium-card overdue-panel quick-panel-card rounded-2xl p-5 h-full">
+                        <div class="quick-panel-header">
+                            <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
+                            <p class="mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
+                        </div>
+                        <div id="upcomingList" class="space-y-3 fixed-scroll-panel quick-panel-list">
                             <div class="text-center py-10 text-gray-500"><i class="fas fa-calendar-check text-4xl mb-3 opacity-50"></i><p>Nenhuma parcela pendente.</p></div>
                         </div>
-                        <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                        <div class="quick-panel-pagination mt-3 flex items-center justify-between text-xs text-gray-500">
                             <button id="upcomingPrevPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Anterior</button>
                             <span id="upcomingPageInfo">Página 1 de 1</span>
                             <button id="upcomingNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Próxima</button>
@@ -771,10 +773,13 @@
                     </div>
                 </div>
                 <div>
-                    <div class="glass-card premium-card rounded-2xl p-5 h-full">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Pagamentos atrasados</h3>
-                        <div id="overdueList" class="space-y-3 fixed-scroll-panel"><p class="text-sm text-gray-500">Sem pagamentos atrasados.</p></div>
-                        <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                    <div class="glass-card premium-card quick-panel-card rounded-2xl p-5 h-full">
+                        <div class="quick-panel-header">
+                            <h3 class="text-xl font-bold text-gray-800">Pagamentos atrasados</h3>
+                            <p class="mt-1 text-xs text-gray-500">Lista operacional para cobranca e baixa de atrasos.</p>
+                        </div>
+                        <div id="overdueList" class="space-y-3 fixed-scroll-panel quick-panel-list"><p class="text-sm text-gray-500">Sem pagamentos atrasados.</p></div>
+                        <div class="quick-panel-pagination mt-3 flex items-center justify-between text-xs text-gray-500">
                             <button id="overduePrevPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Anterior</button>
                             <span id="overduePageInfo">Página 1 de 1</span>
                             <button id="overdueNextPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Próxima</button>
@@ -825,61 +830,77 @@
         </main>
     </div>
 
-            <div id="collectionModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-xl p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-800">Enviar cobrança</h3>
-                    <p class="text-sm text-gray-500">Mensagem editável com placeholders.</p>
+            <div id="collectionModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="collectionModalTitle">
+        <div class="modal-base__panel modal-base__panel--md">
+            <div class="modal-base__header">
+                <div class="modal-base__title-wrap">
+                    <h3 id="collectionModalTitle" class="modal-base__title text-2xl">Enviar cobrança</h3>
+                    <p class="modal-base__description">Mensagem editável com placeholders.</p>
                 </div>
-                <button id="closeCollectionModalBtn" class="text-gray-400 hover:text-gray-600" type="button"><i class="fas fa-times text-xl"></i></button>
+                <button id="closeCollectionModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar modal de cobrança"><i class="fas fa-times"></i></button>
             </div>
-            <div class="space-y-3">
-                <div class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-700">
-                    Placeholders: <code>{nome}</code>, <code>{valor}</code>, <code>{vencimento}</code>, <code>{pix_chave}</code>
+            <div class="modal-base__body">
+                <section class="modal-base__section">
+                    <p class="modal-base__field-helper">Placeholders: <code>{nome}</code>, <code>{valor}</code>, <code>{vencimento}</code>, <code>{pix_chave}</code></p>
+                    <label for="collectionMessage" class="modal-base__field-label mt-3">Mensagem</label>
+                    <textarea id="collectionMessage" rows="6" class="filter-control modal-base__textarea"></textarea>
+                </section>
+                <section class="modal-base__section">
+                    <p class="modal-base__field-label">Preview</p>
+                    <p id="collectionPreview" class="text-sm text-gray-600">-</p>
+                </section>
+            </div>
+            <div class="modal-base__footer">
+                <div class="modal-base__footer-secondary">
+                    <button id="cancelCollectionBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Fechar</button>
                 </div>
-                <textarea id="collectionMessage" rows="6" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm"></textarea>
-                <div class="rounded-xl border border-gray-200 bg-slate-50 p-3 text-xs text-gray-600">
-                    <p class="font-semibold mb-1">Preview</p>
-                    <p id="collectionPreview">-</p>
-                </div>
-                <div class="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
-                    <button id="cancelCollectionBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Fechar</button>
-                    <button id="copyCollectionBtn" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"><i class="fas fa-copy mr-2"></i>Copiar mensagem</button>
+                <div class="modal-base__footer-actions">
+                    <button id="copyCollectionBtn" type="button" class="modal-btn modal-btn--primary"><i class="fas fa-copy mr-2"></i>Copiar mensagem</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="paymentConfirmModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="modal-panel w-full max-w-lg p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-800">Confirmar pagamento</h3>
-                    <p class="text-sm text-gray-500">Revise os dados antes de concluir.</p>
+    <div id="paymentConfirmModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="paymentConfirmModalTitle">
+        <div class="modal-base__panel modal-base__panel--md">
+            <div class="modal-base__header">
+                <div class="modal-base__title-wrap">
+                    <h3 id="paymentConfirmModalTitle" class="modal-base__title text-2xl">Confirmar pagamento</h3>
+                    <p class="modal-base__description">Revise os dados antes de concluir.</p>
                 </div>
-                <button id="closePaymentConfirmModalBtn" class="text-gray-400 hover:text-gray-600" type="button"><i class="fas fa-times text-xl"></i></button>
+                <button id="closePaymentConfirmModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar confirmação de pagamento"><i class="fas fa-times"></i></button>
             </div>
-            <div id="paymentConfirmInfo" class="rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm text-gray-700"></div>
-            <div class="mt-4">
-                <label for="paymentDateInput" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
-                <input id="paymentDateInput" type="date" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
+            <div class="modal-base__body">
+                <section id="paymentConfirmInfo" class="modal-base__section text-sm text-gray-700"></section>
+                <section class="modal-base__section">
+                    <div class="modal-base__grid-2">
+                        <div class="modal-base__field">
+                            <label for="paymentDateInput" class="modal-base__field-label">Data do pagamento</label>
+                            <input id="paymentDateInput" type="date" class="filter-control" data-modal-autofocus>
+                        </div>
+                        <div class="modal-base__field">
+                            <label for="paymentMethodSelect" class="modal-base__field-label">Forma de pagamento</label>
+                            <select id="paymentMethodSelect" class="filter-control">
+                                <option value="PIX">PIX</option>
+                                <option value="DINHEIRO">Dinheiro</option>
+                                <option value="TRANSFERENCIA">Transferência</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
             </div>
-            <div class="mt-4">
-                <label for="paymentMethodSelect" class="mb-1 block text-sm text-gray-600">Forma de pagamento</label>
-                <select id="paymentMethodSelect" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm">
-                    <option value="PIX">PIX</option>
-                    <option value="DINHEIRO">Dinheiro</option>
-                    <option value="TRANSFERENCIA">Transferência</option>
-                </select>
-            </div>
-            <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <button id="cancelPaymentConfirmBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button id="confirmPaymentBtn" type="button" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"><i class="fas fa-check mr-2"></i>Confirmar pagamento</button>
+            <div class="modal-base__footer">
+                <div class="modal-base__footer-secondary">
+                    <button id="cancelPaymentConfirmBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Cancelar</button>
+                </div>
+                <div class="modal-base__footer-actions">
+                    <button id="confirmPaymentBtn" type="button" class="modal-btn modal-btn--primary"><i class="fas fa-check mr-2"></i>Confirmar pagamento</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="/scripts/modal-system.js"></script>
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
     <script>
         const authUser = window.__AUTH_USER__;
@@ -1436,7 +1457,7 @@
 
         function renderDailySummary(summary) {
             const dueToday = summary?.dueToday || { count: 0, totalValue: 0, href: '/admin/installments.html?status=pending&due=today' };
-            const overdue = summary?.overdue || { count: 0, totalValue: 0, href: '/admin/installments.html?status=overdue' };
+            const overdue = summary?.overdue || { count: 0, totalValue: 0, href: '/admin/installments.html?status=overdue&due=month' };
             const next7 = summary?.next7Days || { count: 0, totalValue: 0, href: '/admin/installments.html?status=pending&due=next7' };
 
             document.getElementById('dueTodayCount').textContent = String(dueToday.count || 0);
@@ -2063,3 +2084,4 @@
     </script>
 </body>
 </html>
+

@@ -202,6 +202,11 @@
   --clients-text-primary: #E5E7EB;
   --clients-text-secondary: #A7B0C0;
   --clients-text-muted: #7B869B;
+  --clients-table-bg: rgba(27, 32, 42, 0.86);
+  --clients-table-header-bg: rgba(41, 48, 61, 0.95);
+  --clients-table-header-active-bg: rgba(59, 68, 84, 0.95);
+  --clients-table-row-bg: rgba(27, 32, 42, 0.9);
+  --clients-table-row-hover-bg: rgba(51, 60, 74, 0.78);
 }
 
 .dashboard-premium.dashboard-debtors .page-title {
@@ -213,42 +218,30 @@
 }
 
 .dashboard-premium.dashboard-debtors .clients-kpi-grid > div {
-  background: var(--clients-surface) !important;
-  border: 1px solid var(--clients-border) !important;
-  border-radius: 17px !important;
-  box-shadow: var(--clients-shadow) !important;
+  background: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35) !important;
 }
 
-.dashboard-premium.dashboard-debtors .clients-kpi-grid > div p.text-xs {
-  color: var(--clients-text-muted) !important;
+.dashboard-premium.dashboard-debtors .clients-kpi-grid .kpi-label {
+  color: #94a3b8 !important;
 }
 
 .dashboard-premium.dashboard-debtors #totalDebtors,
-.dashboard-premium.dashboard-debtors #inactiveDebtors {
-  color: var(--clients-text-primary) !important;
-}
-
-.dashboard-premium.dashboard-debtors #activeDebtors {
-  color: #4AB89D !important;
-}
-
-.dashboard-premium.dashboard-debtors .clients-kpi-grid > div:nth-child(4) {
-  background: linear-gradient(135deg, rgba(78, 48, 24, 0.62), rgba(56, 36, 23, 0.54)) !important;
-  border-color: rgba(245, 158, 11, 0.22) !important;
-}
-
+.dashboard-premium.dashboard-debtors #activeDebtors,
+.dashboard-premium.dashboard-debtors #inactiveDebtors,
 .dashboard-premium.dashboard-debtors #overdueDebtors {
-  color: #E5B07A !important;
+  color: #f8fafc !important;
 }
 
+.dashboard-premium.dashboard-debtors .clients-kpi-grid .kpi-insight,
 .dashboard-premium.dashboard-debtors .clients-kpi-grid .kpi-insight-line {
-  color: var(--clients-text-secondary) !important;
+  color: #cbd5e1 !important;
 }
 
-.dashboard-premium.dashboard-debtors .clients-kpi-grid > div .inline-flex.h-10.w-10 {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #94A3B8 !important;
+.dashboard-premium.dashboard-debtors .clients-kpi-grid > div > span {
+  color: rgba(148, 163, 184, 0.8) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel {
@@ -312,12 +305,12 @@
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell {
   border-radius: 14px !important;
   border: 1px solid rgba(148, 163, 184, 0.22) !important;
-  background: rgba(15, 23, 42, 0.62) !important;
+  background: var(--clients-table-bg) !important;
   box-shadow: none !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th {
-  background: rgba(30, 41, 59, 0.92) !important;
+  background: var(--clients-table-header-bg) !important;
   color: #94a3b8 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -328,13 +321,17 @@
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th.sortable-th:hover {
-  background: rgba(51, 65, 85, 0.92) !important;
+  background: var(--clients-table-header-active-bg) !important;
+}
+
+.dashboard-premium.dashboard-debtors .clients-data-panel .table-shell th.sortable-th[data-sort-active="true"] {
+  background: var(--clients-table-header-active-bg) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .table-shell td {
   padding: 16px 14px !important;
   border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
-  background: transparent !important;
+  background: var(--clients-table-row-bg) !important;
   color: #e2e8f0 !important;
 }
 
@@ -348,7 +345,7 @@
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-table-row:hover td,
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row:hover td,
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row:hover td {
-  background: rgba(51, 65, 85, 0.34) !important;
+  background: var(--clients-table-row-hover-bg) !important;
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-overdue-row {
@@ -356,7 +353,7 @@
 }
 
 .dashboard-premium.dashboard-debtors .clients-data-panel .debtor-expanded-row {
-  background: rgba(51, 65, 85, 0.24) !important;
+  background: rgba(51, 60, 74, 0.58) !important;
   box-shadow: none !important;
 }
 

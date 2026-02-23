@@ -97,18 +97,27 @@
         .page-title { color: #ffffff; }
         .muted-on-dark { color: #cbd5e1; }
 
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
-            color: #0f172a;
+        .kpi-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
+        .kpi-value {
+            color: #0f172a;
+            font-size: 1.375rem;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .kpi-insight,
         .kpi-insight-line {
             margin-top: 6px;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            line-height: 1.35;
+            line-height: 1.3;
             color: #64748b;
         }
 
@@ -123,96 +132,206 @@
 
         #debtorModal {
             background:
-                radial-gradient(1200px circle at 12% 10%, rgba(30, 64, 175, 0.2), transparent 42%),
+                radial-gradient(940px circle at 14% 8%, rgba(37, 99, 235, 0.16), transparent 42%),
+                radial-gradient(740px circle at 82% 86%, rgba(15, 23, 42, 0.4), transparent 58%),
                 rgba(2, 6, 23, 0.78);
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3px);
         }
 
         .debtor-modal-panel {
-            border-radius: 22px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            background: linear-gradient(165deg, rgba(8, 15, 34, 0.96) 0%, rgba(11, 22, 46, 0.94) 55%, rgba(8, 28, 62, 0.9) 100%);
-            box-shadow: 0 28px 70px -34px rgba(2, 6, 23, 0.85), inset 0 1px 0 rgba(148, 163, 184, 0.18);
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(162deg, rgba(8, 15, 34, 0.97) 0%, rgba(9, 21, 44, 0.95) 56%, rgba(9, 29, 62, 0.93) 100%);
+            box-shadow: 0 30px 70px -36px rgba(2, 6, 23, 0.86), inset 0 1px 0 rgba(148, 163, 184, 0.18);
         }
 
         .debtor-modal-header {
             border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-            padding-bottom: 0.9rem;
-            margin-bottom: 1.1rem;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1rem;
         }
 
         .debtor-modal-kicker {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: #93c5fd;
+            letter-spacing: 0.16em;
+            color: #9dc6ff;
         }
 
         .debtor-modal-title {
             margin-top: 0.25rem;
             color: #f8fafc;
-            font-size: 1.75rem;
+            font-size: 2rem;
             line-height: 1.1;
             font-weight: 700;
         }
 
         .debtor-modal-subtitle {
             margin-top: 0.3rem;
-            font-size: 0.88rem;
-            color: #9fb0c9;
+            font-size: 0.9rem;
+            color: #9aabc3;
         }
 
         .debtor-modal-close {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 12px;
             border: 1px solid rgba(148, 163, 184, 0.22);
-            background: rgba(15, 23, 42, 0.58);
+            background: rgba(15, 23, 42, 0.48);
             color: #cbd5e1;
-            transition: background-color 140ms ease-out, color 140ms ease-out, border-color 140ms ease-out;
+            transition: background-color 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out;
         }
 
         .debtor-modal-close:hover {
-            background: rgba(30, 41, 59, 0.8);
+            background: rgba(30, 41, 59, 0.74);
             color: #f8fafc;
-            border-color: rgba(96, 165, 250, 0.42);
+            border-color: rgba(96, 165, 250, 0.48);
         }
 
         .debtor-form-card {
-            border-radius: 16px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            background: linear-gradient(160deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.42) 100%);
-            padding: 1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.56) 0%, rgba(15, 23, 42, 0.4) 100%);
+            padding: 1.05rem;
         }
 
         .debtor-form-card h4 {
             color: #dbeafe;
         }
 
-        #debtorModal .debtor-form-card label {
+        .debtor-form-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 0.85rem 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .debtor-form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .debtor-field {
+            min-width: 0;
+        }
+
+        .debtor-field--full {
+            grid-column: 1 / -1;
+        }
+
+        .debtor-field-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 0.38rem;
             color: #9fb0c9;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            line-height: 1.2;
+        }
+
+        .debtor-required-mark {
+            color: #cfe2ff;
+            font-weight: 700;
+        }
+
+        .debtor-optional-tag {
+            color: #7e90ab;
+            font-size: 0.76rem;
             font-weight: 500;
         }
 
-        #debtorModal .filter-control.input-shell {
-            background: rgba(15, 23, 42, 0.62);
-            border-color: rgba(148, 163, 184, 0.3);
+        .debtor-input-wrap {
+            position: relative;
+        }
+
+        .debtor-input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #89a3c8;
+            font-size: 0.86rem;
+            pointer-events: none;
+            transition: color 160ms ease-out;
+        }
+
+        #debtorModal .debtor-input-control {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(30, 41, 59, 0.36) 100%);
             color: #e2e8f0;
+            padding: 10px 12px 10px 38px;
+            font-size: 0.98rem;
+            line-height: 1.25;
+            transition: border-color 180ms ease-out, box-shadow 180ms ease-out, background-color 180ms ease-out;
         }
 
-        #debtorModal .filter-control.input-shell::placeholder {
-            color: #8ea0ba;
+        #debtorModal .debtor-input-control::placeholder {
+            color: #7d91ad;
         }
 
-        #debtorModal .filter-control.input-shell:focus,
-        #debtorModal .filter-control.input-shell:focus-visible {
-            border-color: rgba(96, 165, 250, 0.65);
+        #debtorModal .debtor-input-control:hover {
+            border-color: rgba(148, 163, 184, 0.44);
+        }
+
+        #debtorModal .debtor-input-control:focus,
+        #debtorModal .debtor-input-control:focus-visible {
+            border-color: rgba(96, 165, 250, 0.78);
             outline: none !important;
-            box-shadow: none !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 14px 30px -22px rgba(59, 130, 246, 0.7);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.58) 0%, rgba(30, 41, 59, 0.42) 100%);
+        }
+
+        #debtorModal .debtor-input-wrap:focus-within .debtor-input-icon {
+            color: #bfdbfe;
+        }
+
+        #debtorModal .debtor-input-control.field-invalid {
+            border-color: rgba(248, 113, 113, 0.85);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.16);
+        }
+
+        #debtorModal .debtor-input-control.field-invalid + .debtor-select-arrow {
+            color: #fca5a5;
+        }
+
+        #debtorModal select.debtor-input-control {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .debtor-select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8fa6c9;
+            font-size: 0.75rem;
+            pointer-events: none;
+            transition: color 160ms ease-out;
+        }
+
+        #debtorModal .debtor-input-wrap:focus-within .debtor-select-arrow {
+            color: #bfdbfe;
+        }
+
+        .debtor-field-error {
+            margin-top: 0.36rem;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            font-weight: 600;
+            color: #fda4af;
         }
 
         #debtorModal button:focus,
@@ -221,43 +340,44 @@
             box-shadow: none !important;
         }
 
-        #debtorModal select.filter-control.input-shell option {
+        #debtorModal select.debtor-input-control option {
             background: #0f172a;
             color: #e2e8f0;
         }
 
         .debtor-action-row {
-            margin-top: 0.75rem;
+            margin-top: 1.1rem;
             padding-top: 1rem;
             border-top: 1px solid rgba(148, 163, 184, 0.18);
         }
 
         .debtor-btn-secondary {
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            background: rgba(51, 65, 85, 0.52);
-            color: #e2e8f0;
-            min-width: 120px;
-            transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out;
+            border: 1px solid rgba(148, 163, 184, 0.36);
+            background: rgba(15, 23, 42, 0.44);
+            color: #cbd5e1;
+            min-width: 126px;
+            transition: background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
         }
 
         .debtor-btn-secondary:hover {
-            background: rgba(71, 85, 105, 0.64);
-            border-color: rgba(148, 163, 184, 0.62);
+            background: rgba(51, 65, 85, 0.64);
+            border-color: rgba(148, 163, 184, 0.54);
             color: #f8fafc;
         }
 
         .debtor-btn-primary {
-            border: 1px solid rgba(96, 165, 250, 0.6);
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.96) 0%, rgba(37, 99, 235, 0.95) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.64);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.94) 0%, rgba(59, 130, 246, 0.92) 100%);
             color: #eff6ff;
-            min-width: 140px;
-            box-shadow: 0 10px 24px -14px rgba(37, 99, 235, 0.8);
-            transition: filter 140ms ease-out, box-shadow 140ms ease-out;
+            min-width: 164px;
+            box-shadow: 0 14px 28px -16px rgba(59, 130, 246, 0.86);
+            transition: filter 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
         }
 
         .debtor-btn-primary:hover {
-            filter: brightness(1.06);
-            box-shadow: 0 12px 28px -14px rgba(37, 99, 235, 0.9);
+            filter: brightness(1.08);
+            box-shadow: 0 18px 32px -18px rgba(59, 130, 246, 0.95);
+            transform: translateY(-1px);
         }
 
         .clients-data-panel {
@@ -372,8 +492,8 @@
             width: 30px;
             height: 30px;
             border-radius: 8px;
-            border: 1px solid transparent;
-            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(248, 250, 252, 0.72);
             color: #475569;
             transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
         }
@@ -389,30 +509,36 @@
         }
         .debtor-action-btn[data-variant="details"] {
             color: #2563eb;
+            border-color: rgba(59, 130, 246, 0.45);
+            background: rgba(239, 246, 255, 0.82);
         }
         .debtor-action-btn[data-variant="details"]:hover {
-            background: #eff6ff;
-            border-color: #dbeafe;
+            background: #dbeafe;
+            border-color: #93c5fd;
             color: #1d4ed8;
         }
         .debtor-action-btn[data-variant="details"].is-expanded {
-            background: #eff6ff;
-            border-color: #dbeafe;
+            background: #dbeafe;
+            border-color: #93c5fd;
             color: #1d4ed8;
         }
         .debtor-action-btn[data-variant="edit"] {
             color: #059669;
+            border-color: rgba(16, 185, 129, 0.44);
+            background: rgba(236, 253, 245, 0.82);
         }
         .debtor-action-btn[data-variant="edit"]:hover {
-            background: #ecfdf5;
-            border-color: #a7f3d0;
+            background: #d1fae5;
+            border-color: #6ee7b7;
             color: #047857;
         }
         .debtor-action-btn[data-variant="delete"] {
             color: #dc2626;
+            border-color: rgba(248, 113, 113, 0.45);
+            background: rgba(254, 242, 242, 0.82);
         }
         .debtor-action-btn[data-variant="delete"]:hover {
-            background: #fef2f2;
+            background: #fee2e2;
             border-color: #fca5a5;
             color: #b91c1c;
         }
@@ -732,7 +858,7 @@
 
             .debtor-modal-panel {
                 padding: 1rem;
-                border-radius: 18px;
+                border-radius: 14px;
             }
 
             .debtor-modal-title {
@@ -790,7 +916,10 @@
             color: #e2e8f0;
         }
 
+        .dark .kpi-label { color: #94a3b8; }
         .dark .kpi-value { color: #f8fafc; }
+        .dark .kpi-insight,
+        .dark .kpi-insight-line { color: #cbd5e1; }
         .dark .filter-control,
         .dark .table-shell,
         .dark .table-shell td {
@@ -831,15 +960,43 @@
         .dark .debtor-action-btn {
             border-color: rgba(148, 163, 184, 0.24);
             color: #cbd5e1;
-            background: transparent;
+            background: rgba(15, 23, 42, 0.45);
         }
         .dark .debtor-action-btn:hover {
             background: rgba(51, 65, 85, 0.52);
             border-color: rgba(148, 163, 184, 0.38);
         }
-        .dark .debtor-action-btn[data-variant="details"] { color: #93c5fd; }
-        .dark .debtor-action-btn[data-variant="edit"] { color: #6ee7b7; }
-        .dark .debtor-action-btn[data-variant="delete"] { color: #fca5a5; }
+        .dark .debtor-action-btn[data-variant="details"] {
+            color: #93c5fd;
+            border-color: rgba(96, 165, 250, 0.45);
+            background: rgba(30, 58, 138, 0.22);
+        }
+        .dark .debtor-action-btn[data-variant="details"]:hover {
+            border-color: rgba(147, 197, 253, 0.6);
+            background: rgba(37, 99, 235, 0.28);
+            color: #dbeafe;
+        }
+        .dark .debtor-action-btn[data-variant="edit"] {
+            color: #6ee7b7;
+            border-color: rgba(52, 211, 153, 0.42);
+            background: rgba(6, 95, 70, 0.22);
+        }
+        .dark .debtor-action-btn[data-variant="edit"]:hover {
+            border-color: rgba(110, 231, 183, 0.58);
+            background: rgba(5, 150, 105, 0.26);
+            color: #a7f3d0;
+        }
+        .dark .debtor-action-btn[data-variant="delete"] {
+            color: #fca5a5;
+            border-color: rgba(248, 113, 113, 0.44);
+            background: rgba(127, 29, 29, 0.24);
+        }
+        .dark .debtor-action-btn[data-variant="delete"]:hover {
+            border-color: rgba(252, 165, 165, 0.62);
+            background: rgba(185, 28, 28, 0.28);
+            color: #fecaca;
+        }
+
 </style>
     <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
     <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css">
@@ -910,57 +1067,29 @@
             </div>
 
             <div class="clients-kpi-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
-                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
-                    <div class="relative flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Total de clientes</p>
-                            <p id="totalDebtors" class="mt-3 text-4xl font-extrabold leading-none text-gray-900">&mdash;</p>
-                            <p id="totalDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
-                        </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
-                            <i class="fas fa-users"></i>
-                        </span>
-                    </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-users"></i></span>
+                    <p class="kpi-label">Total de clientes</p>
+                    <p id="totalDebtors" class="kpi-value mt-3">&mdash;</p>
+                    <p id="totalDebtorsInsight" class="kpi-insight">Carregando dados...</p>
                 </div>
-                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
-                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
-                    <div class="relative flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Ativos</p>
-                            <p id="activeDebtors" class="mt-3 text-4xl font-extrabold leading-none text-emerald-600">&mdash;</p>
-                            <p id="activeDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
-                        </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
-                            <i class="fas fa-circle-check"></i>
-                        </span>
-                    </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-circle-check"></i></span>
+                    <p class="kpi-label">Clientes ativos</p>
+                    <p id="activeDebtors" class="kpi-value mt-3">&mdash;</p>
+                    <p id="activeDebtorsInsight" class="kpi-insight">Carregando dados...</p>
                 </div>
-                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
-                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
-                    <div class="relative flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Inativos</p>
-                            <p id="inactiveDebtors" class="mt-3 text-4xl font-extrabold leading-none text-slate-700">&mdash;</p>
-                            <p id="inactiveDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
-                        </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
-                            <i class="fas fa-user-clock"></i>
-                        </span>
-                    </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-user-clock"></i></span>
+                    <p class="kpi-label">Clientes inativos</p>
+                    <p id="inactiveDebtors" class="kpi-value mt-3">&mdash;</p>
+                    <p id="inactiveDebtorsInsight" class="kpi-insight">Carregando dados...</p>
                 </div>
-                <div class="card relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm">
-                    <span class="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-slate-200/60 blur-2xl"></span>
-                    <div class="relative flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">Com atraso</p>
-                            <p id="overdueDebtors" class="mt-3 text-4xl font-extrabold leading-none text-amber-600">&mdash;</p>
-                            <p id="overdueDebtorsInsight" class="kpi-insight-line">Carregando dados...</p>
-                        </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-500">
-                            <i class="fas fa-triangle-exclamation"></i>
-                        </span>
-                    </div>
+                <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                    <span class="pointer-events-none absolute right-4 top-4 text-slate-400/80"><i class="fas fa-triangle-exclamation"></i></span>
+                    <p class="kpi-label">Clientes com atraso</p>
+                    <p id="overdueDebtors" class="kpi-value mt-3">&mdash;</p>
+                    <p id="overdueDebtorsInsight" class="kpi-insight">Carregando dados...</p>
                 </div>
             </div>
 
@@ -1071,110 +1200,189 @@
                 </div>
             </div>
 
-            <div id="debtorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="debtor-modal-panel w-full max-w-2xl p-6">
-                    <div class="debtor-modal-header mb-5 flex items-start justify-between gap-4">
-                        <div>
-                            <p class="debtor-modal-kicker">Cadastro</p>
-                            <h3 id="debtorModalTitle" class="debtor-modal-title">Novo cliente</h3>
-                            <p class="debtor-modal-subtitle">Preencha os dados para cadastrar o cliente e acompanhar os empréstimos.</p>
+            <div id="debtorModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="debtorModalTitle">
+                <div class="modal-base__panel modal-base__panel--lg debtor-modal-panel">
+                    <form id="newDebtorForm" class="flex min-h-0 flex-1 flex-col" novalidate>
+                        <div class="modal-base__header debtor-modal-header">
+                            <div class="modal-base__title-wrap">
+                                <p class="debtor-modal-kicker">Cadastro</p>
+                                <h3 id="debtorModalTitle" class="modal-base__title debtor-modal-title">Novo cliente</h3>
+                                <p class="modal-base__description debtor-modal-subtitle">Preencha os dados para cadastrar o cliente e acompanhar os empréstimos.</p>
+                            </div>
+                            <button id="closeDebtorModalBtn" class="modal-base__close debtor-modal-close" data-modal-close="primary" type="button" aria-label="Fechar cadastro de cliente"><i class="fas fa-times"></i></button>
                         </div>
-                        <button id="closeDebtorModalBtn" class="debtor-modal-close" type="button"><i class="fas fa-times"></i></button>
-                    </div>
-                    <form id="newDebtorForm" class="space-y-4" novalidate>
-                        <div class="debtor-form-card">
-                            <h4 class="mb-3 text-sm font-semibold uppercase tracking-wide">Informações do cliente</h4>
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div class="md:col-span-2">
-                                    <label class="mb-1 block text-sm text-gray-600">Nome*</label>
-                                    <input id="newDebtorName" class="filter-control input-shell" type="text" autocomplete="name" placeholder="Nome completo" required>
-                                    <p id="newDebtorNameError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Telefone/WhatsApp*</label>
-                                    <input id="newDebtorPhone" class="filter-control input-shell" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
-                                    <p id="newDebtorPhoneError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">CPF (opcional)</label>
-                                    <input id="newDebtorCpf" class="filter-control input-shell" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
-                                    <p id="newDebtorCpfError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">E-mail (opcional)</label>
-                                    <input id="newDebtorEmail" class="filter-control input-shell" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
-                                    <p id="newDebtorEmailError" class="mt-1 hidden text-xs font-semibold text-red-600"></p>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm text-gray-600">Status</label>
-                                    <select id="newDebtorStatus" class="filter-control input-shell">
-                                        <option value="Ativo">Ativo</option>
-                                        <option value="Inativo">Inativo</option>
-                                    </select>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="mb-1 block text-sm text-gray-600">Endereço (opcional)</label>
-                                    <input id="newDebtorAddress" class="filter-control input-shell" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+
+                        <div class="modal-base__body">
+                            <div class="modal-base__section debtor-form-card">
+                                <h4 class="modal-base__section-title">Informações do cliente</h4>
+                                <div class="debtor-form-grid">
+                                    <div class="debtor-field debtor-field--full">
+                                        <label class="debtor-field-label">Nome <span class="debtor-required-mark">*</span></label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-user debtor-input-icon" aria-hidden="true"></i>
+                                            <input id="newDebtorName" class="filter-control input-shell debtor-input-control" type="text" autocomplete="name" placeholder="Nome completo" required data-modal-autofocus>
+                                        </div>
+                                        <p id="newDebtorNameError" class="debtor-field-error mt-1 hidden"></p>
+                                    </div>
+                                    <div class="debtor-field">
+                                        <label class="debtor-field-label">Telefone/WhatsApp <span class="debtor-required-mark">*</span></label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-phone debtor-input-icon" aria-hidden="true"></i>
+                                            <input id="newDebtorPhone" class="filter-control input-shell debtor-input-control" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" maxlength="15" required>
+                                        </div>
+                                        <p id="newDebtorPhoneError" class="debtor-field-error mt-1 hidden"></p>
+                                    </div>
+                                    <div class="debtor-field">
+                                        <label class="debtor-field-label">CPF <span class="debtor-optional-tag">(opcional)</span></label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-id-card debtor-input-icon" aria-hidden="true"></i>
+                                            <input id="newDebtorCpf" class="filter-control input-shell debtor-input-control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
+                                        </div>
+                                        <p id="newDebtorCpfError" class="debtor-field-error mt-1 hidden"></p>
+                                    </div>
+                                    <div class="debtor-field">
+                                        <label class="debtor-field-label">E-mail <span class="debtor-optional-tag">(opcional)</span></label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-envelope debtor-input-icon" aria-hidden="true"></i>
+                                            <input id="newDebtorEmail" class="filter-control input-shell debtor-input-control" type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.com">
+                                        </div>
+                                        <p id="newDebtorEmailError" class="debtor-field-error mt-1 hidden"></p>
+                                    </div>
+                                    <div class="debtor-field">
+                                        <label class="debtor-field-label">Status</label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-signal debtor-input-icon" aria-hidden="true"></i>
+                                            <select id="newDebtorStatus" class="filter-control input-shell debtor-input-control debtor-select-control">
+                                                <option value="Ativo">Ativo</option>
+                                                <option value="Inativo">Inativo</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down debtor-select-arrow" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="debtor-field debtor-field--full">
+                                        <label class="debtor-field-label">Endereço <span class="debtor-optional-tag">(opcional)</span></label>
+                                        <div class="debtor-input-wrap">
+                                            <i class="fas fa-location-dot debtor-input-icon" aria-hidden="true"></i>
+                                            <input id="newDebtorAddress" class="filter-control input-shell debtor-input-control" type="text" autocomplete="street-address" placeholder="Rua, nº - Bairro">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="debtor-action-row flex items-center justify-end gap-3 pt-2">
-                            <button id="cancelDebtorModalBtn" type="button" class="debtor-btn-secondary rounded-xl px-4 py-2 text-sm font-semibold">Cancelar</button>
-                            <button type="submit" class="debtor-btn-primary rounded-xl px-4 py-2 text-sm font-semibold">Salvar cliente</button>
+
+                        <div class="modal-base__footer debtor-action-row">
+                            <div class="modal-base__footer-secondary">
+                                <button id="cancelDebtorModalBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary debtor-btn-secondary">Cancelar</button>
+                            </div>
+                            <div class="modal-base__footer-actions">
+                                <button type="submit" class="modal-btn modal-btn--primary debtor-btn-primary">
+                                    <i class="fas fa-check mr-2"></i>Salvar cliente
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div id="deleteDebtorConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
-                    <h3 class="text-xl font-semibold text-gray-800">Confirmar exclusão</h3>
-                    <p class="mt-2 text-sm text-gray-600">Tem certeza que deseja excluir este cliente?</p>
-                    <div class="mt-6 flex items-center justify-end gap-3">
-                        <button id="cancelDeleteDebtorBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                            Cancelar
+            <div id="deleteDebtorConfirmModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="deleteDebtorConfirmTitle">
+                <div class="modal-base__panel modal-base__panel--md">
+                    <div class="modal-base__header">
+                        <div class="modal-base__title-wrap">
+                            <h3 id="deleteDebtorConfirmTitle" class="modal-base__title text-2xl">Confirmar exclusão</h3>
+                            <p class="modal-base__description">Tem certeza que deseja excluir este cliente?</p>
+                        </div>
+                        <button id="closeDeleteDebtorConfirmModalBtn" type="button" class="modal-base__close" data-modal-close="primary" aria-label="Fechar confirmação de exclusão">
+                            <i class="fas fa-times"></i>
                         </button>
-                        <button id="confirmDeleteDebtorBtn" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
-                            Excluir
-                        </button>
+                    </div>
+                    <div class="modal-base__body">
+                        <div class="modal-base__section">
+                            <p class="text-sm text-gray-500">Essa ação não pode ser desfeita e também remove vínculos de histórico deste cliente.</p>
+                        </div>
+                    </div>
+                    <div class="modal-base__footer">
+                        <div class="modal-base__footer-secondary">
+                            <button id="cancelDeleteDebtorBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Cancelar</button>
+                        </div>
+                        <div class="modal-base__footer-actions">
+                            <button id="confirmDeleteDebtorBtn" type="button" class="modal-btn modal-btn--danger">Excluir</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="registerPaymentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-                <div class="w-full max-w-lg rounded-2xl border border-gray-200 bg-slate-50 p-6 shadow-2xl">
-                    <div class="mb-5 flex items-start justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800">Registrar pagamento</h3>
-                            <p class="text-sm text-gray-500">Cliente: <span id="registerPaymentDebtorName" class="font-semibold text-gray-800">-</span></p>
-                        </div>
-                        <button id="closeRegisterPaymentModalBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none" type="button"><i class="fas fa-times"></i></button>
-                    </div>
-                    <form id="registerPaymentForm" class="space-y-4">
-                        <div>
-                            <label for="registerPaymentAmount" class="mb-1 block text-sm text-gray-600">Valor (R$)</label>
-                            <input id="registerPaymentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control input-shell" required placeholder="0,00">
-                        </div>
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label for="registerPaymentDate" class="mb-1 block text-sm text-gray-600">Data do pagamento</label>
-                                <input id="registerPaymentDate" type="date" class="filter-control input-shell" required>
+            <div id="registerPaymentModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="registerPaymentModalTitle">
+                <div class="modal-base__panel modal-base__panel--md">
+                    <form id="registerPaymentForm" class="flex min-h-0 flex-1 flex-col">
+                        <div class="modal-base__header">
+                            <div class="modal-base__title-wrap">
+                                <h3 id="registerPaymentModalTitle" class="modal-base__title text-2xl">Registrar pagamento</h3>
+                                <p class="modal-base__description">Confirme os dados da parcela e registre o recebimento.</p>
                             </div>
-                            <div>
-                                <label for="registerPaymentMethod" class="mb-1 block text-sm text-gray-600">Forma</label>
-                                <select id="registerPaymentMethod" class="filter-control input-shell" required>
-                                    <option value="PIX">PIX</option>
-                                    <option value="DINHEIRO">Dinheiro</option>
-                                    <option value="TRANSFERENCIA">Transferência</option>
-                                    <option value="CARTAO">Cartão</option>
-                                </select>
-                            </div>
+                            <button id="closeRegisterPaymentModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar modal de pagamento"><i class="fas fa-times"></i></button>
                         </div>
-                        <div class="flex items-center justify-end gap-3 pt-2">
-                            <button id="cancelRegisterPaymentModalBtn" type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancelar</button>
-                            <button id="saveRegisterPaymentBtn" type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                                <i class="fas fa-check mr-2"></i>Registrar
-                            </button>
+
+                        <div class="modal-base__body">
+                            <section class="modal-base__section">
+                                <h4 class="modal-base__section-title">Resumo da parcela</h4>
+                                <div class="modal-base__grid-2">
+                                    <div class="modal-base__field">
+                                        <p class="modal-base__field-label mb-1">Cliente</p>
+                                        <p id="registerPaymentDebtorName" class="text-base font-semibold text-gray-900">-</p>
+                                    </div>
+                                    <div class="modal-base__field">
+                                        <p class="modal-base__field-label mb-1">Parcela alvo</p>
+                                        <p id="registerPaymentInstallmentRef" class="text-base font-semibold text-gray-900">-</p>
+                                    </div>
+                                    <div class="modal-base__field">
+                                        <p class="modal-base__field-label mb-1">Vencimento</p>
+                                        <p id="registerPaymentInstallmentDue" class="text-sm font-semibold text-gray-700">-</p>
+                                    </div>
+                                    <div class="modal-base__field">
+                                        <p class="modal-base__field-label mb-1">Status</p>
+                                        <span id="registerPaymentInstallmentStatus" class="status-chip status-chip--warning">Pendente</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="modal-base__section">
+                                <h4 class="modal-base__section-title">Pagamento</h4>
+                                <div class="modal-base__grid-2">
+                                    <div class="modal-base__field">
+                                        <label for="registerPaymentAmount" class="modal-base__field-label">Valor (R$)</label>
+                                        <input id="registerPaymentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control input-shell" required placeholder="0,00" data-modal-autofocus>
+                                    </div>
+                                    <div class="modal-base__field">
+                                        <label for="registerPaymentDate" class="modal-base__field-label">Data do pagamento</label>
+                                        <input id="registerPaymentDate" type="date" class="filter-control input-shell" required>
+                                    </div>
+                                    <div class="modal-base__field debtor-field--full">
+                                        <label for="registerPaymentMethod" class="modal-base__field-label">Forma de pagamento</label>
+                                        <select id="registerPaymentMethod" class="filter-control input-shell" required>
+                                            <option value="PIX">PIX</option>
+                                            <option value="DINHEIRO">Dinheiro</option>
+                                            <option value="TRANSFERENCIA">Transferência</option>
+                                            <option value="CARTAO">Cartão</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="modal-base__section">
+                                <h4 class="modal-base__section-title">Observação</h4>
+                                <textarea id="registerPaymentNotes" rows="3" class="filter-control input-shell modal-base__textarea" placeholder="Observações sobre este pagamento (opcional)"></textarea>
+                            </section>
+                        </div>
+
+                        <div class="modal-base__footer">
+                            <div class="modal-base__footer-secondary">
+                                <button id="cancelRegisterPaymentModalBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Voltar</button>
+                            </div>
+                            <div class="modal-base__footer-actions">
+                                <button id="saveRegisterPaymentBtn" type="submit" class="modal-btn modal-btn--primary">
+                                    <i class="fas fa-check mr-2"></i>Confirmar pagamento
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1191,6 +1399,7 @@
         </main>
     </div>
 
+    <script src="/scripts/modal-system.js"></script>
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
     <script>
         const currentUser = window.__AUTH_USER__;
@@ -1416,13 +1625,18 @@
         const registerPaymentModal = document.getElementById('registerPaymentModal');
         const registerPaymentForm = document.getElementById('registerPaymentForm');
         const registerPaymentDebtorName = document.getElementById('registerPaymentDebtorName');
+        const registerPaymentInstallmentRef = document.getElementById('registerPaymentInstallmentRef');
+        const registerPaymentInstallmentDue = document.getElementById('registerPaymentInstallmentDue');
+        const registerPaymentInstallmentStatus = document.getElementById('registerPaymentInstallmentStatus');
         const registerPaymentAmount = document.getElementById('registerPaymentAmount');
         const registerPaymentDate = document.getElementById('registerPaymentDate');
         const registerPaymentMethod = document.getElementById('registerPaymentMethod');
+        const registerPaymentNotes = document.getElementById('registerPaymentNotes');
         const closeRegisterPaymentModalBtn = document.getElementById('closeRegisterPaymentModalBtn');
         const cancelRegisterPaymentModalBtn = document.getElementById('cancelRegisterPaymentModalBtn');
         const saveRegisterPaymentBtn = document.getElementById('saveRegisterPaymentBtn');
         const deleteDebtorConfirmModal = document.getElementById('deleteDebtorConfirmModal');
+        const closeDeleteDebtorConfirmModalBtn = document.getElementById('closeDeleteDebtorConfirmModalBtn');
         const cancelDeleteDebtorBtn = document.getElementById('cancelDeleteDebtorBtn');
         const confirmDeleteDebtorBtn = document.getElementById('confirmDeleteDebtorBtn');
         const deleteDebtorToast = document.getElementById('deleteDebtorToast');
@@ -1551,13 +1765,24 @@
         function setInlineError(element, message) {
             if (!element) return;
             const text = String(message || '').trim();
+            const fieldId = element.id.endsWith('Error') ? element.id.slice(0, -5) : '';
+            const fieldInput = fieldId ? document.getElementById(fieldId) : null;
+
             if (!text) {
                 element.textContent = '';
                 element.classList.add('hidden');
+                if (fieldInput instanceof HTMLElement) {
+                    fieldInput.classList.remove('field-invalid');
+                    fieldInput.removeAttribute('aria-invalid');
+                }
                 return;
             }
             element.textContent = text;
             element.classList.remove('hidden');
+            if (fieldInput instanceof HTMLElement) {
+                fieldInput.classList.add('field-invalid');
+                fieldInput.setAttribute('aria-invalid', 'true');
+            }
         }
 
         function clearDebtorFormErrors() {
@@ -2355,10 +2580,15 @@
             if (!target) return null;
 
             const amount = Number(target.installment.amount ?? target.installment.value ?? 0);
+            const installmentNumber = Number(target.installment.installment_number ?? target.installment.number);
             return {
                 loanId: target.installment.loan_id ?? target.installment.loanId,
                 installmentId: target.installment.id,
                 amount: Number.isFinite(amount) ? amount : 0,
+                dueDate: target.installment.due_date ?? null,
+                installmentNumber: Number.isFinite(installmentNumber) && installmentNumber > 0 ? installmentNumber : null,
+                isOverdue: Boolean(target.isOverdue),
+                statusLabel: target.isOverdue ? 'Em atraso' : 'Pendente',
             };
         }
 
@@ -3209,12 +3439,31 @@
                 debtorId: debtor.id,
                 loanId: target.loanId,
                 installmentId: target.installmentId,
+                dueDate: target.dueDate || '',
+                statusLabel: target.statusLabel || 'Pendente',
+                isOverdue: Boolean(target.isOverdue),
             };
 
             if (registerPaymentDebtorName) registerPaymentDebtorName.textContent = debtor?.name || '-';
+            if (registerPaymentInstallmentRef) {
+                const installmentRef = target.installmentNumber
+                    ? `Parcela #${target.installmentNumber}`
+                    : `Parcela #${target.installmentId}`;
+                registerPaymentInstallmentRef.textContent = installmentRef;
+            }
+            if (registerPaymentInstallmentDue) {
+                registerPaymentInstallmentDue.textContent = target.dueDate ? formatDate(target.dueDate) : '-';
+            }
+            if (registerPaymentInstallmentStatus) {
+                registerPaymentInstallmentStatus.textContent = target.statusLabel || 'Pendente';
+                registerPaymentInstallmentStatus.className = target.isOverdue
+                    ? 'status-chip status-chip--danger'
+                    : 'status-chip status-chip--warning';
+            }
             if (registerPaymentAmount) registerPaymentAmount.value = formatCurrencyInput(target.amount || 0);
             if (registerPaymentDate) registerPaymentDate.value = getLocalTodayDateInputValue();
             if (registerPaymentMethod) registerPaymentMethod.value = 'PIX';
+            if (registerPaymentNotes) registerPaymentNotes.value = '';
 
             registerPaymentModal.classList.remove('hidden');
             registerPaymentModal.classList.add('flex');
@@ -3229,6 +3478,12 @@
             registerPaymentModal.classList.remove('flex');
             unlockBodyScrollForDebtorsModal(registerPaymentModal);
             if (registerPaymentForm) registerPaymentForm.reset();
+            if (registerPaymentInstallmentRef) registerPaymentInstallmentRef.textContent = '-';
+            if (registerPaymentInstallmentDue) registerPaymentInstallmentDue.textContent = '-';
+            if (registerPaymentInstallmentStatus) {
+                registerPaymentInstallmentStatus.textContent = 'Pendente';
+                registerPaymentInstallmentStatus.className = 'status-chip status-chip--warning';
+            }
         }
 
         function setRegisterPaymentSaving(isSaving) {
@@ -3387,6 +3642,7 @@
             });
         }
 
+        if (closeDeleteDebtorConfirmModalBtn) closeDeleteDebtorConfirmModalBtn.addEventListener('click', closeDeleteDebtorConfirmModal);
         if (cancelDeleteDebtorBtn) cancelDeleteDebtorBtn.addEventListener('click', closeDeleteDebtorConfirmModal);
         if (confirmDeleteDebtorBtn) confirmDeleteDebtorBtn.addEventListener('click', confirmDeleteDebtor);
         if (deleteDebtorConfirmModal) {
@@ -3453,6 +3709,10 @@
 
                 const paymentDateValue = String(registerPaymentDate?.value || '').trim() || getLocalTodayDateInputValue();
                 const methodValue = String(registerPaymentMethod?.value || 'PIX').trim();
+                const notesValue = String(registerPaymentNotes?.value || '').trim();
+                const composedNotes = notesValue
+                    ? `Registrado via Clientes | ${notesValue}`
+                    : 'Registrado via Clientes';
 
                 setRegisterPaymentSaving(true);
                 try {
@@ -3466,7 +3726,7 @@
                             amount,
                             paymentDate: paymentDateValue,
                             method: methodValue,
-                            notes: 'Registrado via Clientes',
+                            notes: composedNotes,
                         }),
                     });
 
