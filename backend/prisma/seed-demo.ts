@@ -3,8 +3,11 @@ import {
   ClientStatus,
   InstallmentStatus,
   InterestType,
+  LoanSimulationInterestType,
+  LoanSimulationStatus,
   LoanStatus,
   PaymentMethod,
+  Prisma,
   PrismaClient,
   UserRole,
 } from "@prisma/client";
@@ -36,6 +39,81 @@ function addDaysUtc(date: Date, days: number): Date {
   const next = new Date(date.getTime());
   next.setUTCDate(next.getUTCDate() + days);
   return next;
+}
+
+function toIsoDateOnly(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function splitAmount(total: number, parts: number): number[] {
+  const safeParts = Math.max(1, Math.trunc(parts));
+  const cents = Math.round(total * 100);
+  const base = Math.floor(cents / safeParts);
+  const remainder = cents - (base * safeParts);
+
+  return Array.from({ length: safeParts }, (_item, index) => {
+    const amount = base + (index === safeParts - 1 ? remainder : 0);
+    return Math.round(amount) / 100;
+  });
+}
+
+function buildSimulationSeedPayload(params: {
+  principalAmount: number;
+  interestType: LoanSimulationInterestType;
+  interestRate: number;
+  fixedFeeAmount: number;
+  installmentsCount: number;
+  startDateIso: string;
+  firstDueDateIso: string;
+  todayIso: string;
+  observations: string;
+}) {
+  const installmentsCount = Math.max(1, Math.trunc(params.installmentsCount));
+  const principalAmount = Math.round(params.principalAmount * 100) / 100;
+  const fixedFeeAmount = Math.round(params.fixedFeeAmount * 100) / 100;
+  const interestRate = Math.round(params.interestRate * 100) / 100;
+
+  const dueDates = Array.from({ length: installmentsCount }, (_item, index) => {
+    const firstDueDate = isoToUtcDateOnly(params.firstDueDateIso);
+    return toIsoDateOnly(addDaysUtc(firstDueDate, index * 30));
+  });
+
+  const totalInterest = params.interestType === LoanSimulationInterestType.FIXO
+    ? fixedFeeAmount
+    : Math.round((principalAmount * (interestRate / 100) * installmentsCount) * 100) / 100;
+  const totalAmount = Math.round((principalAmount + totalInterest) * 100) / 100;
+  const installmentAmount = Math.round((totalAmount / installmentsCount) * 100) / 100;
+
+  const principalParts = splitAmount(principalAmount, installmentsCount);
+  const interestParts = splitAmount(totalInterest, installmentsCount);
+  const amountParts = splitAmount(totalAmount, installmentsCount);
+
+  return {
+    firstDueDate: isoToUtcDateOnly(params.firstDueDateIso),
+    scheduleJson: {
+      startDate: params.startDateIso,
+      dueDates,
+      observations: params.observations,
+      installments: dueDates.map((dueDate, index) => ({
+        installmentNumber: index + 1,
+        dueDate,
+        amount: amountParts[index],
+        principalAmount: principalParts[index],
+        interestAmount: interestParts[index],
+        status: dueDate < params.todayIso ? "Atrasado" : "Pendente",
+      })),
+    },
+    totalsJson: {
+      totalAmount,
+      totalInterest,
+      installmentAmount,
+      interestRate,
+      fixedFeeAmount,
+    },
+  };
 }
 
 function computeCpfCheckDigit(digits: number[], factorStart: number): number {
@@ -465,9 +543,89 @@ async function main() {
         }
       }
     }
+
+    await tx.loanSimulation.deleteMany({
+      where: {
+        ownerUserId: adminUser.id,
+        clientId: { in: clients.map((item) => item.id) },
+      },
+    });
+
+    const simulationSeeds = [
+      {
+        clientId: byIndex(1).id,
+        principalAmount: 3200,
+        interestType: LoanSimulationInterestType.SIMPLES,
+        interestRate: 9.5,
+        fixedFeeAmount: 0,
+        installmentsCount: 6,
+        startDateIso: todayIso,
+        firstDueDateIso: toIsoDateOnly(addDaysUtc(today, 20)),
+        status: LoanSimulationStatus.DRAFT,
+        expiresAt: addDaysUtc(today, 7),
+        observations: "[SEED_DEMO] Simulacao pendente para envio",
+      },
+      {
+        clientId: byIndex(2).id,
+        principalAmount: 6800,
+        interestType: LoanSimulationInterestType.COMPOSTO,
+        interestRate: 12.3,
+        fixedFeeAmount: 0,
+        installmentsCount: 8,
+        startDateIso: todayIso,
+        firstDueDateIso: toIsoDateOnly(addDaysUtc(today, 15)),
+        status: LoanSimulationStatus.SENT,
+        expiresAt: addDaysUtc(today, 5),
+        observations: "[SEED_DEMO] Simulacao enviada por WhatsApp",
+      },
+      {
+        clientId: byIndex(4).id,
+        principalAmount: 2500,
+        interestType: LoanSimulationInterestType.FIXO,
+        interestRate: 0,
+        fixedFeeAmount: 450,
+        installmentsCount: 5,
+        startDateIso: toIsoDateOnly(addDaysUtc(today, -30)),
+        firstDueDateIso: toIsoDateOnly(addDaysUtc(today, -10)),
+        status: LoanSimulationStatus.EXPIRED,
+        expiresAt: addDaysUtc(today, -1),
+        observations: "[SEED_DEMO] Simulacao expirada",
+      },
+    ] as const;
+
+    for (const seed of simulationSeeds) {
+      const built = buildSimulationSeedPayload({
+        principalAmount: seed.principalAmount,
+        interestType: seed.interestType,
+        interestRate: seed.interestRate,
+        fixedFeeAmount: seed.fixedFeeAmount,
+        installmentsCount: seed.installmentsCount,
+        startDateIso: seed.startDateIso,
+        firstDueDateIso: seed.firstDueDateIso,
+        todayIso,
+        observations: seed.observations,
+      });
+
+      await tx.loanSimulation.create({
+        data: {
+          ownerUserId: adminUser.id,
+          clientId: seed.clientId,
+          principalAmount: seed.principalAmount,
+          interestType: seed.interestType,
+          interestRate: seed.interestRate,
+          fixedFeeAmount: seed.interestType === LoanSimulationInterestType.FIXO ? seed.fixedFeeAmount : null,
+          installmentsCount: seed.installmentsCount,
+          firstDueDate: built.firstDueDate,
+          scheduleJson: built.scheduleJson as Prisma.JsonObject,
+          totalsJson: built.totalsJson as Prisma.JsonObject,
+          status: seed.status,
+          expiresAt: seed.expiresAt,
+        },
+      });
+    }
   });
 
-  const [clientsCount, loansCount, installmentsCount, paymentsCount] = await Promise.all([
+  const [clientsCount, loansCount, installmentsCount, paymentsCount, simulationsCount] = await Promise.all([
     prisma.client.count({
       where: {
         ownerUserId: adminUser.id,
@@ -504,6 +662,11 @@ async function main() {
         },
       },
     }),
+    prisma.loanSimulation.count({
+      where: {
+        ownerUserId: adminUser.id,
+      },
+    }),
   ]);
 
   console.log("Seed demo concluido.");
@@ -512,6 +675,7 @@ async function main() {
   console.log(`Emprestimos demo: ${loansCount}`);
   console.log(`Parcelas demo: ${installmentsCount}`);
   console.log(`Pagamentos demo: ${paymentsCount}`);
+  console.log(`Simulacoes demo: ${simulationsCount}`);
 }
 
 main()

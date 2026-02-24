@@ -10,6 +10,7 @@ import { errorHandler } from "./middleware/error-handler";
 import { optionalAuth } from "./middleware/auth";
 import { authRoutes } from "./routes/auth.routes";
 import { dashboardRoutes } from "./routes/dashboard.routes";
+import { loanSimulationsRoutes } from "./routes/loan-simulations.routes";
 import { notificationsRoutes } from "./routes/notifications.routes";
 import { pageRoutes } from "./routes/page.routes";
 import { paymentsRoutes } from "./routes/payments.routes";
@@ -38,6 +39,7 @@ app.get("/health", (_req, res) => {
 
 app.use(authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/loan-simulations", loanSimulationsRoutes);
 app.use("/api/tables", tablesRoutes);
 app.use("/api/payments", paymentsRoutes);
 app.use("/api/notifications", notificationsRoutes);
