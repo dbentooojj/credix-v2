@@ -1000,7 +1000,6 @@
 </style>
     <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
     <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css">
-    <%- include('partials/ui-system') %>
 </head>
 <body class="dashboard-premium dashboard-debtors primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
@@ -1057,22 +1056,15 @@
         </aside>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
-            <%
-                const debtorsHeaderActions = include('components/button', {
-                    id: 'newDebtorBtn',
-                    label: 'Novo cliente',
-                    icon: 'fas fa-user-plus',
-                    variant: 'primary',
-                    className: 'min-h-[44px] px-5'
-                });
-            %>
-            <%- include('components/section', {
-                className: 'mb-6',
-                title: 'Clientes',
-                subtitle: 'Consulte perfil, contato e situação de cada cliente.',
-                headerActions: debtorsHeaderActions,
-                content: ''
-            }) %>
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">Clientes</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Consulte perfil, contato e situação de cada cliente.</p>
+                </div>
+                <button id="newDebtorBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-blue-500">
+                    <i class="fas fa-user-plus mr-2"></i>Novo cliente
+                </button>
+            </div>
 
             <div class="clients-kpi-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
                 <div class="relative rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
@@ -1102,71 +1094,40 @@
             </div>
 
             <div class="clients-data-panel surface rounded-2xl p-4 sm:p-5 lg:p-6">
-                <%
-                    const debtorsSearchField = include('components/field', {
-                        className: 'md:col-span-4',
-                        label: 'Buscar',
-                        labelClassName: 'mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600',
-                        forId: 'debtorSearch',
-                        controlHtml: include('components/input', {
-                            id: 'debtorSearch',
-                            className: 'filter-control input-shell text-sm',
-                            placeholder: 'Nome, telefone ou documento'
-                        })
-                    });
-                    const debtorsStatusField = include('components/field', {
-                        className: 'md:col-span-3',
-                        label: 'Status',
-                        labelClassName: 'mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600',
-                        forId: 'statusFilter',
-                        controlHtml: include('components/select', {
-                            id: 'statusFilter',
-                            className: 'filter-control input-shell text-sm',
-                            options: [
-                                { value: 'Todos', label: 'Todos', selected: true },
-                                { value: 'Ativo', label: 'Ativo' },
-                                { value: 'Inativo', label: 'Inativo' },
-                                { value: 'Atrasado', label: 'Atrasado' },
-                                { value: 'Quitado', label: 'Quitado' }
-                            ]
-                        })
-                    });
-                    const debtorsSortField = include('components/field', {
-                        className: 'md:col-span-3',
-                        label: 'Ordenar por',
-                        labelClassName: 'mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600',
-                        forId: 'sortBy',
-                        controlHtml: include('components/select', {
-                            id: 'sortBy',
-                            className: 'filter-control input-shell text-sm',
-                            options: [
-                                { value: 'name', label: 'Nome', selected: true },
-                                { value: 'document', label: 'Documento' },
-                                { value: 'phone', label: 'Telefone' },
-                                { value: 'open_total', label: 'Maior em aberto' },
-                                { value: 'loans_count', label: 'Empréstimos' },
-                                { value: 'overdue_count', label: 'Parcelas em atraso' },
-                                { value: 'max_overdue_days', label: 'Maior dias em atraso' },
-                                { value: 'next_due_date', label: 'Próximo vencimento' },
-                                { value: 'created_at', label: 'Data de cadastro' },
-                                { value: 'status', label: 'Status' }
-                            ]
-                        })
-                    });
-                    const clearDebtorsFiltersButton = include('components/button', {
-                        id: 'clearFiltersBtn',
-                        label: 'Limpar filtros',
-                        icon: 'fas fa-filter-circle-xmark',
-                        variant: 'secondary',
-                        className: 'h-11 w-full text-sm'
-                    });
-                %>
-                <div class="mb-5 app-form-grid md:grid-cols-12 md:gap-4">
-                    <%- debtorsSearchField %>
-                    <%- debtorsStatusField %>
-                    <%- debtorsSortField %>
+                <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+                    <div class="md:col-span-4">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Buscar</label>
+                        <input id="debtorSearch" type="text" class="filter-control input-shell text-sm" placeholder="Nome, telefone ou documento">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Status</label>
+                        <select id="statusFilter" class="filter-control input-shell text-sm">
+                            <option value="Todos">Todos</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                            <option value="Atrasado">Atrasado</option>
+                            <option value="Quitado">Quitado</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">Ordenar por</label>
+                        <select id="sortBy" class="filter-control input-shell text-sm">
+                            <option value="name">Nome</option>
+                            <option value="document">Documento</option>
+                            <option value="phone">Telefone</option>
+                            <option value="open_total">Maior em aberto</option>
+                            <option value="loans_count">Empréstimos</option>
+                            <option value="overdue_count">Parcelas em atraso</option>
+                            <option value="max_overdue_days">Maior dias em atraso</option>
+                            <option value="next_due_date">Próximo vencimento</option>
+                            <option value="created_at">Data de cadastro</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
                     <div class="md:col-span-2 md:self-end">
-                        <%- clearDebtorsFiltersButton %>
+                        <button id="clearFiltersBtn" type="button" class="inline-flex w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                            <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
+                        </button>
                     </div>
                 </div>
 
@@ -1239,7 +1200,7 @@
                 </div>
             </div>
 
-            <div id="debtorModal" class="modal-base modal-form-clean fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="debtorModalTitle">
+            <div id="debtorModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="debtorModalTitle">
                 <div class="modal-base__panel modal-base__panel--lg debtor-modal-panel">
                     <form id="newDebtorForm" class="flex min-h-0 flex-1 flex-col" novalidate>
                         <div class="modal-base__header debtor-modal-header">
@@ -1350,7 +1311,7 @@
                 </div>
             </div>
 
-            <div id="registerPaymentModal" class="modal-base modal-form-clean fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="registerPaymentModalTitle">
+            <div id="registerPaymentModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="registerPaymentModalTitle">
                 <div class="modal-base__panel modal-base__panel--md">
                     <form id="registerPaymentForm" class="flex min-h-0 flex-1 flex-col">
                         <div class="modal-base__header">
@@ -1409,12 +1370,7 @@
 
                             <section class="modal-base__section">
                                 <h4 class="modal-base__section-title">Observação</h4>
-                                <%- include('components/textarea', {
-                                    id: 'registerPaymentNotes',
-                                    rows: 3,
-                                    className: 'filter-control input-shell modal-base__textarea',
-                                    placeholder: 'Observações sobre este pagamento (opcional)'
-                                }) %>
+                                <textarea id="registerPaymentNotes" rows="3" class="filter-control input-shell modal-base__textarea" placeholder="Observações sobre este pagamento (opcional)"></textarea>
                             </section>
                         </div>
 

@@ -1071,22 +1071,6 @@ html:not(.dark) body.dashboard-premium main .hover\:bg-blue-50:hover {
   margin-left: auto;
 }
 
-/* Clean form modal variant: removes divider lines for modal regions with inputs */
-.dashboard-premium .modal-base.modal-form-clean .modal-base__header {
-  border-bottom: none;
-  box-shadow: none;
-}
-
-.dashboard-premium .modal-base.modal-form-clean .modal-base__body {
-  border-top: none;
-}
-
-.dashboard-premium .modal-base.modal-form-clean .modal-base__footer {
-  border-top: none;
-  background: transparent;
-  box-shadow: none;
-}
-
 .dashboard-premium .modal-base__section {
   border-radius: 14px;
   border: 1px solid var(--modal-card-border);

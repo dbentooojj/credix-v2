@@ -623,7 +623,6 @@
         }
         </style>
     <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
-    <%- include('partials/ui-system') %>
 </head>
 <body class="dashboard-premium dashboard-installments primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
@@ -680,20 +679,15 @@
         </aside>
 
         <main class="flex-1 ml-64 p-4 sm:p-6 lg:p-8">
-            <%
-                const installmentsHeaderActions = `
-                    <div class="flex items-center">
-                        <p class="text-xs text-slate-300">Atualizado: <span id="lastUpdatedAt" class="font-semibold text-slate-200">--:--</span></p>
-                    </div>
-                `;
-            %>
-            <%- include('components/section', {
-                className: 'mb-6',
-                title: 'Controle de cobrança',
-                subtitle: 'Acompanhe pendências, atrasos e recebimentos com ação rápida.',
-                headerActions: installmentsHeaderActions,
-                content: ''
-            }) %>
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="page-title text-3xl font-bold">Controle de Cobrança</h2>
+                    <p class="muted-on-dark mt-1 text-sm">Acompanhe pendências, atrasos e recebimentos com ação rápida.</p>
+                </div>
+                <div class="flex items-center">
+                    <p class="text-xs text-slate-300">Atualizado: <span id="lastUpdatedAt" class="font-semibold text-slate-200">--:--</span></p>
+                </div>
+            </div>
             <div id="kpiSkeletonGrid" class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 mb-6">
                 <div class="kpi-card"><div class="skeleton h-3 w-36"></div><div class="skeleton h-8 w-32 mt-4"></div><div class="skeleton h-3 w-20 mt-3"></div></div>
                 <div class="kpi-card"><div class="skeleton h-3 w-28"></div><div class="skeleton h-8 w-24 mt-4"></div><div class="skeleton h-3 w-16 mt-3"></div></div>
@@ -730,126 +724,62 @@
             </div>
 
             <div class="glass-card rounded-2xl p-6 mb-6">
-                <%
-                    const installmentsSearchField = include('components/field', {
-                        className: 'md:col-span-2 xl:col-span-3',
-                        label: 'Buscar',
-                        labelClassName: 'block text-sm text-gray-600 mb-1',
-                        forId: 'installmentSearch',
-                        controlHtml: `
-                            <div class="relative">
-                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                ${include('components/input', {
-                                    id: 'installmentSearch',
-                                    className: 'filter-control pl-10',
-                                    placeholder: 'Nome, telefone, empréstimo ou parcela'
-                                })}
-                            </div>
-                        `
-                    });
-                    const installmentsStatusField = include('components/field', {
-                        className: 'md:col-span-1 xl:col-span-2',
-                        label: 'Status',
-                        labelClassName: 'block text-sm text-gray-600 mb-1',
-                        forId: 'installmentStatusFilter',
-                        controlHtml: include('components/select', {
-                            id: 'installmentStatusFilter',
-                            className: 'filter-control',
-                            options: [
-                                { value: 'Todos', label: 'Todos', selected: true },
-                                { value: 'Pago', label: 'Pago' },
-                                { value: 'Pendente', label: 'Pendente' },
-                                { value: 'Atrasado', label: 'Em atraso' }
-                            ]
-                        })
-                    });
-                    const installmentsClientField = include('components/field', {
-                        className: 'md:col-span-1 xl:col-span-2',
-                        label: 'Cliente',
-                        labelClassName: 'block text-sm text-gray-600 mb-1',
-                        forId: 'installmentClientFilter',
-                        controlHtml: include('components/select', {
-                            id: 'installmentClientFilter',
-                            className: 'filter-control',
-                            options: [
-                                { value: 'all', label: 'Todos os clientes', selected: true }
-                            ]
-                        })
-                    });
-                    const installmentsPeriodField = include('components/field', {
-                        className: 'md:col-span-1 xl:col-span-2',
-                        label: 'Período',
-                        labelClassName: 'block text-sm text-gray-600 mb-1',
-                        forId: 'installmentPeriodFilter',
-                        controlHtml: include('components/select', {
-                            id: 'installmentPeriodFilter',
-                            className: 'filter-control',
-                            options: [
-                                { value: 'all', label: 'Todos', selected: true },
-                                { value: 'today', label: 'Hoje' },
-                                { value: 'next7', label: 'Próximos 7 dias' },
-                                { value: 'month_current', label: 'Mês atual' },
-                                { value: 'last30', label: 'Últimos 30 dias' },
-                                { value: 'custom', label: 'Personalizado' }
-                            ]
-                        })
-                    });
-                    const installmentsPaymentMethodField = include('components/field', {
-                        className: 'md:col-span-1 xl:col-span-2',
-                        label: 'Forma de pagamento',
-                        labelClassName: 'block text-sm text-gray-600 mb-1',
-                        forId: 'installmentPaymentMethodFilter',
-                        controlHtml: include('components/select', {
-                            id: 'installmentPaymentMethodFilter',
-                            className: 'filter-control',
-                            options: [
-                                { value: 'Todas', label: 'Todas', selected: true },
-                                { value: 'Pix', label: 'Pix' },
-                                { value: 'Dinheiro', label: 'Dinheiro' },
-                                { value: 'Transferência', label: 'Transferência' },
-                                { value: 'Cartão', label: 'Cartão' },
-                                { value: 'Outro', label: 'Outro' }
-                            ]
-                        })
-                    });
-                    const installmentsClearFiltersButton = include('components/button', {
-                        id: 'clearFiltersBtn',
-                        label: 'Limpar filtros',
-                        icon: 'fas fa-filter-circle-xmark',
-                        variant: 'secondary',
-                        className: 'h-11 w-full whitespace-nowrap text-sm'
-                    });
-                %>
-                <div class="app-form-grid md:grid-cols-2 xl:grid-cols-12">
-                    <%- installmentsSearchField %>
-                    <%- installmentsStatusField %>
-                    <%- installmentsClientField %>
-                    <%- installmentsPeriodField %>
-                    <%- installmentsPaymentMethodField %>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+                    <div class="md:col-span-2 xl:col-span-3">
+                        <label for="installmentSearch" class="block text-sm text-gray-600 mb-1">Buscar</label>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input id="installmentSearch" type="text" class="filter-control pl-10" placeholder="Nome, telefone, empréstimo ou parcela">
+                        </div>
+                    </div>
+                    <div class="md:col-span-1 xl:col-span-2">
+                        <label for="installmentStatusFilter" class="block text-sm text-gray-600 mb-1">Status</label>
+                        <select id="installmentStatusFilter" class="filter-control">
+                            <option value="Todos">Todos</option>
+                            <option value="Pago">Pago</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Atrasado">Em atraso</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1 xl:col-span-2">
+                        <label for="installmentClientFilter" class="block text-sm text-gray-600 mb-1">Cliente</label>
+                        <select id="installmentClientFilter" class="filter-control">
+                            <option value="all">Todos os clientes</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1 xl:col-span-2">
+                        <label for="installmentPeriodFilter" class="block text-sm text-gray-600 mb-1">Período</label>
+                        <select id="installmentPeriodFilter" class="filter-control">
+                            <option value="all">Todos</option>
+                            <option value="today">Hoje</option>
+                            <option value="next7">Próximos 7 dias</option>
+                            <option value="month_current">Mês atual</option>
+                            <option value="last30">Últimos 30 dias</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1 xl:col-span-2">
+                        <label for="installmentPaymentMethodFilter" class="block text-sm text-gray-600 mb-1">Forma de pagamento</label>
+                        <select id="installmentPaymentMethodFilter" class="filter-control">
+                            <option value="Todas">Todas</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Cartão">Cartão</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
                     <div class="md:col-span-2 xl:col-span-1 flex items-end">
-                        <%- installmentsClearFiltersButton %>
+                        <button id="clearFiltersBtn" type="button" class="inline-flex h-[42px] w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:bg-slate-100">
+                            <i class="fas fa-filter-circle-xmark mr-2"></i>Limpar filtros
+                        </button>
                     </div>
                     <div id="customRangeWrap" class="hidden md:col-span-2 xl:col-span-6">
-                        <%- include('components/field', {
-                            label: 'Período personalizado',
-                            labelClassName: 'block text-sm text-gray-600 mb-1',
-                            controlHtml: `
-                                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                    ${include('components/input', {
-                                        id: 'customStartDate',
-                                        type: 'date',
-                                        className: 'filter-control',
-                                        attrs: 'aria-label="Data inicial"'
-                                    })}
-                                    ${include('components/input', {
-                                        id: 'customEndDate',
-                                        type: 'date',
-                                        className: 'filter-control',
-                                        attrs: 'aria-label="Data final"'
-                                    })}
-                                </div>
-                            `
-                        }) %>
+                        <label class="block text-sm text-gray-600 mb-1">Período personalizado</label>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <input id="customStartDate" type="date" class="filter-control" aria-label="Data inicial">
+                            <input id="customEndDate" type="date" class="filter-control" aria-label="Data final">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -911,7 +841,7 @@
         </main>
     </div>
 
-    <div id="notificationModal" class="modal-base modal-form-clean fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle">
+    <div id="notificationModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle">
         <div class="modal-base__panel modal-base__panel--md">
             <div class="modal-base__header">
                 <div class="modal-base__title-wrap">
@@ -926,24 +856,16 @@
                 <section class="modal-base__section">
                     <div class="modal-base__field">
                         <label for="messageTemplate" class="modal-base__field-label">Modelo</label>
-                        <%- include('components/select', {
-                            id: 'messageTemplate',
-                            className: 'filter-control',
-                            options: [
-                                { value: 'vencimento_proximo', label: 'Vencimento próximo (3 dias)', selected: true },
-                                { value: 'vencimento_hoje', label: 'Vence hoje' },
-                                { value: 'atraso', label: 'Atraso' },
-                                { value: 'personalizada', label: 'Personalizada' }
-                            ]
-                        }) %>
+                        <select id="messageTemplate" class="filter-control">
+                            <option value="vencimento_proximo">Vencimento próximo (3 dias)</option>
+                            <option value="vencimento_hoje">Vence hoje</option>
+                            <option value="atraso">Atraso</option>
+                            <option value="personalizada">Personalizada</option>
+                        </select>
                     </div>
                     <div class="modal-base__field mt-3">
                         <label for="customMessage" class="modal-base__field-label">Mensagem</label>
-                        <%- include('components/textarea', {
-                            id: 'customMessage',
-                            rows: 4,
-                            className: 'filter-control modal-base__textarea'
-                        }) %>
+                        <textarea id="customMessage" rows="4" class="filter-control modal-base__textarea"></textarea>
                     </div>
                     <p class="modal-base__field-helper mt-3">
                         <i class="fas fa-circle-info mr-1"></i>
@@ -962,7 +884,7 @@
         </div>
     </div>
 
-    <div id="installmentModal" class="modal-base modal-form-clean fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle" data-modal-base="true">
+    <div id="installmentModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle" data-modal-base="true">
         <div class="modal-base__panel modal-base__panel--lg installment-modal relative z-[60]">
             <div class="modal-base__header installment-modal-header">
                 <h3 id="installmentModalTitle" class="modal-base__title installment-modal-title">Detalhes da parcela</h3>

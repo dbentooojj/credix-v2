@@ -15,7 +15,6 @@ Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS U
 - Login de admin
 - Cadastro de clientes
 - Cadastro e controle de emprestimos
-- Simulacao de emprestimo com persistencia e envio por WhatsApp
 - Controle de parcelas e registro de pagamentos
 - Dashboard e relatorios com totais principais
 - Envio de notificacoes WhatsApp via Cloud API (Meta)
@@ -38,7 +37,6 @@ Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS U
 - `Loan`
 - `Installment` (suporte ao layout atual)
 - `Payment`
-- `LoanSimulation` (rascunho/enviada/aceita/expirada/cancelada)
 
 Com integridade referencial por FK e cascatas.
 
@@ -240,7 +238,6 @@ cat backup.sql | docker compose exec -T db psql -U $POSTGRES_USER -d $POSTGRES_D
 - Area protegida: `/admin/*`
 - Dashboard consolidado: `/api/dashboard?period=6m&metric=recebido`
 - Tabelas frontend: `/api/tables/:tableName`
-- Simulacoes de emprestimo: `/api/loan-simulations`
 - Pagamentos: `/api/payments`
 - Notificacoes WhatsApp: `/api/notifications/whatsapp/batch`
 - Notificacao e-mail (teste manual): `/api/notifications/email/due-tomorrow`
@@ -330,11 +327,3 @@ Exemplo de resposta:
 ## Observacoes
 - `.env` real nao deve ser commitado.
 - Os HTMLs originais foram reaproveitados em `EJS` mantendo o visual base.
-
-## Como testar simulacao de emprestimo
-1. Acesse `/admin/loans.html` e clique em `Nova simulacao`.
-2. Preencha cliente, valor, juros, parcelas e datas, e clique em `Salvar simulacao`.
-3. No modal, clique em `Enviar WhatsApp` para gerar o link `wa.me` com mensagem pronta.
-4. Clique em `Aprovar` para converter a simulacao em emprestimo real com parcelas.
-5. Valide no painel `Simulacoes pendentes` que o status mudou para `ACCEPTED`.
-6. Valide nos relatorios que apenas o emprestimo aprovado aparece (simulacoes nao entram no dashboard).

@@ -1,7 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
+﻿import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env";
 import { verifyToken } from "../lib/jwt";
-import { prisma } from "../lib/prisma";
 
 function readToken(req: Request): string | null {
   const raw = req.cookies?.[env.COOKIE_NAME];
@@ -9,20 +8,6 @@ function readToken(req: Request): string | null {
     return null;
   }
   return raw;
-}
-
-async function doesUserExist(userIdRaw: unknown): Promise<boolean> {
-  const userId = Number(userIdRaw);
-  if (!Number.isFinite(userId) || userId <= 0) {
-    return false;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-
-  return Boolean(user);
 }
 
 export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
@@ -40,7 +25,7 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
   return next();
 }
 
-export async function requireAuthApi(req: Request, res: Response, next: NextFunction) {
+export function requireAuthApi(req: Request, res: Response, next: NextFunction) {
   const token = readToken(req);
   if (!token) {
     return res.status(401).json({ message: "Nao autenticado" });
@@ -48,18 +33,13 @@ export async function requireAuthApi(req: Request, res: Response, next: NextFunc
 
   try {
     req.user = verifyToken(token);
-    const userExists = await doesUserExist(req.user?.sub);
-    if (!userExists) {
-      return res.status(401).json({ message: "Sessao invalida ou expirada" });
-    }
-
     return next();
   } catch {
     return res.status(401).json({ message: "Sessao invalida ou expirada" });
   }
 }
 
-export async function requireAuthPage(req: Request, res: Response, next: NextFunction) {
+export function requireAuthPage(req: Request, res: Response, next: NextFunction) {
   const token = readToken(req);
   if (!token) {
     return res.redirect("/login");
@@ -67,11 +47,6 @@ export async function requireAuthPage(req: Request, res: Response, next: NextFun
 
   try {
     req.user = verifyToken(token);
-    const userExists = await doesUserExist(req.user?.sub);
-    if (!userExists) {
-      return res.redirect("/login");
-    }
-
     return next();
   } catch {
     return res.redirect("/login");
