@@ -1574,6 +1574,8 @@
                     return {
                         ...row,
                         // O backend persiste apenas simples/composto; modo fixo segue no meta de observacoes.
+                        // Em modo fixo, `interest_rate` nao representa percentual e pode estourar o Decimal(7,4) do banco.
+                        interest_rate: interestMode === 'fixo' ? 0 : round2(row?.interest_rate),
                         interest_type: interestMode === 'fixo' ? 'composto' : interestMode,
                         observations: encodeLoanObservations(parsed.userText, mergedMeta),
                     };
@@ -4546,7 +4548,8 @@
                 principal_amount: values.principal,
                 total_amount: calcResult.totalAmount,
                 installments_count: values.installments,
-                interest_rate: values.interestType === 'fixo' ? round2(values.fixedAddition) : values.interestRate,
+                // Modo fixo persiste o acrescimo em `loan_meta.fixedAddition`; no banco, a taxa fica 0.
+                interest_rate: values.interestType === 'fixo' ? 0 : values.interestRate,
                 interest_type: values.interestType === 'fixo' ? 'composto' : values.interestType,
                 installment_amount: calcResult.installmentAmount,
                 observations: encodeLoanObservations(values.observations, loanMeta),
