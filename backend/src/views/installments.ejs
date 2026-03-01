@@ -841,48 +841,49 @@
         </main>
     </div>
 
-    <div id="notificationModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle">
-        <div class="modal-base__panel modal-base__panel--md">
-            <div class="modal-base__header">
-                <div class="modal-base__title-wrap">
-                    <h3 id="notificationModalTitle" class="modal-base__title text-2xl">Enviar notificações</h3>
-                    <p class="modal-base__description">Dispare mensagens em lote com base nos filtros ativos.</p>
-                </div>
-                <button id="closeNotificationModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar modal de notificações">
-                    <i class="fas fa-times"></i>
-                </button>
+    <%
+        const notificationModalBody = `
+            <div class="modal-base__field">
+                <label for="messageTemplate" class="modal-base__field-label">Modelo</label>
+                <select id="messageTemplate" class="filter-control">
+                    <option value="vencimento_proximo">Vencimento próximo (3 dias)</option>
+                    <option value="vencimento_hoje">Vence hoje</option>
+                    <option value="atraso">Atraso</option>
+                    <option value="personalizada">Personalizada</option>
+                </select>
             </div>
-            <div class="modal-base__body">
-                <section class="modal-base__section">
-                    <div class="modal-base__field">
-                        <label for="messageTemplate" class="modal-base__field-label">Modelo</label>
-                        <select id="messageTemplate" class="filter-control">
-                            <option value="vencimento_proximo">Vencimento próximo (3 dias)</option>
-                            <option value="vencimento_hoje">Vence hoje</option>
-                            <option value="atraso">Atraso</option>
-                            <option value="personalizada">Personalizada</option>
-                        </select>
-                    </div>
-                    <div class="modal-base__field mt-3">
-                        <label for="customMessage" class="modal-base__field-label">Mensagem</label>
-                        <textarea id="customMessage" rows="4" class="filter-control modal-base__textarea"></textarea>
-                    </div>
-                    <p class="modal-base__field-helper mt-3">
-                        <i class="fas fa-circle-info mr-1"></i>
-                        Envio considera apenas parcelas filtradas na tela.
-                    </p>
-                </section>
+            <div class="modal-base__field mt-3">
+                <label for="customMessage" class="modal-base__field-label">Mensagem</label>
+                <textarea id="customMessage" rows="4" class="filter-control modal-base__textarea"></textarea>
             </div>
-            <div class="modal-base__footer">
-                <div class="modal-base__footer-secondary">
-                    <button id="cancelNotificationBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Cancelar</button>
-                </div>
-                <div class="modal-base__footer-actions">
-                    <button id="sendNotificationBtn" type="button" class="modal-btn modal-btn--primary"><i class="fas fa-paper-plane mr-2"></i>Enviar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+            <p class="modal-base__field-helper mt-3">
+                <i class="fas fa-circle-info mr-1"></i>
+                Envio considera apenas parcelas filtradas na tela.
+            </p>
+        `;
+    %>
+    <%- include('components/modal-base', {
+        id: 'notificationModal',
+        size: 'md',
+        headingId: 'notificationModalTitle',
+        closeBtnId: 'closeNotificationModalBtn',
+        title: 'Enviar notificações',
+        subtitle: 'Dispare mensagens em lote com base nos filtros ativos.',
+        children: notificationModalBody,
+        actions: {
+            secondary: {
+                id: 'cancelNotificationBtn',
+                label: 'Cancelar',
+                className: 'modal-btn--ghost',
+                close: true,
+            },
+            primary: {
+                id: 'sendNotificationBtn',
+                label: 'Enviar',
+                type: 'button',
+            },
+        },
+    }) %>
 
     <div id="installmentModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="installmentModalTitle" data-modal-base="true">
         <div class="modal-base__panel modal-base__panel--lg installment-modal relative z-[60]">
@@ -2503,10 +2504,10 @@
                         ? '<button type="button" data-action="modal-go-payment" class="modal-btn modal-btn--primary">Registrar pagamento</button>'
                         : ''}
                     ${status === 'Pago'
-                        ? '<button type="button" data-action="modal-go-refund" class="modal-btn modal-btn--secondary">Estorno</button>'
+                        ? '<button type="button" data-action="modal-go-refund" class="modal-btn modal-btn--ghost">Estorno</button>'
                         : ''}
                     <button type="button" data-action="modal-go-delete" class="modal-btn modal-btn--danger">Excluir</button>
-                    <button type="button" data-action="modal-close" class="modal-btn modal-btn--secondary">Concluir</button>
+                    <button type="button" data-action="modal-close" class="modal-btn modal-btn--ghost">Concluir</button>
                 `);
                 return;
             }
@@ -2566,7 +2567,7 @@
                 `;
 
                 setInstallmentModalFooter({
-                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--ghost">Voltar</button>',
                     actions: `<button type="submit" form="installmentPaymentForm" class="modal-btn modal-btn--primary" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar pagamento'}</button>`,
                 });
                 return;
@@ -2594,7 +2595,7 @@
                 `;
 
                 setInstallmentModalFooter({
-                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--ghost">Voltar</button>',
                     actions: `<button type="submit" form="installmentRefundForm" class="modal-btn modal-btn--primary" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Confirmando...` : 'Confirmar estorno'}</button>`,
                 });
                 return;
@@ -2618,7 +2619,7 @@
                     </div>
                 `;
                 setInstallmentModalFooter({
-                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--ghost">Voltar</button>',
                     actions: '<button type="button" data-action="modal-go-refund" class="modal-btn modal-btn--primary">Ir para estorno</button>',
                 });
                 return;
@@ -2637,7 +2638,7 @@
                     </div>
                 `;
                 setInstallmentModalFooter({
-                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Voltar</button>',
+                    secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--ghost">Voltar</button>',
                     actions: '<a href="/admin/loans.html" class="modal-btn modal-btn--danger inline-flex items-center justify-center">Ir para empréstimos</a>',
                 });
                 return;
@@ -2662,7 +2663,7 @@
                 </form>
             `;
             setInstallmentModalFooter({
-                secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--secondary">Cancelar</button>',
+                secondary: '<button type="button" data-action="modal-back-details" class="modal-btn modal-btn--ghost">Cancelar</button>',
                 actions: `<button type="submit" form="installmentDeleteForm" class="modal-btn modal-btn--danger" ${installmentModalState.isSubmitting ? 'disabled' : ''}>${installmentModalState.isSubmitting ? `${loadingIcon}Excluindo...` : 'Excluir parcela'}</button>`,
             });
         }

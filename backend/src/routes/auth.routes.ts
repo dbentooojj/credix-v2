@@ -282,4 +282,3 @@ router.patch("/auth/password", requireAuthApi, async (req, res) => {
 });
 
 export { router as authRoutes };
-

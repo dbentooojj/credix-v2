@@ -42,6 +42,21 @@
     });
   }
 
+  function resolveGlobalFunction(path) {
+    if (!path || typeof path !== 'string') return null;
+    const parts = path.split('.').map((item) => item.trim()).filter(Boolean);
+    if (!parts.length) return null;
+    let pointer = window;
+    for (const part of parts) {
+      if (pointer && Object.prototype.hasOwnProperty.call(pointer, part)) {
+        pointer = pointer[part];
+      } else {
+        return null;
+      }
+    }
+    return typeof pointer === 'function' ? pointer : null;
+  }
+
   function ensureModalA11yAttributes(modal) {
     if (!modal.getAttribute('role')) {
       modal.setAttribute('role', 'dialog');
@@ -54,13 +69,31 @@
 
   function lockBodyScroll() {
     if (modalStack.length !== 1) return;
-    bodyOverflowSnapshot = document.body.style.overflow || '';
+    const currentOverflow = document.body.style.overflow || '';
+    // Avoid capturing "hidden" as baseline when page-specific scripts also lock scroll.
+    if (currentOverflow !== 'hidden') {
+      bodyOverflowSnapshot = currentOverflow;
+    } else if (typeof bodyOverflowSnapshot !== 'string') {
+      bodyOverflowSnapshot = '';
+    }
     document.body.style.overflow = 'hidden';
   }
 
   function unlockBodyScroll() {
     if (modalStack.length !== 0) return;
     document.body.style.overflow = bodyOverflowSnapshot;
+    bodyOverflowSnapshot = '';
+  }
+
+  function recoverBodyScrollIfNoVisibleModal() {
+    const hasVisibleModal = Array.from(document.querySelectorAll('[data-modal-base="true"]'))
+      .some((modal) => isModalVisible(modal));
+
+    if (hasVisibleModal) return;
+
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = bodyOverflowSnapshot || '';
+    }
     bodyOverflowSnapshot = '';
   }
 
@@ -207,7 +240,8 @@
     ensureModalA11yAttributes(modal);
 
     const state = modalStates.get(modal) || {};
-    state.onClose = typeof options.onClose === 'function' ? options.onClose : state.onClose;
+    const onCloseFromAttr = resolveGlobalFunction(modal.getAttribute('data-modal-on-close'));
+    state.onClose = typeof options.onClose === 'function' ? options.onClose : (onCloseFromAttr || state.onClose);
     state.initialFocus = typeof options.initialFocus === 'string' ? options.initialFocus : state.initialFocus;
     state.restoreFocusOnClose = options.restoreFocusOnClose !== false;
     modalStates.set(modal, state);
@@ -221,12 +255,19 @@
       if (titleNode) titleNode.textContent = options.title;
     }
 
-    if ('description' in options) {
+    if ('description' in options || 'subtitle' in options) {
       const descriptionNode = modal.querySelector('.modal-base__description');
       if (descriptionNode) {
-        const description = String(options.description || '').trim();
+        const description = String(options.subtitle ?? options.description ?? '').trim();
         descriptionNode.textContent = description;
         descriptionNode.classList.toggle('hidden', !description);
+      }
+    }
+
+    if ('children' in options) {
+      const bodyNode = modal.querySelector('.modal-base__body');
+      if (bodyNode && typeof options.children === 'string') {
+        bodyNode.innerHTML = options.children;
       }
     }
 
@@ -250,17 +291,80 @@
     handleVisibilityChange(modal);
   }
 
+  function create(options = {}) {
+    const modalId = typeof options.id === 'string' && options.id.trim()
+      ? options.id.trim()
+      : `modal-${Math.random().toString(36).slice(2, 10)}`;
+    const panelSize = options.size === 'lg' ? 'lg' : 'md';
+    const title = String(options.title || '').trim();
+    const subtitle = String(options.subtitle || '').trim();
+    const bodyHtml = typeof options.children === 'string' ? options.children : '';
+
+    const backdrop = document.createElement('div');
+    backdrop.id = modalId;
+    backdrop.className = 'modal-base fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4';
+    backdrop.setAttribute('data-modal-base', 'true');
+
+    const panel = document.createElement('div');
+    panel.className = `modal-base__panel modal-base__panel--${panelSize}`;
+
+    const header = document.createElement('div');
+    header.className = 'modal-base__header';
+    header.innerHTML = `
+      <div class="modal-base__title-wrap">
+        <h3 class="modal-base__title">${title}</h3>
+        <p class="modal-base__description${subtitle ? '' : ' hidden'}">${subtitle}</p>
+      </div>
+      <button class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar modal">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+
+    const body = document.createElement('div');
+    body.className = 'modal-base__body';
+    body.innerHTML = bodyHtml;
+
+    const footer = document.createElement('div');
+    footer.className = 'modal-base__footer';
+    footer.innerHTML = `
+      <div class="modal-base__footer-secondary">
+        <button data-modal-action="secondary" data-modal-close="secondary" type="button" class="modal-btn modal-btn--ghost">Cancelar</button>
+      </div>
+      <div class="modal-base__footer-actions">
+        <button data-modal-action="primary" type="button" class="modal-btn modal-btn--primary">Confirmar</button>
+      </div>
+    `;
+
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(footer);
+    backdrop.appendChild(panel);
+
+    document.body.appendChild(backdrop);
+    setup(backdrop, {
+      title,
+      subtitle,
+      children: bodyHtml,
+      onClose: typeof options.onClose === 'function' ? options.onClose : undefined,
+      actions: options.actions,
+      size: panelSize,
+    });
+    return backdrop;
+  }
+
   function hide(target) {
     const modal = asElement(target);
     if (!modal) return;
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     handleVisibilityChange(modal);
+    recoverBodyScrollIfNoVisibleModal();
   }
 
   function init(selector = '[data-modal-base="true"]') {
     const modals = Array.from(document.querySelectorAll(selector));
     modals.forEach((modal) => setup(modal));
+    recoverBodyScrollIfNoVisibleModal();
   }
 
   document.addEventListener('keydown', (event) => {
@@ -316,6 +420,7 @@
   window.ModalBase = {
     init,
     setup,
+    create,
     show,
     hide,
     requestClose,

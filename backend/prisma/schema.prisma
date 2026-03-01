@@ -41,6 +41,17 @@ enum InstallmentStatus {
   ATRASADO
 }
 
+enum FinanceTransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum FinanceTransactionStatus {
+  COMPLETED
+  SCHEDULED
+  PENDING
+}
+
 model User {
   id           Int      @id @default(autoincrement())
   name         String
@@ -53,6 +64,7 @@ model User {
   loans        Loan[]
   installments Installment[]
   payments     Payment[]
+  financeTransactions FinanceTransaction[]
 }
 
 model Client {
@@ -153,4 +165,22 @@ model Payment {
   @@index([loanId])
   @@index([installmentId])
   @@index([paymentDate])
+}
+
+model FinanceTransaction {
+  id          Int                      @id @default(autoincrement())
+  ownerUserId Int
+  ownerUser   User                     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  type        FinanceTransactionType
+  amount      Decimal                  @db.Decimal(14, 2)
+  category    String
+  date        DateTime                 @db.Date
+  description String
+  status      FinanceTransactionStatus @default(COMPLETED)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  @@index([ownerUserId])
+  @@index([ownerUserId, type, date])
+  @@index([ownerUserId, status])
 }

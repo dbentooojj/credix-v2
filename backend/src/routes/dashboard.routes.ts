@@ -21,7 +21,6 @@ const dashboardQuerySchema = z.object({
   tz: z.string().optional(),
 });
 
-type DashboardMetric = "recebido" | "emprestado" | "lucro";
 type InstallmentDerivedStatus = "PAGA" | "ATRASADA" | "VENCE_HOJE" | "EM_DIA";
 type KpiInsightTone = "positive" | "negative" | "neutral";
 type KpiInsight = { text: string; tone: KpiInsightTone };
