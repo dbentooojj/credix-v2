@@ -40,10 +40,6 @@ const simulationStore = new Map<number, Map<string, LoanSimulationRow>>();
 const LOAN_META_START = "[[LOAN_META]]";
 const LOAN_META_END = "[[/LOAN_META]]";
 
-type SequenceDb = {
-  $executeRawUnsafe: (query: string, ...values: unknown[]) => Promise<unknown>;
-};
-
 function readUserId(req: { user?: { sub?: string } }): number {
   const parsed = Number(req.user?.sub);
   return Number.isFinite(parsed) ? parsed : Number.NaN;
@@ -156,24 +152,6 @@ function resolveSimulationDueDates(row: LoanSimulationRow): string[] {
   return Array.from({ length: count }, (_item, index) => {
     return explicitDueDates[index] || addMonthsIsoDate(firstDueDate, index);
   });
-}
-
-async function syncLoanAndInstallmentIdSequences(db: SequenceDb) {
-  await db.$executeRawUnsafe(`
-    SELECT setval(
-      pg_get_serial_sequence('"Loan"', 'id'),
-      COALESCE((SELECT MAX(id) FROM "Loan"), 0) + 1,
-      false
-    )
-  `);
-
-  await db.$executeRawUnsafe(`
-    SELECT setval(
-      pg_get_serial_sequence('"Installment"', 'id'),
-      COALESCE((SELECT MAX(id) FROM "Installment"), 0) + 1,
-      false
-    )
-  `);
 }
 
 function formatCurrencyBRL(value: unknown): string {
@@ -504,10 +482,17 @@ router.post("/:id/approve", async (req, res) => {
   const todayIso = new Date().toISOString().slice(0, 10);
 
   const createdLoan = await prisma.$transaction(async (tx) => {
-    await syncLoanAndInstallmentIdSequences(tx);
+    const [loanMax, installmentMax] = await Promise.all([
+      tx.loan.aggregate({ _max: { id: true } }),
+      tx.installment.aggregate({ _max: { id: true } }),
+    ]);
+
+    const nextLoanId = (loanMax._max.id ?? 0) + 1;
+    const nextInstallmentId = (installmentMax._max.id ?? 0) + 1;
 
     const loan = await tx.loan.create({
       data: {
+        id: nextLoanId,
         ownerUserId,
         clientId: row.clientId,
         principalAmount,
@@ -528,6 +513,7 @@ router.post("/:id/approve", async (req, res) => {
 
     await tx.installment.createMany({
       data: dueDates.map((dueDate, index) => ({
+        id: nextInstallmentId + index,
         ownerUserId,
         loanId: loan.id,
         clientId: row.clientId,
