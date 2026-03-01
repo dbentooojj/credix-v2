@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { InstallmentStatus, InterestType, LoanStatus, PaymentMethod } from "@prisma/client";
+import { InstallmentStatus, InterestType, LoanStatus, PaymentMethod, Prisma } from "@prisma/client";
 import { Router } from "express";
 import { requireAuthApi } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -37,6 +37,7 @@ const router = Router();
 router.use(requireAuthApi);
 
 const simulationStore = new Map<number, Map<string, LoanSimulationRow>>();
+const simulationApprovalLocks = new Set<string>();
 const LOAN_META_START = "[[LOAN_META]]";
 const LOAN_META_END = "[[/LOAN_META]]";
 
@@ -152,6 +153,26 @@ function resolveSimulationDueDates(row: LoanSimulationRow): string[] {
   return Array.from({ length: count }, (_item, index) => {
     return explicitDueDates[index] || addMonthsIsoDate(firstDueDate, index);
   });
+}
+
+function isIdUniqueViolation(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (error.code !== "P2002") return false;
+  const target = Array.isArray(error.meta?.target) ? error.meta.target : [];
+  return target.includes("id");
+}
+
+async function findLoanBySimulationMarker(ownerUserId: number, simulationId: string): Promise<number | null> {
+  const marker = `"simulationId":"${simulationId}"`;
+  const loan = await prisma.loan.findFirst({
+    where: {
+      ownerUserId,
+      observations: { contains: marker },
+    },
+    select: { id: true },
+  });
+
+  return loan?.id ?? null;
 }
 
 function formatCurrencyBRL(value: unknown): string {
@@ -435,107 +456,141 @@ router.post("/:id/approve", async (req, res) => {
   const id = String(req.params.id ?? "").trim();
   const row = getUserStore(ownerUserId).get(id);
   if (!row) return res.status(404).json({ message: "Simulacao nao encontrada" });
-
-  const client = await findClient(ownerUserId, row.clientId);
-  if (!client) {
-    return res.status(400).json({ message: "Cliente invalido para aprovar simulacao." });
+  const approvalLockKey = `${ownerUserId}:${id}`;
+  if (simulationApprovalLocks.has(approvalLockKey)) {
+    return res.status(409).json({ message: "Aprovacao em andamento. Aguarde alguns segundos." });
   }
 
-  if (row.loanId && Number.isFinite(row.loanId)) {
-    const existingLoan = await prisma.loan.findFirst({
-      where: { id: row.loanId, ownerUserId },
-      select: { id: true },
-    });
+  simulationApprovalLocks.add(approvalLockKey);
 
-    if (existingLoan) {
-      row.status = "ACCEPTED";
-      row.updatedAt = new Date().toISOString();
-      return res.json({ data: { ...mapRowForResponse(row, client), loanId: existingLoan.id } });
+  try {
+    const client = await findClient(ownerUserId, row.clientId);
+    if (!client) {
+      return res.status(400).json({ message: "Cliente invalido para aprovar simulacao." });
     }
 
-    row.loanId = null;
+    if (row.loanId && Number.isFinite(row.loanId)) {
+      const existingLoan = await prisma.loan.findFirst({
+        where: { id: row.loanId, ownerUserId },
+        select: { id: true },
+      });
+
+      if (existingLoan) {
+        row.status = "ACCEPTED";
+        row.updatedAt = new Date().toISOString();
+        return res.json({ data: { ...mapRowForResponse(row, client), loanId: existingLoan.id } });
+      }
+
+      row.loanId = null;
+    }
+
+    const linkedLoanId = await findLoanBySimulationMarker(ownerUserId, row.id);
+    if (linkedLoanId) {
+      row.status = "ACCEPTED";
+      row.loanId = linkedLoanId;
+      row.updatedAt = new Date().toISOString();
+      return res.json({ data: { ...mapRowForResponse(row, client), loanId: linkedLoanId } });
+    }
+
+    const dueDates = resolveSimulationDueDates(row);
+    const installmentsCount = Math.max(1, Math.trunc(toNumber(row.installmentsCount)));
+    const principalAmount = round2(row.principalAmount);
+    const totalAmount = round2(row.totals.totalAmount);
+    const installmentAmount = round2(row.totals.installmentAmount);
+    const interestAmountTotal = Math.max(round2(totalAmount - principalAmount), 0);
+    const normalizedInterestType = String(row.interestType || "composto").trim().toLowerCase();
+    const fixedAddition = round2(normalizedInterestType === "fixo" ? (row.fixedFeeAmount || row.interestRate) : 0);
+    const loanInterestRate = round2(normalizedInterestType === "fixo" ? 0 : row.interestRate);
+    const interestType = resolveInterestTypeForLoan(normalizedInterestType);
+    const loanStatus = resolveLoanStatusFromDueDates(dueDates);
+
+    const loanMeta = {
+      interestMode: normalizedInterestType === "simples" ? "simples" : (normalizedInterestType === "fixo" ? "fixo" : "composto"),
+      fixedAddition,
+      maxInstallment: 0,
+      simulationId: row.id,
+    };
+
+    const observations = encodeLoanObservations(row.observations, loanMeta);
+    const installmentValues = splitAmount(totalAmount, installmentsCount);
+    const principalValues = splitAmount(principalAmount, installmentsCount);
+    const interestValues = splitAmount(interestAmountTotal, installmentsCount);
+    const todayIso = new Date().toISOString().slice(0, 10);
+
+    let createdLoan: { id: number } | null = null;
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        createdLoan = await prisma.$transaction(async (tx) => {
+          const [loanMax, installmentMax] = await Promise.all([
+            tx.loan.aggregate({ _max: { id: true } }),
+            tx.installment.aggregate({ _max: { id: true } }),
+          ]);
+
+          const nextLoanId = (loanMax._max.id ?? 0) + 1;
+          const nextInstallmentId = (installmentMax._max.id ?? 0) + 1;
+
+          const loan = await tx.loan.create({
+            data: {
+              id: nextLoanId,
+              ownerUserId,
+              clientId: row.clientId,
+              principalAmount,
+              interestRate: loanInterestRate,
+              interestType,
+              installmentsCount,
+              installmentAmount,
+              totalAmount,
+              paymentMethod: PaymentMethod.PIX,
+              startDate: toDateOnlyUtc(row.startDate),
+              firstDueDate: toDateOnlyUtc(dueDates[0] || row.firstDueDate || row.startDate),
+              dueDate: toDateOnlyUtc(dueDates[dueDates.length - 1] || dueDates[0] || row.firstDueDate || row.startDate),
+              status: loanStatus,
+              observations,
+            },
+            select: { id: true },
+          });
+
+          await tx.installment.createMany({
+            data: dueDates.map((dueDate, index) => ({
+              id: nextInstallmentId + index,
+              ownerUserId,
+              loanId: loan.id,
+              clientId: row.clientId,
+              installmentNumber: index + 1,
+              dueDate: toDateOnlyUtc(dueDate),
+              paymentDate: null,
+              amount: installmentValues[index] ?? installmentAmount,
+              principalAmount: principalValues[index] ?? null,
+              interestAmount: interestValues[index] ?? null,
+              status: dueDate < todayIso ? InstallmentStatus.ATRASADO : InstallmentStatus.PENDENTE,
+              paymentMethod: null,
+              notes: null,
+            })),
+          });
+
+          return loan;
+        });
+        break;
+      } catch (error) {
+        if (isIdUniqueViolation(error) && attempt < 2) {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    if (!createdLoan) {
+      throw new Error("Falha ao criar emprestimo da simulacao.");
+    }
+
+    row.status = "ACCEPTED";
+    row.loanId = createdLoan.id;
+    row.updatedAt = new Date().toISOString();
+    return res.json({ data: { ...mapRowForResponse(row, client), loanId: createdLoan.id } });
+  } finally {
+    simulationApprovalLocks.delete(approvalLockKey);
   }
-
-  const dueDates = resolveSimulationDueDates(row);
-  const installmentsCount = Math.max(1, Math.trunc(toNumber(row.installmentsCount)));
-  const principalAmount = round2(row.principalAmount);
-  const totalAmount = round2(row.totals.totalAmount);
-  const installmentAmount = round2(row.totals.installmentAmount);
-  const interestAmountTotal = Math.max(round2(totalAmount - principalAmount), 0);
-  const normalizedInterestType = String(row.interestType || "composto").trim().toLowerCase();
-  const fixedAddition = round2(normalizedInterestType === "fixo" ? (row.fixedFeeAmount || row.interestRate) : 0);
-  const loanInterestRate = round2(normalizedInterestType === "fixo" ? fixedAddition : row.interestRate);
-  const interestType = resolveInterestTypeForLoan(normalizedInterestType);
-  const loanStatus = resolveLoanStatusFromDueDates(dueDates);
-
-  const loanMeta = {
-    interestMode: normalizedInterestType === "simples" ? "simples" : (normalizedInterestType === "fixo" ? "fixo" : "composto"),
-    fixedAddition,
-    maxInstallment: 0,
-    simulationId: row.id,
-  };
-
-  const observations = encodeLoanObservations(row.observations, loanMeta);
-  const installmentValues = splitAmount(totalAmount, installmentsCount);
-  const principalValues = splitAmount(principalAmount, installmentsCount);
-  const interestValues = splitAmount(interestAmountTotal, installmentsCount);
-  const todayIso = new Date().toISOString().slice(0, 10);
-
-  const createdLoan = await prisma.$transaction(async (tx) => {
-    const [loanMax, installmentMax] = await Promise.all([
-      tx.loan.aggregate({ _max: { id: true } }),
-      tx.installment.aggregate({ _max: { id: true } }),
-    ]);
-
-    const nextLoanId = (loanMax._max.id ?? 0) + 1;
-    const nextInstallmentId = (installmentMax._max.id ?? 0) + 1;
-
-    const loan = await tx.loan.create({
-      data: {
-        id: nextLoanId,
-        ownerUserId,
-        clientId: row.clientId,
-        principalAmount,
-        interestRate: loanInterestRate,
-        interestType,
-        installmentsCount,
-        installmentAmount,
-        totalAmount,
-        paymentMethod: PaymentMethod.PIX,
-        startDate: toDateOnlyUtc(row.startDate),
-        firstDueDate: toDateOnlyUtc(dueDates[0] || row.firstDueDate || row.startDate),
-        dueDate: toDateOnlyUtc(dueDates[dueDates.length - 1] || dueDates[0] || row.firstDueDate || row.startDate),
-        status: loanStatus,
-        observations,
-      },
-      select: { id: true },
-    });
-
-    await tx.installment.createMany({
-      data: dueDates.map((dueDate, index) => ({
-        id: nextInstallmentId + index,
-        ownerUserId,
-        loanId: loan.id,
-        clientId: row.clientId,
-        installmentNumber: index + 1,
-        dueDate: toDateOnlyUtc(dueDate),
-        paymentDate: null,
-        amount: installmentValues[index] ?? installmentAmount,
-        principalAmount: principalValues[index] ?? null,
-        interestAmount: interestValues[index] ?? null,
-        status: dueDate < todayIso ? InstallmentStatus.ATRASADO : InstallmentStatus.PENDENTE,
-        paymentMethod: null,
-        notes: null,
-      })),
-    });
-
-    return loan;
-  });
-
-  row.status = "ACCEPTED";
-  row.loanId = createdLoan.id;
-  row.updatedAt = new Date().toISOString();
-  return res.json({ data: { ...mapRowForResponse(row, client), loanId: createdLoan.id } });
 });
 
 router.post("/:id/cancel", async (req, res) => {

@@ -3519,8 +3519,9 @@
                 const installmentsInfo = getLoanInstallmentsSummary(loan);
                 const financialSituation = getLoanFinancialSituation(installments);
                 const interestType = normalizeInterestType(loan.interest_type);
+                const fixedAddition = round2(loan.loan_meta?.fixedAddition ?? loan.interest_rate);
                 const interestPrimary = interestType === 'fixo'
-                    ? formatCurrency(loan.interest_rate)
+                    ? formatCurrency(fixedAddition)
                     : `${loan.interest_rate}%`;
                 const interestTypeLabel = formatInterestTypeLabel(interestType);
                 const totalInstallments = toNumber(loan.installments_count || installments.length);
@@ -3619,8 +3620,9 @@
                     : 'Nao e possivel editar: emprestimo possui parcela paga';
                 const editLoanDisabledAttrs = canEditLoan ? '' : 'disabled aria-disabled="true"';
                 const editLoanDisabledClass = canEditLoan ? '' : ' opacity-50 cursor-not-allowed';
+                const fixedAddition = round2(loan.loan_meta?.fixedAddition ?? loan.interest_rate);
                 const interestPrimary = interestType === 'fixo'
-                    ? formatCurrency(loan.interest_rate)
+                    ? formatCurrency(fixedAddition)
                     : `${loan.interest_rate}%`;
 
                 return `
@@ -4634,10 +4636,11 @@
 
             const interestType = normalizeInterestType(loan.interest_type);
             const interestTypeLabel = formatInterestTypeLabel(interestType);
+            const fixedAddition = round2(loan.loan_meta?.fixedAddition ?? loan.interest_rate);
             const monthlyRateText = `${round2(toNumber(loan.interest_rate))}% a.m.`;
             const dailyRateText = `${round2(toNumber(loan.interest_rate) / 30)}% a.d.`;
             const interestDisplayValue = interestType === 'fixo'
-                ? `${formatCurrency(loan.interest_rate)} fixo`
+                ? `${formatCurrency(fixedAddition)} fixo`
                 : `${monthlyRateText} | ${dailyRateText}`;
             const interestDisplayNote = interestType === 'fixo'
                 ? 'Valor fixo de juros aplicado no contrato'
@@ -5104,7 +5107,7 @@
                 principal_amount: values.principal,
                 total_amount: calcResult.totalAmount,
                 installments_count: values.installments,
-                interest_rate: values.interestType === 'fixo' ? round2(values.fixedAddition) : values.interestRate,
+                interest_rate: values.interestType === 'fixo' ? 0 : values.interestRate,
                 interest_type: values.interestType === 'fixo' ? 'composto' : values.interestType,
                 installment_amount: calcResult.installmentAmount,
                 observations: encodeLoanObservations(values.observations, loanMeta),

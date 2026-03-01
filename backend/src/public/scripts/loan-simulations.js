@@ -19,6 +19,7 @@
     mode: "loan",
     currentSimulationId: null,
     pendingRows: [],
+    actionLocks: new Set(),
   };
 
   const actionRefs = {
@@ -68,6 +69,28 @@
       return;
     }
     window.alert(message);
+  }
+
+  function setActionButtonLoading(button, isLoading) {
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.disabled = Boolean(isLoading);
+    button.classList.toggle("opacity-60", Boolean(isLoading));
+    button.classList.toggle("pointer-events-none", Boolean(isLoading));
+  }
+
+  async function runSimulationAction(action, simulationId, button, handler) {
+    const lockKey = `${String(action || "")}:${String(simulationId || "")}`;
+    if (!lockKey || simulationState.actionLocks.has(lockKey)) return;
+
+    simulationState.actionLocks.add(lockKey);
+    setActionButtonLoading(button, true);
+
+    try {
+      await handler();
+    } finally {
+      simulationState.actionLocks.delete(lockKey);
+      setActionButtonLoading(button, false);
+    }
   }
 
   function normalizeSearchText(value) {
@@ -269,17 +292,23 @@
       }
 
       if (action === "send") {
-        void sendSimulationToWhatsApp(simulationId, true);
+        void runSimulationAction(action, simulationId, button, async function () {
+          await sendSimulationToWhatsApp(simulationId, true);
+        });
         return;
       }
 
       if (action === "approve") {
-        void approveSimulation(simulationId, true);
+        void runSimulationAction(action, simulationId, button, async function () {
+          await approveSimulation(simulationId, true);
+        });
         return;
       }
 
       if (action === "cancel") {
-        void cancelSimulation(simulationId, true);
+        void runSimulationAction(action, simulationId, button, async function () {
+          await cancelSimulation(simulationId, true);
+        });
       }
     });
   }
