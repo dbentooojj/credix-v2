@@ -14,6 +14,10 @@ import {
   getIsoTodayInTimeZone,
   normalizeTimeZone,
 } from "../lib/date-time";
+import {
+  applyDashboardAdjustments,
+  type DashboardTransaction,
+} from "../lib/dashboard-metrics-rules";
 import { toSafeNumber } from "../lib/numbers";
 import { requireAuthApi } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -259,9 +263,9 @@ router.get("/", async (req, res) => {
   const loanedByMonthAll = new Map<string, number>();
   const profitByMonthAll = new Map<string, number>();
   const cashAdjustmentByMonthAll = new Map<string, number>();
+  const manualAdjustmentTransactions: DashboardTransaction[] = [];
   let totalReceived = 0;
   let receivedThisMonth = 0;
-  let cashAdjustmentNet = 0;
 
   payments.forEach((payment) => {
     const paymentAmount = toSafeNumber(payment.amount);
@@ -292,7 +296,10 @@ router.get("/", async (req, res) => {
   cashAdjustments.forEach((adjustment) => {
     const signedAmount = toSafeNumber(adjustment.amount)
       * (adjustment.type === FinanceTransactionType.INCOME ? 1 : -1);
-    cashAdjustmentNet += signedAmount;
+    manualAdjustmentTransactions.push({
+      type: "adjustment",
+      amountSigned: signedAmount,
+    });
 
     const monthKey = dateToMonthKey(adjustment.date);
     cashAdjustmentByMonthAll.set(monthKey, (cashAdjustmentByMonthAll.get(monthKey) ?? 0) + signedAmount);
@@ -442,12 +449,25 @@ router.get("/", async (req, res) => {
   });
 
   const totalToReceive = Math.max(totalExpected - totalReceived, 0);
-  const cashBalance = totalToReceive + cashAdjustmentNet;
   const delinquencyRate = totalToReceive > 0 ? (totalOverdue / totalToReceive) * 100 : 0;
   const profitTotal = hasExplicitInterestBreakdown
     ? Math.max(interestReceived, 0)
     : Math.max(totalReceived - principalReceived, 0);
   const roiRate = totalLoaned > 0 ? (profitTotal / totalLoaned) * 100 : 0;
+  const metricsWithAdjustments = applyDashboardAdjustments(
+    {
+      cashBalanceBase: totalToReceive,
+      receivedThisMonth,
+      profitThisMonth: profitByMonthAll.get(currentMonthKey) ?? 0,
+      profitTotal,
+      roiRate,
+      totalOverdue,
+      totalLoaned,
+    },
+    manualAdjustmentTransactions,
+  );
+  const cashAdjustmentNet = metricsWithAdjustments.cashAdjustmentNet;
+  const cashBalance = metricsWithAdjustments.cashBalance;
 
   const chartPoints = monthKeys.map((monthKey) => ({
     month: monthKey,
