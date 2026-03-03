@@ -93,8 +93,121 @@
 }
 
 .dashboard-premium.dashboard-financial .kpi-card {
-  padding: 22px !important;
+  padding: 20px !important;
   background: var(--inst-surface-base) !important;
+}
+
+.dashboard-premium.dashboard-financial .cash-adjust-btn {
+  line-height: 1;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  transition: border-color 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out;
+}
+
+.dashboard-premium.dashboard-financial .cash-adjust-btn:hover {
+  border-color: rgba(148, 163, 184, 0.55) !important;
+  color: #f8faff !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card .kpi-value {
+  font-size: 2rem !important;
+  line-height: 1.1;
+  font-weight: 800 !important;
+  margin-top: 9px;
+}
+
+.dashboard-premium.dashboard-financial .kpi-card .kpi-insight,
+.dashboard-premium.dashboard-financial .kpi-card .kpi-note {
+  margin-top: 10px;
+}
+
+.dashboard-premium.dashboard-financial .kpi-note-positive {
+  color: #7ff6d4 !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-note-negative {
+  color: #fda4af !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-main .kpi-card {
+  min-height: 106px;
+  padding: 20px !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-main .kpi-card-main {
+  min-height: 106px;
+  padding: 20px !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-main .kpi-card .kpi-value {
+  font-size: 2rem !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-main .kpi-card-main .kpi-value {
+  font-size: 2rem !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-main .kpi-sparkline-wrap {
+  opacity: 0.98;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-card {
+  min-height: 106px;
+  padding: 20px !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-card .kpi-value {
+  font-size: 2rem !important;
+  color: #f8faff !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-sparkline-wrap {
+  height: 32px;
+  margin-top: 8px;
+  opacity: 1 !important;
+}
+
+.dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-sparkline {
+  height: 32px;
+}
+
+@media (min-width: 768px) {
+  .dashboard-premium.dashboard-financial .kpi-row-main .kpi-card,
+  .dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-card {
+    height: 212px;
+    min-height: 212px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-premium.dashboard-financial .kpi-row-main .kpi-sparkline-wrap,
+  .dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-sparkline-wrap {
+    margin-top: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-premium.dashboard-financial .kpi-row-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-premium.dashboard-financial .kpi-row-main > article {
+    grid-column: auto / auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-premium.dashboard-financial .kpi-card .kpi-value {
+    font-size: 1.7rem !important;
+  }
+
+  .dashboard-premium.dashboard-financial .kpi-row-main .kpi-card-main .kpi-value {
+    font-size: 1.7rem !important;
+  }
+
+  .dashboard-premium.dashboard-financial .kpi-row-secondary .kpi-card .kpi-value {
+    font-size: 1.7rem !important;
+  }
 }
 
 .dashboard-premium.dashboard-financial .kpi-card.kpi-primary-brand {
@@ -127,23 +240,12 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
+.dashboard-premium.dashboard-financial #upcomingList,
 .dashboard-premium.dashboard-financial #overdueList {
-  padding: 4px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.dashboard-premium.dashboard-financial #overdueList .overdue-item {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  border-radius: 14px !important;
-}
-
-.dashboard-premium.dashboard-financial #overdueList .overdue-item:hover {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(255, 255, 255, 0.09) !important;
-  box-shadow: none !important;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 
 .dashboard-premium.dashboard-financial #overdueList .status-pill.status-red {

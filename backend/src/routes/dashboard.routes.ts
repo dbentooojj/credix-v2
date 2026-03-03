@@ -1,4 +1,9 @@
-import { PaymentMethod, Prisma } from "@prisma/client";
+import {
+  FinanceTransactionStatus,
+  FinanceTransactionType,
+  PaymentMethod,
+  Prisma,
+} from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
 import { env } from "../config/env";
@@ -20,6 +25,15 @@ const dashboardQuerySchema = z.object({
   metric: z.enum(["recebido", "emprestado", "lucro"]).optional(),
   tz: z.string().optional(),
 });
+
+const cashAdjustmentCreateSchema = z.object({
+  type: z.enum(["income", "expense"]),
+  amount: z.number().positive(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  description: z.string().trim().max(300).optional(),
+});
+
+const CASH_ADJUSTMENT_CATEGORY = "Ajuste de caixa";
 
 type InstallmentDerivedStatus = "PAGA" | "ATRASADA" | "VENCE_HOJE" | "EM_DIA";
 type KpiInsightTone = "positive" | "negative" | "neutral";
@@ -96,6 +110,19 @@ function formatPercentPtBr(value: number): string {
   });
 }
 
+function parseDateOnly(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatDateDayMonthPtBr(value: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+  }).format(value);
+}
+
 function getInstallmentStatus(
   dueDateIso: string,
   todayIso: string,
@@ -157,7 +184,7 @@ router.get("/", async (req, res) => {
   const sparklineMonthKeys = buildMonthSeries(currentMonthKey, 6);
   const next7Iso = addDays(todayIso, 7);
 
-  const [loans, installments, payments] = await Promise.all([
+  const [loans, installments, payments, cashAdjustments] = await Promise.all([
     prisma.loan.findMany({
       where: { ownerUserId: userId },
       select: {
@@ -207,6 +234,21 @@ router.get("/", async (req, res) => {
         paymentDate: true,
       },
     }),
+    prisma.financeTransaction.findMany({
+      where: {
+        ownerUserId: userId,
+        category: CASH_ADJUSTMENT_CATEGORY,
+        status: FinanceTransactionStatus.COMPLETED,
+      },
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        date: true,
+        description: true,
+      },
+      orderBy: [{ date: "asc" }, { id: "asc" }],
+    }),
   ]);
 
   const monthKeySet = new Set(monthKeys);
@@ -216,8 +258,10 @@ router.get("/", async (req, res) => {
   const receivedByMonthAll = new Map<string, number>();
   const loanedByMonthAll = new Map<string, number>();
   const profitByMonthAll = new Map<string, number>();
+  const cashAdjustmentByMonthAll = new Map<string, number>();
   let totalReceived = 0;
   let receivedThisMonth = 0;
+  let cashAdjustmentNet = 0;
 
   payments.forEach((payment) => {
     const paymentAmount = toSafeNumber(payment.amount);
@@ -244,6 +288,19 @@ router.get("/", async (req, res) => {
       });
     }
   });
+
+  cashAdjustments.forEach((adjustment) => {
+    const signedAmount = toSafeNumber(adjustment.amount)
+      * (adjustment.type === FinanceTransactionType.INCOME ? 1 : -1);
+    cashAdjustmentNet += signedAmount;
+
+    const monthKey = dateToMonthKey(adjustment.date);
+    cashAdjustmentByMonthAll.set(monthKey, (cashAdjustmentByMonthAll.get(monthKey) ?? 0) + signedAmount);
+  });
+
+  const latestCashAdjustment = cashAdjustments.length > 0
+    ? cashAdjustments[cashAdjustments.length - 1]
+    : null;
 
   loans.forEach((loan) => {
     const monthKey = dateToMonthKey(loan.startDate);
@@ -385,6 +442,7 @@ router.get("/", async (req, res) => {
   });
 
   const totalToReceive = Math.max(totalExpected - totalReceived, 0);
+  const cashBalance = totalToReceive + cashAdjustmentNet;
   const delinquencyRate = totalToReceive > 0 ? (totalOverdue / totalToReceive) * 100 : 0;
   const profitTotal = hasExplicitInterestBreakdown
     ? Math.max(interestReceived, 0)
@@ -471,11 +529,18 @@ router.get("/", async (req, res) => {
   const receivedMonthlySeries = buildMonthlySeries(sparklineMonthKeys, receivedByMonthAll);
   const loanedMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, loanedByMonthAll);
   const profitMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, profitByMonthAll);
+  const cashAdjustmentMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, cashAdjustmentByMonthAll);
   const totalToReceiveSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.toReceive ?? 0);
   const totalOverdueSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.overdue ?? 0);
+  const cashAdjustmentSeries = buildCumulativeSeriesFromFlows(cashAdjustmentNet, cashAdjustmentMonthlyFlows);
+  const cashBalanceSeries = totalToReceiveSeries.map((value, index) => value + (cashAdjustmentSeries[index] ?? 0));
   const totalReceivedSeries = buildCumulativeSeriesFromFlows(totalReceived, receivedMonthlySeries);
   const totalLoanedSeries = buildCumulativeSeriesFromFlows(totalLoaned, loanedMonthlyFlows);
   const profitTotalSeries = buildCumulativeSeriesFromFlows(profitTotal, profitMonthlyFlows);
+  const roiRateSeries = totalLoanedSeries.map((loanedValue, index) => {
+    const profitValue = profitTotalSeries[index] ?? 0;
+    return loanedValue > 0 ? (profitValue / loanedValue) * 100 : 0;
+  });
   const epsilon = 0.00001;
 
   const previousCumulativeValue = (series: number[]): number => (
@@ -484,16 +549,9 @@ router.get("/", async (req, res) => {
 
   const buildProjectionInsight = (projectionValue: number, previousValue: number): KpiInsight => {
     if (Math.abs(previousValue) < epsilon) {
-      if (Math.abs(projectionValue) < epsilon) {
-        return {
-          tone: "neutral",
-          text: `Projecao: ${formatCurrencyPtBr(projectionValue)} (0,00% vs mes anterior)`,
-        };
-      }
-
       return {
-        tone: projectionValue >= 0 ? "positive" : "negative",
-        text: `Projecao: ${formatCurrencyPtBr(projectionValue)} (sem base comparativa no mes anterior)`,
+        tone: Math.abs(projectionValue) < epsilon ? "neutral" : projectionValue >= 0 ? "positive" : "negative",
+        text: `Proj.: ${formatCurrencyPtBr(projectionValue)}`,
       };
     }
 
@@ -501,28 +559,21 @@ router.get("/", async (req, res) => {
     if (Math.abs(pct) < 0.005) {
       return {
         tone: "neutral",
-        text: `Projecao: ${formatCurrencyPtBr(projectionValue)} (0,00% vs mes anterior)`,
+        text: `Proj.: ${formatCurrencyPtBr(projectionValue)} (0,00%)`,
       };
     }
 
+    const sign = pct > 0 ? "+" : "-";
     return {
       tone: pct > 0 ? "positive" : "negative",
-      text: `Projecao: ${formatCurrencyPtBr(projectionValue)} (${pct > 0 ? "↑" : "↓"} ${formatPercentPtBr(pct)}% vs mes anterior)`,
+      text: `Proj.: ${formatCurrencyPtBr(projectionValue)} (${sign}${formatPercentPtBr(Math.abs(pct))}%)`,
     };
   };
-
   const buildOverdueLast30Insight = (currentValue: number, value30DaysAgo: number): KpiInsight => {
     if (Math.abs(value30DaysAgo) < epsilon) {
-      if (Math.abs(currentValue) < epsilon) {
-        return {
-          tone: "neutral",
-          text: "0,00% vs ultimos 30 dias",
-        };
-      }
-
       return {
-        tone: "negative",
-        text: "↑ sem base comparativa vs ultimos 30 dias",
+        tone: Math.abs(currentValue) < epsilon ? "neutral" : "negative",
+        text: Math.abs(currentValue) < epsilon ? "30d: 0,00%" : "30d: sem base",
       };
     }
 
@@ -530,28 +581,21 @@ router.get("/", async (req, res) => {
     if (Math.abs(pct) < 0.005) {
       return {
         tone: "neutral",
-        text: "0,00% vs ultimos 30 dias",
+        text: "30d: 0,00%",
       };
     }
 
+    const sign = pct > 0 ? "+" : "-";
     return {
       tone: pct < 0 ? "positive" : "negative",
-      text: `${pct > 0 ? "↑" : "↓"} ${formatPercentPtBr(pct)}% vs ultimos 30 dias`,
+      text: `30d: ${sign}${formatPercentPtBr(Math.abs(pct))}%`,
     };
   };
-
   const buildProfitAverage3MInsight = (currentMonthProfit: number, average3Months: number): KpiInsight => {
     if (Math.abs(average3Months) < epsilon) {
-      if (Math.abs(currentMonthProfit) < epsilon) {
-        return {
-          tone: "neutral",
-          text: `Lucro do mes: ${formatCurrencyPtBr(currentMonthProfit)} (sem historico 3M)`,
-        };
-      }
-
       return {
-        tone: currentMonthProfit > 0 ? "positive" : "negative",
-        text: `Lucro do mes: ${formatCurrencyPtBr(currentMonthProfit)} (sem base comparativa 3M)`,
+        tone: Math.abs(currentMonthProfit) < epsilon ? "neutral" : currentMonthProfit > 0 ? "positive" : "negative",
+        text: Math.abs(currentMonthProfit) < epsilon ? "3M: sem historico" : "3M: sem base",
       };
     }
 
@@ -559,16 +603,16 @@ router.get("/", async (req, res) => {
     if (Math.abs(pct) < 0.005) {
       return {
         tone: "neutral",
-        text: `Lucro do mes: ${formatCurrencyPtBr(currentMonthProfit)} (0,00% vs media 3M)`,
+        text: "3M: 0,00%",
       };
     }
 
+    const sign = pct > 0 ? "+" : "-";
     return {
       tone: pct > 0 ? "positive" : "negative",
-      text: `Lucro do mes: ${formatCurrencyPtBr(currentMonthProfit)} (${pct > 0 ? "↑" : "↓"} ${formatPercentPtBr(pct)}% vs media 3M)`,
+      text: `3M: ${sign}${formatPercentPtBr(Math.abs(pct))}%`,
     };
   };
-
   const [currentYear, currentMonth, currentDay] = todayIso.split("-").map(Number);
   const daysInCurrentMonth = new Date(Date.UTC(currentYear, currentMonth, 0)).getUTCDate();
   const elapsedDays = Math.min(Math.max(currentDay, 1), daysInCurrentMonth);
@@ -584,12 +628,33 @@ router.get("/", async (req, res) => {
     ? previous3MonthKeys.reduce((sum, monthKey) => sum + (profitByMonthAll.get(monthKey) ?? 0), 0) / previous3MonthKeys.length
     : 0;
   const currentMonthProfit = profitByMonthAll.get(currentMonthKey) ?? 0;
+  const previousMonthProfit = profitByMonthAll.get(previousMonthKey) ?? 0;
 
   const receivedProjectionInsight = buildProjectionInsight(projectedReceivedThisMonth, previousMonthReceived);
   const overdueLast30Insight = buildOverdueLast30Insight(totalOverdue, overdue30DaysAgo);
   const profitAverageInsight = buildProfitAverage3MInsight(currentMonthProfit, previous3MonthProfitAverage);
+  const previousCashBalance = cashBalanceSeries.length >= 2
+    ? cashBalanceSeries[cashBalanceSeries.length - 2]
+    : previousSnapshot.toReceive;
+  const cashAdjustmentInsight: KpiInsight | undefined = latestCashAdjustment
+    ? (() => {
+      const signedAmount = toSafeNumber(latestCashAdjustment.amount)
+        * (latestCashAdjustment.type === FinanceTransactionType.INCOME ? 1 : -1);
+      const actionLabel = signedAmount >= 0 ? "entrada" : "retirada";
+      return {
+        tone: signedAmount >= 0 ? "positive" : "negative",
+        text: `Ultimo ajuste: ${actionLabel} em ${formatDateDayMonthPtBr(latestCashAdjustment.date)}`,
+      };
+    })()
+    : undefined;
 
   const kpiCards = {
+    cashBalance: {
+      currentValue: cashBalance,
+      previousValue: previousCashBalance,
+      series: toSparklinePoints(sparklineMonthKeys, cashBalanceSeries),
+      insight: cashAdjustmentInsight,
+    },
     totalToReceive: {
       currentValue: totalToReceive,
       previousValue: previousSnapshot.toReceive,
@@ -611,6 +676,17 @@ router.get("/", async (req, res) => {
       currentValue: totalLoaned,
       previousValue: previousCumulativeValue(totalLoanedSeries),
       series: toSparklinePoints(sparklineMonthKeys, totalLoanedSeries),
+    },
+    profitThisMonth: {
+      currentValue: currentMonthProfit,
+      previousValue: previousMonthProfit,
+      series: toSparklinePoints(sparklineMonthKeys, profitMonthlyFlows),
+      insight: profitAverageInsight,
+    },
+    roiRate: {
+      currentValue: roiRate,
+      previousValue: previousCumulativeValue(roiRateSeries),
+      series: toSparklinePoints(sparklineMonthKeys, roiRateSeries),
     },
     profitTotal: {
       currentValue: profitTotal,
@@ -668,16 +744,31 @@ router.get("/", async (req, res) => {
       metric,
     },
     kpis: {
+      cashBalance,
+      cashAdjustmentNet,
       totalLoaned,
       totalToReceive,
       totalReceived,
       receivedThisMonth,
       totalOverdue,
+      profitThisMonth: currentMonthProfit,
       profitTotal,
       roiRate,
       delinquencyRate,
     },
     kpiCards,
+    cashAdjustment: {
+      net: cashAdjustmentNet,
+      last: latestCashAdjustment
+        ? {
+          id: latestCashAdjustment.id,
+          type: latestCashAdjustment.type === FinanceTransactionType.INCOME ? "income" : "expense",
+          amount: toSafeNumber(latestCashAdjustment.amount),
+          date: dateToIso(latestCashAdjustment.date),
+          description: latestCashAdjustment.description,
+        }
+        : null,
+    },
     dailySummary: {
       dueToday: {
         count: dueTodayCount,
@@ -708,4 +799,44 @@ router.get("/", async (req, res) => {
   });
 });
 
+router.post("/cash-adjustments", async (req, res) => {
+  const userId = Number(req.user?.sub);
+  if (!Number.isFinite(userId)) {
+    return res.status(401).json({ message: "Nao autenticado" });
+  }
+
+  const payload = cashAdjustmentCreateSchema.parse(req.body);
+  const defaultDate = getIsoTodayInTimeZone(normalizeTimeZone(undefined));
+  const adjustmentType = payload.type === "income"
+    ? FinanceTransactionType.INCOME
+    : FinanceTransactionType.EXPENSE;
+
+  const created = await prisma.financeTransaction.create({
+    data: {
+      ownerUserId: userId,
+      type: adjustmentType,
+      amount: payload.amount,
+      category: CASH_ADJUSTMENT_CATEGORY,
+      date: parseDateOnly(payload.date ?? defaultDate),
+      description: payload.description?.trim() || "Ajuste manual de caixa",
+      status: FinanceTransactionStatus.COMPLETED,
+    },
+  });
+
+  return res.status(201).json({
+    data: {
+      id: created.id,
+      type: created.type === FinanceTransactionType.INCOME ? "income" : "expense",
+      amount: toSafeNumber(created.amount),
+      date: dateToIso(created.date),
+      description: created.description,
+    },
+  });
+});
+
 export { router as dashboardRoutes };
+
+
+
+
+

@@ -286,6 +286,15 @@ function parseStatusFilter(rawStatus: unknown): Set<SimulationStatus> | null {
   return statuses.length > 0 ? new Set(statuses) : null;
 }
 
+function getSimulationStatusLabel(status: SimulationStatus): string {
+  if (status === "DRAFT") return "Rascunho";
+  if (status === "SENT") return "Enviada";
+  if (status === "ACCEPTED") return "Aceita";
+  if (status === "EXPIRED") return "Expirada";
+  if (status === "CANCELED") return "Cancelada";
+  return status;
+}
+
 function computeTotalsFromPayload(payload: Record<string, unknown>) {
   const principal = round2(payload.principalAmount);
   const installments = Math.max(1, Math.trunc(toNumber(payload.installmentsCount)));
@@ -342,7 +351,7 @@ function mapRowForResponse(row: LoanSimulationRow, client?: ClientLite | null) {
       phone: clientPhone,
     },
     status: effectiveStatus,
-    statusLabel: effectiveStatus,
+    statusLabel: getSimulationStatusLabel(effectiveStatus),
   };
 }
 

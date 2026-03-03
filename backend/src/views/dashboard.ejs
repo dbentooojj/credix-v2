@@ -193,6 +193,37 @@
             display: block;
         }
 
+        .kpi-card-main {
+            min-height: 148px;
+            padding: 22px;
+        }
+
+        .kpi-card-main .kpi-value {
+            font-size: 1.82rem;
+        }
+
+        .kpi-row-main .kpi-sparkline-wrap {
+            opacity: 0.86;
+        }
+
+        .kpi-row-secondary .kpi-card {
+            min-height: 118px;
+        }
+
+        .kpi-row-secondary .kpi-value {
+            font-size: 1.28rem;
+        }
+
+        .kpi-row-secondary .kpi-sparkline-wrap,
+        .kpi-row-secondary .kpi-sparkline {
+            height: 30px;
+        }
+
+        .kpi-row-secondary .kpi-sparkline-wrap {
+            margin-top: 10px;
+            opacity: 0.74;
+        }
+
         .summary-link {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -446,6 +477,7 @@
         @media (max-width: 640px) {
             .metric-value { font-size: 2rem; }
             .kpi-value { font-size: 1.3rem; }
+            .kpi-card-main .kpi-value { font-size: 1.52rem; }
 
             .icon-btn {
                 width: 36px;
@@ -620,8 +652,8 @@
         html:not(.dark) main .hover\:bg-gray-50:hover,
         html:not(.dark) main .hover\:bg-slate-50:hover { background-color: #d3ddea !important; }
         </style>
-    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css">
-    <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css">
+    <link rel="stylesheet" href="/styles/premium-dashboard-theme.css?v=20260303f">
+    <link rel="stylesheet" href="/styles/premium-dashboard-institutional.css?v=20260303f">
 </head>
 <body class="dashboard-premium dashboard-financial primary-gradient min-h-screen">
     <header class="premium-header fixed w-full top-0 z-50">
@@ -690,44 +722,54 @@
                 </div>
             </div>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-5">
+            <section class="kpi-row-main grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <article class="kpi-card glass-card premium-card kpi-primary-brand">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Total a receber</span><i class="fas fa-circle-info kpi-info" title="Valor previsto para entrar no caixa."></i></div>
-                    <div class="kpi-value" id="kpiTotalToReceive">R$ 0,00</div>
-                    <p class="kpi-insight" id="kpiTotalToReceiveInsight">--</p>
-                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalToReceiveSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-                </article>
-                <article class="kpi-card glass-card premium-card kpi-danger kpi-primary-alert">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Total em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige ação."></i></div>
-                    <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
-                    <p class="kpi-insight" id="kpiTotalOverdueInsight">--</p>
-                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalOverdueSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-                    <p class="kpi-note" id="kpiOverdueRate">Inadimplência: --</p>
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="kpi-label">Saldo / Caixa atual</span>
+                        <div class="flex items-center gap-2">
+                            <button id="openCashAdjustModalBtn" type="button" class="cash-adjust-btn rounded-lg border border-slate-500/45 px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-700/30">
+                                <i class="fas fa-wallet mr-1"></i>Ajustar caixa
+                            </button>
+                            <i class="fas fa-circle-info kpi-info" title="Saldo atual com ajustes manuais de caixa."></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiCashBalance">R$ 0,00</div>
+                    <p class="kpi-note" id="kpiCashAdjustmentNet">Ajustes: R$ 0,00</p>
+                    <p class="kpi-insight" id="kpiCashBalanceInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiCashBalanceSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
                 <article class="kpi-card glass-card premium-card kpi-primary-positive">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Recebido no mês</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mês."></i></div>
+                    <div class="flex items-start justify-between"><span class="kpi-label">Total recebido no mes</span><i class="fas fa-circle-info kpi-info" title="Entradas confirmadas no mes atual."></i></div>
                     <div class="kpi-value" id="kpiReceivedThisMonth">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiReceivedThisMonthInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiReceivedThisMonthSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
+                <article id="kpiOverdueCard" class="kpi-card glass-card premium-card">
+                    <div class="flex items-start justify-between"><span class="kpi-label">Em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige acao."></i></div>
+                    <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
+                    <p class="kpi-note" id="kpiOverdueRate">Inadimpl.: --</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalOverdueSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+                </article>
+            </section>
+
+            <section class="kpi-row-secondary grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                 <article class="kpi-card glass-card premium-card">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Total emprestado</span><i class="fas fa-circle-info kpi-info" title="Capital ja colocado na rua."></i></div>
+                    <div class="flex items-start justify-between"><span class="kpi-label">Lucro do mes</span><i class="fas fa-circle-info kpi-info" title="Resultado do mes atual."></i></div>
+                    <div class="kpi-value" id="kpiProfitThisMonth">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiProfitThisMonthInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiProfitThisMonthSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+                </article>
+                <article class="kpi-card glass-card premium-card">
+                    <div class="flex items-start justify-between"><span class="kpi-label">Retorno total</span><i class="fas fa-circle-info kpi-info" title="Lucro acumulado em reais e ROI da carteira."></i></div>
+                    <div class="kpi-value" id="kpiRoiRate">R$ 0,00</div>
+                    <p class="kpi-insight" id="kpiRoiRateInsight">--</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiRoiRateSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+                </article>
+                <article class="kpi-card glass-card premium-card">
+                    <div class="flex items-start justify-between"><span class="kpi-label">Total emprestado</span><i class="fas fa-circle-info kpi-info" title="Capital total emprestado."></i></div>
                     <div class="kpi-value" id="kpiTotalLoaned">R$ 0,00</div>
                     <p class="kpi-insight" id="kpiTotalLoanedInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiTotalLoanedSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-                </article>
-                <article class="kpi-card glass-card premium-card">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Lucro total</span><i class="fas fa-circle-info kpi-info" title="Retorno acumulado da carteira."></i></div>
-                    <div class="kpi-value" id="kpiProfitTotal">R$ 0,00</div>
-                    <p class="kpi-insight" id="kpiProfitTotalInsight">--</p>
-                    <div class="kpi-sparkline-wrap"><svg id="kpiProfitTotalSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-                    <p class="kpi-note" id="kpiRoiRate">ROI: 0,00%</p>
-                </article>
-                <article class="kpi-card glass-card premium-card">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Total recebido</span><i class="fas fa-circle-info kpi-info" title="Tudo o que ja voltou para o caixa."></i></div>
-                    <div class="kpi-value" id="kpiTotalReceived">R$ 0,00</div>
-                    <p class="kpi-insight" id="kpiTotalReceivedInsight">--</p>
-                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalReceivedSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
             </section>
 
@@ -757,7 +799,7 @@
 
             <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <div class="glass-card premium-card overdue-panel quick-panel-card rounded-2xl p-5 h-full">
+                    <div class="glass-card premium-card quick-panel-card rounded-2xl p-5 h-full">
                         <div class="quick-panel-header">
                             <h3 class="text-xl font-bold text-gray-800">Ação rápida: próximos vencimentos</h3>
                             <p class="mt-1 text-xs text-gray-500">Lista operacional para marcar pagamento rápido.</p>
@@ -778,7 +820,9 @@
                             <h3 class="text-xl font-bold text-gray-800">Pagamentos atrasados</h3>
                             <p class="mt-1 text-xs text-gray-500">Lista operacional para cobranca e baixa de atrasos.</p>
                         </div>
-                        <div id="overdueList" class="space-y-3 fixed-scroll-panel quick-panel-list"><p class="text-sm text-gray-500">Sem pagamentos atrasados.</p></div>
+                        <div id="overdueList" class="space-y-3 fixed-scroll-panel quick-panel-list">
+                            <div class="text-center py-10 text-gray-500"><i class="fas fa-circle-check text-4xl mb-3 opacity-50"></i><p>Sem pagamentos atrasados.</p></div>
+                        </div>
                         <div class="quick-panel-pagination mt-3 flex items-center justify-between text-xs text-gray-500">
                             <button id="overduePrevPageBtn" type="button" class="rounded-lg border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Anterior</button>
                             <span id="overduePageInfo">Página 1 de 1</span>
@@ -900,6 +944,53 @@
         </div>
     </div>
 
+    <div id="cashAdjustModal" class="modal-base fixed inset-0 z-50 hidden items-center justify-center p-4" data-modal-base="true" role="dialog" aria-modal="true" aria-labelledby="cashAdjustModalTitle">
+        <div class="modal-base__panel modal-base__panel--md">
+            <div class="modal-base__header">
+                <div class="modal-base__title-wrap">
+                    <h3 id="cashAdjustModalTitle" class="modal-base__title text-2xl">Ajustar caixa</h3>
+                    <p class="modal-base__description">Registre entrada ou retirada para atualizar o saldo atual.</p>
+                </div>
+                <button id="closeCashAdjustModalBtn" class="modal-base__close" data-modal-close="primary" type="button" aria-label="Fechar ajuste de caixa"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-base__body">
+                <section class="modal-base__section">
+                    <div class="modal-base__grid-2">
+                        <div class="modal-base__field">
+                            <label for="cashAdjustmentType" class="modal-base__field-label">Tipo</label>
+                            <select id="cashAdjustmentType" class="filter-control" data-modal-autofocus>
+                                <option value="income">Entrada</option>
+                                <option value="expense">Retirada</option>
+                            </select>
+                        </div>
+                        <div class="modal-base__field">
+                            <label for="cashAdjustmentAmount" class="modal-base__field-label">Valor (R$)</label>
+                            <input id="cashAdjustmentAmount" type="text" inputmode="decimal" autocomplete="off" class="filter-control" placeholder="R$ 0,00">
+                        </div>
+                    </div>
+                    <div class="modal-base__grid-2 mt-3">
+                        <div class="modal-base__field">
+                            <label for="cashAdjustmentDate" class="modal-base__field-label">Data</label>
+                            <input id="cashAdjustmentDate" type="date" class="filter-control">
+                        </div>
+                        <div class="modal-base__field">
+                            <label for="cashAdjustmentDescription" class="modal-base__field-label">Observacao</label>
+                            <input id="cashAdjustmentDescription" type="text" maxlength="300" class="filter-control" placeholder="Motivo do ajuste (opcional)">
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-base__footer">
+                <div class="modal-base__footer-secondary">
+                    <button id="cancelCashAdjustBtn" data-modal-close="secondary" type="button" class="modal-btn modal-btn--secondary">Cancelar</button>
+                </div>
+                <div class="modal-base__footer-actions">
+                    <button id="saveCashAdjustBtn" type="button" class="modal-btn modal-btn--primary"><i class="fas fa-check mr-2"></i>Salvar ajuste</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/scripts/modal-system.js"></script>
     <script>window.__AUTH_USER__ = <%- JSON.stringify(currentUser || null) %>;</script>
     <script>
@@ -921,10 +1012,19 @@
         const userMenuDropdown = document.getElementById('userMenuDropdown');
         const collectionModal = document.getElementById('collectionModal');
         const paymentConfirmModal = document.getElementById('paymentConfirmModal');
+        const cashAdjustModal = document.getElementById('cashAdjustModal');
         const paymentConfirmInfo = document.getElementById('paymentConfirmInfo');
         const paymentDateInput = document.getElementById('paymentDateInput');
         const paymentMethodSelect = document.getElementById('paymentMethodSelect');
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const openCashAdjustModalBtn = document.getElementById('openCashAdjustModalBtn');
+        const closeCashAdjustModalBtn = document.getElementById('closeCashAdjustModalBtn');
+        const cancelCashAdjustBtn = document.getElementById('cancelCashAdjustBtn');
+        const saveCashAdjustBtn = document.getElementById('saveCashAdjustBtn');
+        const cashAdjustmentTypeInput = document.getElementById('cashAdjustmentType');
+        const cashAdjustmentAmountInput = document.getElementById('cashAdjustmentAmount');
+        const cashAdjustmentDateInput = document.getElementById('cashAdjustmentDate');
+        const cashAdjustmentDescriptionInput = document.getElementById('cashAdjustmentDescription');
         const collectionMessageInput = document.getElementById('collectionMessage');
         const collectionPreview = document.getElementById('collectionPreview');
         const periodSelect = document.getElementById('periodSelect');
@@ -955,24 +1055,25 @@
             selectedCollection: null,
             selectedPayment: null,
             paymentSubmitting: false,
+            cashAdjustmentSubmitting: false,
         };
 
         const KPI_IDS = [
-            'kpiTotalToReceive',
+            'kpiCashBalance',
             'kpiTotalOverdue',
             'kpiReceivedThisMonth',
+            'kpiProfitThisMonth',
+            'kpiRoiRate',
             'kpiTotalLoaned',
-            'kpiProfitTotal',
-            'kpiTotalReceived',
         ];
 
         const KPI_CARD_CONFIG = [
-            { key: 'totalToReceive', insightId: 'kpiTotalToReceiveInsight', sparklineId: 'kpiTotalToReceiveSparkline' },
-            { key: 'totalOverdue', insightId: 'kpiTotalOverdueInsight', sparklineId: 'kpiTotalOverdueSparkline' },
+            { key: 'cashBalance', fallbackKey: 'totalToReceive', insightId: 'kpiCashBalanceInsight', sparklineId: 'kpiCashBalanceSparkline' },
             { key: 'receivedThisMonth', insightId: 'kpiReceivedThisMonthInsight', sparklineId: 'kpiReceivedThisMonthSparkline' },
+            { key: 'totalOverdue', insightId: '', sparklineId: 'kpiTotalOverdueSparkline' },
+            { key: 'profitThisMonth', fallbackKey: 'profitTotal', insightId: 'kpiProfitThisMonthInsight', sparklineId: 'kpiProfitThisMonthSparkline' },
+            { key: 'profitTotal', insightId: '', sparklineId: 'kpiRoiRateSparkline' },
             { key: 'totalLoaned', insightId: 'kpiTotalLoanedInsight', sparklineId: 'kpiTotalLoanedSparkline' },
-            { key: 'profitTotal', insightId: 'kpiProfitTotalInsight', sparklineId: 'kpiProfitTotalSparkline' },
-            { key: 'totalReceived', insightId: 'kpiTotalReceivedInsight', sparklineId: 'kpiTotalReceivedSparkline' },
         ];
 
         function lockBodyScrollForModal(modalElement) {
@@ -1016,6 +1117,200 @@
             return `${safe.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
         }
 
+        function parseCurrencyInputValue(value) {
+            const raw = String(value ?? '').trim();
+            if (!raw) return 0;
+
+            const sanitized = raw
+                .replace(/\s+/g, '')
+                .replace(/R\$/gi, '')
+                .replace(/[^\d,.-]/g, '');
+
+            const commaIndex = sanitized.lastIndexOf(',');
+            const dotIndex = sanitized.lastIndexOf('.');
+            let normalized = sanitized;
+
+            if (commaIndex >= 0 && dotIndex >= 0) {
+                if (commaIndex > dotIndex) {
+                    normalized = sanitized.replace(/\./g, '').replace(',', '.');
+                } else {
+                    normalized = sanitized.replace(/,/g, '');
+                }
+            } else if (commaIndex >= 0) {
+                normalized = sanitized.replace(/\./g, '').replace(',', '.');
+            } else {
+                normalized = sanitized.replace(/,/g, '');
+            }
+
+            const parsed = Number(normalized);
+            return Number.isFinite(parsed) ? Math.max(parsed, 0) : 0;
+        }
+
+        function readCashAdjustmentAmountMaskState() {
+            const intDigits = String(cashAdjustmentAmountInput?.dataset.amountInt || '')
+                .replace(/\D/g, '')
+                .replace(/^0+(?=\d)/, '');
+            const decDigits = String(cashAdjustmentAmountInput?.dataset.amountDec || '')
+                .replace(/\D/g, '')
+                .slice(0, 2);
+            const hasDecimal = String(cashAdjustmentAmountInput?.dataset.amountHasDecimal || '') === '1';
+
+            if (intDigits || decDigits || hasDecimal) {
+                return { intDigits, decDigits, hasDecimal };
+            }
+
+            const parsed = parseCurrencyInputValue(cashAdjustmentAmountInput?.value || '');
+            if (parsed <= 0) return { intDigits: '', decDigits: '', hasDecimal: false };
+
+            const [intPart, decPart] = parsed.toFixed(2).split('.');
+            const trimmedDec = decPart === '00' ? '' : decPart.replace(/0+$/, '');
+            return { intDigits: intPart.replace(/^0+(?=\d)/, ''), decDigits: trimmedDec, hasDecimal: trimmedDec.length > 0 };
+        }
+
+        function moveCashAdjustmentAmountCaretToEnd() {
+            if (!(cashAdjustmentAmountInput instanceof HTMLInputElement)) return;
+            requestAnimationFrame(() => {
+                const length = cashAdjustmentAmountInput.value.length;
+                cashAdjustmentAmountInput.setSelectionRange(length, length);
+            });
+        }
+
+        function setCashAdjustmentAmountMaskState(state) {
+            if (!(cashAdjustmentAmountInput instanceof HTMLInputElement)) return;
+
+            const intDigits = String(state?.intDigits || '')
+                .replace(/\D/g, '')
+                .replace(/^0+(?=\d)/, '');
+            const decDigits = String(state?.decDigits || '')
+                .replace(/\D/g, '')
+                .slice(0, 2);
+            const hasDecimal = Boolean(state?.hasDecimal);
+            const hasAnyDigit = intDigits.length > 0 || decDigits.length > 0;
+
+            cashAdjustmentAmountInput.dataset.amountInt = intDigits;
+            cashAdjustmentAmountInput.dataset.amountDec = decDigits;
+            cashAdjustmentAmountInput.dataset.amountHasDecimal = hasDecimal ? '1' : '0';
+
+            if (!hasAnyDigit && !hasDecimal) {
+                cashAdjustmentAmountInput.value = '';
+                cashAdjustmentAmountInput.dataset.amountValue = '0';
+                return;
+            }
+
+            const integerValue = intDigits ? Number(intDigits) : 0;
+            const decimalDisplay = (hasDecimal || decDigits.length > 0)
+                ? decDigits.padEnd(2, '0').slice(0, 2)
+                : '00';
+            const numericValue = Number(`${integerValue}.${decimalDisplay}`);
+
+            cashAdjustmentAmountInput.dataset.amountValue = Number.isFinite(numericValue)
+                ? String(numericValue)
+                : '0';
+            cashAdjustmentAmountInput.value = `R$ ${integerValue.toLocaleString('pt-BR')},${decimalDisplay}`;
+        }
+
+        function setCashAdjustmentAmountValue(value) {
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                setCashAdjustmentAmountMaskState({ intDigits: '', decDigits: '', hasDecimal: false });
+                return;
+            }
+
+            const safe = Math.max(amount, 0);
+            const [intPart, decPart] = safe.toFixed(2).split('.');
+            const trimmedDec = decPart === '00' ? '' : decPart.replace(/0+$/, '');
+            setCashAdjustmentAmountMaskState({
+                intDigits: intPart.replace(/^0+(?=\d)/, ''),
+                decDigits: trimmedDec,
+                hasDecimal: trimmedDec.length > 0,
+            });
+        }
+
+        function getCashAdjustmentAmountValue() {
+            const amountFromMask = Number(cashAdjustmentAmountInput?.dataset.amountValue || 0);
+            if (Number.isFinite(amountFromMask) && amountFromMask > 0) return amountFromMask;
+            return parseCurrencyInputValue(cashAdjustmentAmountInput?.value || '');
+        }
+
+        function handleCashAdjustmentAmountBeforeInput(event) {
+            if (!(cashAdjustmentAmountInput instanceof HTMLInputElement)) return;
+            const inputType = String(event?.inputType || '');
+            if (!inputType) return;
+
+            if (inputType === 'insertFromPaste' || inputType === 'insertFromDrop') return;
+
+            if (
+                inputType !== 'insertText'
+                && inputType !== 'deleteContentBackward'
+                && inputType !== 'deleteContentForward'
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            const hasFullSelection = cashAdjustmentAmountInput.selectionStart === 0
+                && cashAdjustmentAmountInput.selectionEnd === cashAdjustmentAmountInput.value.length;
+            let state = hasFullSelection && inputType === 'insertText'
+                ? { intDigits: '', decDigits: '', hasDecimal: false }
+                : readCashAdjustmentAmountMaskState();
+
+            if (inputType === 'insertText') {
+                const char = String(event.data || '');
+                if (!char) return;
+
+                if (char === ',' || char === '.') {
+                    state.hasDecimal = true;
+                    setCashAdjustmentAmountMaskState(state);
+                    moveCashAdjustmentAmountCaretToEnd();
+                    return;
+                }
+
+                if (!/^\d$/.test(char)) return;
+
+                if (state.hasDecimal) {
+                    if (state.decDigits.length < 2) {
+                        state.decDigits = `${state.decDigits}${char}`.slice(0, 2);
+                    }
+                } else {
+                    state.intDigits = `${state.intDigits}${char}`.replace(/^0+(?=\d)/, '');
+                }
+
+                setCashAdjustmentAmountMaskState(state);
+                moveCashAdjustmentAmountCaretToEnd();
+                return;
+            }
+
+            if (hasFullSelection) {
+                setCashAdjustmentAmountValue(0);
+                moveCashAdjustmentAmountCaretToEnd();
+                return;
+            }
+
+            if (state.hasDecimal && state.decDigits.length > 0) {
+                state.decDigits = state.decDigits.slice(0, -1);
+            } else if (state.hasDecimal) {
+                state.hasDecimal = false;
+            } else if (state.intDigits.length > 0) {
+                state.intDigits = state.intDigits.slice(0, -1);
+            }
+
+            if (!state.intDigits && !state.decDigits && !state.hasDecimal) {
+                setCashAdjustmentAmountValue(0);
+            } else {
+                setCashAdjustmentAmountMaskState(state);
+            }
+            moveCashAdjustmentAmountCaretToEnd();
+        }
+
+        function handleCashAdjustmentAmountPaste(event) {
+            const rawText = event.clipboardData?.getData('text') || '';
+            if (!rawText) return;
+            event.preventDefault();
+            const parsed = parseCurrencyInputValue(rawText);
+            setCashAdjustmentAmountValue(parsed);
+            moveCashAdjustmentAmountCaretToEnd();
+        }
+
         function buildKpiInsight(currentValue, previousValue) {
             const current = Number.isFinite(Number(currentValue)) ? Number(currentValue) : 0;
             const previous = Number.isFinite(Number(previousValue)) ? Number(previousValue) : 0;
@@ -1025,13 +1320,13 @@
                 if (Math.abs(current) < 0.00001) {
                     return {
                         tone: 'neutral',
-                        text: '0,00% em relação ao mês anterior',
+                        text: '0,00% vs mes ant.',
                     };
                 }
 
                 return {
                     tone: delta >= 0 ? 'positive' : 'negative',
-                    text: `${delta >= 0 ? '↑' : '↓'} sem base comparativa no mês anterior`,
+                    text: 'Sem base ant.',
                 };
             }
 
@@ -1044,16 +1339,15 @@
             if (Math.abs(pct) < 0.005) {
                 return {
                     tone: 'neutral',
-                        text: '0,00% em relação ao mês anterior',
+                    text: '0,00% vs mes ant.',
                 };
             }
 
             return {
                 tone: pct > 0 ? 'positive' : 'negative',
-                text: `${pct > 0 ? '↑' : '↓'} ${pctText}% em relação ao mês anterior`,
+                text: `${pct > 0 ? '+' : '-'}${pctText}% vs mes ant.`,
             };
         }
-
         function renderSparkline(svgElement, seriesValues, tone = 'neutral') {
             if (!svgElement) return;
 
@@ -1125,9 +1419,9 @@
             const payload = (kpiCardsPayload && typeof kpiCardsPayload === 'object') ? kpiCardsPayload : {};
 
             KPI_CARD_CONFIG.forEach((card) => {
-                const insightElement = document.getElementById(card.insightId);
+                const insightElement = card.insightId ? document.getElementById(card.insightId) : null;
                 const sparklineElement = document.getElementById(card.sparklineId);
-                const metricData = payload[card.key] || {};
+                const metricData = payload[card.key] || (card.fallbackKey ? payload[card.fallbackKey] : null) || {};
 
                 const currentValue = Number(metricData.currentValue ?? 0);
                 const previousValue = Number(metricData.previousValue ?? 0);
@@ -1385,23 +1679,56 @@
         }
 
         function renderKpis(kpis, kpiCards) {
-            document.getElementById('kpiTotalToReceive').textContent = formatCurrency(kpis?.totalToReceive);
-            document.getElementById('kpiTotalOverdue').textContent = formatCurrency(kpis?.totalOverdue);
+            const cashBalance = Number(kpis?.cashBalance ?? kpis?.totalToReceive ?? 0);
+            const cashAdjustmentNet = Number(kpis?.cashAdjustmentNet ?? 0);
+            const totalOverdue = Number(kpis?.totalOverdue ?? 0);
+
+            document.getElementById('kpiCashBalance').textContent = formatCurrency(cashBalance);
+            const cashAdjustmentNetElement = document.getElementById('kpiCashAdjustmentNet');
+            if (cashAdjustmentNetElement) {
+                cashAdjustmentNetElement.classList.remove('kpi-note-positive', 'kpi-note-negative');
+                if (Math.abs(cashAdjustmentNet) < 0.005) {
+                    cashAdjustmentNetElement.textContent = 'Ajustes: R$ 0,00';
+                } else {
+                    const sign = cashAdjustmentNet > 0 ? '+' : '-';
+                    cashAdjustmentNetElement.textContent = `Ajustes: ${sign}${formatCurrency(Math.abs(cashAdjustmentNet))}`;
+                    if (cashAdjustmentNet > 0) cashAdjustmentNetElement.classList.add('kpi-note-positive');
+                    if (cashAdjustmentNet < 0) cashAdjustmentNetElement.classList.add('kpi-note-negative');
+                }
+            }
             document.getElementById('kpiReceivedThisMonth').textContent = formatCurrency(kpis?.receivedThisMonth);
+            document.getElementById('kpiTotalOverdue').textContent = formatCurrency(totalOverdue);
+            document.getElementById('kpiProfitThisMonth').textContent = formatCurrency(kpis?.profitThisMonth);
+            document.getElementById('kpiRoiRate').textContent = formatCurrency(kpis?.profitTotal);
             document.getElementById('kpiTotalLoaned').textContent = formatCurrency(kpis?.totalLoaned);
-            document.getElementById('kpiProfitTotal').textContent = formatCurrency(kpis?.profitTotal);
-            document.getElementById('kpiTotalReceived').textContent = formatCurrency(kpis?.totalReceived);
 
-            const hasToReceive = Number(kpis?.totalToReceive || 0) > 0;
-            document.getElementById('kpiOverdueRate').textContent = hasToReceive
-                ? `Inadimplência: ${formatPercent(kpis?.delinquencyRate)}`
-                : 'Inadimplência: --';
+            const roiInsightElement = document.getElementById('kpiRoiRateInsight');
+            if (roiInsightElement) {
+                const roiRateValue = Number(kpis?.roiRate ?? 0);
+                roiInsightElement.classList.remove('kpi-insight-positive', 'kpi-insight-negative');
+                if (roiRateValue > 0.005) roiInsightElement.classList.add('kpi-insight-positive');
+                if (roiRateValue < -0.005) roiInsightElement.classList.add('kpi-insight-negative');
+                roiInsightElement.textContent = `ROI: ${formatPercent(roiRateValue)}`;
+            }
 
-            document.getElementById('kpiRoiRate').textContent = `ROI: ${formatPercent(kpis?.roiRate)}`;
+            const hasToReceive = cashBalance > 0;
+            const hasOverdue = totalOverdue > 0;
+
+            const overdueRateElement = document.getElementById('kpiOverdueRate');
+            if (overdueRateElement) {
+                overdueRateElement.textContent = hasToReceive
+                    ? `Inadimpl.: ${formatPercent(kpis?.delinquencyRate)}`
+                    : 'Inadimpl.: --';
+            }
+
+            const overdueCardElement = document.getElementById('kpiOverdueCard');
+            if (overdueCardElement) {
+                overdueCardElement.classList.toggle('kpi-primary-alert', hasOverdue);
+                overdueCardElement.classList.toggle('kpi-danger', hasOverdue);
+            }
 
             renderKpiCardExtras(kpiCards);
         }
-
         function updateChartTypeButtons() {
             if (chartTypeLineBtn) {
                 const isLine = dashboardState.chartView === 'line';
@@ -1708,7 +2035,7 @@
                 container.style.height = 'auto';
                 container.style.maxHeight = 'none';
                 container.style.overflowY = 'hidden';
-                container.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-circle-check text-4xl mb-3 opacity-50"></i><p>Sem pagamentos atrasados.</p></div>';
+                container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-check text-4xl mb-3 opacity-50"></i><p>Sem pagamentos atrasados.</p></div>';
                 dashboardState.overduePage = 1;
                 updatePaginationControls('overdue', 1, 1, false);
                 return;
@@ -1925,6 +2252,101 @@
             if (success) closePaymentConfirmModal(true);
         }
 
+        function setCashAdjustLoading(loading) {
+            dashboardState.cashAdjustmentSubmitting = loading;
+            if (saveCashAdjustBtn) {
+                saveCashAdjustBtn.disabled = loading;
+                saveCashAdjustBtn.classList.toggle('opacity-70', loading);
+                saveCashAdjustBtn.classList.toggle('cursor-not-allowed', loading);
+                saveCashAdjustBtn.innerHTML = loading
+                    ? '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'
+                    : '<i class="fas fa-check mr-2"></i>Salvar ajuste';
+            }
+
+            if (cashAdjustmentTypeInput) cashAdjustmentTypeInput.disabled = loading;
+            if (cashAdjustmentAmountInput) cashAdjustmentAmountInput.disabled = loading;
+            if (cashAdjustmentDateInput) cashAdjustmentDateInput.disabled = loading;
+            if (cashAdjustmentDescriptionInput) cashAdjustmentDescriptionInput.disabled = loading;
+        }
+
+        function resetCashAdjustForm() {
+            if (cashAdjustmentTypeInput) cashAdjustmentTypeInput.value = 'income';
+            setCashAdjustmentAmountValue(0);
+            if (cashAdjustmentDateInput) cashAdjustmentDateInput.value = getLocalTodayDateInputValue();
+            if (cashAdjustmentDescriptionInput) cashAdjustmentDescriptionInput.value = '';
+        }
+
+        function openCashAdjustModal() {
+            if (!cashAdjustModal) return;
+            resetCashAdjustForm();
+            setCashAdjustLoading(false);
+            cashAdjustModal.classList.remove('hidden');
+            cashAdjustModal.classList.add('flex');
+            lockBodyScrollForModal(cashAdjustModal);
+        }
+
+        function closeCashAdjustModal(force = false) {
+            if (!cashAdjustModal) return;
+            if (dashboardState.cashAdjustmentSubmitting && !force) return;
+            cashAdjustModal.classList.add('hidden');
+            cashAdjustModal.classList.remove('flex');
+            unlockBodyScrollForModal(cashAdjustModal);
+            setCashAdjustLoading(false);
+        }
+
+        async function saveCashAdjustment() {
+            if (dashboardState.cashAdjustmentSubmitting) return;
+            const type = String(cashAdjustmentTypeInput?.value || 'income').toLowerCase();
+            const amount = getCashAdjustmentAmountValue();
+            const date = String(cashAdjustmentDateInput?.value || '').trim();
+            const description = String(cashAdjustmentDescriptionInput?.value || '').trim();
+
+            if (type !== 'income' && type !== 'expense') {
+                showMessage('Tipo de ajuste invalido.', 'error');
+                return;
+            }
+
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showMessage('Informe um valor maior que zero.', 'error');
+                return;
+            }
+
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                showMessage('Informe uma data valida.', 'error');
+                return;
+            }
+
+            setCashAdjustLoading(true);
+            try {
+                const response = await fetch('/api/dashboard/cash-adjustments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        type,
+                        amount,
+                        date,
+                        description,
+                    }),
+                });
+
+                const payload = await response.json().catch(() => null);
+                if (!response.ok) {
+                    showMessage(payload?.message || 'Falha ao salvar ajuste de caixa.', 'error');
+                    return;
+                }
+
+                showMessage('Ajuste de caixa salvo.', 'success');
+                closeCashAdjustModal(true);
+                await loadDashboard();
+            } catch (error) {
+                console.error(error);
+                showMessage('Erro de conexao ao salvar ajuste de caixa.', 'error');
+            } finally {
+                setCashAdjustLoading(false);
+            }
+        }
+
         sidebarToggle.addEventListener('click', () => {
             if (isMobileViewport()) {
                 sidebar.classList.toggle('mobile-open');
@@ -2041,6 +2463,32 @@
         paymentConfirmModal.addEventListener('click', (event) => {
             if (event.target === paymentConfirmModal) closePaymentConfirmModal();
         });
+        if (openCashAdjustModalBtn) {
+            openCashAdjustModalBtn.addEventListener('click', openCashAdjustModal);
+        }
+        if (closeCashAdjustModalBtn) {
+            closeCashAdjustModalBtn.addEventListener('click', () => closeCashAdjustModal());
+        }
+        if (cancelCashAdjustBtn) {
+            cancelCashAdjustBtn.addEventListener('click', () => closeCashAdjustModal());
+        }
+        if (saveCashAdjustBtn) {
+            saveCashAdjustBtn.addEventListener('click', saveCashAdjustment);
+        }
+        if (cashAdjustmentAmountInput) {
+            cashAdjustmentAmountInput.addEventListener('beforeinput', handleCashAdjustmentAmountBeforeInput);
+            cashAdjustmentAmountInput.addEventListener('paste', handleCashAdjustmentAmountPaste);
+            cashAdjustmentAmountInput.addEventListener('focus', moveCashAdjustmentAmountCaretToEnd);
+            cashAdjustmentAmountInput.addEventListener('blur', () => {
+                const parsed = parseCurrencyInputValue(cashAdjustmentAmountInput.value);
+                setCashAdjustmentAmountValue(parsed);
+            });
+        }
+        if (cashAdjustModal) {
+            cashAdjustModal.addEventListener('click', (event) => {
+                if (event.target === cashAdjustModal) closeCashAdjustModal();
+            });
+        }
 
         if (userMenuBtn && userMenuDropdown) {
             userMenuBtn.addEventListener('click', (event) => {
@@ -2084,4 +2532,6 @@
     </script>
 </body>
 </html>
+
+
 

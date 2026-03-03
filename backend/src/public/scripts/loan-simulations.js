@@ -410,7 +410,22 @@
     if (value === "ACCEPTED") return "Aceita";
     if (value === "EXPIRED") return "Expirada";
     if (value === "CANCELED") return "Cancelada";
+    if (value === "ACEITA") return "Aceita";
+    if (value === "CANCELADA") return "Cancelada";
+    if (value === "ENVIADA") return "Enviada";
+    if (value === "RASCUNHO") return "Rascunho";
+    if (value === "EXPIRADA") return "Expirada";
     return value || "-";
+  }
+
+  function resolveStatusLabel(row) {
+    const statusCode = String(row?.status || "").trim();
+    if (statusCode) return getStatusLabel(statusCode);
+
+    const fallbackLabel = String(row?.statusLabel || "").trim();
+    if (fallbackLabel) return getStatusLabel(fallbackLabel);
+
+    return "-";
   }
 
   function formatInterestTypeLabel(value) {
@@ -488,7 +503,7 @@
           </div>
 
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <span class="${getStatusBadgeClass(row.status)}">${row.statusLabel || getStatusLabel(row.status)}</span>
+            <span class="${getStatusBadgeClass(row.status)}">${resolveStatusLabel(row)}</span>
           </div>
 
           <div class="mt-3 flex items-center justify-end gap-1">
@@ -536,7 +551,7 @@
               <div class="mt-0.5 text-xs text-slate-500">${formatInterestTypeLabel(row.interestType)}</div>
             </div>
           </td>
-          <td><span class="${getStatusBadgeClass(row.status)}">${row.statusLabel || getStatusLabel(row.status)}</span></td>
+          <td><span class="${getStatusBadgeClass(row.status)}">${resolveStatusLabel(row)}</span></td>
           <td>${formatDate((row.expiresAt || "").slice(0, 10))}</td>
           <td>
             ${actions.length ? `<div class="flex items-center gap-1">${actions.join("")}</div>` : '<span class="text-xs text-slate-500">-</span>'}

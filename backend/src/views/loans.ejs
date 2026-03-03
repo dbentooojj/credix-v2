@@ -26,6 +26,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <style>
         html { font-size: 16px; }
         body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
@@ -655,13 +658,18 @@
             box-shadow: 0 18px 38px rgba(2, 6, 23, 0.62) !important;
             color: #e2e8f0 !important;
             z-index: 9999 !important;
+            width: 276px !important;
+            font-size: 13px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-months {
             background: #0b1730 !important;
             border-bottom: 1px solid rgba(100, 116, 139, 0.32) !important;
+            height: 40px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-current-month {
             color: #e2e8f0 !important;
+            padding-top: 6px !important;
+            font-size: 15px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-current-month .cur-month,
         .dashboard-premium.dashboard-loans .flatpickr-current-month input.cur-year {
@@ -683,23 +691,38 @@
         .dashboard-premium.dashboard-loans .flatpickr-prev-month svg,
         .dashboard-premium.dashboard-loans .flatpickr-next-month svg {
             fill: #cbd5e1 !important;
+            width: 13px !important;
+            height: 13px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-weekdays {
             background: #0b1730 !important;
             border-bottom: 1px solid rgba(100, 116, 139, 0.2) !important;
+            height: 30px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-days,
         .dashboard-premium.dashboard-loans .dayContainer {
             background: #0b1730 !important;
+            width: 252px !important;
+            min-width: 252px !important;
+            max-width: 252px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-weekday {
             color: #9fb0c8 !important;
             font-weight: 600 !important;
+            width: 36px !important;
+            max-width: 36px !important;
+            line-height: 30px !important;
+            font-size: 12px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-day {
             color: #dbe5f4 !important;
             border-radius: 8px !important;
             border: 1px solid transparent !important;
+            width: 36px !important;
+            max-width: 36px !important;
+            height: 34px !important;
+            line-height: 34px !important;
+            font-size: 13px !important;
         }
         .dashboard-premium.dashboard-loans .flatpickr-day:hover {
             background: rgba(59, 130, 246, 0.18) !important;
@@ -719,6 +742,28 @@
         .dashboard-premium.dashboard-loans .flatpickr-day.nextMonthDay,
         .dashboard-premium.dashboard-loans .flatpickr-day.flatpickr-disabled {
             color: rgba(148, 163, 184, 0.46) !important;
+        }
+        @media (max-width: 640px) {
+            .dashboard-premium.dashboard-loans .flatpickr-calendar {
+                width: 266px !important;
+                font-size: 12px !important;
+            }
+            .dashboard-premium.dashboard-loans .flatpickr-days,
+            .dashboard-premium.dashboard-loans .dayContainer {
+                width: 245px !important;
+                min-width: 245px !important;
+                max-width: 245px !important;
+            }
+            .dashboard-premium.dashboard-loans .flatpickr-weekday,
+            .dashboard-premium.dashboard-loans .flatpickr-day {
+                width: 35px !important;
+                max-width: 35px !important;
+            }
+            .dashboard-premium.dashboard-loans .flatpickr-day {
+                height: 32px !important;
+                line-height: 32px !important;
+                font-size: 12px !important;
+            }
         }
         .installment-preview {
             border-radius: 12px;
@@ -1716,7 +1761,7 @@
                                             </div>
                                             <div>
                                                 <label class="mb-1 block text-sm text-slate-300">Valor principal (R$)</label>
-                                                <input id="loanPrincipal" class="filter-control" type="text" inputmode="decimal" autocomplete="off" required placeholder="0,00">
+                                                <input id="loanPrincipal" class="filter-control" type="text" inputmode="decimal" autocomplete="off" required placeholder="R$ 0,00">
                                                 <p id="loanPrincipalError" class="field-error" aria-live="polite"></p>
                                             </div>
                                         </div>
@@ -2220,7 +2265,15 @@
             simulation: null,
             firstDueTouched: false
         };
-        const ENABLE_LOAN_FLATPICKR = false;
+        function shouldUseLoanFlatpickr() {
+            if (typeof window.flatpickr !== 'function') return false;
+            if (typeof window.matchMedia !== 'function') return true;
+            const isSmallViewport = window.matchMedia('(max-width: 768px)').matches;
+            const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+            return !isSmallViewport && !isCoarsePointer;
+        }
+
+        const ENABLE_LOAN_FLATPICKR = shouldUseLoanFlatpickr();
         const MAX_AUTO_INSTALLMENTS = 96;
         const MAX_INSTALLMENT_TOLERANCE = 1;
 
@@ -2305,6 +2358,185 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
             });
+        }
+
+        function readLoanPrincipalMaskState() {
+            const input = document.getElementById('loanPrincipal');
+            if (!(input instanceof HTMLInputElement)) {
+                return { intDigits: '', decDigits: '', hasDecimal: false };
+            }
+
+            const intDigits = String(input.dataset.amountInt || '')
+                .replace(/\D/g, '')
+                .replace(/^0+(?=\d)/, '');
+            const decDigits = String(input.dataset.amountDec || '')
+                .replace(/\D/g, '')
+                .slice(0, 2);
+            const hasDecimal = String(input.dataset.amountHasDecimal || '') === '1';
+
+            if (intDigits || decDigits || hasDecimal) {
+                return { intDigits, decDigits, hasDecimal };
+            }
+
+            const parsed = parseCurrencyInput(input.value || '');
+            if (parsed <= 0) return { intDigits: '', decDigits: '', hasDecimal: false };
+
+            const [intPart, decPart] = parsed.toFixed(2).split('.');
+            const trimmedDec = decPart === '00' ? '' : decPart.replace(/0+$/, '');
+            return {
+                intDigits: intPart.replace(/^0+(?=\d)/, ''),
+                decDigits: trimmedDec,
+                hasDecimal: trimmedDec.length > 0,
+            };
+        }
+
+        function setLoanPrincipalMaskState(state) {
+            const input = document.getElementById('loanPrincipal');
+            if (!(input instanceof HTMLInputElement)) return;
+
+            const intDigits = String(state?.intDigits || '')
+                .replace(/\D/g, '')
+                .replace(/^0+(?=\d)/, '');
+            const decDigits = String(state?.decDigits || '')
+                .replace(/\D/g, '')
+                .slice(0, 2);
+            const hasDecimal = Boolean(state?.hasDecimal);
+            const hasAnyDigit = intDigits.length > 0 || decDigits.length > 0;
+
+            input.dataset.amountInt = intDigits;
+            input.dataset.amountDec = decDigits;
+            input.dataset.amountHasDecimal = hasDecimal ? '1' : '0';
+
+            if (!hasAnyDigit && !hasDecimal) {
+                input.value = '';
+                input.dataset.amountValue = '0';
+                return;
+            }
+
+            const integerValue = intDigits ? Number(intDigits) : 0;
+            const decimalDisplay = (hasDecimal || decDigits.length > 0)
+                ? decDigits.padEnd(2, '0').slice(0, 2)
+                : '00';
+            const numericValue = Number(`${integerValue}.${decimalDisplay}`);
+
+            input.dataset.amountValue = Number.isFinite(numericValue) ? String(numericValue) : '0';
+            input.value = `R$ ${integerValue.toLocaleString('pt-BR')},${decimalDisplay}`;
+        }
+
+        function setLoanPrincipalMaskedValue(value) {
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                setLoanPrincipalMaskState({ intDigits: '', decDigits: '', hasDecimal: false });
+                return;
+            }
+
+            const safe = Math.max(amount, 0);
+            const [intPart, decPart] = safe.toFixed(2).split('.');
+            const trimmedDec = decPart === '00' ? '' : decPart.replace(/0+$/, '');
+            setLoanPrincipalMaskState({
+                intDigits: intPart.replace(/^0+(?=\d)/, ''),
+                decDigits: trimmedDec,
+                hasDecimal: trimmedDec.length > 0,
+            });
+        }
+
+        function moveLoanPrincipalCaretToEnd() {
+            const input = document.getElementById('loanPrincipal');
+            if (!(input instanceof HTMLInputElement)) return;
+            requestAnimationFrame(() => {
+                const length = input.value.length;
+                input.setSelectionRange(length, length);
+            });
+        }
+
+        function syncLoanPrincipalFieldAfterMask() {
+            clearFieldErrors();
+            triggerReactiveLoanRecalculation();
+        }
+
+        function handleLoanPrincipalBeforeInput(event) {
+            const input = document.getElementById('loanPrincipal');
+            if (!(input instanceof HTMLInputElement)) return;
+
+            const inputType = String(event?.inputType || '');
+            if (!inputType) return;
+            if (inputType === 'insertFromPaste' || inputType === 'insertFromDrop') return;
+
+            if (
+                inputType !== 'insertText'
+                && inputType !== 'deleteContentBackward'
+                && inputType !== 'deleteContentForward'
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const hasFullSelection = input.selectionStart === 0 && input.selectionEnd === input.value.length;
+            let state = hasFullSelection && inputType === 'insertText'
+                ? { intDigits: '', decDigits: '', hasDecimal: false }
+                : readLoanPrincipalMaskState();
+
+            if (inputType === 'insertText') {
+                const char = String(event.data || '');
+                if (!char) return;
+
+                if (char === ',' || char === '.') {
+                    state.hasDecimal = true;
+                    setLoanPrincipalMaskState(state);
+                    moveLoanPrincipalCaretToEnd();
+                    syncLoanPrincipalFieldAfterMask();
+                    return;
+                }
+
+                if (!/^\d$/.test(char)) return;
+
+                if (state.hasDecimal) {
+                    if (state.decDigits.length < 2) {
+                        state.decDigits = `${state.decDigits}${char}`.slice(0, 2);
+                    }
+                } else {
+                    state.intDigits = `${state.intDigits}${char}`.replace(/^0+(?=\d)/, '');
+                }
+
+                setLoanPrincipalMaskState(state);
+                moveLoanPrincipalCaretToEnd();
+                syncLoanPrincipalFieldAfterMask();
+                return;
+            }
+
+            if (hasFullSelection) {
+                setLoanPrincipalMaskedValue(0);
+                moveLoanPrincipalCaretToEnd();
+                syncLoanPrincipalFieldAfterMask();
+                return;
+            }
+
+            if (state.hasDecimal && state.decDigits.length > 0) {
+                state.decDigits = state.decDigits.slice(0, -1);
+            } else if (state.hasDecimal) {
+                state.hasDecimal = false;
+            } else if (state.intDigits.length > 0) {
+                state.intDigits = state.intDigits.slice(0, -1);
+            }
+
+            if (!state.intDigits && !state.decDigits && !state.hasDecimal) {
+                setLoanPrincipalMaskedValue(0);
+            } else {
+                setLoanPrincipalMaskState(state);
+            }
+            moveLoanPrincipalCaretToEnd();
+            syncLoanPrincipalFieldAfterMask();
+        }
+
+        function handleLoanPrincipalPaste(event) {
+            const rawText = event.clipboardData?.getData('text') || '';
+            if (!rawText) return;
+            event.preventDefault();
+            const parsed = parseCurrencyInput(rawText);
+            setLoanPrincipalMaskedValue(parsed);
+            moveLoanPrincipalCaretToEnd();
+            syncLoanPrincipalFieldAfterMask();
         }
 
         function formatDate(value) {
@@ -2585,7 +2817,7 @@
 
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
             const rect = anchorElement.getBoundingClientRect();
-            const estimatedCalendarWidth = 308;
+            const estimatedCalendarWidth = 280;
             const spaceToRight = viewportWidth - rect.left;
             const spaceToLeft = rect.right;
 
@@ -2612,6 +2844,72 @@
                     positionElement: anchorBtn instanceof HTMLElement ? anchorBtn : undefined,
                 });
             });
+        }
+
+        function openNativePreviewDatePicker(dateInput, index, anchorElement = null) {
+            if (!(dateInput instanceof HTMLInputElement)) return;
+            const parsedIndex = Math.trunc(toNumber(index));
+            if (!Number.isFinite(parsedIndex) || parsedIndex < 0) return;
+
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            const anchorRect = anchorElement instanceof HTMLElement ? anchorElement.getBoundingClientRect() : null;
+            const left = anchorRect
+                ? Math.max(8, Math.min(Math.round(anchorRect.left), Math.max(8, viewportWidth - 52)))
+                : 16;
+            const top = anchorRect
+                ? Math.max(8, Math.min(Math.round(anchorRect.bottom + 6), Math.max(8, viewportHeight - 52)))
+                : 16;
+
+            const nativePickerInput = document.createElement('input');
+            nativePickerInput.type = 'date';
+            nativePickerInput.value = normalizeIsoDateOnly(dateInput.value);
+            nativePickerInput.setAttribute('aria-hidden', 'true');
+            nativePickerInput.tabIndex = -1;
+            nativePickerInput.style.position = 'fixed';
+            nativePickerInput.style.left = `${left}px`;
+            nativePickerInput.style.top = `${top}px`;
+            nativePickerInput.style.width = '36px';
+            nativePickerInput.style.height = '36px';
+            nativePickerInput.style.opacity = '0.001';
+            nativePickerInput.style.pointerEvents = 'none';
+            nativePickerInput.style.zIndex = '9999';
+
+            let removed = false;
+            const cleanup = () => {
+                if (removed) return;
+                removed = true;
+                nativePickerInput.remove();
+            };
+
+            const commitChange = () => {
+                const normalized = normalizeIsoDateOnly(nativePickerInput.value);
+                if (!normalized) return;
+                dateInput.value = normalized;
+                dateInput.dataset.fpLastValue = normalized;
+                updateInstallmentDueDate(parsedIndex, normalized, true);
+            };
+
+            nativePickerInput.addEventListener('change', () => {
+                commitChange();
+                cleanup();
+            }, { once: true });
+
+            nativePickerInput.addEventListener('blur', () => {
+                setTimeout(cleanup, 0);
+            }, { once: true });
+
+            document.body.appendChild(nativePickerInput);
+            nativePickerInput.focus({ preventScroll: true });
+
+            if (typeof nativePickerInput.showPicker === 'function') {
+                try {
+                    nativePickerInput.showPicker();
+                    return;
+                } catch (error) {}
+            }
+
+            nativePickerInput.click();
         }
 
         function startOfDay(value) {
@@ -4021,6 +4319,7 @@
             document.getElementById('loanInstallments').value = '';
             document.getElementById('loanUseMaxInstallment').checked = false;
             document.getElementById('loanMaxInstallment').value = '';
+            setLoanPrincipalMaskedValue(0);
             document.getElementById('loanEditingId').value = '';
             loanFormState.schedule = [];
 
@@ -4043,7 +4342,7 @@
 
                 populateDebtorOptions(loan.debtor_id);
                 document.getElementById('loanDebtor').value = String(loan.debtor_id);
-                document.getElementById('loanPrincipal').value = formatCurrencyInput(loan.principal_amount);
+                setLoanPrincipalMaskedValue(loan.principal_amount);
                 document.getElementById('loanInstallments').value = loan.installments_count;
                 setDateInputValue(document.getElementById('loanStartDate'), startDateValue);
                 setDateInputValue(document.getElementById('loanFirstDueDate'), firstDueValue);
@@ -4959,15 +5258,12 @@
 
         const loanPrincipalInput = document.getElementById('loanPrincipal');
         if (loanPrincipalInput instanceof HTMLInputElement) {
-            loanPrincipalInput.addEventListener('input', function () {
-                const sanitized = String(loanPrincipalInput.value || '').replace(/[^\d,.\sR$]/gi, '');
-                if (sanitized !== loanPrincipalInput.value) {
-                    loanPrincipalInput.value = sanitized;
-                }
-            });
+            loanPrincipalInput.addEventListener('beforeinput', handleLoanPrincipalBeforeInput);
+            loanPrincipalInput.addEventListener('paste', handleLoanPrincipalPaste);
+            loanPrincipalInput.addEventListener('focus', moveLoanPrincipalCaretToEnd);
 
             loanPrincipalInput.addEventListener('blur', function () {
-                loanPrincipalInput.value = formatCurrencyInput(loanPrincipalInput.value);
+                setLoanPrincipalMaskedValue(parseCurrencyInput(loanPrincipalInput.value));
                 triggerReactiveLoanRecalculation();
             });
         }
@@ -5063,9 +5359,7 @@
                 dateInput._flatpickr.open();
                 return;
             }
-
-            dateInput.focus();
-            dateInput.click();
+            openNativePreviewDatePicker(dateInput, index, editBtn);
         });
 
         installmentsPreviewList.addEventListener('change', function (event) {
@@ -5208,7 +5502,7 @@
             loadLoansData();
         });
     </script>
-    <script src="/scripts/loan-simulations.js?v=20260223-status-colors-v2"></script>
+    <script src="/scripts/loan-simulations.js?v=20260303-pt-status-v1"></script>
 </body>
 </html>
 
