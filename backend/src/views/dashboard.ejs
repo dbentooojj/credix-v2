@@ -744,11 +744,11 @@
                     <p class="kpi-insight" id="kpiReceivedThisMonthInsight">--</p>
                     <div class="kpi-sparkline-wrap"><svg id="kpiReceivedThisMonthSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
-                <article id="kpiOverdueCard" class="kpi-card glass-card premium-card">
-                    <div class="flex items-start justify-between"><span class="kpi-label">Em atraso</span><i class="fas fa-circle-info kpi-info" title="Saldo vencido que exige acao."></i></div>
-                    <div class="kpi-value" id="kpiTotalOverdue">R$ 0,00</div>
-                    <p class="kpi-note" id="kpiOverdueRate">Inadimpl.: --</p>
-                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalOverdueSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+                <article id="kpiReceivableCard" class="kpi-card glass-card premium-card">
+                    <div class="flex items-start justify-between"><span class="kpi-label">A Receber</span><i class="fas fa-circle-info kpi-info" title="Parcelas em aberto (futuras + atrasadas)."></i></div>
+                    <div class="kpi-value" id="kpiTotalReceivableOpen">R$ 0,00</div>
+                    <p class="kpi-note" id="kpiReceivableBreakdown">Futuras: R$ 0,00 • Sem inadimplência</p>
+                    <div class="kpi-sparkline-wrap"><svg id="kpiTotalReceivableOpenSparkline" class="kpi-sparkline" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg></div>
                 </article>
             </section>
 
@@ -1060,7 +1060,7 @@
 
         const KPI_IDS = [
             'kpiCashBalance',
-            'kpiTotalOverdue',
+            'kpiTotalReceivableOpen',
             'kpiReceivedThisMonth',
             'kpiProfitThisMonth',
             'kpiRoiRate',
@@ -1070,7 +1070,7 @@
         const KPI_CARD_CONFIG = [
             { key: 'cashBalance', fallbackKey: 'totalToReceive', insightId: 'kpiCashBalanceInsight', sparklineId: 'kpiCashBalanceSparkline' },
             { key: 'receivedThisMonth', insightId: 'kpiReceivedThisMonthInsight', sparklineId: 'kpiReceivedThisMonthSparkline' },
-            { key: 'totalOverdue', insightId: '', sparklineId: 'kpiTotalOverdueSparkline' },
+            { key: 'totalOpenReceivable', insightId: '', sparklineId: 'kpiTotalReceivableOpenSparkline' },
             { key: 'profitThisMonth', fallbackKey: 'profitTotal', insightId: 'kpiProfitThisMonthInsight', sparklineId: 'kpiProfitThisMonthSparkline' },
             { key: 'profitTotal', insightId: '', sparklineId: 'kpiRoiRateSparkline' },
             { key: 'totalLoaned', insightId: 'kpiTotalLoanedInsight', sparklineId: 'kpiTotalLoanedSparkline' },
@@ -1681,7 +1681,9 @@
         function renderKpis(kpis, kpiCards) {
             const cashBalance = Number(kpis?.cashBalance ?? kpis?.totalToReceive ?? 0);
             const cashAdjustmentNet = Number(kpis?.cashAdjustmentNet ?? 0);
-            const totalOverdue = Number(kpis?.totalOverdue ?? 0);
+            const totalOverdue = Number(kpis?.openReceivableOverdue ?? kpis?.totalOverdue ?? 0);
+            const totalFutureOpen = Number(kpis?.openReceivableFuture ?? 0);
+            const totalOpenReceivable = Number(kpis?.totalOpenReceivable ?? 0);
 
             document.getElementById('kpiCashBalance').textContent = formatCurrency(cashBalance);
             const cashAdjustmentNetElement = document.getElementById('kpiCashAdjustmentNet');
@@ -1697,7 +1699,7 @@
                 }
             }
             document.getElementById('kpiReceivedThisMonth').textContent = formatCurrency(kpis?.receivedThisMonth);
-            document.getElementById('kpiTotalOverdue').textContent = formatCurrency(totalOverdue);
+            document.getElementById('kpiTotalReceivableOpen').textContent = formatCurrency(totalOpenReceivable);
             document.getElementById('kpiProfitThisMonth').textContent = formatCurrency(kpis?.profitThisMonth);
             document.getElementById('kpiRoiRate').textContent = formatCurrency(kpis?.profitTotal);
             document.getElementById('kpiTotalLoaned').textContent = formatCurrency(kpis?.totalLoaned);
@@ -1711,20 +1713,25 @@
                 roiInsightElement.textContent = `ROI: ${formatPercent(roiRateValue)}`;
             }
 
-            const hasToReceive = cashBalance > 0;
             const hasOverdue = totalOverdue > 0;
 
-            const overdueRateElement = document.getElementById('kpiOverdueRate');
-            if (overdueRateElement) {
-                overdueRateElement.textContent = hasToReceive
-                    ? `Inadimpl.: ${formatPercent(kpis?.delinquencyRate)}`
-                    : 'Inadimpl.: --';
+            const receivableBreakdownElement = document.getElementById('kpiReceivableBreakdown');
+            if (receivableBreakdownElement) {
+                receivableBreakdownElement.classList.remove('kpi-note-negative');
+                const futureText = `Futuras: ${formatCurrency(totalFutureOpen)}`;
+                const overdueText = hasOverdue
+                    ? `Atrasadas: ${formatCurrency(totalOverdue)}`
+                    : 'Sem inadimplência';
+                receivableBreakdownElement.textContent = `${futureText} • ${overdueText}`;
+                if (hasOverdue) {
+                    receivableBreakdownElement.classList.add('kpi-note-negative');
+                }
             }
 
-            const overdueCardElement = document.getElementById('kpiOverdueCard');
-            if (overdueCardElement) {
-                overdueCardElement.classList.toggle('kpi-primary-alert', hasOverdue);
-                overdueCardElement.classList.toggle('kpi-danger', hasOverdue);
+            const receivableCardElement = document.getElementById('kpiReceivableCard');
+            if (receivableCardElement) {
+                receivableCardElement.classList.toggle('kpi-primary-alert', hasOverdue);
+                receivableCardElement.classList.toggle('kpi-danger', hasOverdue);
             }
 
             renderKpiCardExtras(kpiCards);

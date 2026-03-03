@@ -319,6 +319,8 @@ router.get("/", async (req, res) => {
   const totalExpected = loans.reduce((sum, loan) => sum + toSafeNumber(loan.totalAmount), 0);
 
   let totalOverdue = 0;
+  let openReceivableFuture = 0;
+  let openReceivableOverdue = 0;
   let principalReceived = 0;
   let interestReceived = 0;
   let hasExplicitInterestBreakdown = false;
@@ -387,6 +389,7 @@ router.get("/", async (req, res) => {
 
     if (current.status === "ATRASADA") {
       totalOverdue += outstanding;
+      openReceivableOverdue += outstanding;
       if (monthKey === currentMonthKey) {
         overdueCurrentMonthCount += 1;
         overdueCurrentMonthValue += outstanding;
@@ -400,6 +403,10 @@ router.get("/", async (req, res) => {
       previous.total += outstanding;
       previous.count += 1;
       overdueByDebtor.set(installment.clientId, previous);
+    }
+
+    if (current.status === "EM_DIA") {
+      openReceivableFuture += outstanding;
     }
 
     if (current.status === "VENCE_HOJE") {
@@ -449,6 +456,7 @@ router.get("/", async (req, res) => {
   });
 
   const totalToReceive = Math.max(totalExpected - totalReceived, 0);
+  const totalOpenReceivable = openReceivableFuture + openReceivableOverdue;
   const delinquencyRate = totalToReceive > 0 ? (totalOverdue / totalToReceive) * 100 : 0;
   const profitTotal = hasExplicitInterestBreakdown
     ? Math.max(interestReceived, 0)
@@ -504,9 +512,13 @@ router.get("/", async (req, res) => {
     value: values[index] ?? 0,
   }));
 
-  const computeSnapshotAt = (asOfIso: string): { toReceive: number; overdue: number } => {
+  const computeSnapshotAt = (
+    asOfIso: string,
+  ): { toReceive: number; overdue: number; openFuture: number; openReceivable: number } => {
     let toReceiveAtReference = 0;
     let overdueAtReference = 0;
+    let openFutureAtReference = 0;
+    let openReceivableAtReference = 0;
 
     installments.forEach((installment) => {
       const loanStartIso = dateToIso(installment.loan.startDate);
@@ -524,18 +536,34 @@ router.get("/", async (req, res) => {
       toReceiveAtReference += outstandingAtReference;
       if (dueDateIso < asOfIso) {
         overdueAtReference += outstandingAtReference;
+        openReceivableAtReference += outstandingAtReference;
+      } else if (dueDateIso > asOfIso) {
+        openFutureAtReference += outstandingAtReference;
+        openReceivableAtReference += outstandingAtReference;
       }
     });
 
-    return { toReceive: toReceiveAtReference, overdue: overdueAtReference };
+    return {
+      toReceive: toReceiveAtReference,
+      overdue: overdueAtReference,
+      openFuture: openFutureAtReference,
+      openReceivable: openReceivableAtReference,
+    };
   };
 
-  const sparklineSnapshotByMonth = new Map<string, { toReceive: number; overdue: number }>();
+  const sparklineSnapshotByMonth = new Map<string, {
+    toReceive: number;
+    overdue: number;
+    openFuture: number;
+    openReceivable: number;
+  }>();
   sparklineMonthKeys.forEach((monthKey) => {
     if (monthKey === currentMonthKey) {
       sparklineSnapshotByMonth.set(monthKey, {
         toReceive: totalToReceive,
         overdue: totalOverdue,
+        openFuture: openReceivableFuture,
+        openReceivable: totalOpenReceivable,
       });
       return;
     }
@@ -552,6 +580,9 @@ router.get("/", async (req, res) => {
   const cashAdjustmentMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, cashAdjustmentByMonthAll);
   const totalToReceiveSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.toReceive ?? 0);
   const totalOverdueSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.overdue ?? 0);
+  const totalOpenReceivableSeries = sparklineMonthKeys.map((monthKey) => (
+    sparklineSnapshotByMonth.get(monthKey)?.openReceivable ?? 0
+  ));
   const cashAdjustmentSeries = buildCumulativeSeriesFromFlows(cashAdjustmentNet, cashAdjustmentMonthlyFlows);
   const cashBalanceSeries = totalToReceiveSeries.map((value, index) => value + (cashAdjustmentSeries[index] ?? 0));
   const totalReceivedSeries = buildCumulativeSeriesFromFlows(totalReceived, receivedMonthlySeries);
@@ -686,6 +717,11 @@ router.get("/", async (req, res) => {
       series: toSparklinePoints(sparklineMonthKeys, totalOverdueSeries),
       insight: overdueLast30Insight,
     },
+    totalOpenReceivable: {
+      currentValue: totalOpenReceivable,
+      previousValue: previousSnapshot.openReceivable,
+      series: toSparklinePoints(sparklineMonthKeys, totalOpenReceivableSeries),
+    },
     receivedThisMonth: {
       currentValue: receivedThisMonth,
       previousValue: receivedByMonthAll.get(previousMonthKey) ?? 0,
@@ -768,6 +804,9 @@ router.get("/", async (req, res) => {
       cashAdjustmentNet,
       totalLoaned,
       totalToReceive,
+      totalOpenReceivable,
+      openReceivableFuture,
+      openReceivableOverdue,
       totalReceived,
       receivedThisMonth,
       totalOverdue,
