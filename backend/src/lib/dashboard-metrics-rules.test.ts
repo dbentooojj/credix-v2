@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   applyDashboardAdjustments,
+  applyDashboardLedgerTransaction,
+  computeOutstandingAmount,
+  createDashboardLedgerAccumulator,
   getDashboardTransactionImpact,
   type DashboardMetricsBase,
 } from "./dashboard-metrics-rules";
@@ -87,4 +90,45 @@ test("aplicador ignora transacao que nao e ajuste manual", () => {
 
   assert.equal(result.cashAdjustmentNet, 0);
   assert.equal(result.cashBalance, base.cashBalanceBase);
+});
+
+test("cenario 1: saldo inicial 1000 sobe para 1500 ao quitar parcela de 500", () => {
+  const currentMonthKey = "2026-03";
+  const ledger = createDashboardLedgerAccumulator();
+
+  applyDashboardLedgerTransaction(ledger, {
+    type: "revenue",
+    amountSigned: 1_000,
+    monthKey: currentMonthKey,
+  }, currentMonthKey);
+  assert.equal(ledger.cashBalance, 1_000);
+
+  applyDashboardLedgerTransaction(ledger, {
+    type: "revenue",
+    amountSigned: 500,
+    monthKey: currentMonthKey,
+  }, currentMonthKey);
+
+  assert.equal(ledger.cashBalance, 1_500);
+  assert.equal(ledger.receivedThisMonth, 1_500);
+  assert.equal(ledger.profitThisMonth, 1_500);
+});
+
+test("cenario 2: parcela futura paga sai de a receber e entra no recebido do mes", () => {
+  const currentMonthKey = "2026-03";
+  const ledger = createDashboardLedgerAccumulator();
+
+  const amount = 500;
+  const openBefore = computeOutstandingAmount(amount, 0);
+  assert.equal(openBefore, 500);
+
+  applyDashboardLedgerTransaction(ledger, {
+    type: "revenue",
+    amountSigned: amount,
+    monthKey: currentMonthKey,
+  }, currentMonthKey);
+
+  const openAfter = computeOutstandingAmount(amount, amount);
+  assert.equal(openAfter, 0);
+  assert.equal(ledger.receivedThisMonth, 500);
 });

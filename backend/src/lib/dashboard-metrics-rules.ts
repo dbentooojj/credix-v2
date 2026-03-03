@@ -12,6 +12,19 @@ export type DashboardTransaction = {
   amountSigned: number;
 };
 
+export type DashboardLedgerTransaction = DashboardTransaction & {
+  monthKey: string;
+};
+
+export type DashboardLedgerAccumulator = {
+  cashBalance: number;
+  cashAdjustmentNet: number;
+  totalReceived: number;
+  receivedThisMonth: number;
+  profitTotal: number;
+  profitThisMonth: number;
+};
+
 export type DashboardMetricsBase = {
   cashBalanceBase: number;
   receivedThisMonth: number;
@@ -62,6 +75,59 @@ const DASHBOARD_TRANSACTION_IMPACT_MAP: Record<DashboardTransactionType, Dashboa
 
 export function getDashboardTransactionImpact(type: DashboardTransactionType): DashboardTransactionImpact {
   return DASHBOARD_TRANSACTION_IMPACT_MAP[type];
+}
+
+export function computeOutstandingAmount(installmentAmount: number, paidAmount: number): number {
+  if (!Number.isFinite(installmentAmount) || installmentAmount <= 0) return 0;
+  if (!Number.isFinite(paidAmount) || paidAmount <= 0) return installmentAmount;
+  return Math.max(installmentAmount - paidAmount, 0);
+}
+
+export function createDashboardLedgerAccumulator(): DashboardLedgerAccumulator {
+  return {
+    cashBalance: 0,
+    cashAdjustmentNet: 0,
+    totalReceived: 0,
+    receivedThisMonth: 0,
+    profitTotal: 0,
+    profitThisMonth: 0,
+  };
+}
+
+export function applyDashboardLedgerTransaction(
+  accumulator: DashboardLedgerAccumulator,
+  transaction: DashboardLedgerTransaction,
+  currentMonthKey: string,
+): DashboardLedgerAccumulator {
+  if (!Number.isFinite(transaction.amountSigned)) {
+    return accumulator;
+  }
+
+  const impact = getDashboardTransactionImpact(transaction.type);
+
+  if (impact.affectsBalance) {
+    accumulator.cashBalance += transaction.amountSigned;
+  }
+
+  if (impact.isAdjustment) {
+    accumulator.cashAdjustmentNet += transaction.amountSigned;
+  }
+
+  if (impact.affectsRevenue) {
+    accumulator.totalReceived += transaction.amountSigned;
+    if (transaction.monthKey === currentMonthKey) {
+      accumulator.receivedThisMonth += transaction.amountSigned;
+    }
+  }
+
+  if (impact.affectsProfit) {
+    accumulator.profitTotal += transaction.amountSigned;
+    if (transaction.monthKey === currentMonthKey) {
+      accumulator.profitThisMonth += transaction.amountSigned;
+    }
+  }
+
+  return accumulator;
 }
 
 export function applyDashboardAdjustments(

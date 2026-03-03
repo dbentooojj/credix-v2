@@ -15,9 +15,17 @@ import {
   normalizeTimeZone,
 } from "../lib/date-time";
 import {
-  applyDashboardAdjustments,
-  type DashboardTransaction,
+  applyDashboardLedgerTransaction,
+  computeOutstandingAmount,
+  createDashboardLedgerAccumulator,
+  getDashboardTransactionImpact,
+  type DashboardTransactionType,
 } from "../lib/dashboard-metrics-rules";
+import {
+  CASH_ADJUSTMENT_CATEGORY,
+  INSTALLMENT_PAYMENT_CATEGORY,
+  buildInstallmentIncomeDescription,
+} from "../lib/installment-income-transaction";
 import { toSafeNumber } from "../lib/numbers";
 import { requireAuthApi } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -36,8 +44,6 @@ const cashAdjustmentCreateSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   description: z.string().trim().max(300).optional(),
 });
-
-const CASH_ADJUSTMENT_CATEGORY = "Ajuste de caixa";
 
 type InstallmentDerivedStatus = "PAGA" | "ATRASADA" | "VENCE_HOJE" | "EM_DIA";
 type KpiInsightTone = "positive" | "negative" | "neutral";
@@ -134,7 +140,7 @@ function getInstallmentStatus(
   installmentAmount: number,
 ): { status: InstallmentDerivedStatus; statusLabel: string; outstanding: number } {
   const epsilon = 0.009;
-  const outstanding = Math.max(installmentAmount - paidAmount, 0);
+  const outstanding = computeOutstandingAmount(installmentAmount, paidAmount);
   const isPaid = outstanding <= epsilon;
 
   if (isPaid) {
@@ -188,7 +194,7 @@ router.get("/", async (req, res) => {
   const sparklineMonthKeys = buildMonthSeries(currentMonthKey, 6);
   const next7Iso = addDays(todayIso, 7);
 
-  const [loans, installments, payments, cashAdjustments] = await Promise.all([
+  const [loans, installments, payments, financeTransactions] = await Promise.all([
     prisma.loan.findMany({
       where: { ownerUserId: userId },
       select: {
@@ -241,7 +247,6 @@ router.get("/", async (req, res) => {
     prisma.financeTransaction.findMany({
       where: {
         ownerUserId: userId,
-        category: CASH_ADJUSTMENT_CATEGORY,
         status: FinanceTransactionStatus.COMPLETED,
       },
       select: {
@@ -249,6 +254,7 @@ router.get("/", async (req, res) => {
         type: true,
         amount: true,
         date: true,
+        category: true,
         description: true,
       },
       orderBy: [{ date: "asc" }, { id: "asc" }],
@@ -262,23 +268,73 @@ router.get("/", async (req, res) => {
   const receivedByMonthAll = new Map<string, number>();
   const loanedByMonthAll = new Map<string, number>();
   const profitByMonthAll = new Map<string, number>();
-  const cashAdjustmentByMonthAll = new Map<string, number>();
-  const manualAdjustmentTransactions: DashboardTransaction[] = [];
-  let totalReceived = 0;
-  let receivedThisMonth = 0;
+  const balanceByMonthAll = new Map<string, number>();
+  const installmentIncomeDescriptions = new Set<string>();
+  const ledgerAccumulator = createDashboardLedgerAccumulator();
+
+  const applyLedgerEntry = (entry: {
+    type: DashboardTransactionType;
+    amountSigned: number;
+    monthKey: string;
+  }) => {
+    if (!Number.isFinite(entry.amountSigned)) return;
+
+    const impact = getDashboardTransactionImpact(entry.type);
+    applyDashboardLedgerTransaction(ledgerAccumulator, entry, currentMonthKey);
+
+    if (impact.affectsBalance) {
+      balanceByMonthAll.set(
+        entry.monthKey,
+        (balanceByMonthAll.get(entry.monthKey) ?? 0) + entry.amountSigned,
+      );
+    }
+
+    if (impact.affectsRevenue) {
+      receivedByMonthAll.set(
+        entry.monthKey,
+        (receivedByMonthAll.get(entry.monthKey) ?? 0) + entry.amountSigned,
+      );
+      if (monthKeySet.has(entry.monthKey)) {
+        receivedByMonth.set(
+          entry.monthKey,
+          (receivedByMonth.get(entry.monthKey) ?? 0) + entry.amountSigned,
+        );
+      }
+    }
+
+    if (impact.affectsProfit) {
+      profitByMonthAll.set(
+        entry.monthKey,
+        (profitByMonthAll.get(entry.monthKey) ?? 0) + entry.amountSigned,
+      );
+    }
+  };
+
+  financeTransactions.forEach((transaction) => {
+    const monthKey = dateToMonthKey(transaction.date);
+    const amountSigned = toSafeNumber(transaction.amount)
+      * (transaction.type === FinanceTransactionType.INCOME ? 1 : -1);
+    const dashboardType: DashboardTransactionType = transaction.category === CASH_ADJUSTMENT_CATEGORY
+      ? "adjustment"
+      : transaction.type === FinanceTransactionType.INCOME
+        ? "revenue"
+        : "expense";
+
+    if (dashboardType === "revenue" && transaction.category === INSTALLMENT_PAYMENT_CATEGORY) {
+      installmentIncomeDescriptions.add(transaction.description.trim());
+    }
+
+    applyLedgerEntry({
+      type: dashboardType,
+      amountSigned,
+      monthKey,
+    });
+  });
 
   payments.forEach((payment) => {
     const paymentAmount = toSafeNumber(payment.amount);
     const paymentDateIso = dateToIso(payment.paymentDate);
     const paymentMonthKey = dateToMonthKey(payment.paymentDate);
-    totalReceived += paymentAmount;
-    if (paymentMonthKey === currentMonthKey) {
-      receivedThisMonth += paymentAmount;
-    }
-    receivedByMonthAll.set(paymentMonthKey, (receivedByMonthAll.get(paymentMonthKey) ?? 0) + paymentAmount);
-    if (monthKeySet.has(paymentMonthKey)) {
-      receivedByMonth.set(paymentMonthKey, (receivedByMonth.get(paymentMonthKey) ?? 0) + paymentAmount);
-    }
 
     if (payment.installmentId) {
       paymentByInstallment.set(
@@ -290,24 +346,30 @@ router.get("/", async (req, res) => {
         paymentDateIso,
         monthKey: paymentMonthKey,
       });
+
+      const expectedDescription = buildInstallmentIncomeDescription(payment.installmentId, payment.loanId);
+      if (!installmentIncomeDescriptions.has(expectedDescription)) {
+        installmentIncomeDescriptions.add(expectedDescription);
+        applyLedgerEntry({
+          type: "revenue",
+          amountSigned: paymentAmount,
+          monthKey: paymentMonthKey,
+        });
+      }
     }
   });
 
-  cashAdjustments.forEach((adjustment) => {
-    const signedAmount = toSafeNumber(adjustment.amount)
-      * (adjustment.type === FinanceTransactionType.INCOME ? 1 : -1);
-    manualAdjustmentTransactions.push({
-      type: "adjustment",
-      amountSigned: signedAmount,
-    });
-
-    const monthKey = dateToMonthKey(adjustment.date);
-    cashAdjustmentByMonthAll.set(monthKey, (cashAdjustmentByMonthAll.get(monthKey) ?? 0) + signedAmount);
-  });
-
+  const cashAdjustments = financeTransactions.filter(
+    (transaction) => transaction.category === CASH_ADJUSTMENT_CATEGORY,
+  );
   const latestCashAdjustment = cashAdjustments.length > 0
     ? cashAdjustments[cashAdjustments.length - 1]
     : null;
+  const totalReceived = ledgerAccumulator.totalReceived;
+  const receivedThisMonth = ledgerAccumulator.receivedThisMonth;
+  const profitTotal = ledgerAccumulator.profitTotal;
+  const cashAdjustmentNet = ledgerAccumulator.cashAdjustmentNet;
+  const ledgerCashBalance = ledgerAccumulator.cashBalance;
 
   loans.forEach((loan) => {
     const monthKey = dateToMonthKey(loan.startDate);
@@ -316,14 +378,11 @@ router.get("/", async (req, res) => {
   });
 
   const totalLoaned = loans.reduce((sum, loan) => sum + toSafeNumber(loan.principalAmount), 0);
-  const totalExpected = loans.reduce((sum, loan) => sum + toSafeNumber(loan.totalAmount), 0);
 
   let totalOverdue = 0;
+  let totalToReceiveOutstanding = 0;
   let openReceivableFuture = 0;
   let openReceivableOverdue = 0;
-  let principalReceived = 0;
-  let interestReceived = 0;
-  let hasExplicitInterestBreakdown = false;
 
   let dueTodayCount = 0;
   let dueTodayValue = 0;
@@ -359,6 +418,10 @@ router.get("/", async (req, res) => {
     const current = getInstallmentStatus(dueDateIso, todayIso, paidAmount, amount);
     const outstanding = current.outstanding;
     const monthKey = dueDateIso.slice(0, 7);
+
+    if (outstanding > 0) {
+      totalToReceiveOutstanding += outstanding;
+    }
 
     if (outstanding > 0 && monthKeySet.has(monthKey)) {
       if (current.status === "ATRASADA") {
@@ -418,64 +481,13 @@ router.get("/", async (req, res) => {
       next7Count += 1;
       next7Value += outstanding;
     }
-
-    if (paidAmount > 0) {
-      const loanPrincipal = toSafeNumber(installment.loan.principalAmount);
-      const loanTotal = toSafeNumber(installment.loan.totalAmount);
-      const defaultPrincipalShare = loanTotal > 0 ? amount * (loanPrincipal / loanTotal) : amount;
-
-      const principalComponent = installment.principalAmount !== null
-        ? toSafeNumber(installment.principalAmount)
-        : defaultPrincipalShare;
-
-      const interestComponent = installment.interestAmount !== null
-        ? toSafeNumber(installment.interestAmount)
-        : Math.max(amount - principalComponent, 0);
-
-      if (installment.principalAmount !== null || installment.interestAmount !== null) {
-        hasExplicitInterestBreakdown = true;
-      }
-
-      const principalPaid = Math.min(paidAmount, Math.max(principalComponent, 0));
-      const interestPaid = Math.min(
-        Math.max(paidAmount - principalPaid, 0),
-        Math.max(interestComponent, 0),
-      );
-
-      principalReceived += principalPaid;
-      interestReceived += interestPaid;
-
-      const paymentMeta = paymentMetaByInstallment.get(installment.id);
-      if (paymentMeta) {
-        profitByMonthAll.set(
-          paymentMeta.monthKey,
-          (profitByMonthAll.get(paymentMeta.monthKey) ?? 0) + interestPaid,
-        );
-      }
-    }
   });
 
-  const totalToReceive = Math.max(totalExpected - totalReceived, 0);
   const totalOpenReceivable = openReceivableFuture + openReceivableOverdue;
+  const totalToReceive = totalToReceiveOutstanding;
   const delinquencyRate = totalToReceive > 0 ? (totalOverdue / totalToReceive) * 100 : 0;
-  const profitTotal = hasExplicitInterestBreakdown
-    ? Math.max(interestReceived, 0)
-    : Math.max(totalReceived - principalReceived, 0);
   const roiRate = totalLoaned > 0 ? (profitTotal / totalLoaned) * 100 : 0;
-  const metricsWithAdjustments = applyDashboardAdjustments(
-    {
-      cashBalanceBase: totalToReceive,
-      receivedThisMonth,
-      profitThisMonth: profitByMonthAll.get(currentMonthKey) ?? 0,
-      profitTotal,
-      roiRate,
-      totalOverdue,
-      totalLoaned,
-    },
-    manualAdjustmentTransactions,
-  );
-  const cashAdjustmentNet = metricsWithAdjustments.cashAdjustmentNet;
-  const cashBalance = metricsWithAdjustments.cashBalance;
+  const cashBalance = ledgerCashBalance;
 
   const chartPoints = monthKeys.map((monthKey) => ({
     month: monthKey,
@@ -577,14 +589,13 @@ router.get("/", async (req, res) => {
   const receivedMonthlySeries = buildMonthlySeries(sparklineMonthKeys, receivedByMonthAll);
   const loanedMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, loanedByMonthAll);
   const profitMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, profitByMonthAll);
-  const cashAdjustmentMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, cashAdjustmentByMonthAll);
+  const balanceMonthlyFlows = buildMonthlySeries(sparklineMonthKeys, balanceByMonthAll);
   const totalToReceiveSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.toReceive ?? 0);
   const totalOverdueSeries = sparklineMonthKeys.map((monthKey) => sparklineSnapshotByMonth.get(monthKey)?.overdue ?? 0);
   const totalOpenReceivableSeries = sparklineMonthKeys.map((monthKey) => (
     sparklineSnapshotByMonth.get(monthKey)?.openReceivable ?? 0
   ));
-  const cashAdjustmentSeries = buildCumulativeSeriesFromFlows(cashAdjustmentNet, cashAdjustmentMonthlyFlows);
-  const cashBalanceSeries = totalToReceiveSeries.map((value, index) => value + (cashAdjustmentSeries[index] ?? 0));
+  const cashBalanceSeries = buildCumulativeSeriesFromFlows(cashBalance, balanceMonthlyFlows);
   const totalReceivedSeries = buildCumulativeSeriesFromFlows(totalReceived, receivedMonthlySeries);
   const totalLoanedSeries = buildCumulativeSeriesFromFlows(totalLoaned, loanedMonthlyFlows);
   const profitTotalSeries = buildCumulativeSeriesFromFlows(profitTotal, profitMonthlyFlows);
@@ -684,9 +695,7 @@ router.get("/", async (req, res) => {
   const receivedProjectionInsight = buildProjectionInsight(projectedReceivedThisMonth, previousMonthReceived);
   const overdueLast30Insight = buildOverdueLast30Insight(totalOverdue, overdue30DaysAgo);
   const profitAverageInsight = buildProfitAverage3MInsight(currentMonthProfit, previous3MonthProfitAverage);
-  const previousCashBalance = cashBalanceSeries.length >= 2
-    ? cashBalanceSeries[cashBalanceSeries.length - 2]
-    : previousSnapshot.toReceive;
+  const previousCashBalance = previousCumulativeValue(cashBalanceSeries);
   const cashAdjustmentInsight: KpiInsight | undefined = latestCashAdjustment
     ? (() => {
       const signedAmount = toSafeNumber(latestCashAdjustment.amount)

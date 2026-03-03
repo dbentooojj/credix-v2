@@ -5,6 +5,10 @@
   Prisma,
 } from "@prisma/client";
 import { Router } from "express";
+import {
+  deleteInstallmentIncomeTransaction,
+  upsertInstallmentIncomeTransaction,
+} from "../lib/installment-income-transaction";
 import { AppError } from "../middleware/error-handler";
 import { requireAuthApi } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -207,6 +211,14 @@ router.post("/", async (req, res) => {
           notes: payload.notes?.trim() || null,
         },
       });
+
+      await upsertInstallmentIncomeTransaction(tx, {
+        ownerUserId: userId,
+        installmentId: payload.installmentId,
+        loanId: payload.loanId,
+        amount: payload.amount,
+        date: paymentDate,
+      });
     }
 
     return payment;
@@ -282,6 +294,12 @@ router.post("/installments/:installmentId/revert", async (req, res) => {
         paymentMethod: null,
         notes: null,
       },
+    });
+
+    await deleteInstallmentIncomeTransaction(tx, {
+      ownerUserId: userId,
+      installmentId,
+      loanId: installment.loanId,
     });
 
     return {

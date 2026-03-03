@@ -6,6 +6,11 @@
   PaymentMethod,
   type Prisma,
 } from "@prisma/client";
+import {
+  INSTALLMENT_PAYMENT_CATEGORY,
+  deleteInstallmentIncomeTransaction,
+  upsertInstallmentIncomeTransaction,
+} from "../lib/installment-income-transaction";
 import { toSafeInteger, toSafeNumber } from "../lib/numbers";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../middleware/error-handler";
@@ -727,6 +732,12 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
           installmentId: { not: null },
         },
       });
+      await tx.financeTransaction.deleteMany({
+        where: {
+          ownerUserId,
+          category: INSTALLMENT_PAYMENT_CATEGORY,
+        },
+      });
     }
 
     for (const row of normalized) {
@@ -784,12 +795,26 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
             notes: row.notes,
           },
         });
+
+        await upsertInstallmentIncomeTransaction(tx, {
+          ownerUserId,
+          installmentId: row.id,
+          loanId: row.loanId,
+          amount: row.amount,
+          date: row.paymentDate,
+        });
       } else {
         await tx.payment.deleteMany({
           where: {
             ownerUserId,
             installmentId: row.id,
           },
+        });
+
+        await deleteInstallmentIncomeTransaction(tx, {
+          ownerUserId,
+          installmentId: row.id,
+          loanId: row.loanId,
         });
       }
     }
