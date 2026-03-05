@@ -6,9 +6,14 @@ import {
 
 export const CASH_ADJUSTMENT_CATEGORY = "Ajuste de caixa";
 export const INSTALLMENT_PAYMENT_CATEGORY = "Recebimento de parcela";
+export const LOAN_DISBURSEMENT_CATEGORY = "Desembolso de emprestimo";
 
 export function buildInstallmentIncomeDescription(installmentId: number, loanId: number): string {
   return `Recebimento da parcela #${installmentId} do emprestimo #${loanId}`;
+}
+
+export function buildLoanDisbursementDescription(loanId: number): string {
+  return `Desembolso do emprestimo #${loanId}`;
 }
 
 type InstallmentIncomeTransactionInput = {
@@ -77,6 +82,76 @@ export async function deleteInstallmentIncomeTransaction(
     where: {
       ownerUserId: params.ownerUserId,
       category: INSTALLMENT_PAYMENT_CATEGORY,
+      description,
+    },
+  });
+}
+
+type LoanDisbursementTransactionInput = {
+  ownerUserId: number;
+  loanId: number;
+  amount: number;
+  date: Date;
+};
+
+export async function upsertLoanDisbursementTransaction(
+  tx: Prisma.TransactionClient,
+  input: LoanDisbursementTransactionInput,
+) {
+  const amount = Number(input.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return;
+
+  const description = buildLoanDisbursementDescription(input.loanId);
+
+  const existing = await tx.financeTransaction.findFirst({
+    where: {
+      ownerUserId: input.ownerUserId,
+      category: LOAN_DISBURSEMENT_CATEGORY,
+      description,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existing) {
+    await tx.financeTransaction.update({
+      where: { id: existing.id },
+      data: {
+        ownerUserId: input.ownerUserId,
+        type: FinanceTransactionType.EXPENSE,
+        amount,
+        category: LOAN_DISBURSEMENT_CATEGORY,
+        date: input.date,
+        description,
+        status: FinanceTransactionStatus.COMPLETED,
+      },
+    });
+    return;
+  }
+
+  await tx.financeTransaction.create({
+    data: {
+      ownerUserId: input.ownerUserId,
+      type: FinanceTransactionType.EXPENSE,
+      amount,
+      category: LOAN_DISBURSEMENT_CATEGORY,
+      date: input.date,
+      description,
+      status: FinanceTransactionStatus.COMPLETED,
+    },
+  });
+}
+
+export async function deleteLoanDisbursementTransaction(
+  tx: Prisma.TransactionClient,
+  params: { ownerUserId: number; loanId: number },
+) {
+  const description = buildLoanDisbursementDescription(params.loanId);
+  await tx.financeTransaction.deleteMany({
+    where: {
+      ownerUserId: params.ownerUserId,
+      category: LOAN_DISBURSEMENT_CATEGORY,
       description,
     },
   });

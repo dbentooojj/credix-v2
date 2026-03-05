@@ -132,3 +132,18 @@ test("cenario 2: parcela futura paga sai de a receber e entra no recebido do mes
   assert.equal(openAfter, 0);
   assert.equal(ledger.receivedThisMonth, 500);
 });
+
+test("desembolso de emprestimo reduz caixa sem afetar lucro", () => {
+  const currentMonthKey = "2026-03";
+  const ledger = createDashboardLedgerAccumulator();
+
+  applyDashboardLedgerTransaction(ledger, {
+    type: "loan",
+    amountSigned: -1000,
+    monthKey: currentMonthKey,
+  }, currentMonthKey);
+
+  assert.equal(ledger.cashBalance, -1000);
+  assert.equal(ledger.profitTotal, 0);
+  assert.equal(ledger.receivedThisMonth, 0);
+});

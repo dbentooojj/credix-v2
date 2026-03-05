@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { InstallmentStatus, InterestType, LoanStatus, PaymentMethod, Prisma } from "@prisma/client";
 import { Router } from "express";
+import { upsertLoanDisbursementTransaction } from "../lib/installment-income-transaction";
 import { requireAuthApi } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
 
@@ -577,6 +578,15 @@ router.post("/:id/approve", async (req, res) => {
               notes: null,
             })),
           });
+
+          if (loanStatus !== LoanStatus.PENDENTE) {
+            await upsertLoanDisbursementTransaction(tx, {
+              ownerUserId,
+              loanId: loan.id,
+              amount: principalAmount,
+              date: toDateOnlyUtc(row.startDate),
+            });
+          }
 
           return loan;
         });

@@ -24,6 +24,7 @@ import {
 import {
   CASH_ADJUSTMENT_CATEGORY,
   INSTALLMENT_PAYMENT_CATEGORY,
+  LOAN_DISBURSEMENT_CATEGORY,
   buildInstallmentIncomeDescription,
 } from "../lib/installment-income-transaction";
 import { toSafeNumber } from "../lib/numbers";
@@ -123,6 +124,45 @@ function formatPercentPtBr(value: number): string {
 function parseDateOnly(value: string): Date {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
+}
+
+function isFinanceStorageUnavailableError(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2021" || error.code === "P2022") {
+      return true;
+    }
+  }
+
+  return (
+    error instanceof Prisma.PrismaClientInitializationError
+    || error instanceof Prisma.PrismaClientRustPanicError
+  );
+}
+
+async function readCompletedFinanceTransactions(ownerUserId: number) {
+  try {
+    return await prisma.financeTransaction.findMany({
+      where: {
+        ownerUserId,
+        status: FinanceTransactionStatus.COMPLETED,
+      },
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        date: true,
+        category: true,
+        description: true,
+      },
+      orderBy: [{ date: "asc" }, { id: "asc" }],
+    });
+  } catch (error) {
+    if (isFinanceStorageUnavailableError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 function formatDateDayMonthPtBr(value: Date): string {
@@ -244,21 +284,7 @@ router.get("/", async (req, res) => {
         paymentDate: true,
       },
     }),
-    prisma.financeTransaction.findMany({
-      where: {
-        ownerUserId: userId,
-        status: FinanceTransactionStatus.COMPLETED,
-      },
-      select: {
-        id: true,
-        type: true,
-        amount: true,
-        date: true,
-        category: true,
-        description: true,
-      },
-      orderBy: [{ date: "asc" }, { id: "asc" }],
-    }),
+    readCompletedFinanceTransactions(userId),
   ]);
 
   const monthKeySet = new Set(monthKeys);
@@ -316,6 +342,8 @@ router.get("/", async (req, res) => {
       * (transaction.type === FinanceTransactionType.INCOME ? 1 : -1);
     const dashboardType: DashboardTransactionType = transaction.category === CASH_ADJUSTMENT_CATEGORY
       ? "adjustment"
+      : transaction.category === LOAN_DISBURSEMENT_CATEGORY
+        ? "loan"
       : transaction.type === FinanceTransactionType.INCOME
         ? "revenue"
         : "expense";
@@ -874,22 +902,32 @@ router.post("/cash-adjustments", async (req, res) => {
   }
 
   const payload = cashAdjustmentCreateSchema.parse(req.body);
-  const defaultDate = getIsoTodayInTimeZone(normalizeTimeZone(undefined));
   const adjustmentType = payload.type === "income"
     ? FinanceTransactionType.INCOME
     : FinanceTransactionType.EXPENSE;
+  const dateIso = payload.date ?? getIsoTodayInTimeZone(normalizeTimeZone(undefined));
 
-  const created = await prisma.financeTransaction.create({
-    data: {
-      ownerUserId: userId,
-      type: adjustmentType,
-      amount: payload.amount,
-      category: CASH_ADJUSTMENT_CATEGORY,
-      date: parseDateOnly(payload.date ?? defaultDate),
-      description: payload.description?.trim() || "Ajuste manual de caixa",
-      status: FinanceTransactionStatus.COMPLETED,
-    },
-  });
+  let created;
+  try {
+    created = await prisma.financeTransaction.create({
+      data: {
+        ownerUserId: userId,
+        type: adjustmentType,
+        amount: payload.amount,
+        category: CASH_ADJUSTMENT_CATEGORY,
+        date: parseDateOnly(dateIso),
+        description: payload.description?.trim() || "Ajuste manual de caixa",
+        status: FinanceTransactionStatus.COMPLETED,
+      },
+    });
+  } catch (error) {
+    if (isFinanceStorageUnavailableError(error)) {
+      return res.status(503).json({
+        message: "Modulo financeiro indisponivel. Execute as migracoes e reinicie o servico.",
+      });
+    }
+    throw error;
+  }
 
   return res.status(201).json({
     data: {

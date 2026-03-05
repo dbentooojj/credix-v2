@@ -7,8 +7,10 @@
   type Prisma,
 } from "@prisma/client";
 import {
+  deleteLoanDisbursementTransaction,
   INSTALLMENT_PAYMENT_CATEGORY,
   deleteInstallmentIncomeTransaction,
+  upsertLoanDisbursementTransaction,
   upsertInstallmentIncomeTransaction,
 } from "../lib/installment-income-transaction";
 import { toSafeInteger, toSafeNumber } from "../lib/numbers";
@@ -498,6 +500,13 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
 
       const ids = normalized.map((row) => row.id);
       await ensureRowsOwnedByUser(tx, "loans", ids, ownerUserId);
+      const existingLoanIds = await tx.loan.findMany({
+        where: { ownerUserId },
+        select: { id: true },
+      });
+      const existingLoanIdSet = new Set(existingLoanIds.map((item) => item.id));
+      const normalizedLoanIdSet = new Set(ids);
+      const removedLoanIds = [...existingLoanIdSet].filter((loanId) => !normalizedLoanIdSet.has(loanId));
 
       const paidLoanRows = await tx.installment.findMany({
         where: {
@@ -559,6 +568,10 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
         }
       }
 
+      for (const loanId of removedLoanIds) {
+        await deleteLoanDisbursementTransaction(tx, { ownerUserId, loanId });
+      }
+
       if (ids.length > 0) {
         await tx.loan.deleteMany({
           where: {
@@ -607,6 +620,20 @@ export async function replaceTableData(tableName: TableName, rawRows: unknown[],
             status: row.status,
           },
         });
+
+        if (row.status !== LoanStatus.PENDENTE) {
+          await upsertLoanDisbursementTransaction(tx, {
+            ownerUserId,
+            loanId: row.id,
+            amount: row.principalAmount,
+            date: row.startDate,
+          });
+        } else {
+          await deleteLoanDisbursementTransaction(tx, {
+            ownerUserId,
+            loanId: row.id,
+          });
+        }
       }
     });
 
