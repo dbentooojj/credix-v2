@@ -63,11 +63,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        LEGACY_BACKEND_URL: ${LEGACY_BACKEND_URL:-http://backend:4000}
     container_name: credix_frontend
     restart: unless-stopped
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
+      COOKIE_NAME: ${COOKIE_NAME:-credix_token}
     ports:
       - "127.0.0.1:3000:3000"
     healthcheck:
