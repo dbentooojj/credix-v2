@@ -1,4 +1,4 @@
-# AGENTS.md instructions for c:\dev\credfacil
+# AGENTS.md instructions for c:\dev\credix
 
 <INSTRUCTIONS>
 ## Skills

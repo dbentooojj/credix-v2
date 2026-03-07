@@ -1,5 +1,5 @@
 {
-  "name": "credfacil-app",
+  "name": "credix-app",
   "version": "1.0.0",
   "description": "Sistema de controle de emprestimos com Node.js, Express, Prisma e PostgreSQL",
   "private": true,

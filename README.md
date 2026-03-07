@@ -1,4 +1,4 @@
-# CredFacil - Sistema de Controle de Emprestimos
+# Credix - Sistema de Controle de Emprestimos
 
 Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS Ubuntu.
 
@@ -99,7 +99,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=<usuario_smtp>
 SMTP_PASS=<senha_smtp>
-SMTP_FROM="CredFacil <no-reply@seudominio.com>"
+SMTP_FROM="Credix <no-reply@seudominio.com>"
 
 EMAIL_NOTIFY_ENABLED=true
 EMAIL_NOTIFY_TO=seu-email@dominio.com,financeiro@dominio.com
@@ -115,7 +115,7 @@ Para testar manualmente sem esperar o horario:
 ```bash
 curl -X POST http://localhost:4000/api/notifications/email/due-tomorrow \
   -H "Content-Type: application/json" \
-  -b "credfacil_token=<SEU_COOKIE_DE_LOGIN>"
+  -b "credix_token=<SEU_COOKIE_DE_LOGIN>"
 ```
 
 Para testar uma data especifica:
@@ -123,7 +123,7 @@ Para testar uma data especifica:
 ```bash
 curl -X POST http://localhost:4000/api/notifications/email/due-tomorrow \
   -H "Content-Type: application/json" \
-  -H "Cookie: credfacil_token=<SEU_COOKIE_DE_LOGIN>" \
+  -H "Cookie: credix_token=<SEU_COOKIE_DE_LOGIN>" \
   -d '{"targetDate":"2026-02-15"}'
 ```
 

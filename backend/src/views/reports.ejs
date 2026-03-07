@@ -4623,7 +4623,7 @@
 
         function getReportPdfLogoUrl() {
             try {
-                const customLogoUrl = String(localStorage.getItem('credfacil:pdf-logo-url') || '').trim();
+                const customLogoUrl = String(localStorage.getItem('credix:pdf-logo-url') || '').trim();
                 if (customLogoUrl) return customLogoUrl;
             } catch (_error) {}
             return `${window.location.origin}/android-chrome-192x192.png`;

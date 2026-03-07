@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: credfacil_db
+    container_name: credix_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: credfacil_backend
+    container_name: credix_backend
     restart: unless-stopped
     depends_on:
       db:
@@ -63,7 +63,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: credfacil_frontend
+    container_name: credix_frontend
     restart: unless-stopped
     environment:
       NODE_ENV: production

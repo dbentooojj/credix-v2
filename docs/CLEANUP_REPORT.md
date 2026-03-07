@@ -1,6 +1,6 @@
 # CLEANUP REPORT
 Date: 2026-02-19
-Project: `c:\dev\credfacil`
+Project: `c:\dev\credix`
 
 ## Scope
 - PHASE 1: inventory of potentially obsolete items, no deletion.

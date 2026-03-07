@@ -152,7 +152,7 @@ function pick<T>(rand: () => number, values: readonly T[]): T {
 }
 
 function parseOptions(): StressOptions {
-  const adminEmail = (process.env.ADMIN_EMAIL || "admin@credfacil.com").toLowerCase().trim();
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@credix.app.br").toLowerCase().trim();
   const userEmail = (process.env.STRESS_USER_EMAIL || adminEmail).toLowerCase().trim();
   const userName = process.env.STRESS_USER_NAME || process.env.ADMIN_NAME || "Administrador";
   const userPassword = process.env.STRESS_USER_PASSWORD || process.env.ADMIN_PASSWORD || "123456";

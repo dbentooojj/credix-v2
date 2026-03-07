@@ -128,7 +128,7 @@ function computeLoanStatus(today: Date, installments: InstallmentPlan[]): LoanSt
 
 async function seedAdminUser() {
   const name = process.env.ADMIN_NAME || "Administrador";
-  const email = (process.env.ADMIN_EMAIL || "admin@credfacil.com").toLowerCase().trim();
+  const email = (process.env.ADMIN_EMAIL || "admin@credix.app.br").toLowerCase().trim();
   const password = process.env.ADMIN_PASSWORD || "123456";
 
   const passwordHash = await bcrypt.hash(password, 10);

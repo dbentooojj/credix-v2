@@ -28,7 +28,7 @@ const envSchema = z.object({
     .transform((value) => normalizeOptional(value)),
   RESET_PASSWORD_EXPIRES_IN: z.string().default("30m"),
   SESSION_IDLE_MINUTES: z.coerce.number().int().min(1).max(1440).default(30),
-  COOKIE_NAME: z.string().default("credfacil_token"),
+  COOKIE_NAME: z.string().default("credix_token"),
   COOKIE_SECURE: z
     .string()
     .optional()

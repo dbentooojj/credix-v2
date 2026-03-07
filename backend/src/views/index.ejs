@@ -425,8 +425,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('currentUser', JSON.stringify(payload.user || {}));
         localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
-        localStorage.setItem('credfacil:last-activity-at', String(Date.now()));
-        localStorage.removeItem('credfacil:force-logout-at');
+        localStorage.setItem('credix:last-activity-at', String(Date.now()));
+        localStorage.removeItem('credix:force-logout-at');
 
         message.className = 'login-message is-success';
         message.textContent = 'Login realizado com sucesso. Redirecionando...';
