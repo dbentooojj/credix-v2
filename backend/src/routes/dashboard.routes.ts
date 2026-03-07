@@ -67,11 +67,17 @@ type InstallmentWithRefs = {
   };
   loan: {
     id: number;
+    installmentsCount: number;
     principalAmount: Prisma.Decimal;
     totalAmount: Prisma.Decimal;
     paymentMethod: PaymentMethod;
     startDate: Date;
   };
+};
+
+type InstallmentPaymentSplit = {
+  principalAmount: number;
+  interestAmount: number;
 };
 
 function monthLabel(monthKey: string): string {
@@ -118,6 +124,22 @@ function formatPercentPtBr(value: number): string {
   return Math.abs(value).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+  });
+}
+
+function round2(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function splitAmount(total: number, parts: number): number[] {
+  const safeParts = Math.max(1, Math.trunc(parts || 0));
+  const cents = Math.round(round2(total) * 100);
+  const base = Math.floor(cents / safeParts);
+  const remainder = cents - (base * safeParts);
+
+  return Array.from({ length: safeParts }, (_item, index) => {
+    const current = base + (index === safeParts - 1 ? remainder : 0);
+    return round2(current / 100);
   });
 }
 
@@ -213,6 +235,89 @@ function getRelativeDueLabel(dueDateIso: string, todayIso: string): string {
   return `em ${diffDays} dias`;
 }
 
+function normalizeInstallmentSplit(
+  totalAmount: number,
+  split: InstallmentPaymentSplit,
+): InstallmentPaymentSplit {
+  const safeTotal = round2(Math.max(totalAmount, 0));
+  if (safeTotal <= 0) {
+    return { principalAmount: 0, interestAmount: 0 };
+  }
+
+  let principalAmount = round2(Math.max(split.principalAmount, 0));
+  let interestAmount = round2(Math.max(split.interestAmount, 0));
+  const splitTotal = round2(principalAmount + interestAmount);
+
+  if (Math.abs(splitTotal - safeTotal) <= 0.01) {
+    return { principalAmount, interestAmount };
+  }
+
+  if (splitTotal <= 0) {
+    return { principalAmount: safeTotal, interestAmount: 0 };
+  }
+
+  principalAmount = round2((safeTotal * principalAmount) / splitTotal);
+  interestAmount = round2(safeTotal - principalAmount);
+  return { principalAmount, interestAmount };
+}
+
+function resolveInstallmentDueSplit(installment: InstallmentWithRefs): InstallmentPaymentSplit {
+  const installmentAmount = toSafeNumber(installment.amount);
+
+  if (installment.principalAmount !== null || installment.interestAmount !== null) {
+    const principalAmount = installment.principalAmount !== null
+      ? toSafeNumber(installment.principalAmount)
+      : Math.max(installmentAmount - toSafeNumber(installment.interestAmount), 0);
+    const interestAmount = installment.interestAmount !== null
+      ? toSafeNumber(installment.interestAmount)
+      : Math.max(installmentAmount - principalAmount, 0);
+
+    return normalizeInstallmentSplit(installmentAmount, {
+      principalAmount,
+      interestAmount,
+    });
+  }
+
+  const installmentsCount = Math.max(1, Math.trunc(installment.loan.installmentsCount || 0));
+  const principalTotal = toSafeNumber(installment.loan.principalAmount);
+  const interestTotal = Math.max(round2(toSafeNumber(installment.loan.totalAmount) - principalTotal), 0);
+  const principalValues = splitAmount(principalTotal, installmentsCount);
+  const interestValues = splitAmount(interestTotal, installmentsCount);
+  const installmentIndex = Math.min(
+    Math.max(Math.trunc(installment.installmentNumber || 1), 1),
+    installmentsCount,
+  ) - 1;
+
+  return normalizeInstallmentSplit(installmentAmount, {
+    principalAmount: principalValues[installmentIndex] ?? installmentAmount,
+    interestAmount: interestValues[installmentIndex] ?? 0,
+  });
+}
+
+function resolveInstallmentPaymentSplit(
+  installment: InstallmentWithRefs,
+  paymentAmount: number,
+): InstallmentPaymentSplit {
+  const safePaymentAmount = round2(Math.max(paymentAmount, 0));
+  if (safePaymentAmount <= 0) {
+    return { principalAmount: 0, interestAmount: 0 };
+  }
+
+  const installmentAmount = toSafeNumber(installment.amount);
+  if (installmentAmount <= 0) {
+    return { principalAmount: safePaymentAmount, interestAmount: 0 };
+  }
+
+  const dueSplit = resolveInstallmentDueSplit(installment);
+  const ratio = safePaymentAmount / installmentAmount;
+  const principalAmount = round2(dueSplit.principalAmount * ratio);
+
+  return normalizeInstallmentSplit(safePaymentAmount, {
+    principalAmount,
+    interestAmount: round2(safePaymentAmount - principalAmount),
+  });
+}
+
 router.use(requireAuthApi);
 
 router.get("/", async (req, res) => {
@@ -266,6 +371,7 @@ router.get("/", async (req, res) => {
         loan: {
           select: {
             id: true,
+            installmentsCount: true,
             principalAmount: true,
             totalAmount: true,
             paymentMethod: true,
@@ -288,6 +394,7 @@ router.get("/", async (req, res) => {
   ]);
 
   const monthKeySet = new Set(monthKeys);
+  const installmentById = new Map(installments.map((installment) => [installment.id, installment]));
   const paymentByInstallment = new Map<number, number>();
   const paymentMetaByInstallment = new Map<number, { amount: number; paymentDateIso: string; monthKey: string }>();
   const receivedByMonth = new Map<string, number>();
@@ -295,7 +402,11 @@ router.get("/", async (req, res) => {
   const loanedByMonthAll = new Map<string, number>();
   const profitByMonthAll = new Map<string, number>();
   const balanceByMonthAll = new Map<string, number>();
-  const installmentIncomeDescriptions = new Set<string>();
+  const installmentIncomeTransactions = new Map<string, {
+    amountSigned: number;
+    monthKey: string;
+  }>();
+  const processedInstallmentIncomeDescriptions = new Set<string>();
   const ledgerAccumulator = createDashboardLedgerAccumulator();
 
   const applyLedgerEntry = (entry: {
@@ -348,8 +459,12 @@ router.get("/", async (req, res) => {
         ? "revenue"
         : "expense";
 
-    if (dashboardType === "revenue" && transaction.category === INSTALLMENT_PAYMENT_CATEGORY) {
-      installmentIncomeDescriptions.add(transaction.description.trim());
+    if (transaction.category === INSTALLMENT_PAYMENT_CATEGORY && dashboardType === "revenue") {
+      installmentIncomeTransactions.set(transaction.description.trim(), {
+        amountSigned,
+        monthKey,
+      });
+      return;
     }
 
     applyLedgerEntry({
@@ -376,15 +491,52 @@ router.get("/", async (req, res) => {
       });
 
       const expectedDescription = buildInstallmentIncomeDescription(payment.installmentId, payment.loanId);
-      if (!installmentIncomeDescriptions.has(expectedDescription)) {
-        installmentIncomeDescriptions.add(expectedDescription);
+      processedInstallmentIncomeDescriptions.add(expectedDescription);
+
+      const installment = installmentById.get(payment.installmentId);
+      if (!installment) {
         applyLedgerEntry({
           type: "revenue",
           amountSigned: paymentAmount,
           monthKey: paymentMonthKey,
         });
+        return;
       }
+
+      const paymentSplit = resolveInstallmentPaymentSplit(installment, paymentAmount);
+      if (paymentSplit.interestAmount > 0) {
+        applyLedgerEntry({
+          type: "revenue",
+          amountSigned: paymentSplit.interestAmount,
+          monthKey: paymentMonthKey,
+        });
+      }
+      if (paymentSplit.principalAmount > 0) {
+        applyLedgerEntry({
+          type: "repayment",
+          amountSigned: paymentSplit.principalAmount,
+          monthKey: paymentMonthKey,
+        });
+      }
+    } else {
+      applyLedgerEntry({
+        type: "revenue",
+        amountSigned: paymentAmount,
+        monthKey: paymentMonthKey,
+      });
     }
+  });
+
+  installmentIncomeTransactions.forEach((entry, description) => {
+    if (processedInstallmentIncomeDescriptions.has(description)) {
+      return;
+    }
+
+    applyLedgerEntry({
+      type: "revenue",
+      amountSigned: entry.amountSigned,
+      monthKey: entry.monthKey,
+    });
   });
 
   const cashAdjustments = financeTransactions.filter(

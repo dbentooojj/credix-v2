@@ -1551,20 +1551,29 @@
             return '';
         }
 
-        function openWhatsAppCharge(item) {
+        function buildWhatsAppChargeUrl(item) {
             const phone = normalizeWhatsAppPhone(item?.phone);
-            if (!phone) {
+            if (!phone) return '';
+
+            const text = buildCollectionMessage(item);
+            return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+        }
+
+        function openWhatsAppCharge(item) {
+            const whatsappUrl = buildWhatsAppChargeUrl(item);
+            if (!whatsappUrl) {
                 showMessage('Cliente sem telefone válido para WhatsApp.', 'error');
                 return;
             }
 
-            const text = buildCollectionMessage(item);
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-            const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-            if (opened) return;
-
-            // Fallback para navegadores que bloqueiam nova aba.
-            window.location.href = whatsappUrl;
+            const link = document.createElement('a');
+            link.href = whatsappUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         }
 
         function setActiveSidebarItem(targetHref) {
@@ -2054,6 +2063,7 @@
 
             container.innerHTML = pageItems.map((item) => {
                 dashboardState.overdueById.set(String(item.installmentId), item);
+                const whatsappUrl = buildWhatsAppChargeUrl(item);
                 return `
                     <article class="overdue-item upcoming-item">
                         <div class="flex items-start justify-between gap-3">
@@ -2067,7 +2077,9 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn overdue-charge-btn"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>
+                            ${whatsappUrl
+                                ? `<a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="quick-action-btn overdue-charge-btn inline-flex items-center"><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</a>`
+                                : `<button type="button" data-action="charge" data-id="${item.installmentId}" class="quick-action-btn overdue-charge-btn" disabled><i class="fab fa-whatsapp mr-1"></i>Cobrar no WhatsApp</button>`}
                             <button type="button" data-action="mark-paid" data-id="${item.installmentId}" class="quick-action-btn overdue-pay-btn">Pagar<i class="fas fa-check ml-1"></i></button>
                         </div>
                     </article>

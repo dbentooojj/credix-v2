@@ -69,7 +69,7 @@ const DASHBOARD_TRANSACTION_IMPACT_MAP: Record<DashboardTransactionType, Dashboa
     isAdjustment: false,
     affectsRevenue: true,
     affectsProfit: false,
-    affectsBalance: false,
+    affectsBalance: true,
   },
 };
 

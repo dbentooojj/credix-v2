@@ -24,6 +24,7 @@ function buildBaseMetrics(): DashboardMetricsBase {
 test("separa transacao de receita e ajuste manual", () => {
   const revenueImpact = getDashboardTransactionImpact("revenue");
   const adjustmentImpact = getDashboardTransactionImpact("adjustment");
+  const repaymentImpact = getDashboardTransactionImpact("repayment");
 
   assert.equal(revenueImpact.isAdjustment, false);
   assert.equal(revenueImpact.affectsRevenue, true);
@@ -31,6 +32,11 @@ test("separa transacao de receita e ajuste manual", () => {
   assert.equal(adjustmentImpact.isAdjustment, true);
   assert.equal(adjustmentImpact.affectsRevenue, false);
   assert.equal(adjustmentImpact.affectsProfit, false);
+
+  assert.equal(repaymentImpact.isAdjustment, false);
+  assert.equal(repaymentImpact.affectsRevenue, true);
+  assert.equal(repaymentImpact.affectsProfit, false);
+  assert.equal(repaymentImpact.affectsBalance, true);
 });
 
 test("ajuste manual afeta apenas saldo", () => {
@@ -92,29 +98,31 @@ test("aplicador ignora transacao que nao e ajuste manual", () => {
   assert.equal(result.cashBalance, base.cashBalanceBase);
 });
 
-test("cenario 1: saldo inicial 1000 sobe para 1500 ao quitar parcela de 500", () => {
+test("repasse de principal aumenta caixa e recebido, mas nao lucro", () => {
   const currentMonthKey = "2026-03";
   const ledger = createDashboardLedgerAccumulator();
 
   applyDashboardLedgerTransaction(ledger, {
-    type: "revenue",
-    amountSigned: 1_000,
+    type: "repayment",
+    amountSigned: 400,
     monthKey: currentMonthKey,
   }, currentMonthKey);
-  assert.equal(ledger.cashBalance, 1_000);
+  assert.equal(ledger.cashBalance, 400);
+  assert.equal(ledger.receivedThisMonth, 400);
+  assert.equal(ledger.profitThisMonth, 0);
 
   applyDashboardLedgerTransaction(ledger, {
     type: "revenue",
-    amountSigned: 500,
+    amountSigned: 100,
     monthKey: currentMonthKey,
   }, currentMonthKey);
 
-  assert.equal(ledger.cashBalance, 1_500);
-  assert.equal(ledger.receivedThisMonth, 1_500);
-  assert.equal(ledger.profitThisMonth, 1_500);
+  assert.equal(ledger.cashBalance, 500);
+  assert.equal(ledger.receivedThisMonth, 500);
+  assert.equal(ledger.profitThisMonth, 100);
 });
 
-test("cenario 2: parcela futura paga sai de a receber e entra no recebido do mes", () => {
+test("parcela futura paga entra inteira no recebido do mes, com lucro apenas no juros", () => {
   const currentMonthKey = "2026-03";
   const ledger = createDashboardLedgerAccumulator();
 
@@ -123,14 +131,20 @@ test("cenario 2: parcela futura paga sai de a receber e entra no recebido do mes
   assert.equal(openBefore, 500);
 
   applyDashboardLedgerTransaction(ledger, {
+    type: "repayment",
+    amountSigned: 400,
+    monthKey: currentMonthKey,
+  }, currentMonthKey);
+  applyDashboardLedgerTransaction(ledger, {
     type: "revenue",
-    amountSigned: amount,
+    amountSigned: 100,
     monthKey: currentMonthKey,
   }, currentMonthKey);
 
   const openAfter = computeOutstandingAmount(amount, amount);
   assert.equal(openAfter, 0);
   assert.equal(ledger.receivedThisMonth, 500);
+  assert.equal(ledger.profitThisMonth, 100);
 });
 
 test("desembolso de emprestimo reduz caixa sem afetar lucro", () => {

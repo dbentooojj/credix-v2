@@ -38,6 +38,30 @@ function addDaysUtc(date: Date, days: number): Date {
   return next;
 }
 
+function round2(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function splitAmount(total: number, parts: number): number[] {
+  const safeParts = Math.max(1, Math.trunc(parts || 0));
+  const cents = Math.round(round2(total) * 100);
+  const base = Math.floor(cents / safeParts);
+  const remainder = cents - (base * safeParts);
+
+  return Array.from({ length: safeParts }, (_item, index) => {
+    const current = base + (index === safeParts - 1 ? remainder : 0);
+    return round2(current / 100);
+  });
+}
+
+function buildInstallmentIncomeDescription(installmentId: number, loanId: number): string {
+  return `Recebimento da parcela #${installmentId} do emprestimo #${loanId}`;
+}
+
+function buildLoanDisbursementDescription(loanId: number): string {
+  return `Desembolso do emprestimo #${loanId}`;
+}
+
 function computeCpfCheckDigit(digits: number[], factorStart: number): number {
   const sum = digits.reduce((acc, digit, index) => acc + digit * (factorStart - index), 0);
   const mod = sum % 11;
@@ -160,6 +184,38 @@ async function main() {
   const demoCpfs = Array.from({ length: demoCount }, (_, index) => generateCpf(index + 1));
 
   await prisma.$transaction(async (tx) => {
+    const existingDemoLoans = await tx.loan.findMany({
+      where: {
+        ownerUserId: adminUser.id,
+        client: {
+          ownerUserId: adminUser.id,
+          cpf: { in: demoCpfs },
+        },
+      },
+      select: {
+        id: true,
+        installments: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    const staleFinanceDescriptions = existingDemoLoans.flatMap((loan) => [
+      buildLoanDisbursementDescription(loan.id),
+      ...loan.installments.map((installment) => buildInstallmentIncomeDescription(installment.id, loan.id)),
+    ]);
+
+    if (staleFinanceDescriptions.length > 0) {
+      await tx.financeTransaction.deleteMany({
+        where: {
+          ownerUserId: adminUser.id,
+          description: { in: staleFinanceDescriptions },
+        },
+      });
+    }
+
     // Remove o dataset demo anterior (somente os CPFs gerados aqui).
     await tx.client.deleteMany({
       where: {
@@ -240,8 +296,8 @@ async function main() {
               { dueOffsetDays: -120, paid: true, paymentDelayDays: 1 },
               { dueOffsetDays: -90, paid: true, paymentDelayDays: 0 },
               { dueOffsetDays: -60, paid: true, paymentDelayDays: 2 },
-              { dueOffsetDays: -30, paid: true, paymentDelayDays: 1 },
-              { dueOffsetDays: 7 },
+              { dueOffsetDays: -6, paid: true, paymentDelayDays: 1 },
+              { dueOffsetDays: 24 },
             ],
           },
         ],
@@ -294,7 +350,7 @@ async function main() {
         clientId: byIndex(5).id,
         loans: [
           {
-            label: "Credito pessoal (somente em aberto)",
+            label: "Credito pessoal (fluxo no mes)",
             principalAmount: 1500,
             totalAmount: 1800,
             installmentsCount: 3,
@@ -303,9 +359,9 @@ async function main() {
             interestType: InterestType.SIMPLES,
             paymentMethod: PaymentMethod.CARTAO,
             installments: [
-              { dueOffsetDays: 2 },
-              { dueOffsetDays: 32 },
-              { dueOffsetDays: 62 },
+              { dueOffsetDays: -2, paid: true, paymentDelayDays: 0 },
+              { dueOffsetDays: 28 },
+              { dueOffsetDays: 58 },
             ],
           },
         ],
@@ -377,8 +433,8 @@ async function main() {
             paymentMethod: PaymentMethod.DINHEIRO,
             installments: [
               { dueOffsetDays: -20, paid: true, paymentDelayDays: 0 },
-              { dueOffsetDays: 6 },
-              { dueOffsetDays: 36 },
+              { dueOffsetDays: -1, paid: true, paymentDelayDays: 0 },
+              { dueOffsetDays: 29 },
             ],
           },
         ],
@@ -401,6 +457,11 @@ async function main() {
         const firstDueDate = dueDates.reduce((min, current) => (current < min ? current : min), dueDates[0]);
         const lastDueDate = dueDates.reduce((max, current) => (current > max ? current : max), dueDates[0]);
         const startDate = addDaysUtc(firstDueDate, -20);
+        const principalValues = splitAmount(plan.principalAmount, plan.installmentsCount);
+        const interestValues = splitAmount(
+          Math.max(round2(plan.totalAmount - plan.principalAmount), 0),
+          plan.installmentsCount,
+        );
 
         const loan = await tx.loan.create({
           data: {
@@ -442,6 +503,8 @@ async function main() {
               dueDate,
               paymentDate,
               amount: plan.installmentAmount,
+              principalAmount: principalValues[index] ?? null,
+              interestAmount: interestValues[index] ?? null,
               status,
               paymentMethod: paid ? plan.paymentMethod : null,
               notes: "Seed demo",
