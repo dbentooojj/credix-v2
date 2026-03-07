@@ -52,7 +52,7 @@ function resolvePublicBaseUrl(req: Request): string {
   const protocol = (forwardedProto || req.protocol || "http").trim();
   const host = (req.headers["x-forwarded-host"] as string | undefined)
     || req.get("host")
-    || "localhost:3000";
+    || "localhost:4000";
 
   return `${protocol}://${host}`;
 }

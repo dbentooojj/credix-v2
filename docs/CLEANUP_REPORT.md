@@ -13,7 +13,7 @@ Project: `c:\dev\credfacil`
 
 ### Low risk (approved for removal)
 - `demo-data.js`
-  - Evidence: legacy static prototype file; not referenced by backend/next/nginx runtime flow.
+  - Evidence: legacy static prototype file; not referenced by backend/next runtime flow.
 - `dashboard.html`, `debtors.html`, `installments.html`, `loans.html`, `reports.html`, `index.html` (root)
   - Evidence: active frontend uses `backend/src/views/*.ejs` and `/admin/*.html` routes served by Express (`backend/src/routes/page.routes.ts`).
   - Root HTML files were outside current Docker runtime flow.
@@ -28,14 +28,14 @@ Project: `c:\dev\credfacil`
   - Process document; no runtime impact, but can have operational value.
 
 ### High risk (not removed)
-- `backend/`, `frontend/`, `nginx/`, `certbot/`, `.env`, `docker-compose.yml`, `package.json`, `package-lock.json`
+- `backend/`, `frontend/`, `.env`, `docker-compose.yml`, `package.json`, `package-lock.json`
   - Structural/infra/configuration-critical items.
 
 ## PHASE 2 - Executed removals (low risk)
 
 ### 1) Removed `demo-data.js`
 - Build validation: OK
-- Docker validation (`docker compose ps`): `backend`, `frontend`, `db` healthy; `nginx` up
+- Docker validation (`docker compose ps`): `backend`, `frontend`, `db` healthy
 - Log check: no critical error
 
 ### 2) Removed `dashboard.html`

@@ -29,7 +29,7 @@ Aplicacao full-stack com autenticacao, PostgreSQL e deploy via Docker para VPS U
 - `backend/prisma/migrations/*`: migrations
 - `backend/prisma/seed.ts`: cria admin
 - `frontend/app/*`: base do novo frontend Next.js (rota inicial em `/app`)
-- `docker-compose.yml`: backend + frontend + postgres + nginx
+- `docker-compose.yml`: backend + frontend + postgres
 
 ## Modelos do banco
 - `User` (admin)
@@ -65,15 +65,15 @@ npm run db:seed
 npm run dev
 ```
 
-Acesse: `http://localhost:3000/login`
+Acesse: `http://localhost:4000/login`
 
 Opcional (frontend Next base em paralelo):
 ```bash
 cd ../frontend
 npm install
-npm run dev -- -p 3001
+npm run dev
 ```
-Acesse: `http://localhost:3001/app` (ou configure outra porta local).
+Acesse: `http://localhost:3000/app` (ou configure outra porta local).
 
 ## Configurar WhatsApp Cloud API
 Defina no `.env`:
@@ -113,7 +113,7 @@ Com isso, o app envia 1 e-mail por dia no horario configurado com a lista de par
 Para testar manualmente sem esperar o horario:
 
 ```bash
-curl -X POST http://localhost:3000/api/notifications/email/due-tomorrow \
+curl -X POST http://localhost:4000/api/notifications/email/due-tomorrow \
   -H "Content-Type: application/json" \
   -b "credfacil_token=<SEU_COOKIE_DE_LOGIN>"
 ```
@@ -121,7 +121,7 @@ curl -X POST http://localhost:3000/api/notifications/email/due-tomorrow \
 Para testar uma data especifica:
 
 ```bash
-curl -X POST http://localhost:3000/api/notifications/email/due-tomorrow \
+curl -X POST http://localhost:4000/api/notifications/email/due-tomorrow \
   -H "Content-Type: application/json" \
   -H "Cookie: credfacil_token=<SEU_COOKIE_DE_LOGIN>" \
   -d '{"targetDate":"2026-02-15"}'
@@ -162,7 +162,10 @@ cp .env.example .env
 ```
 
 Edite `.env` e troque senhas/chaves (`POSTGRES_PASSWORD`, `JWT_SECRET`, etc).
-Em ambiente sem HTTPS, mantenha `COOKIE_SECURE=false`. Depois de habilitar SSL, mude para `true`.
+Em ambiente sem HTTPS, mantenha `COOKIE_SECURE=false`.
+Quando o dominio estiver atras do `nginx` da VPS com SSL, ajuste:
+- `APP_BASE_URL=https://seu-dominio.com`
+- `COOKIE_SECURE=true`
 
 Suba os containers:
 ```bash
@@ -191,35 +194,16 @@ Acesso inicial:
 - Email: `ADMIN_EMAIL` do `.env`
 - Senha: `ADMIN_PASSWORD` do `.env`
 
-## Nginx reverse proxy e HTTPS (Certbot)
-O projeto ja sobe Nginx em HTTP (`nginx/conf.d/default.conf`).
+### 5) Topologia final na VPS
+O `docker-compose` publica apenas:
+- frontend em `127.0.0.1:3000`
+- backend em `127.0.0.1:4000`
+- banco sem exposicao publica
 
-Para HTTPS:
-1. Ajuste dominio real no Nginx.
-2. Use o arquivo base: `nginx/conf.d/default-ssl.conf.example`.
-3. Gere certificado com Certbot (webroot) no VPS:
-```bash
-mkdir -p certbot/www certbot/conf
-
-docker run --rm -it \
-  -v $(pwd)/certbot/www:/var/www/certbot \
-  -v $(pwd)/certbot/conf:/etc/letsencrypt \
-  certbot/certbot certonly \
-  --webroot -w /var/www/certbot \
-  -d seu-dominio.com -d www.seu-dominio.com \
-  -m seu-email@dominio.com --agree-tos --no-eff-email
-```
-4. Monte `certbot/conf` no container Nginx e reinicie.
-5. Troque o `default.conf` pelo `default-ssl.conf.example` ajustado.
-
-Renovacao automatica (cron exemplo):
-```bash
-0 3 * * * docker run --rm \
-  -v /caminho/projeto/certbot/www:/var/www/certbot \
-  -v /caminho/projeto/certbot/conf:/etc/letsencrypt \
-  certbot/certbot renew --webroot -w /var/www/certbot --quiet && \
-  docker compose -f /caminho/projeto/docker-compose.yml restart nginx
-```
+O `nginx` e o SSL ficam fora do projeto, instalados na propria VPS. Configure o proxy reverso da VPS para:
+- enviar `/app` para `http://127.0.0.1:3000`
+- enviar `/` para `http://127.0.0.1:4000`
+- encaminhar `Host`, `X-Real-IP`, `X-Forwarded-For` e `X-Forwarded-Proto`
 
 ## Backup e restore PostgreSQL
 

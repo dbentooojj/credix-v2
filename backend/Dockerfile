@@ -15,6 +15,6 @@ COPY src ./src
 
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 4000
 
 CMD ["sh", "-c", "npm run prisma:migrate:deploy && node dist/server.js"]
