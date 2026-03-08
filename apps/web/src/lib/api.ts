@@ -21,7 +21,12 @@ function normalizeBaseUrl(value: string) {
 }
 
 export function getApiBaseUrl() {
-  return normalizeBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000");
+  const isServer = typeof window === "undefined";
+  const baseUrl = isServer
+    ? (process.env.API_INTERNAL_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000")
+    : (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000");
+
+  return normalizeBaseUrl(baseUrl);
 }
 
 async function fetchApiJson<T>(path: string): Promise<T> {

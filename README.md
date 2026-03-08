@@ -36,6 +36,19 @@ npm run dev:api
 npm run dev:web
 ```
 
+## Docker
+
+Para subir a nova base sem conflitar com o projeto antigo:
+
+```bash
+docker compose up -d --build
+```
+
+Portas padrao do `credix-v2`:
+
+- web: `http://localhost:3100`
+- api: `http://localhost:4100`
+
 ## Proximo passo
 
 O plano detalhado de migracao esta em [docs/refactor-plan.md](./docs/refactor-plan.md).
