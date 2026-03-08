@@ -1,5 +1,8 @@
-import { ChecklistCard } from "../../../src/components/admin/checklist-card";
-import { roadmapPhases, standardRules } from "../../../src/lib/migration-roadmap";
+import { Milestone, Shield } from "lucide-react";
+import { ChecklistCard } from "@/src/components/admin/checklist-card";
+import { Badge } from "@/src/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { roadmapPhases, standardRules } from "@/src/lib/migration-roadmap";
 
 export const metadata = {
   title: "Migracao",
@@ -7,17 +10,24 @@ export const metadata = {
 
 export default function MigrationPage() {
   return (
-    <div className="page-stack">
-      <section className="page-header">
-        <span className="eyebrow">Refactor Roadmap</span>
-        <h2 className="page-title">Plano de migracao com dono claro para cada camada.</h2>
-        <p className="page-subtitle">
-          O objetivo nao e reescrever tudo de uma vez. E migrar modulo por modulo ate o legado deixar de ser a
-          origem principal do sistema.
-        </p>
+    <div className="space-y-6">
+      <section className="space-y-4">
+        <Badge className="w-fit gap-2">
+          <Milestone className="size-3.5" />
+          Refactor roadmap
+        </Badge>
+        <div className="space-y-3">
+          <h2 className="max-w-4xl font-display text-4xl leading-[0.95] tracking-[-0.08em] text-foreground sm:text-5xl">
+            Plano de migracao com dono claro para cada camada.
+          </h2>
+          <p className="max-w-3xl text-base leading-8 text-muted-foreground">
+            O objetivo nao e reescrever tudo de uma vez. E migrar modulo por modulo ate o legado deixar de ser a
+            origem principal do sistema.
+          </p>
+        </div>
       </section>
 
-      <section className="section-grid section-grid--two">
+      <section className="grid gap-4 xl:grid-cols-2">
         {roadmapPhases.map((phase) => (
           <ChecklistCard
             key={phase.title}
@@ -29,19 +39,29 @@ export default function MigrationPage() {
         ))}
       </section>
 
-      <section className="surface" style={{ padding: 26 }}>
-        <div className="page-header">
-          <span className="eyebrow">Regras do padrao</span>
-          <h3 className="page-title" style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)" }}>
+      <Card className="border-border/60 bg-card/75">
+        <CardHeader className="space-y-4">
+          <Badge variant="outline" className="w-fit gap-2">
+            <Shield className="size-3.5" />
+            Regras do padrao
+          </Badge>
+          <CardTitle className="max-w-3xl font-display text-3xl leading-[0.98] tracking-[-0.06em] sm:text-4xl">
             Decisoes que nao devem mais voltar ao estado hibrido.
-          </h3>
-        </div>
-        <ul className="checklist">
-          {standardRules.map((rule) => (
-            <li key={rule}>{rule}</li>
-          ))}
-        </ul>
-      </section>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3">
+            {standardRules.map((rule) => (
+              <div
+                key={rule}
+                className="rounded-[24px] border border-border/60 bg-background/35 px-5 py-4 text-sm leading-7 text-muted-foreground"
+              >
+                {rule}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,7 @@
-import { ChecklistCard } from "../../../../src/components/admin/checklist-card";
-import { getFinanceBlueprint } from "../../../../src/lib/finance-blueprints";
+import { ArrowDownToLine } from "lucide-react";
+import { ChecklistCard } from "@/src/components/admin/checklist-card";
+import { Badge } from "@/src/components/ui/badge";
+import { getFinanceBlueprint } from "@/src/lib/finance-blueprints";
 
 export const metadata = {
   title: "Valores a Receber",
@@ -9,17 +11,24 @@ const blueprint = getFinanceBlueprint("receivables");
 
 export default function ReceivablesPage() {
   return (
-    <div className="page-stack">
-      <section className="page-header">
-        <div className="status-row">
-          <span className="eyebrow">{blueprint.kicker}</span>
-          <span className="chip chip--success">Mesma base visual do pagar</span>
+    <div className="space-y-6">
+      <section className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Badge className="gap-2">
+            <ArrowDownToLine className="size-3.5" />
+            {blueprint.kicker}
+          </Badge>
+          <Badge variant="success">Mesma base visual do pagar</Badge>
         </div>
-        <h2 className="page-title">{blueprint.title}</h2>
-        <p className="page-subtitle">{blueprint.summary}</p>
+        <div className="space-y-3">
+          <h2 className="max-w-4xl font-display text-4xl leading-[0.95] tracking-[-0.08em] text-foreground sm:text-5xl">
+            {blueprint.title}
+          </h2>
+          <p className="max-w-3xl text-base leading-8 text-muted-foreground">{blueprint.summary}</p>
+        </div>
       </section>
 
-      <section className="section-grid section-grid--two">
+      <section className="grid gap-4 xl:grid-cols-2">
         <ChecklistCard
           eyebrow="Escopo visual"
           title="UI que precisa nascer no web"
@@ -34,7 +43,7 @@ export default function ReceivablesPage() {
         />
       </section>
 
-      <section className="section-grid section-grid--two">
+      <section className="grid gap-4 xl:grid-cols-2">
         <ChecklistCard
           eyebrow="Pronto quando"
           title="Criterio de saida do legado"
