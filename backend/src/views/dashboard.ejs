@@ -59,26 +59,8 @@
         }
 
         .modern-sidebar {
-            background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
-            border-right: 1px solid rgba(148, 163, 184, 0.18);
             transform: translateX(0);
             transition: transform 120ms ease-out;
-        }
-
-        .sidebar-item {
-            transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out;
-            border-radius: 12px;
-            margin: 4px 0;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(148, 163, 184, 0.12);
-            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
-        }
-
-        .sidebar-item.active {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.5) inset, 0 2px 8px rgba(59, 130, 246, 0.25);
         }
 
         /* Remover outlines de foco (pedido do usuário) apenas nesta tela. */
@@ -585,15 +567,6 @@
             backdrop-filter: blur(8px);
         }
 
-        .modern-sidebar {
-            background: linear-gradient(180deg, #15253f 0%, var(--premium-sidebar) 100%);
-            border-right: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .sidebar-item.active {
-            background: linear-gradient(135deg, #1B3D8F 0%, #234EA8 100%);
-        }
-
         .glass-card,
         .kpi-card,
         .summary-link,
@@ -699,17 +672,7 @@
     </header>
 
     <div class="flex pt-16 sm:pt-20">
-        <aside id="sidebar" class="modern-sidebar fixed left-0 top-16 h-[calc(100%-4rem)] w-64 z-40 sm:top-20 sm:h-[calc(100%-5rem)]">
-            <nav class="mt-8 px-4">
-                <ul class="space-y-2">
-                    <li><a href="dashboard.html" class="sidebar-item active flex items-center px-4 py-3 text-white rounded-lg"><i class="fas fa-tachometer-alt mr-4 text-lg"></i><span class="font-medium">Painel financeiro</span></a></li>
-                    <li><a href="debtors.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-users mr-4 text-lg"></i><span>Clientes</span></a></li>
-                    <li><a href="loans.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-hand-holding-usd mr-4 text-lg"></i><span>Empréstimos</span></a></li>
-                    <li><a href="installments.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-calendar-check mr-4 text-lg"></i><span>Parcelas</span></a></li>
-                    <li><a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg"><i class="fas fa-chart-bar mr-4 text-lg"></i><span>Relatórios</span></a></li>
-                </ul>
-            </nav>
-        </aside>
+        <%- include('partials/admin-sidebar', { activePage }) %>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -1007,7 +970,6 @@
         const sidebar = document.getElementById('sidebar');
         const main = document.querySelector('main');
         const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarLinks = document.querySelectorAll('#sidebar .sidebar-item');
         const userMenuBtn = document.getElementById('userMenuBtn');
         const userMenuDropdown = document.getElementById('userMenuDropdown');
         const collectionModal = document.getElementById('collectionModal');
@@ -1574,20 +1536,6 @@
             document.body.appendChild(link);
             link.click();
             link.remove();
-        }
-
-        function setActiveSidebarItem(targetHref) {
-            sidebarLinks.forEach((link) => {
-                const isActive = link.getAttribute('href') === targetHref;
-                link.classList.toggle('active', isActive);
-                if (isActive) link.setAttribute('aria-current', 'page');
-                else link.removeAttribute('aria-current');
-            });
-        }
-
-        function syncActiveSidebarWithRoute() {
-            const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-            setActiveSidebarItem(currentPage);
         }
 
         function syncSidebarLayout() {
@@ -2380,7 +2328,6 @@
             syncBottomPanelsHeight();
         });
         syncSidebarLayout();
-        syncActiveSidebarWithRoute();
 
         periodSelect.addEventListener('change', async (event) => {
             dashboardState.period = event.target.value;
@@ -2551,6 +2498,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

@@ -353,7 +353,7 @@ async function checkSession() {
     try {
         const response = await fetch('/auth/me', { credentials: 'include' });
         if (response.ok) {
-            window.location.href = '/admin/dashboard.html';
+            window.location.href = '/admin/visao-geral.html';
         }
     } catch (error) {
         // Ignora erro de rede aqui e mantem tela de login
@@ -433,7 +433,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         message.classList.remove('hidden');
 
         setTimeout(() => {
-            window.location.href = '/admin/dashboard.html';
+            window.location.href = '/admin/visao-geral.html';
         }, 600);
     } catch (error) {
         message.className = 'login-message is-error';

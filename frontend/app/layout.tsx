@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Credix Frontend",
-  description: "Base frontend em Next.js para migracao incremental",
+  title: {
+    default: "Credix",
+    template: "%s | Credix",
+  },
+  description: "Frontend Credix em Next.js para migracao incremental",
 };
 
 type RootLayoutProps = {
@@ -14,7 +23,7 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="pt-BR">
-      <body className="text-slate-100 antialiased">{children}</body>
+      <body className={`${inter.className} text-slate-100 antialiased`}>{children}</body>
     </html>
   );
 }

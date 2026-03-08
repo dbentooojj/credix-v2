@@ -17,6 +17,8 @@ const legacyPageRoutes = [
   "/forgot-password.html",
   "/reset-password",
   "/reset-password.html",
+  "/visao-geral",
+  "/visao-geral.html",
   "/dashboard",
   "/dashboard.html",
   "/dashboard-advanced.html",
@@ -45,12 +47,6 @@ const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
     return {
-      beforeFiles: [
-        {
-          source: "/app",
-          destination: "/migration-gateway",
-        },
-      ],
       afterFiles: [
         ...legacyPageRoutes.map((source) => ({
           source,

@@ -37,6 +37,8 @@ const dashboardQuerySchema = z.object({
   period: z.enum(["3m", "6m", "12m"]).optional(),
   metric: z.enum(["recebido", "emprestado", "lucro"]).optional(),
   tz: z.string().optional(),
+  recentMovementsPage: z.coerce.number().int().positive().optional(),
+  recentMovementsPageSize: z.coerce.number().int().min(1).max(20).optional(),
 });
 
 const cashAdjustmentCreateSchema = z.object({
@@ -187,12 +189,83 @@ async function readCompletedFinanceTransactions(ownerUserId: number) {
   }
 }
 
+async function readOpenFinanceTransactions(ownerUserId: number) {
+  try {
+    return await prisma.financeTransaction.findMany({
+      where: {
+        ownerUserId,
+        status: {
+          in: [FinanceTransactionStatus.SCHEDULED, FinanceTransactionStatus.PENDING],
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        date: true,
+        category: true,
+        description: true,
+        status: true,
+      },
+      orderBy: [{ date: "asc" }, { id: "asc" }],
+    });
+  } catch (error) {
+    if (isFinanceStorageUnavailableError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
 function formatDateDayMonthPtBr(value: Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     timeZone: "UTC",
   }).format(value);
+}
+
+function getFinanceMovementMeta(transaction: {
+  type: FinanceTransactionType;
+  category: string;
+}): {
+  direction: "in" | "out";
+  typeLabel: string;
+  moduleLabel: string;
+  href: string;
+} {
+  if (transaction.category === LOAN_DISBURSEMENT_CATEGORY) {
+    return {
+      direction: "out",
+      typeLabel: "Desembolso",
+      moduleLabel: "Emprestimos",
+      href: "/admin/loans.html",
+    };
+  }
+
+  if (transaction.category === CASH_ADJUSTMENT_CATEGORY) {
+    return {
+      direction: transaction.type === FinanceTransactionType.INCOME ? "in" : "out",
+      typeLabel: "Ajuste",
+      moduleLabel: "Financeiro",
+      href: "/admin/dashboard.html",
+    };
+  }
+
+  return transaction.type === FinanceTransactionType.INCOME
+    ? {
+      direction: "in",
+      typeLabel: "Entrada",
+      moduleLabel: "Financeiro",
+      href: "/admin/contas-a-receber.html",
+    }
+    : {
+      direction: "out",
+      typeLabel: "Saida",
+      moduleLabel: "Financeiro",
+      href: "/admin/contas-a-pagar.html",
+    };
 }
 
 function getInstallmentStatus(
@@ -330,6 +403,8 @@ router.get("/", async (req, res) => {
   const period = parsedQuery.period ?? "6m";
   const metric = parsedQuery.metric ?? "recebido";
   const timeZone = normalizeTimeZone(parsedQuery.tz);
+  const requestedRecentMovementsPage = parsedQuery.recentMovementsPage ?? 1;
+  const recentMovementsPageSize = parsedQuery.recentMovementsPageSize ?? 6;
 
   const todayIso = getIsoTodayInTimeZone(timeZone);
   const currentMonthKey = todayIso.slice(0, 7);
@@ -339,7 +414,7 @@ router.get("/", async (req, res) => {
   const sparklineMonthKeys = buildMonthSeries(currentMonthKey, 6);
   const next7Iso = addDays(todayIso, 7);
 
-  const [loans, installments, payments, financeTransactions] = await Promise.all([
+  const [loans, installments, payments, financeTransactions, openFinanceTransactions] = await Promise.all([
     prisma.loan.findMany({
       where: { ownerUserId: userId },
       select: {
@@ -391,6 +466,7 @@ router.get("/", async (req, res) => {
       },
     }),
     readCompletedFinanceTransactions(userId),
+    readOpenFinanceTransactions(userId),
   ]);
 
   const monthKeySet = new Set(monthKeys);
@@ -575,6 +651,8 @@ router.get("/", async (req, res) => {
 
   const upcomingCandidates: Array<{
     installmentId: number;
+    installmentNumber: number;
+    loanInstallmentsCount: number;
     loanId: number;
     debtorId: number;
     debtorName: string;
@@ -616,6 +694,8 @@ router.get("/", async (req, res) => {
 
       upcomingCandidates.push({
         installmentId: installment.id,
+        installmentNumber: installment.installmentNumber,
+        loanInstallmentsCount: installment.loan.installmentsCount,
         loanId: installment.loanId,
         debtorId: installment.clientId,
         debtorName: installment.client.name,
@@ -970,6 +1050,72 @@ router.get("/", async (req, res) => {
       paymentLink: env.PAYMENT_LINK ?? null,
     }));
 
+  const openFinanceReceivableTransactions = openFinanceTransactions
+    .filter((transaction) => transaction.type === FinanceTransactionType.INCOME);
+  const openFinancePayableTransactions = openFinanceTransactions
+    .filter((transaction) => transaction.type === FinanceTransactionType.EXPENSE);
+  const financeReceivableOpenTotal = openFinanceReceivableTransactions
+    .reduce((sum, transaction) => sum + toSafeNumber(transaction.amount), 0);
+  const financePayableOpenTotal = openFinancePayableTransactions
+    .reduce((sum, transaction) => sum + toSafeNumber(transaction.amount), 0);
+  const accountsReceivableTotal = totalOpenReceivable + financeReceivableOpenTotal;
+  const accountsPayableTotal = financePayableOpenTotal;
+  const projectedBalance = cashBalance + accountsReceivableTotal - accountsPayableTotal;
+
+  const receiptsTodayItems = upcomingCandidates
+    .filter((item) => item.status === "VENCE_HOJE")
+    .map((item) => ({
+      id: `installment-${item.installmentId}`,
+      source: "installment",
+      title: `${item.debtorName} parcela ${item.installmentNumber}/${item.loanInstallmentsCount}`,
+      subtitle: `Vencimento: ${formatDateDayMonthPtBr(new Date(`${item.dueDate}T00:00:00Z`))}`,
+      typeLabel: "Parcela",
+      moduleLabel: "Emprestimos",
+      amount: item.amount,
+      href: "/admin/installments.html?status=pending&due=today",
+    }));
+
+  const financeReceiptsToday = openFinanceReceivableTransactions
+    .filter((transaction) => dateToIso(transaction.date) === todayIso)
+    .map((transaction) => ({
+      id: `finance-income-${transaction.id}`,
+      source: "finance",
+      title: transaction.description,
+      subtitle: `Categoria: ${transaction.category}`,
+      typeLabel: "Conta a receber",
+      moduleLabel: "Financeiro",
+      amount: toSafeNumber(transaction.amount),
+      href: "/admin/contas-a-receber.html",
+    }));
+
+  const paymentsTodayItems = openFinancePayableTransactions
+    .filter((transaction) => dateToIso(transaction.date) === todayIso)
+    .map((transaction) => ({
+      id: `finance-expense-${transaction.id}`,
+      title: transaction.description,
+      subtitle: `Categoria: ${transaction.category}`,
+      typeLabel: "Financeiro",
+      moduleLabel: transaction.category,
+      amount: toSafeNumber(transaction.amount),
+      href: "/admin/contas-a-pagar.html",
+    }));
+
+  const overdueIncomingFinance = openFinanceReceivableTransactions
+    .filter((transaction) => dateToIso(transaction.date) < todayIso);
+
+  const overdueOutgoingFinance = openFinancePayableTransactions
+    .filter((transaction) => dateToIso(transaction.date) < todayIso);
+
+  const receiptsToday = [...receiptsTodayItems, ...financeReceiptsToday]
+    .sort((a, b) => b.amount - a.amount);
+  const paymentsToday = [...paymentsTodayItems]
+    .sort((a, b) => b.amount - a.amount);
+  const overdueIncomingCount = overduePayments.length + overdueIncomingFinance.length;
+  const overdueIncomingValue = overduePayments.reduce((sum, item) => sum + item.amount, 0)
+    + overdueIncomingFinance.reduce((sum, item) => sum + toSafeNumber(item.amount), 0);
+  const overdueOutgoingCount = overdueOutgoingFinance.length;
+  const overdueOutgoingValue = overdueOutgoingFinance.reduce((sum, item) => sum + toSafeNumber(item.amount), 0);
+
   const ranking = [...overdueByDebtor.entries()]
     .map(([debtorId, data]) => ({
       debtorId,
@@ -980,6 +1126,79 @@ router.get("/", async (req, res) => {
     }))
     .sort((a, b) => b.totalOverdue - a.totalOverdue)
     .slice(0, 3);
+
+  const recentInstallmentPayments = payments
+    .map((payment) => {
+      const amount = toSafeNumber(payment.amount);
+      if (amount <= 0) return null;
+
+      const paymentIso = dateToIso(payment.paymentDate);
+      const installment = payment.installmentId
+        ? installmentById.get(payment.installmentId) ?? null
+        : null;
+
+      if (installment) {
+        return {
+          id: `payment-${payment.id}`,
+          occurredAt: paymentIso,
+          direction: "in" as const,
+          amount,
+          typeLabel: "Recebimento",
+          moduleLabel: "Emprestimos",
+          title: `${installment.client.name} parcela ${installment.installmentNumber}/${installment.loan.installmentsCount}`,
+          subtitle: `Baixado em ${formatDateDayMonthPtBr(payment.paymentDate)}`,
+          href: "/admin/installments.html?status=paid",
+        };
+      }
+
+      return {
+        id: `payment-${payment.id}`,
+        occurredAt: paymentIso,
+        direction: "in" as const,
+        amount,
+        typeLabel: "Recebimento",
+        moduleLabel: "Emprestimos",
+        title: `Pagamento #${payment.id}`,
+        subtitle: `Baixado em ${formatDateDayMonthPtBr(payment.paymentDate)}`,
+        href: "/admin/installments.html?status=paid",
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  const recentFinanceMovements = financeTransactions
+    .filter((transaction) => transaction.category !== INSTALLMENT_PAYMENT_CATEGORY)
+    .map((transaction) => {
+      const meta = getFinanceMovementMeta(transaction);
+      return {
+        id: `finance-${transaction.id}`,
+        occurredAt: dateToIso(transaction.date),
+        direction: meta.direction,
+        amount: toSafeNumber(transaction.amount),
+        typeLabel: meta.typeLabel,
+        moduleLabel: meta.moduleLabel,
+        title: transaction.description,
+        subtitle: `Categoria: ${transaction.category}`,
+        href: meta.href,
+      };
+    });
+
+  const sortedRecentMovements = [...recentInstallmentPayments, ...recentFinanceMovements]
+    .sort((a, b) => {
+      if (a.occurredAt !== b.occurredAt) return b.occurredAt.localeCompare(a.occurredAt);
+      return b.id.localeCompare(a.id);
+    });
+
+  const recentMovementsTotalItems = sortedRecentMovements.length;
+  const recentMovementsTotalPages = Math.max(1, Math.ceil(recentMovementsTotalItems / recentMovementsPageSize));
+  const recentMovementsPage = Math.min(
+    Math.max(requestedRecentMovementsPage, 1),
+    recentMovementsTotalPages,
+  );
+  const recentMovementsStartIndex = (recentMovementsPage - 1) * recentMovementsPageSize;
+  const recentMovements = sortedRecentMovements.slice(
+    recentMovementsStartIndex,
+    recentMovementsStartIndex + recentMovementsPageSize,
+  );
 
   return res.json({
     meta: {
@@ -994,6 +1213,11 @@ router.get("/", async (req, res) => {
       totalLoaned,
       totalToReceive,
       totalOpenReceivable,
+      accountsReceivableTotal,
+      accountsPayableTotal,
+      projectedBalance,
+      financeReceivableOpenTotal,
+      financePayableOpenTotal,
       openReceivableFuture,
       openReceivableOverdue,
       totalReceived,
@@ -1017,6 +1241,35 @@ router.get("/", async (req, res) => {
         }
         : null,
     },
+    overviewSummary: {
+      cashBalance: {
+        value: cashBalance,
+        note: "Disponivel agora",
+        href: "/admin/dashboard.html",
+      },
+      accountsReceivable: {
+        value: accountsReceivableTotal,
+        loanValue: totalOpenReceivable,
+        financeValue: financeReceivableOpenTotal,
+        itemsCount: upcomingDue.length + overduePayments.length + openFinanceReceivableTransactions.length,
+        note: "Emprestimos + Financeiro",
+        href: "/admin/contas-a-receber.html",
+      },
+      accountsPayable: {
+        value: accountsPayableTotal,
+        financeValue: financePayableOpenTotal,
+        itemsCount: openFinancePayableTransactions.length,
+        note: "Compromissos pendentes",
+        href: "/admin/contas-a-pagar.html",
+      },
+      projectedBalance: {
+        value: projectedBalance,
+        note: "Apos entradas e saidas",
+        receivableValue: accountsReceivableTotal,
+        payableValue: accountsPayableTotal,
+        href: "/admin/visao-geral.html",
+      },
+    },
     dailySummary: {
       dueToday: {
         count: dueTodayCount,
@@ -1034,12 +1287,39 @@ router.get("/", async (req, res) => {
         href: "/admin/installments.html?status=pending&due=next7",
       },
     },
+    dailyOperations: {
+      receiptsToday: {
+        totalValue: receiptsToday.reduce((sum, item) => sum + item.amount, 0),
+        items: receiptsToday,
+      },
+      paymentsToday: {
+        totalValue: paymentsToday.reduce((sum, item) => sum + item.amount, 0),
+        items: paymentsToday,
+      },
+      alerts: {
+        overdueIncomingCount,
+        overdueIncomingValue,
+        overdueOutgoingCount,
+        overdueOutgoingValue,
+        incomingHref: "/admin/installments.html?status=overdue&due=month",
+        outgoingHref: "/admin/contas-a-pagar.html",
+      },
+    },
     chart: {
       metric,
       period,
       points: chartPoints,
       hasData: hasChartData,
       emptyMessage: "Sem dados no periodo.",
+    },
+    recentMovements,
+    recentMovementsPagination: {
+      page: recentMovementsPage,
+      pageSize: recentMovementsPageSize,
+      totalItems: recentMovementsTotalItems,
+      totalPages: recentMovementsTotalPages,
+      hasPreviousPage: recentMovementsPage > 1,
+      hasNextPage: recentMovementsPage < recentMovementsTotalPages,
     },
     upcomingDue,
     overduePayments,

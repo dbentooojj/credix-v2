@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function MigrationGatewayPage() {
+export default function AppEntryPage() {
   redirect("/app/visao-geral");
 }
