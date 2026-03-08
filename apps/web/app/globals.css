@@ -40,6 +40,7 @@
 
   body {
     @apply min-h-screen bg-background text-foreground antialiased;
+    font-family: var(--font-interface), sans-serif;
     background-image:
       radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
       radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 20%),
@@ -60,5 +61,22 @@
   ::selection {
     background: rgba(96, 165, 250, 0.28);
     color: white;
+  }
+}
+
+@layer utilities {
+  .font-interface {
+    font-family: var(--font-interface), sans-serif;
+  }
+
+  .font-menu {
+    font-family: var(--font-interface), sans-serif;
+    font-weight: 500;
+  }
+
+  .font-number {
+    font-family: var(--font-interface), sans-serif;
+    font-weight: 600;
+    font-variant-numeric: lining-nums tabular-nums;
   }
 }

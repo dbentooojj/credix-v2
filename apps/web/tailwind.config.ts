@@ -66,8 +66,11 @@ const config = {
         sm: "calc(var(--radius) - 6px)",
       },
       fontFamily: {
-        sans: ["var(--font-body)", "sans-serif"],
-        display: ["var(--font-display)", "serif"],
+        sans: ["var(--font-interface)", "sans-serif"],
+        display: ["var(--font-interface)", "sans-serif"],
+        interface: ["var(--font-interface)", "sans-serif"],
+        menu: ["var(--font-interface)", "sans-serif"],
+        number: ["var(--font-interface)", "sans-serif"],
       },
       boxShadow: {
         glow: "0 24px 90px rgba(0,0,0,0.38)",

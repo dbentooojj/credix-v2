@@ -2,10 +2,15 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { z } from "zod";
+import { handleAsync } from "./lib/async-route";
+import { initializeDatabase, pingDatabase } from "./lib/database";
+import { dashboardRoutes } from "./routes/dashboard";
 import { financeRoutes } from "./routes/finance";
+import { portfolioRoutes } from "./routes/portfolio";
 
 const envSchema = z.object({
   API_PORT: z.coerce.number().int().positive().default(4000),
+  DATABASE_URL: z.string().trim().min(1).default("postgresql://postgres:postgres@localhost:5432/credix_v2"),
   NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
 });
 
@@ -15,15 +20,20 @@ const app = express();
 app.disable("x-powered-by");
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/portfolio", portfolioRoutes);
 
-app.get("/health", (_req, res) => {
+app.get("/health", handleAsync(async (_req, res) => {
+  await pingDatabase();
+
   res.status(200).json({
     status: "ok",
     service: "api",
+    database: "ok",
     timestamp: new Date().toISOString(),
   });
-});
+}));
 
 app.get("/api/meta", (_req, res) => {
   res.status(200).json({
@@ -48,6 +58,15 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
   });
 });
 
-app.listen(env.API_PORT, () => {
-  console.log(`API listening on port ${env.API_PORT}`);
+async function startServer() {
+  await initializeDatabase();
+
+  app.listen(env.API_PORT, () => {
+    console.log(`API listening on port ${env.API_PORT}`);
+  });
+}
+
+void startServer().catch((error) => {
+  console.error("Failed to start API", error);
+  process.exit(1);
 });

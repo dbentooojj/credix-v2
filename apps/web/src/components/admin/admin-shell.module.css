@@ -1,0 +1,369 @@
+.shell {
+  min-height: 100vh;
+  color: #e5e7eb;
+}
+
+.header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(12, 18, 32, 0.86);
+  backdrop-filter: blur(10px);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+}
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  min-width: 0;
+}
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #cbd5e1;
+}
+
+.menuButton:hover {
+  color: #fff;
+  background: rgba(59, 130, 246, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.24);
+}
+
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.userTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  padding: 0.42rem 0.65rem 0.42rem 0.42rem;
+  color: #e2e8f0;
+  min-width: 0;
+}
+
+.userTrigger:hover {
+  color: #fff;
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(59, 130, 246, 0.16);
+}
+
+.userAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.32), rgba(29, 78, 216, 0.18));
+  color: #eff6ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.userMeta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.userLabel {
+  white-space: nowrap;
+  font-size: 0.96rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.userRole {
+  margin-top: 0.1rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.userChevron {
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.userMenuCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin: 0.15rem 0 0.35rem;
+  border: 1px solid rgba(59, 130, 246, 0.14);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(14, 23, 42, 0.96), rgba(9, 16, 30, 0.92)),
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.14), transparent 40%);
+  padding: 0.85rem;
+}
+
+.userMenuAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.38), rgba(14, 116, 144, 0.26));
+  color: #eff6ff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.userMenuContent {
+  min-width: 0;
+}
+
+.userMenuName {
+  color: #f8fafc;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.userMenuEmail {
+  margin-top: 0.2rem;
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.userMenuHint {
+  margin-top: 0.45rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.overlay {
+  position: fixed;
+  inset: 64px 0 0;
+  z-index: 35;
+  padding: 0;
+  border: none;
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(4px);
+}
+
+.sidebar {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  z-index: 40;
+  width: 16rem;
+  height: calc(100vh - 64px);
+  background:
+    radial-gradient(140% 140% at 0% 0%, rgba(37, 99, 235, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(6, 18, 38, 0.98) 0%, rgba(5, 15, 31, 0.98) 100%);
+  border-right: 1px solid rgba(59, 130, 246, 0.12);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+  transition: transform 160ms ease;
+}
+
+.sidebarOpen {
+  transform: translateX(0);
+}
+
+.sidebarHidden {
+  transform: translateX(-100%);
+}
+
+.sidebarScroll {
+  height: 100%;
+  padding: 1.05rem 0.9rem 1.4rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.35) transparent;
+}
+
+.sidebarSection + .sidebarSection {
+  margin-top: 1.3rem;
+}
+
+.sidebarTitle {
+  margin: 0 0 0.55rem;
+  padding: 0 0.6rem;
+  font-size: 0.62rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.sidebarMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.sidebarItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.74rem;
+  min-height: 42px;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #cbd5e1;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.sidebarItem:hover {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(59, 130, 246, 0.18);
+  color: #f8fafc;
+  transform: translateX(1px);
+}
+
+.sidebarItemDisabled {
+  cursor: default;
+  opacity: 0.56;
+}
+
+.sidebarItemDisabled:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #cbd5e1;
+  transform: none;
+}
+
+.sidebarItemActive {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.38) 0%, rgba(30, 64, 175, 0.3) 100%);
+  border-color: rgba(96, 165, 250, 0.34);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 24px -22px rgba(37, 99, 235, 0.72);
+}
+
+.sidebarItemDanger:not(.sidebarItemActive) {
+  color: #f87171;
+}
+
+.sidebarItemDisabled.sidebarItemDanger:not(.sidebarItemActive),
+.sidebarItemDisabled.sidebarItemSuccess:not(.sidebarItemActive) {
+  color: #cbd5e1;
+}
+
+.sidebarItemSuccess:not(.sidebarItemActive) {
+  color: #34d399;
+}
+
+.sidebarIcon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b95aa;
+  flex-shrink: 0;
+  transition: color 160ms ease;
+}
+
+.sidebarItemDanger:not(.sidebarItemActive) .sidebarIcon {
+  color: #ef4444;
+}
+
+.sidebarItemDisabled .sidebarIcon,
+.sidebarItemDisabled.sidebarItemDanger:not(.sidebarItemActive) .sidebarIcon,
+.sidebarItemDisabled.sidebarItemSuccess:not(.sidebarItemActive) .sidebarIcon {
+  color: #8b95aa;
+}
+
+.sidebarItemSuccess:not(.sidebarItemActive) .sidebarIcon {
+  color: #10b981;
+}
+
+.sidebarItem:hover .sidebarIcon,
+.sidebarItemActive .sidebarIcon {
+  color: #dbeafe;
+}
+
+.sidebarItemLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main {
+  min-width: 0;
+  padding: 5rem 1rem 1.5rem;
+  transition: margin-left 160ms ease;
+}
+
+.mainWithSidebar {
+  margin-left: 16rem;
+}
+
+.content {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .userRole {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .headerInner {
+    padding: 1rem 1.5rem;
+  }
+
+  .overlay {
+    top: 80px;
+  }
+
+  .sidebar {
+    top: 80px;
+    height: calc(100vh - 80px);
+  }
+
+  .main {
+    padding: 6.5rem 1.5rem 2rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .main {
+    padding: 6.5rem 1.75rem 2rem;
+  }
+}

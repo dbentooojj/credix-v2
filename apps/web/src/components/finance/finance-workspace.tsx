@@ -1,14 +1,16 @@
 "use client";
 
 import { useDeferredValue, useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
-  AlertCircle,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  CalendarClock,
-  CheckCircle2,
-  LoaderCircle,
-  PencilLine,
+  CalendarDays,
+  Check,
+  Circle,
+  CircleAlert,
+  Clock3,
+  FileText,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
   Trash2,
@@ -23,21 +25,38 @@ import {
   updateFinanceTransaction,
 } from "@/src/lib/api";
 import {
+  addMonths,
+  formatFinanceAmountPlain,
   formatFinanceCurrency,
   formatFinanceDate,
-  getFinanceStatusLabel,
-  getFinanceStatusVariant,
+  formatFinanceMonthLabel,
   getFinanceTodayDate,
   getFinanceViewConfig,
-  isFinanceTransactionOpen,
-  isFinanceTransactionOverdue,
+  parseDateOnly,
+  sameMonth,
+  startOfDay,
+  startOfMonth,
+  toDateInputValue,
 } from "@/src/lib/finance";
 import { cn } from "@/src/lib/utils";
-import { StatCard } from "@/src/components/admin/stat-card";
-import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/src/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
 import { Input } from "@/src/components/ui/input";
+import styles from "@/src/components/finance/finance-workspace.module.css";
 
 type FinanceWorkspaceProps = {
   mode: FinanceTransactionType;
@@ -51,8 +70,24 @@ type FinanceFormState = {
   status: FinanceTransactionStatus;
 };
 
-const selectClassName =
-  "flex h-11 w-full rounded-2xl border border-border/70 bg-background/40 px-4 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-ring/40";
+type FinanceFilterKey = "all" | "pending" | "paid" | "overdue" | "due-today";
+type DisplayStatusKey = "paid" | "overdue" | "due-today" | "scheduled" | "pending";
+
+type DisplayStatus = {
+  key: DisplayStatusKey;
+  group: Exclude<FinanceFilterKey, "all">;
+  label: string;
+  icon: LucideIcon;
+};
+
+const PAGE_SIZE = 15;
+const DISPLAY_ORDER: Record<DisplayStatusKey, number> = {
+  overdue: 0,
+  "due-today": 1,
+  scheduled: 2,
+  pending: 3,
+  paid: 4,
+};
 
 function createEmptyForm(): FinanceFormState {
   return {
@@ -64,33 +99,78 @@ function createEmptyForm(): FinanceFormState {
   };
 }
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Falha ao concluir a operacao.";
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function buildPaginationSequence(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+
+  if (currentPage <= 3) {
+    pages.add(2);
+    pages.add(3);
+    pages.add(4);
+  }
+
+  if (currentPage >= totalPages - 2) {
+    pages.add(totalPages - 1);
+    pages.add(totalPages - 2);
+    pages.add(totalPages - 3);
+  }
+
+  const sorted = [...pages].filter((page) => page >= 1 && page <= totalPages).sort((left, right) => left - right);
+  const sequence: Array<number | "..."> = [];
+
+  sorted.forEach((page, index) => {
+    if (index > 0 && page - sorted[index - 1] > 1) {
+      sequence.push("...");
+    }
+
+    sequence.push(page);
+  });
+
+  return sequence;
 }
 
 export function FinanceWorkspace({ mode }: FinanceWorkspaceProps) {
   const config = getFinanceViewConfig(mode);
   const deferredMode = useDeferredValue(mode);
-  const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
+  const [items, setItems] = useState<FinanceTransaction[]>([]);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
-  const [statusFilter, setStatusFilter] = useState<FinanceTransactionStatus | "all">("all");
-  const [form, setForm] = useState<FinanceFormState>(createEmptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<FinanceFilterKey>("all");
+  const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [form, setForm] = useState<FinanceFormState>(createEmptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  async function loadTransactions() {
+  async function loadTransactions(preserveMonthCursor = false) {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await listFinanceTransactions({ type: deferredMode });
-      setTransactions(response.data);
+      const nextItems = response.data;
+      setItems(nextItems);
+
+      if (!preserveMonthCursor) {
+        setMonthCursor(nextItems.length > 0 ? startOfMonth(parseDateOnly(nextItems[0].date)) : startOfMonth(new Date()));
+      } else if (nextItems.length === 0) {
+        setMonthCursor(startOfMonth(new Date()));
+      }
+
+      setPage(1);
     } catch (loadError) {
-      setError(getErrorMessage(loadError));
+      setError(getErrorMessage(loadError, config.loadError));
+      setItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -100,60 +180,159 @@ export function FinanceWorkspace({ mode }: FinanceWorkspaceProps) {
     void loadTransactions();
   }, [deferredMode]);
 
-  const today = getFinanceTodayDate();
-  const filteredTransactions = transactions.filter((transaction) => {
-    if (statusFilter !== "all" && transaction.status !== statusFilter) {
-      return false;
-    }
-
-    if (deferredSearch) {
-      const haystack = `${transaction.description} ${transaction.category}`.toLowerCase();
-      const needle = deferredSearch.trim().toLowerCase();
-      if (!haystack.includes(needle)) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  const openTransactions = filteredTransactions.filter((transaction) => isFinanceTransactionOpen(transaction));
-  const overdueTransactions = filteredTransactions.filter((transaction) => isFinanceTransactionOverdue(transaction, today));
-  const dueTodayTransactions = filteredTransactions.filter((transaction) => {
-    return isFinanceTransactionOpen(transaction) && transaction.date === today;
-  });
-  const totalVisibleAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-  const openVisibleAmount = openTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-
   function resetForm() {
     setForm(createEmptyForm());
     setEditingId(null);
   }
 
-  function startEditing(transaction: FinanceTransaction) {
-    setEditingId(transaction.id);
-    setForm({
-      description: transaction.description,
-      category: transaction.category,
-      amount: String(transaction.amount),
-      date: transaction.date,
-      status: transaction.status,
-    });
-    setFeedback(null);
+  function handleOpenChange(open: boolean) {
+    setModalOpen(open);
+
+    if (!open) {
+      resetForm();
+    }
+  }
+
+  function openCreateModal() {
+    resetForm();
+    setModalOpen(true);
     setError(null);
   }
+
+  function openEditModal(item: FinanceTransaction) {
+    setEditingId(item.id);
+    setForm({
+      description: item.description,
+      category: item.category,
+      amount: String(item.amount),
+      date: item.date,
+      status: item.status,
+    });
+    setModalOpen(true);
+    setError(null);
+  }
+
+  function getDisplayStatus(item: FinanceTransaction): DisplayStatus {
+    const dueDate = startOfDay(parseDateOnly(item.date));
+    const today = startOfDay(new Date());
+
+    if (item.status === "completed") {
+      return { key: "paid", group: "paid", label: config.statusPaidLabel, icon: Check };
+    }
+
+    if (dueDate.getTime() < today.getTime()) {
+      return { key: "overdue", group: "overdue", label: config.statusOverdueLabel, icon: CircleAlert };
+    }
+
+    if (dueDate.getTime() === today.getTime()) {
+      return { key: "due-today", group: "due-today", label: config.statusTodayLabel, icon: Clock3 };
+    }
+
+    if (item.status === "scheduled") {
+      return { key: "scheduled", group: "pending", label: config.statusScheduledLabel, icon: CalendarDays };
+    }
+
+    return { key: "pending", group: "pending", label: config.statusPendingLabel, icon: Circle };
+  }
+
+  function buildObservation(item: FinanceTransaction, displayStatus: DisplayStatus) {
+    const dueDate = parseDateOnly(item.date);
+    const today = startOfDay(new Date());
+    const diffDays = Math.floor((startOfDay(dueDate).getTime() - today.getTime()) / 86400000);
+
+    if (displayStatus.key === "paid") return config.observationPaid;
+    if (displayStatus.key === "overdue") return `Em atraso ha ${Math.abs(diffDays)} dia(s).`;
+    if (displayStatus.key === "due-today") return config.observationToday;
+    if (displayStatus.key === "scheduled") return config.observationScheduled;
+    return config.observationPending;
+  }
+
+  function matchesSearch(item: FinanceTransaction) {
+    if (!deferredSearch.trim()) return true;
+
+    const haystack = `${item.description} ${item.category}`.toLowerCase();
+    return haystack.includes(deferredSearch.trim().toLowerCase());
+  }
+
+  function matchesStatusFilter(item: FinanceTransaction) {
+    if (statusFilter === "all") return true;
+
+    const displayStatus = getDisplayStatus(item);
+
+    if (statusFilter === "pending") {
+      return displayStatus.group === "pending";
+    }
+
+    return displayStatus.group === statusFilter;
+  }
+
+  function sortItems(sourceItems: FinanceTransaction[]) {
+    return [...sourceItems].sort((left, right) => {
+      const leftStatus = getDisplayStatus(left);
+      const rightStatus = getDisplayStatus(right);
+      const statusDiff = DISPLAY_ORDER[leftStatus.key] - DISPLAY_ORDER[rightStatus.key];
+
+      if (statusDiff !== 0) return statusDiff;
+
+      const leftDate = parseDateOnly(left.date).getTime();
+      const rightDate = parseDateOnly(right.date).getTime();
+
+      if (leftStatus.group === "paid" && rightStatus.group === "paid") {
+        if (leftDate !== rightDate) return rightDate - leftDate;
+      } else if (leftDate !== rightDate) {
+        return leftDate - rightDate;
+      }
+
+      return right.amount - left.amount;
+    });
+  }
+
+  const statusFilters: Array<{ key: FinanceFilterKey; label: string }> = [
+    { key: "all", label: "Todas" },
+    { key: "pending", label: "Pendentes" },
+    { key: "paid", label: config.statusFilterPaidLabel },
+    { key: "overdue", label: "Vencidas" },
+    { key: "due-today", label: "Vencendo hoje" },
+  ];
+
+  const monthBaseItems = items.filter((item) => sameMonth(parseDateOnly(item.date), monthCursor));
+  const filteredItems = sortItems(monthBaseItems.filter(matchesSearch).filter(matchesStatusFilter));
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const visibleItems = filteredItems.slice(startIndex, startIndex + PAGE_SIZE);
+  const paginationSequence = buildPaginationSequence(currentPage, totalPages);
+  const start = filteredItems.length === 0 ? 0 : startIndex + 1;
+  const end = filteredItems.length === 0 ? 0 : Math.min(startIndex + PAGE_SIZE, filteredItems.length);
+  const noun = filteredItems.length === 1 ? config.paginationSingular : config.paginationPlural;
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  const summaryCounts = monthBaseItems.reduce(
+    (accumulator, item) => {
+      const group = getDisplayStatus(item).group;
+      if (group === "overdue") accumulator.overdue += 1;
+      if (group === "due-today") accumulator.dueToday += 1;
+      if (group === "pending") accumulator.pending += 1;
+      return accumulator;
+    },
+    { overdue: 0, dueToday: 0, pending: 0 },
+  );
 
   async function submitForm(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
     setError(null);
-    setFeedback(null);
 
     const amount = Number(form.amount.replace(",", "."));
 
     if (!Number.isFinite(amount) || amount <= 0) {
-      setIsSaving(false);
       setError("Informe um valor valido maior que zero.");
+      setIsSaving(false);
       return;
     }
 
@@ -169,390 +348,522 @@ export function FinanceWorkspace({ mode }: FinanceWorkspaceProps) {
 
       if (editingId) {
         await updateFinanceTransaction(editingId, payload);
-        setFeedback(mode === "expense" ? "Conta atualizada." : "Recebimento atualizado.");
       } else {
         await createFinanceTransaction(payload);
-        setFeedback(mode === "expense" ? "Conta criada." : "Recebimento criado.");
       }
 
+      setMonthCursor(startOfMonth(parseDateOnly(form.date)));
+      setStatusFilter("all");
+      setSearch("");
+      setModalOpen(false);
       resetForm();
-      await loadTransactions();
+      await loadTransactions(true);
     } catch (submitError) {
-      setError(getErrorMessage(submitError));
+      setError(getErrorMessage(submitError, config.saveError));
     } finally {
       setIsSaving(false);
     }
   }
 
-  async function completeTransaction(transaction: FinanceTransaction) {
+  async function completeTransaction(item: FinanceTransaction) {
     setError(null);
-    setFeedback(null);
 
     try {
-      await updateFinanceTransaction(transaction.id, { status: "completed" });
-      setFeedback(mode === "expense" ? "Conta baixada." : "Recebimento confirmado.");
-      await loadTransactions();
+      await updateFinanceTransaction(item.id, { status: "completed" });
+      await loadTransactions(true);
     } catch (actionError) {
-      setError(getErrorMessage(actionError));
+      setError(getErrorMessage(actionError, config.completeError));
     }
   }
 
-  async function removeTransaction(transaction: FinanceTransaction) {
-    const confirmed = window.confirm(
-      mode === "expense"
-        ? "Excluir esta conta a pagar?"
-        : "Excluir este valor a receber?",
-    );
-
+  async function deleteTransaction(item: FinanceTransaction) {
+    const confirmed = window.confirm(config.deleteConfirm);
     if (!confirmed) return;
 
     setError(null);
-    setFeedback(null);
 
     try {
-      await deleteFinanceTransaction(transaction.id);
-
-      if (editingId === transaction.id) {
-        resetForm();
-      }
-
-      setFeedback(mode === "expense" ? "Conta excluida." : "Recebimento excluido.");
-      await loadTransactions();
+      await deleteFinanceTransaction(item.id);
+      await loadTransactions(true);
     } catch (actionError) {
-      setError(getErrorMessage(actionError));
+      setError(getErrorMessage(actionError, config.deleteError));
     }
   }
 
+  function renderStatusIcon(displayStatus: DisplayStatus) {
+    const Icon = displayStatus.icon;
+
+    return (
+      <span
+        className={cn(
+          styles.statusIcon,
+          displayStatus.key === "paid" && styles.statusIconPaid,
+          displayStatus.key === "overdue" && styles.statusIconOverdue,
+          displayStatus.key === "due-today" && styles.statusIconToday,
+          displayStatus.key === "scheduled" && styles.statusIconScheduled,
+          displayStatus.key === "pending" && styles.statusIconPending,
+        )}
+      >
+        <Icon className="size-3.5" />
+      </span>
+    );
+  }
+
+  function renderStatusPill(displayStatus: DisplayStatus) {
+    return (
+      <span
+        className={cn(
+          styles.statusPill,
+          displayStatus.key === "paid" && styles.statusPillPaid,
+          displayStatus.key === "overdue" && styles.statusPillOverdue,
+          displayStatus.key === "due-today" && styles.statusPillToday,
+          displayStatus.key === "scheduled" && styles.statusPillScheduled,
+          displayStatus.key === "pending" && styles.statusPillPending,
+        )}
+      >
+        {displayStatus.label}
+      </span>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <section className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          <Badge className="gap-2">
-            {mode === "expense" ? <ArrowUpFromLine className="size-3.5" /> : <ArrowDownToLine className="size-3.5" />}
-            {config.kicker}
-          </Badge>
-          <Badge variant={mode === "expense" ? "warning" : "success"}>Slice funcional</Badge>
+    <div className={cn(styles.root, isLoading && styles.screenLoading)}>
+      <section className={styles.header}>
+        <div className={styles.headerCopy}>
+          <h1 className={styles.pageTitle}>{config.pageTitle}</h1>
+          <p className={styles.pageSubtitle}>{config.pageSubtitle}</p>
         </div>
-        <div className="space-y-3">
-          <h2 className="max-w-4xl font-display text-4xl leading-[0.95] tracking-[-0.08em] text-foreground sm:text-5xl">
-            {config.title}
-          </h2>
-          <p className="max-w-3xl text-base leading-8 text-muted-foreground">{config.summary}</p>
-        </div>
+
+        <Button type="button" className={styles.primaryButton} onClick={openCreateModal}>
+          <Plus className="size-4" />
+          <span>{config.primaryButtonLabel}</span>
+        </Button>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          eyebrow="Volume visivel"
-          value={formatFinanceCurrency(totalVisibleAmount)}
-          title={config.focusLabel}
-          note={`${filteredTransactions.length} ${filteredTransactions.length === 1 ? "registro" : "registros"} no recorte atual.`}
-        />
-        <StatCard
-          eyebrow="Em aberto"
-          value={formatFinanceCurrency(openVisibleAmount)}
-          title="Pendentes e agendadas"
-          note={`${openTransactions.length} itens aguardando conclusao.`}
-        />
-        <StatCard
-          eyebrow="Vence hoje"
-          value={String(dueTodayTransactions.length).padStart(2, "0")}
-          title="Prioridade imediata"
-          note="Itens abertos com vencimento no dia atual."
-        />
-        <StatCard
-          eyebrow="Atrasadas"
-          value={String(overdueTransactions.length).padStart(2, "0")}
-          title="Atencao"
-          note="Lancamentos em aberto com vencimento anterior a hoje."
-        />
-      </section>
+      {error ? <div className={styles.errorBanner}>{error}</div> : null}
 
-      {(error || feedback) ? (
-        <Card className={cn(
-          "border-border/60 bg-card/75",
-          error ? "border-destructive/40" : "border-success/30",
-        )}>
-          <CardContent className="flex items-start gap-3 p-5">
-            {error ? (
-              <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
-            ) : (
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
-            )}
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-foreground">{error ? "Falha na operacao" : "Atualizado"}</p>
-              <p className="text-sm leading-7 text-muted-foreground">{error || feedback}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
+      <section className={styles.toolbarGrid}>
+        <label className={styles.toolbarSearch} aria-label={config.searchAriaLabel}>
+          <Search className={styles.searchIcon} />
+          <Input
+            type="search"
+            autoComplete="off"
+            placeholder={config.searchPlaceholder}
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            className={styles.toolbarInput}
+          />
+        </label>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_380px]">
-        <Card className="border-border/60 bg-card/75">
-          <CardHeader className="gap-4">
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">{config.listTitle}</Badge>
-                <Badge variant={mode === "expense" ? "warning" : "success"}>{config.focusLabel}</Badge>
-              </div>
-              <CardTitle className="text-2xl">{config.listTitle}</CardTitle>
-              <CardDescription className="text-sm leading-7 text-muted-foreground md:text-base">
-                {config.listDescription}
-              </CardDescription>
-            </div>
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Buscar por descricao ou categoria"
-                  className="pl-11"
-                />
-              </div>
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as FinanceTransactionStatus | "all")}
-                className={selectClassName}
+        <div className={styles.monthSwitcher}>
+          {[-1, 0, 1].map((offset) => {
+            const month = addMonths(monthCursor, offset);
+            const active = sameMonth(month, monthCursor);
+
+            return (
+              <Button
+                key={toDateInputValue(month)}
+                type="button"
+                variant="ghost"
+                className={cn(styles.monthButton, active && styles.monthButtonActive)}
+                onClick={() => {
+                  setMonthCursor(startOfMonth(month));
+                  setPage(1);
+                }}
               >
-                <option value="all">Todos os status</option>
-                <option value="pending">Pendentes</option>
-                <option value="scheduled">Agendados</option>
-                <option value="completed">{config.completeStatusLabel}</option>
-              </select>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-32 animate-pulse rounded-[26px] border border-border/50 bg-background/25"
-                  />
-                ))}
-              </div>
-            ) : filteredTransactions.length === 0 ? (
-              <div className="rounded-[28px] border border-dashed border-border/70 bg-background/25 p-8 text-center">
-                <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-border/70 bg-background/40">
-                  <CalendarClock className="size-6 text-muted-foreground" />
-                </div>
-                <div className="mt-4 space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">{config.emptyTitle}</h3>
-                  <p className="mx-auto max-w-md text-sm leading-7 text-muted-foreground">{config.emptyText}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredTransactions.map((transaction) => {
-                  const isOverdue = isFinanceTransactionOverdue(transaction, today);
+                {formatFinanceMonthLabel(month)}
+              </Button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className={styles.filterRow}>
+        {statusFilters.map((filter) => (
+          <Button
+            key={filter.key}
+            type="button"
+            variant="ghost"
+            className={cn(styles.filterChip, statusFilter === filter.key && styles.filterChipActive)}
+            onClick={() => {
+              setStatusFilter(filter.key);
+              setPage(1);
+            }}
+          >
+            {filter.label}
+          </Button>
+        ))}
+      </section>
+
+      <section className={styles.panel}>
+        <div className={styles.summary}>
+          <span className={styles.summaryOverdue}>{summaryCounts.overdue} {config.summaryOverdueSuffix}</span>
+          <span className={styles.summaryDot}>•</span>
+          <span className={styles.summaryToday}>{summaryCounts.dueToday} {config.summaryTodaySuffix}</span>
+          <span className={styles.summaryDot}>•</span>
+          <span className={styles.summaryPending}>{summaryCounts.pending} {config.summaryPendingSuffix}</span>
+        </div>
+
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>{config.tablePrimaryHeader}</th>
+                <th>Valor (R$)</th>
+                <th>{config.tableDateHeader}</th>
+                <th>Status</th>
+                <th>{config.tableNotesHeader}</th>
+                <th>{config.tableActionsHeader}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleItems.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>
+                    <div className={styles.empty}>
+                      <div className={styles.emptyIcon}>
+                        <FileText className="size-5" />
+                      </div>
+                      <p className={styles.emptyTitle}>{config.emptyTitle}</p>
+                      <p className={styles.emptyNote}>{config.emptyNote}</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                visibleItems.map((item) => {
+                  const displayStatus = getDisplayStatus(item);
+                  const note = buildObservation(item, displayStatus);
 
                   return (
-                    <article
-                      key={transaction.id}
+                    <tr
+                      key={item.id}
                       className={cn(
-                        "rounded-[28px] border border-border/60 bg-background/30 p-5 transition-colors",
-                        isOverdue && "border-destructive/40 bg-destructive/5",
+                        styles.row,
+                        displayStatus.key === "paid" && styles.rowPaid,
+                        displayStatus.key === "overdue" && styles.rowOverdue,
+                        displayStatus.key === "due-today" && styles.rowToday,
+                        displayStatus.key === "scheduled" && styles.rowScheduled,
+                        displayStatus.key === "pending" && styles.rowPending,
                       )}
                     >
-                      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="space-y-4">
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="outline">{transaction.category}</Badge>
-                            <Badge variant={getFinanceStatusVariant(transaction.status)}>
-                              {getFinanceStatusLabel(transaction.status, mode)}
-                            </Badge>
-                            {isOverdue ? <Badge variant="destructive">Atrasada</Badge> : null}
-                          </div>
-
-                          <div className="space-y-1">
-                            <h3 className="text-lg font-semibold text-foreground">{transaction.description}</h3>
-                            <p className="text-sm leading-7 text-muted-foreground">
-                              Vencimento em {formatFinanceDate(transaction.date)}.
-                            </p>
+                      <td>
+                        <div className={styles.mainCell}>
+                          {renderStatusIcon(displayStatus)}
+                          <div>
+                            <p className={styles.title}>{item.description || "Conta sem descricao"}</p>
+                            <p className={styles.subtitle}>{item.category || "Sem categoria"}</p>
                           </div>
                         </div>
+                      </td>
+                      <td>
+                        <span className={styles.amount}>{formatFinanceAmountPlain(item.amount)}</span>
+                      </td>
+                      <td>
+                        <span
+                          className={cn(
+                            styles.due,
+                            displayStatus.key === "overdue" && styles.dueOverdue,
+                            displayStatus.key === "due-today" && styles.dueToday,
+                          )}
+                        >
+                          {formatFinanceDate(item.date)}
+                        </span>
+                      </td>
+                      <td>{renderStatusPill(displayStatus)}</td>
+                      <td>
+                        <p className={styles.note}>{note}</p>
+                      </td>
+                      <td>
+                        <div className={styles.actions}>
+                          {displayStatus.group !== "paid" ? (
+                            <Button
+                              type="button"
+                              className={styles.completeButton}
+                              onClick={() => void completeTransaction(item)}
+                            >
+                              {config.actionCompleteLabel}
+                            </Button>
+                          ) : null}
 
-                        <div className="flex flex-col gap-3 lg:items-end">
-                          <div className="text-3xl font-semibold tracking-[-0.08em] text-foreground">
-                            {formatFinanceCurrency(transaction.amount)}
-                          </div>
-
-                          <div className="flex flex-wrap gap-2">
-                            {transaction.status !== "completed" ? (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant={mode === "expense" ? "warning" : "success"}
-                                onClick={() => void completeTransaction(transaction)}
-                              >
-                                {config.completeActionLabel}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button type="button" variant="ghost" size="icon" className={styles.menuTrigger}>
+                                <MoreVertical className="size-4" />
+                                <span className="sr-only">Abrir menu da conta</span>
                               </Button>
-                            ) : null}
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => startEditing(transaction)}
-                            >
-                              <PencilLine className="size-4" />
-                              Editar
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => void removeTransaction(transaction)}
-                            >
-                              <Trash2 className="size-4" />
-                              Excluir
-                            </Button>
-                          </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className={styles.menuContent}>
+                              <DropdownMenuItem onSelect={() => openEditModal(item)}>
+                                <Pencil className="size-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className={styles.menuDanger} onSelect={() => void deleteTransaction(item)}>
+                                <Trash2 className="size-4" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                      </div>
-                    </article>
+                      </td>
+                    </tr>
                   );
-                })}
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.mobileList}>
+          {visibleItems.length === 0 ? (
+            <div className={styles.empty}>
+              <div className={styles.emptyIcon}>
+                <FileText className="size-5" />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <p className={styles.emptyTitle}>{config.emptyTitle}</p>
+              <p className={styles.emptyNote}>{config.emptyNote}</p>
+            </div>
+          ) : (
+            visibleItems.map((item) => {
+              const displayStatus = getDisplayStatus(item);
+              const note = buildObservation(item, displayStatus);
 
-        <div className="space-y-4">
-          <Card className="border-border/60 bg-card/75">
-            <CardHeader className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={editingId ? "outline" : mode === "expense" ? "warning" : "success"}>
-                  {editingId ? "Modo edicao" : "Acao principal"}
-                </Badge>
-                <Badge variant="outline">{config.focusLabel}</Badge>
-              </div>
-              <CardTitle className="text-2xl">{config.createTitle}</CardTitle>
-              <CardDescription className="text-sm leading-7 text-muted-foreground">
-                {config.createDescription}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-4" onSubmit={submitForm}>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor={`${mode}-description`}>
-                    Descricao
-                  </label>
-                  <Input
-                    id={`${mode}-description`}
-                    value={form.description}
-                    onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-                    placeholder="Descreva o lancamento"
-                    required
-                  />
-                </div>
+              return (
+                <article
+                  key={item.id}
+                  className={cn(
+                    styles.mobileCard,
+                    displayStatus.key === "paid" && styles.mobileCardPaid,
+                    displayStatus.key === "overdue" && styles.mobileCardOverdue,
+                    displayStatus.key === "due-today" && styles.mobileCardToday,
+                    displayStatus.key === "scheduled" && styles.mobileCardScheduled,
+                    displayStatus.key === "pending" && styles.mobileCardPending,
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={styles.mainCell}>
+                      {renderStatusIcon(displayStatus)}
+                      <div>
+                        <p className={styles.title}>{item.description || "Conta sem descricao"}</p>
+                        <p className={styles.subtitle}>{item.category || "Sem categoria"}</p>
+                      </div>
+                    </div>
+                    {renderStatusPill(displayStatus)}
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor={`${mode}-category`}>
-                    Categoria
-                  </label>
-                  <Input
-                    id={`${mode}-category`}
-                    value={form.category}
-                    onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
-                    placeholder="Ex.: fornecedores, servicos, recebiveis"
-                    required
-                  />
-                </div>
+                  <div className={styles.mobileGrid}>
+                    <div>
+                      <p className={styles.mobileLabel}>Valor</p>
+                      <p className={styles.mobileValue}>{formatFinanceCurrency(item.amount)}</p>
+                    </div>
+                    <div>
+                      <p className={styles.mobileLabel}>{config.tableDateHeader}</p>
+                      <p className={styles.mobileValue}>{formatFinanceDate(item.date)}</p>
+                    </div>
+                    <div className={styles.mobileWide}>
+                      <p className={styles.mobileLabel}>Observacoes</p>
+                      <p className={styles.mobileValue}>{note}</p>
+                    </div>
+                  </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground" htmlFor={`${mode}-amount`}>
-                      Valor
+                  <div className={styles.mobileActions}>
+                    {displayStatus.group !== "paid" ? (
+                      <Button
+                        type="button"
+                        className={styles.completeButton}
+                        onClick={() => void completeTransaction(item)}
+                      >
+                        {config.actionCompleteLabel}
+                      </Button>
+                    ) : null}
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button type="button" variant="ghost" size="icon" className={styles.menuTrigger}>
+                          <MoreVertical className="size-4" />
+                          <span className="sr-only">Abrir menu da conta</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className={styles.menuContent}>
+                        <DropdownMenuItem onSelect={() => openEditModal(item)}>
+                          <Pencil className="size-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className={styles.menuDanger} onSelect={() => void deleteTransaction(item)}>
+                          <Trash2 className="size-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className={styles.footer}>
+          <p className={styles.footerInfo}>Mostrando {start}-{end} de {filteredItems.length} {noun}</p>
+          <div className={styles.pagination}>
+            {filteredItems.length > PAGE_SIZE ? (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(styles.pageButton, currentPage <= 1 && styles.pageButtonDisabled)}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  Anterior
+                </Button>
+                {paginationSequence.map((item, index) => (
+                  item === "..." ? (
+                    <span key={`ellipsis-${index}`} className={styles.pageEllipsis}>...</span>
+                  ) : (
+                    <Button
+                      key={item}
+                      type="button"
+                      variant="ghost"
+                      className={cn(styles.pageButton, item === currentPage && styles.pageButtonActive)}
+                      onClick={() => setPage(item)}
+                    >
+                      {item}
+                    </Button>
+                  )
+                ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(styles.pageButton, currentPage >= totalPages && styles.pageButtonDisabled)}
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Proxima
+                </Button>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <Dialog open={modalOpen} onOpenChange={handleOpenChange}>
+        <DialogContent className={styles.dialogContent}>
+          <form onSubmit={submitForm}>
+            <DialogHeader className={styles.dialogHeader}>
+              <DialogTitle>{editingId ? config.modalEditTitle : config.modalNewTitle}</DialogTitle>
+              <DialogDescription>
+                {editingId ? config.modalEditSubtitle : config.modalNewSubtitle}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className={styles.dialogBody}>
+              <section className={styles.dialogSection}>
+                <h3 className={styles.dialogSectionTitle}>Dados principais</h3>
+                <div className={styles.dialogGrid}>
+                  <div className={cn(styles.dialogField, styles.dialogFieldWide)}>
+                    <label className={styles.dialogLabel} htmlFor={`${mode}-description`}>
+                      {config.modalDescriptionLabel}
                     </label>
                     <Input
-                      id={`${mode}-amount`}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputMode="decimal"
-                      value={form.amount}
-                      onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
-                      placeholder="0.00"
+                      id={`${mode}-description`}
+                      className={styles.dialogInput}
+                      maxLength={300}
+                      placeholder={config.modalDescriptionPlaceholder}
+                      value={form.description}
+                      onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground" htmlFor={`${mode}-date`}>
-                      Vencimento
+                  <div className={styles.dialogField}>
+                    <label className={styles.dialogLabel} htmlFor={`${mode}-category`}>
+                      Categoria
+                    </label>
+                    <Input
+                      id={`${mode}-category`}
+                      className={styles.dialogInput}
+                      maxLength={120}
+                      placeholder={config.modalCategoryPlaceholder}
+                      value={form.category}
+                      onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.dialogField}>
+                    <label className={styles.dialogLabel} htmlFor={`${mode}-amount`}>
+                      Valor (R$)
+                    </label>
+                    <Input
+                      id={`${mode}-amount`}
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      inputMode="decimal"
+                      className={styles.dialogInput}
+                      placeholder="0,00"
+                      value={form.amount}
+                      onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className={styles.dialogSection}>
+                <h3 className={styles.dialogSectionTitle}>Agenda</h3>
+                <div className={styles.dialogGrid}>
+                  <div className={styles.dialogField}>
+                    <label className={styles.dialogLabel} htmlFor={`${mode}-date`}>
+                      {config.modalDateLabel}
                     </label>
                     <Input
                       id={`${mode}-date`}
                       type="date"
+                      className={styles.dialogInput}
                       value={form.date}
                       onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
                       required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor={`${mode}-status`}>
-                    Status inicial
-                  </label>
-                  <select
-                    id={`${mode}-status`}
-                    value={form.status}
-                    onChange={(event) => setForm((current) => ({
-                      ...current,
-                      status: event.target.value as FinanceTransactionStatus,
-                    }))}
-                    className={selectClassName}
-                  >
-                    <option value="pending">Pendente</option>
-                    <option value="scheduled">Agendada</option>
-                    <option value="completed">{config.completeStatusLabel}</option>
-                  </select>
+                  <div className={styles.dialogField}>
+                    <label className={styles.dialogLabel} htmlFor={`${mode}-status`}>
+                      Situacao
+                    </label>
+                    <select
+                      id={`${mode}-status`}
+                      className={styles.dialogSelect}
+                      value={form.status}
+                      onChange={(event) => setForm((current) => ({
+                        ...current,
+                        status: event.target.value as FinanceTransactionStatus,
+                      }))}
+                    >
+                      <option value="pending">Pendente</option>
+                      <option value="scheduled">Agendada</option>
+                      <option value="completed">{config.completedOptionLabel}</option>
+                    </select>
+                  </div>
                 </div>
+              </section>
+            </div>
 
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <Button type="submit" variant={mode === "expense" ? "warning" : "success"} disabled={isSaving}>
-                    {isSaving ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
-                    {editingId ? config.updateActionLabel : config.createActionLabel}
-                  </Button>
-                  {editingId ? (
-                    <Button type="button" variant="outline" onClick={resetForm} disabled={isSaving}>
-                      Cancelar edicao
-                    </Button>
-                  ) : null}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-card/75">
-            <CardHeader className="space-y-3">
-              <Badge variant="outline" className="w-fit">
-                Padrao da migracao
-              </Badge>
-              <CardTitle className="text-2xl">O que esta consolidado aqui</CardTitle>
-              <CardDescription className="text-sm leading-7 text-muted-foreground">
-                A mesma base visual e de dados serve para `pagar` e `receber`, mudando so o contexto.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[
-                "Backend novo respondendo apenas com JSON.",
-                "Frontend dono da experiencia e dos estados de tela.",
-                "Componentes reutilizaveis para os dois fluxos financeiros.",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[22px] border border-border/60 bg-background/30 px-4 py-4 text-sm leading-7 text-muted-foreground"
-                >
-                  {item}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+            <DialogFooter className={styles.dialogFooter}>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost" className={styles.dialogCancelButton}>
+                  Cancelar
+                </Button>
+              </DialogClose>
+              <Button type="submit" className={styles.dialogPrimaryButton} disabled={isSaving}>
+                {isSaving ? "Salvando..." : editingId ? config.modalSaveEditLabel : config.modalSaveNewLabel}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,13 +1,33 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: credix_v2_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-credix_v2}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - credix_v2_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-credix_v2}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: credix_v2_api
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       API_PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/credix_v2}
     ports:
       - "${DOCKER_API_PUBLIC_PORT:-4100}:4000"
     healthcheck:
@@ -15,7 +35,6 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-
   web:
     build:
       context: .
@@ -40,3 +59,6 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+
+volumes:
+  credix_v2_postgres_data:

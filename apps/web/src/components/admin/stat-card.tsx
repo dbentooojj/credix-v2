@@ -15,7 +15,7 @@ export function StatCard({ eyebrow, value, title, note }: StatCardProps) {
         <Badge variant="outline" className="w-fit">
           {eyebrow}
         </Badge>
-        <div className="text-4xl font-semibold tracking-[-0.08em] text-foreground">{value}</div>
+        <div className="font-number text-4xl tracking-[-0.08em] text-foreground">{value}</div>
       </CardHeader>
       <CardContent className="space-y-2">
         <CardTitle className="text-xl">{title}</CardTitle>

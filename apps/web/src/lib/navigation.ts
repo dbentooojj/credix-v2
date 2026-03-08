@@ -2,41 +2,73 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
-  LayoutDashboard,
-  Milestone,
-  WalletCards,
+  BarChart3,
+  FileText,
+  Grid2x2,
+  HandCoins,
+  ReceiptText,
+  Users,
 } from "lucide-react";
 
 export type AdminNavigationItem = {
   href: string;
   label: string;
   description: string;
+  disabled?: boolean;
   match?: "exact" | "prefix";
   icon: LucideIcon;
 };
 
 export type AdminNavigationSection = {
-  title: string;
+  title?: string;
   items: AdminNavigationItem[];
 };
 
 export const adminNavigation: AdminNavigationSection[] = [
   {
-    title: "Centro",
     items: [
       {
         href: "/app",
-        label: "Overview",
-        description: "Visao da nova base e dos slices em andamento.",
+        label: "Visao geral",
+        description: "Resumo principal da operacao e ponto de entrada da nova base.",
         match: "exact",
-        icon: LayoutDashboard,
+        icon: Grid2x2,
+      },
+    ],
+  },
+  {
+    title: "Emprestimos",
+    items: [
+      {
+        href: "/app/carteira",
+        label: "Painel da carteira",
+        description: "Resumo operacional da carteira de emprestimos.",
+        icon: BarChart3,
       },
       {
-        href: "/app/migration",
-        label: "Migracao",
-        description: "Roadmap, regras de padrao e sequencia de execucao.",
-        match: "exact",
-        icon: Milestone,
+        href: "/app/clientes",
+        label: "Clientes",
+        description: "Cadastro e acompanhamento dos clientes.",
+        icon: Users,
+      },
+      {
+        href: "/app/emprestimos",
+        label: "Emprestimos",
+        description: "Gestao de contratos e novas operacoes.",
+        icon: HandCoins,
+      },
+      {
+        href: "/app/parcelas",
+        label: "Parcelas",
+        description: "Controle das parcelas geradas pelos emprestimos.",
+        match: "prefix",
+        icon: ReceiptText,
+      },
+      {
+        href: "/app/relatorios",
+        label: "Relatorios",
+        description: "Relatorios do modulo de emprestimos.",
+        icon: FileText,
       },
     ],
   },
@@ -44,25 +76,25 @@ export const adminNavigation: AdminNavigationSection[] = [
     title: "Financeiro",
     items: [
       {
-        href: "/app/finance",
-        label: "Nucleo financeiro",
-        description: "Entrada do primeiro modulo a sair do legado.",
-        match: "exact",
-        icon: WalletCards,
-      },
-      {
         href: "/app/finance/payables",
         label: "Contas a pagar",
-        description: "Primeira tela a ser reimplementada no Next.",
+        description: "Saidas financeiras, compromissos e vencimentos.",
         match: "prefix",
         icon: ArrowUpFromLine,
       },
       {
         href: "/app/finance/receivables",
-        label: "Valores a receber",
-        description: "Tela irma com mesma base visual e contrato alinhado.",
+        label: "Contas a receber",
+        description: "Entradas previstas, recebimentos e baixas.",
         match: "prefix",
         icon: ArrowDownToLine,
+      },
+      {
+        href: "/app/finance/relatorios",
+        label: "Relatorios",
+        description: "Relatorios consolidados do financeiro.",
+        disabled: true,
+        icon: FileText,
       },
     ],
   },
