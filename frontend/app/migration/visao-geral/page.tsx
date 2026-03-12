@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { AppShell } from "../../../components/app-shell";
-import { OverviewPageClient } from "../../../components/overview-page-client";
+import { VisaoGeralScreen } from "@/src/legacy-migration/screens/visao-geral/visao-geral-screen";
 
 export const metadata: Metadata = {
   title: "Visao geral",
 };
 
-export default function VisaoGeralPage() {
+export default function MigrationVisaoGeralPage() {
   return (
     <AppShell>
-      <OverviewPageClient />
+      <VisaoGeralScreen />
     </AppShell>
   );
 }

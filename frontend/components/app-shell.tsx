@@ -68,7 +68,7 @@ const navSections: NavSection[] = [
         icon: UsersIcon,
       },
       {
-        href: "/loans.html",
+        href: "/migration/loans",
         label: "Emprestimos",
         icon: LoansIcon,
       },
@@ -78,7 +78,7 @@ const navSections: NavSection[] = [
         icon: CalendarIcon,
       },
       {
-        href: "/reports.html",
+        href: "/migration/reports",
         label: "Relatorios",
         icon: FileTextIcon,
       },
